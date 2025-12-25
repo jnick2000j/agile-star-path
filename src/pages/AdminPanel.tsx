@@ -15,7 +15,10 @@ import {
   Palette,
   ArrowRight,
   Archive,
-  UserCheck
+  UserCheck,
+  FolderKanban,
+  Package,
+  Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -38,6 +41,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 import { CreateOrganizationDialog } from "@/components/dialogs/CreateOrganizationDialog";
+import { EditOrganizationDialog } from "@/components/dialogs/EditOrganizationDialog";
 import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
 import { UserAccessList } from "@/components/admin/UserAccessList";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
@@ -67,6 +71,10 @@ interface Organization {
   slug: string;
   created_at: string;
   primary_color: string | null;
+  logo_url: string | null;
+  programme_count: number;
+  project_count: number;
+  product_count: number;
 }
 
 const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; className: string }> = {
@@ -139,13 +147,37 @@ export default function AdminPanel() {
 
   const fetchOrganizations = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: orgs, error } = await supabase
         .from("organizations")
         .select("*")
         .order("name");
 
       if (error) throw error;
-      setOrganizations(data || []);
+
+      // Fetch counts for each organization
+      const orgsWithCounts = await Promise.all(
+        (orgs || []).map(async (org) => {
+          const [programmes, projects, products] = await Promise.all([
+            supabase.from("programmes").select("id", { count: "exact", head: true }).eq("organization_id", org.id),
+            supabase.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", org.id),
+            supabase.from("products").select("id", { count: "exact", head: true }).eq("organization_id", org.id),
+          ]);
+
+          return {
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            created_at: org.created_at,
+            primary_color: org.primary_color,
+            logo_url: org.logo_url,
+            programme_count: programmes.count || 0,
+            project_count: projects.count || 0,
+            product_count: products.count || 0,
+          };
+        })
+      );
+
+      setOrganizations(orgsWithCounts);
     } catch (error) {
       console.error("Error fetching organizations:", error);
     }
@@ -438,22 +470,48 @@ export default function AdminPanel() {
                 <div key={org.id} className="metric-card">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div 
-                        className="h-10 w-10 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: org.primary_color || "#2563eb" }}
-                      >
-                        <Building2 className="h-5 w-5 text-white" />
-                      </div>
+                      {org.logo_url ? (
+                        <img
+                          src={org.logo_url}
+                          alt={org.name}
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div 
+                          className="h-10 w-10 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: org.primary_color || "#2563eb" }}
+                        >
+                          <Building2 className="h-5 w-5 text-white" />
+                        </div>
+                      )}
                       <div>
                         <h4 className="font-medium">{org.name}</h4>
                         <p className="text-xs text-muted-foreground">/{org.slug}</p>
                       </div>
                     </div>
+                    <EditOrganizationDialog organization={org} onSuccess={fetchOrganizations} />
                   </div>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  
+                  {/* Linked Items */}
+                  <div className="flex gap-4 mb-4 text-sm">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <FolderKanban className="h-4 w-4" />
+                      <span>{org.programme_count} Programmes</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Layers className="h-4 w-4" />
+                      <span>{org.project_count} Projects</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Package className="h-4 w-4" />
+                      <span>{org.product_count} Products</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-3">
                     <span>Created {new Date(org.created_at).toLocaleDateString()}</span>
                     <Link to="/branding" className="text-primary hover:underline flex items-center gap-1">
-                      Manage <ArrowRight className="h-3 w-3" />
+                      Branding <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
                 </div>
