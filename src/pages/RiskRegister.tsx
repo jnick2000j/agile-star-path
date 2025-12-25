@@ -20,6 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Risk {
   id: string;
@@ -64,6 +71,8 @@ const statusConfig = {
   accepted: { label: "Accepted", className: "bg-primary/10 text-primary" },
 };
 
+const categoryOptions = ["Resource", "Technical", "Compliance", "Financial", "Stakeholder", "Quality", "Commercial"];
+
 const getScoreColor = (score: number) => {
   if (score >= 15) return "bg-destructive text-destructive-foreground";
   if (score >= 10) return "bg-warning text-warning-foreground";
@@ -73,12 +82,34 @@ const getScoreColor = (score: number) => {
 
 export default function RiskRegister() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [probabilityFilters, setProbabilityFilters] = useState<string[]>([]);
 
-  const filteredRisks = risks.filter((r) =>
-    r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.programme.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setFilters(prev => 
+      prev.includes(value) 
+        ? prev.filter(s => s !== value)
+        : [...prev, value]
+    );
+  };
 
+  const clearFilters = () => {
+    setStatusFilters([]);
+    setCategoryFilters([]);
+    setProbabilityFilters([]);
+  };
+
+  const filteredRisks = risks.filter((r) => {
+    const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.programme.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(r.status);
+    const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(r.category);
+    const matchesProbability = probabilityFilters.length === 0 || probabilityFilters.includes(r.probability);
+    return matchesSearch && matchesStatus && matchesCategory && matchesProbability;
+  });
+
+  const activeFilterCount = statusFilters.length + categoryFilters.length + probabilityFilters.length;
   const openRisks = risks.filter(r => r.status === "open" || r.status === "mitigating").length;
   const highRisks = risks.filter(r => r.score >= 15).length;
 
@@ -148,10 +179,76 @@ export default function RiskRegister() {
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`status-${key}`} 
+                        checked={statusFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, statusFilters, setStatusFilters)}
+                      />
+                      <label htmlFor={`status-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Category</Label>
+                  {categoryOptions.map((cat) => (
+                    <div key={cat} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`cat-${cat}`} 
+                        checked={categoryFilters.includes(cat)}
+                        onCheckedChange={() => toggleFilter(cat, categoryFilters, setCategoryFilters)}
+                      />
+                      <label htmlFor={`cat-${cat}`} className="text-sm cursor-pointer flex-1">
+                        {cat}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Probability</Label>
+                  {Object.entries(probabilityConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`prob-${key}`} 
+                        checked={probabilityFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, probabilityFilters, setProbabilityFilters)}
+                      />
+                      <label htmlFor={`prob-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <CreateRiskDialog />
         </div>
       </div>

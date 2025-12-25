@@ -23,6 +23,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Benefit {
   id: string;
@@ -65,13 +72,41 @@ const statusConfig = {
   sustaining: { label: "Sustaining", className: "bg-info/10 text-info" },
 };
 
+const typeOptions = [
+  { value: "quantitative", label: "Quantitative" },
+  { value: "qualitative", label: "Qualitative" },
+];
+
 export default function BenefitsRegister() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [typeFilters, setTypeFilters] = useState<string[]>([]);
 
-  const filteredBenefits = benefits.filter((b) =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.programme.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setFilters(prev => 
+      prev.includes(value) 
+        ? prev.filter(s => s !== value)
+        : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setCategoryFilters([]);
+    setStatusFilters([]);
+    setTypeFilters([]);
+  };
+
+  const filteredBenefits = benefits.filter((b) => {
+    const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.programme.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(b.category);
+    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(b.status);
+    const matchesType = typeFilters.length === 0 || typeFilters.includes(b.type);
+    return matchesSearch && matchesCategory && matchesStatus && matchesType;
+  });
+
+  const activeFilterCount = categoryFilters.length + statusFilters.length + typeFilters.length;
 
   const totalTarget = "£3.7M";
   const totalRealized = "£2.1M";
@@ -143,10 +178,76 @@ export default function BenefitsRegister() {
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Category</Label>
+                  {Object.entries(categoryConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`cat-${key}`} 
+                        checked={categoryFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, categoryFilters, setCategoryFilters)}
+                      />
+                      <label htmlFor={`cat-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`status-${key}`} 
+                        checked={statusFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, statusFilters, setStatusFilters)}
+                      />
+                      <label htmlFor={`status-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Type</Label>
+                  {typeOptions.map((t) => (
+                    <div key={t.value} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`type-${t.value}`} 
+                        checked={typeFilters.includes(t.value)}
+                        onCheckedChange={() => toggleFilter(t.value, typeFilters, setTypeFilters)}
+                      />
+                      <label htmlFor={`type-${t.value}`} className="text-sm cursor-pointer flex-1">
+                        {t.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <CreateBenefitDialog onSuccess={() => {}} />
         </div>
       </div>

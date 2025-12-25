@@ -11,6 +11,13 @@ import {
   MoreVertical
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface TeamMember {
   id: string;
@@ -50,14 +57,39 @@ const statusColors = {
   offline: "bg-muted-foreground",
 };
 
+const departments = ["Executive", "Technology", "Customer Services", "Infrastructure", "Data & Analytics", "Security"];
+
 export default function Team() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilters, setRoleFilters] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [departmentFilters, setDepartmentFilters] = useState<string[]>([]);
 
-  const filteredMembers = teamMembers.filter((m) =>
-    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.department.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setFilters(prev => 
+      prev.includes(value) 
+        ? prev.filter(s => s !== value)
+        : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setRoleFilters([]);
+    setStatusFilters([]);
+    setDepartmentFilters([]);
+  };
+
+  const filteredMembers = teamMembers.filter((m) => {
+    const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.department.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilters.length === 0 || roleFilters.includes(m.role);
+    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(m.status);
+    const matchesDept = departmentFilters.length === 0 || departmentFilters.includes(m.department);
+    return matchesSearch && matchesRole && matchesStatus && matchesDept;
+  });
+
+  const activeFilterCount = roleFilters.length + statusFilters.length + departmentFilters.length;
 
   return (
     <AppLayout title="Team" subtitle="Manage programme team members">
@@ -73,10 +105,76 @@ export default function Team() {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Role</Label>
+                  {Object.entries(roleConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`role-${key}`} 
+                        checked={roleFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, roleFilters, setRoleFilters)}
+                      />
+                      <label htmlFor={`role-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  {Object.keys(statusColors).map((status) => (
+                    <div key={status} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`status-${status}`} 
+                        checked={statusFilters.includes(status)}
+                        onCheckedChange={() => toggleFilter(status, statusFilters, setStatusFilters)}
+                      />
+                      <label htmlFor={`status-${status}`} className="text-sm cursor-pointer flex-1 capitalize">
+                        {status}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Department</Label>
+                  {departments.map((dept) => (
+                    <div key={dept} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`dept-${dept}`} 
+                        checked={departmentFilters.includes(dept)}
+                        onCheckedChange={() => toggleFilter(dept, departmentFilters, setDepartmentFilters)}
+                      />
+                      <label htmlFor={`dept-${dept}`} className="text-sm cursor-pointer flex-1">
+                        {dept}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
             Add Member
