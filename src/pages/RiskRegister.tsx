@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Plus, 
   Search, 
   Filter,
   AlertTriangle,
@@ -12,6 +11,7 @@ import {
   Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CreateRiskDialog } from "@/components/dialogs/CreateRiskDialog";
 import {
   Table,
   TableBody,
@@ -152,10 +152,7 @@ export default function RiskRegister() {
             <Filter className="h-4 w-4" />
             Filter
           </Button>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Risk
-          </Button>
+          <CreateRiskDialog />
         </div>
       </div>
 

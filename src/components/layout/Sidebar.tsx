@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Calendar,
   Mail,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

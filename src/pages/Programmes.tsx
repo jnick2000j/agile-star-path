@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Plus, 
   Search, 
   Filter, 
   MoreVertical, 
@@ -15,7 +14,8 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { CreateProgrammeDialog } from "@/components/dialogs/CreateProgrammeDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Programme {
   id: string;
@@ -143,10 +143,7 @@ export default function Programmes() {
             <Filter className="h-4 w-4" />
             Filter
           </Button>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Programme
-          </Button>
+          <CreateProgrammeDialog />
         </div>
       </div>
 
