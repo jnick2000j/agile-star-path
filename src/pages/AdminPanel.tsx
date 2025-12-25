@@ -36,6 +36,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 import { CreateOrganizationDialog } from "@/components/dialogs/CreateOrganizationDialog";
+import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -403,24 +404,34 @@ export default function AdminPanel() {
         </TabsContent>
 
         <TabsContent value="access">
-          <div className="metric-card">
-            <h3 className="text-lg font-semibold mb-4">Access Control</h3>
-            <p className="text-muted-foreground mb-6">
-              Configure granular access permissions for users to specific programmes and projects.
-            </p>
-            <div className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-lg font-semibold">Access Control</h3>
+              <p className="text-sm text-muted-foreground">
+                Configure granular access permissions for users to specific programmes and projects.
+              </p>
+            </div>
+            <AssignUserAccessDialog onSuccess={() => {}} />
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-3 mb-6">
+            <div className="metric-card">
               <div className="p-4 border border-border rounded-lg">
                 <h4 className="font-medium mb-2">Organization-Level Access</h4>
                 <p className="text-sm text-muted-foreground">
                   Users with organization access can view all programmes and projects within that organization.
                 </p>
               </div>
+            </div>
+            <div className="metric-card">
               <div className="p-4 border border-border rounded-lg">
                 <h4 className="font-medium mb-2">Programme-Level Access</h4>
                 <p className="text-sm text-muted-foreground">
                   Grant users access to specific programmes and all projects within them.
                 </p>
               </div>
+            </div>
+            <div className="metric-card">
               <div className="p-4 border border-border rounded-lg">
                 <h4 className="font-medium mb-2">Project-Level Access</h4>
                 <p className="text-sm text-muted-foreground">
