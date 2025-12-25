@@ -53,6 +53,16 @@ const agilePrinciples = [
   { title: "Reflect and Adjust", description: "At regular intervals, the team reflects on how to become more effective, then tunes and adjusts its behavior accordingly." },
 ];
 
+const productManagementPrinciples = [
+  { title: "Customer-Centric Development", description: "All product decisions should be grounded in deep customer understanding. Use customer research, feedback, and data to validate assumptions and guide development priorities." },
+  { title: "Outcome Over Output", description: "Focus on achieving meaningful outcomes (customer value, business results) rather than just shipping features. Measure success by impact, not velocity." },
+  { title: "Continuous Discovery", description: "Product discovery is an ongoing process. Continuously explore customer problems, validate solutions, and reduce risk before committing to full development." },
+  { title: "Cross-Functional Collaboration", description: "Great products are built by empowered, cross-functional teams including product, design, engineering, and business stakeholders working together." },
+  { title: "Data-Informed Decisions", description: "Use quantitative metrics alongside qualitative insights to make decisions. Define clear success metrics (North Star) and track leading indicators." },
+  { title: "Iterate and Learn", description: "Embrace experimentation and rapid iteration. Learn quickly from failures, validate hypotheses, and adapt based on evidence." },
+  { title: "Strategic Alignment", description: "Product work must align with company vision and strategy. Ensure every initiative connects to broader business objectives and creates strategic value." },
+];
+
 const documents = [
   { name: "Programme Mandate Template", category: "MSP", type: "Template" },
   { name: "Programme Brief Template", category: "MSP", type: "Template" },
@@ -70,6 +80,18 @@ const documents = [
   { name: "Sprint Retrospective Template", category: "Agile", type: "Template" },
   { name: "User Story Template", category: "Agile", type: "Template" },
   { name: "Definition of Done Checklist", category: "Agile", type: "Checklist" },
+  { name: "Product Vision Canvas", category: "Product", type: "Template" },
+  { name: "Product Roadmap Template", category: "Product", type: "Template" },
+  { name: "RICE Prioritization Worksheet", category: "Product", type: "Template" },
+  { name: "MoSCoW Prioritization Template", category: "Product", type: "Template" },
+  { name: "Product Requirements Document (PRD)", category: "Product", type: "Template" },
+  { name: "User Persona Template", category: "Product", type: "Template" },
+  { name: "Customer Journey Map", category: "Product", type: "Template" },
+  { name: "Competitive Analysis Framework", category: "Product", type: "Template" },
+  { name: "Feature Specification Template", category: "Product", type: "Template" },
+  { name: "Go-to-Market Strategy Template", category: "Product", type: "Template" },
+  { name: "OKR Planning Template", category: "Product", type: "Template" },
+  { name: "Product Launch Checklist", category: "Product", type: "Checklist" },
 ];
 
 export default function Documentation() {
@@ -81,7 +103,7 @@ export default function Documentation() {
   );
 
   return (
-    <AppLayout title="Documentation" subtitle="PRINCE2 MSP, Agile & Project Management resources">
+    <AppLayout title="Documentation" subtitle="PRINCE2 MSP, Agile, Product Management & Project Management resources">
       {/* Search */}
       <div className="flex gap-4 mb-6">
         <div className="relative flex-1">
@@ -103,7 +125,7 @@ export default function Documentation() {
         </TabsList>
 
         <TabsContent value="principles" className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
             {/* PRINCE2 Principles */}
             <div className="metric-card">
               <div className="flex items-center gap-3 mb-4">
@@ -168,6 +190,31 @@ export default function Documentation() {
               <Accordion type="single" collapsible className="w-full">
                 {agilePrinciples.map((principle, index) => (
                   <AccordionItem key={index} value={`agile-${index}`}>
+                    <AccordionTrigger className="text-sm text-left">
+                      {principle.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground">
+                      {principle.description}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Product Management Principles */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+                  <BookOpen className="h-5 w-5 text-warning" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Product Management</h3>
+                  <p className="text-sm text-muted-foreground">Best Practices</p>
+                </div>
+              </div>
+              <Accordion type="single" collapsible className="w-full">
+                {productManagementPrinciples.map((principle, index) => (
+                  <AccordionItem key={index} value={`pm-${index}`}>
                     <AccordionTrigger className="text-sm text-left">
                       {principle.title}
                     </AccordionTrigger>

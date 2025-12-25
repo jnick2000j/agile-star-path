@@ -308,6 +308,170 @@ export type Database = {
         }
         Relationships: []
       }
+      product_features: {
+        Row: {
+          actual_release_date: string | null
+          confidence_score: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effort_score: number | null
+          id: string
+          impact_score: number | null
+          moscow: string | null
+          name: string
+          priority: string
+          product_id: string
+          reach_score: number | null
+          status: string
+          target_release: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_release_date?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effort_score?: number | null
+          id?: string
+          impact_score?: number | null
+          moscow?: string | null
+          name: string
+          priority?: string
+          product_id: string
+          reach_score?: number | null
+          status?: string
+          target_release?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_release_date?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effort_score?: number | null
+          id?: string
+          impact_score?: number | null
+          moscow?: string | null
+          name?: string
+          priority?: string
+          product_id?: string
+          reach_score?: number | null
+          status?: string
+          target_release?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_features_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          confidence_score: number | null
+          cost_center: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effort_score: number | null
+          id: string
+          impact_score: number | null
+          launch_date: string | null
+          name: string
+          next_review_date: string | null
+          organization_id: string | null
+          primary_metric: string | null
+          product_owner_id: string | null
+          product_type: string
+          programme_id: string | null
+          reach_score: number | null
+          revenue_target: string | null
+          secondary_metrics: string[] | null
+          stage: string
+          status: string
+          target_market: string | null
+          updated_at: string
+          value_proposition: string | null
+          vision: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          cost_center?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effort_score?: number | null
+          id?: string
+          impact_score?: number | null
+          launch_date?: string | null
+          name: string
+          next_review_date?: string | null
+          organization_id?: string | null
+          primary_metric?: string | null
+          product_owner_id?: string | null
+          product_type?: string
+          programme_id?: string | null
+          reach_score?: number | null
+          revenue_target?: string | null
+          secondary_metrics?: string[] | null
+          stage?: string
+          status?: string
+          target_market?: string | null
+          updated_at?: string
+          value_proposition?: string | null
+          vision?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          cost_center?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effort_score?: number | null
+          id?: string
+          impact_score?: number | null
+          launch_date?: string | null
+          name?: string
+          next_review_date?: string | null
+          organization_id?: string | null
+          primary_metric?: string | null
+          product_owner_id?: string | null
+          product_type?: string
+          programme_id?: string | null
+          reach_score?: number | null
+          revenue_target?: string | null
+          secondary_metrics?: string[] | null
+          stage?: string
+          status?: string
+          target_market?: string | null
+          updated_at?: string
+          value_proposition?: string | null
+          vision?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

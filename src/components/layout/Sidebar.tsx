@@ -19,6 +19,7 @@ import {
   Calendar,
   Mail,
   Shield,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,15 @@ const navigation: NavItem[] = [
     ],
   },
   {
+    label: "Products",
+    icon: Package,
+    children: [
+      { label: "All Products", href: "/products" },
+      { label: "Roadmap", href: "/products/roadmap" },
+      { label: "Features", href: "/products/features" },
+    ],
+  },
+  {
     label: "Registers",
     icon: ClipboardList,
     children: [
@@ -71,7 +81,7 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Registers"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "Registers"]);
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>

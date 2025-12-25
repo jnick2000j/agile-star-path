@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Programmes from "./pages/Programmes";
 import Projects from "./pages/Projects";
+import Products from "./pages/Products";
 import RiskRegister from "./pages/RiskRegister";
 import IssueRegister from "./pages/IssueRegister";
 import BenefitsRegister from "./pages/BenefitsRegister";
@@ -43,6 +44,9 @@ const App = () => (
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/projects/briefs" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/projects/work-packages" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+            <Route path="/products/roadmap" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+            <Route path="/products/features" element={<ProtectedRoute><Products /></ProtectedRoute>} />
             <Route path="/registers/risks" element={<ProtectedRoute><RiskRegister /></ProtectedRoute>} />
             <Route path="/registers/issues" element={<ProtectedRoute><IssueRegister /></ProtectedRoute>} />
             <Route path="/registers/benefits" element={<ProtectedRoute><BenefitsRegister /></ProtectedRoute>} />
