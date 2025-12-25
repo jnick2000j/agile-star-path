@@ -11,14 +11,11 @@ import {
   BarChart3,
   LogOut,
   BookOpen,
-  Settings,
   ChevronDown,
   Layers,
   ClipboardList,
   TrendingUp,
   Calendar,
-  Mail,
-  Shield,
   Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -74,8 +71,6 @@ const navigation: NavItem[] = [
   { label: "Weekly Updates", icon: Calendar, href: "/weekly-updates" },
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
   { label: "Team", icon: Users, href: "/team" },
-  { label: "Admin Panel", icon: Shield, href: "/admin" },
-  { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
 export function Sidebar() {
