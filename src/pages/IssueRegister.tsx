@@ -21,6 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Issue {
   id: string;
@@ -70,11 +77,34 @@ const statusConfig = {
 
 export default function IssueRegister() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilters, setTypeFilters] = useState<string[]>([]);
+  const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
 
-  const filteredIssues = issues.filter((i) =>
-    i.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    i.programme.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setFilters(prev => 
+      prev.includes(value) 
+        ? prev.filter(s => s !== value)
+        : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setTypeFilters([]);
+    setPriorityFilters([]);
+    setStatusFilters([]);
+  };
+
+  const filteredIssues = issues.filter((i) => {
+    const matchesSearch = i.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      i.programme.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = typeFilters.length === 0 || typeFilters.includes(i.type);
+    const matchesPriority = priorityFilters.length === 0 || priorityFilters.includes(i.priority);
+    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(i.status);
+    return matchesSearch && matchesType && matchesPriority && matchesStatus;
+  });
+
+  const activeFilterCount = typeFilters.length + priorityFilters.length + statusFilters.length;
 
   return (
     <AppLayout title="Issue Register" subtitle="PRINCE2 MSP issue management">
@@ -142,10 +172,76 @@ export default function IssueRegister() {
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Type</Label>
+                  {Object.entries(typeConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`type-${key}`} 
+                        checked={typeFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, typeFilters, setTypeFilters)}
+                      />
+                      <label htmlFor={`type-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Priority</Label>
+                  {Object.entries(priorityConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`priority-${key}`} 
+                        checked={priorityFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, priorityFilters, setPriorityFilters)}
+                      />
+                      <label htmlFor={`priority-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`status-${key}`} 
+                        checked={statusFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, statusFilters, setStatusFilters)}
+                      />
+                      <label htmlFor={`status-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <CreateIssueDialog onSuccess={() => {}} />
         </div>
       </div>

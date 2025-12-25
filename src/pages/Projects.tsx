@@ -22,6 +22,13 @@ import {
 import { CreateProjectDialog } from "@/components/dialogs/CreateProjectDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Project {
   id: string;
@@ -63,6 +70,9 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
+  const [stageFilters, setStageFilters] = useState<string[]>([]);
+  const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
+  const [healthFilters, setHealthFilters] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProjects();
@@ -91,9 +101,29 @@ export default function Projects() {
     }
   };
 
-  const filteredProjects = projects.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setFilters(prev => 
+      prev.includes(value) 
+        ? prev.filter(s => s !== value)
+        : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setStageFilters([]);
+    setPriorityFilters([]);
+    setHealthFilters([]);
+  };
+
+  const filteredProjects = projects.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStage = stageFilters.length === 0 || stageFilters.includes(p.stage);
+    const matchesPriority = priorityFilters.length === 0 || priorityFilters.includes(p.priority);
+    const matchesHealth = healthFilters.length === 0 || healthFilters.includes(p.health);
+    return matchesSearch && matchesStage && matchesPriority && matchesHealth;
+  });
+
+  const activeFilterCount = stageFilters.length + priorityFilters.length + healthFilters.length;
 
   return (
     <AppLayout title="Projects" subtitle="Manage all projects across programmes">
@@ -125,10 +155,76 @@ export default function Projects() {
               <LayoutGrid className="h-4 w-4" />
             </Button>
           </div>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Stage</Label>
+                  {Object.entries(stageConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`stage-${key}`} 
+                        checked={stageFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, stageFilters, setStageFilters)}
+                      />
+                      <label htmlFor={`stage-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Priority</Label>
+                  {Object.entries(priorityConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`priority-${key}`} 
+                        checked={priorityFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, priorityFilters, setPriorityFilters)}
+                      />
+                      <label htmlFor={`priority-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Health</Label>
+                  {Object.entries(healthConfig).map(([key]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`health-${key}`} 
+                        checked={healthFilters.includes(key)}
+                        onCheckedChange={() => toggleFilter(key, healthFilters, setHealthFilters)}
+                      />
+                      <label htmlFor={`health-${key}`} className="text-sm cursor-pointer flex-1 capitalize">
+                        {key}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <CreateProjectDialog onSuccess={fetchProjects} />
         </div>
       </div>

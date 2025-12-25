@@ -12,12 +12,20 @@ import {
   Users,
   Target,
   ArrowUpRight,
-  Building2
+  Building2,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateProgrammeDialog } from "@/components/dialogs/CreateProgrammeDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Programme {
   id: string;
@@ -46,6 +54,7 @@ export default function Programmes() {
   const [programmes, setProgrammes] = useState<Programme[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProgrammes();
@@ -75,9 +84,25 @@ export default function Programmes() {
     }
   };
 
-  const filteredProgrammes = programmes.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilters(prev => 
+      prev.includes(status) 
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const clearFilters = () => {
+    setStatusFilters([]);
+  };
+
+  const filteredProgrammes = programmes.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(p.status);
+    return matchesSearch && matchesStatus;
+  });
+
+  const activeFilterCount = statusFilters.length;
 
   return (
     <AppLayout title="Programmes" subtitle="Manage programme portfolio">
@@ -93,10 +118,46 @@ export default function Programmes() {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`status-${key}`} 
+                        checked={statusFilters.includes(key)}
+                        onCheckedChange={() => toggleStatusFilter(key)}
+                      />
+                      <label htmlFor={`status-${key}`} className="text-sm cursor-pointer flex-1">
+                        {config.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <CreateProgrammeDialog />
         </div>
       </div>
