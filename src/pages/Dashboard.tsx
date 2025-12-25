@@ -5,7 +5,8 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { RiskSummary } from "@/components/dashboard/RiskSummary";
 import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { BenefitsTracker } from "@/components/dashboard/BenefitsTracker";
-import { Layers, FolderKanban, AlertTriangle, Target, CheckCircle, Users } from "lucide-react";
+import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
+import { Layers, FolderKanban, AlertTriangle, Target } from "lucide-react";
 
 export default function Dashboard() {
   return (
@@ -38,12 +39,17 @@ export default function Dashboard() {
         />
         <MetricCard
           title="Benefits Realized"
-          value="£1.05M"
+          value="$1.05M"
           change={15}
           changeLabel="vs target"
           icon={<Target className="h-6 w-6" />}
           iconColor="success"
         />
+      </div>
+
+      {/* Organization Stats */}
+      <div className="mb-8">
+        <OrganizationStats />
       </div>
 
       {/* Main Content Grid */}
