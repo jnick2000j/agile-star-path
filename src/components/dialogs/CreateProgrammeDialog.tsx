@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,15 @@ interface CreateProgrammeDialogProps {
   onSuccess?: () => void;
 }
 
+interface Organization {
+  id: string;
+  name: string;
+}
+
 export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -29,7 +35,16 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
     tranche: "",
     start_date: "",
     end_date: "",
+    organization_id: "",
   });
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      const { data } = await supabase.from("organizations").select("id, name").order("name");
+      if (data) setOrganizations(data);
+    };
+    if (open) fetchOrganizations();
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +54,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
     try {
       const { error } = await supabase.from("programmes").insert({
         ...formData,
+        organization_id: formData.organization_id || null,
         created_by: user.id,
         manager_id: user.id,
         progress: 0,
@@ -58,6 +74,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
         tranche: "",
         start_date: "",
         end_date: "",
+        organization_id: "",
       });
       onSuccess?.();
     } catch (error) {
@@ -82,6 +99,19 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label htmlFor="organization">Organization</Label>
+              <Select value={formData.organization_id} onValueChange={(v) => setFormData({ ...formData, organization_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select organization (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="sm:col-span-2">
               <Label htmlFor="name">Programme Name *</Label>
               <Input
@@ -136,7 +166,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
                 id="budget"
                 value={formData.budget}
                 onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                placeholder="e.g., £1.5M"
+                placeholder="e.g., $1.5M"
               />
             </div>
             <div>
@@ -145,7 +175,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
                 id="benefits_target"
                 value={formData.benefits_target}
                 onChange={(e) => setFormData({ ...formData, benefits_target: e.target.value })}
-                placeholder="e.g., £2.5M"
+                placeholder="e.g., $2.5M"
               />
             </div>
             <div>
