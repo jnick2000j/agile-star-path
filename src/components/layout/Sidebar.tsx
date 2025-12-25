@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
+import { OrganizationSelector } from "@/components/OrganizationSelector";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -74,7 +75,7 @@ const navigation: NavItem[] = [
   { label: "Reports", icon: BarChart3, href: "/reports" },
   { label: "Weekly Updates", icon: Calendar, href: "/weekly-updates" },
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
-  { label: "Team", icon: Users, href: "/team" },
+  { label: "Project Teams", icon: Users, href: "/team" },
 ];
 
 export function Sidebar() {
@@ -96,34 +97,9 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
-        {/* Logo - Organization Branded */}
-        <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-          {currentOrganization?.logo_url ? (
-            <img 
-              src={currentOrganization.logo_url} 
-              alt={currentOrganization.name} 
-              className="h-9 w-9 object-contain rounded-lg"
-            />
-          ) : (
-            <div 
-              className="flex h-9 w-9 items-center justify-center rounded-lg"
-              style={{ backgroundColor: currentOrganization?.primary_color || 'hsl(var(--sidebar-primary))' }}
-            >
-              {currentOrganization ? (
-                <Building2 className="h-5 w-5 text-white" />
-              ) : (
-                <Target className="h-5 w-5 text-sidebar-primary-foreground" />
-              )}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h1 className="text-sm font-semibold text-sidebar-foreground truncate">
-              {currentOrganization?.name || "PIMP"}
-            </h1>
-            <p className="text-xs text-sidebar-foreground/60 truncate">
-              {currentOrganization ? "Programme Management" : "Select Organization"}
-            </p>
-          </div>
+        {/* Organization Selector */}
+        <div className="flex h-16 items-center border-b border-sidebar-border px-3">
+          <OrganizationSelector />
         </div>
 
         {/* Navigation */}
