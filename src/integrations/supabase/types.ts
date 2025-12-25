@@ -532,6 +532,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          archived: boolean
+          archived_at: string | null
           avatar_url: string | null
           created_at: string
           default_organization_id: string | null
@@ -539,11 +542,17 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          location: string | null
+          mailing_address: string | null
+          phone_number: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
+          archived?: boolean
+          archived_at?: string | null
           avatar_url?: string | null
           created_at?: string
           default_organization_id?: string | null
@@ -551,11 +560,17 @@ export type Database = {
           email: string
           full_name?: string | null
           id?: string
+          location?: string | null
+          mailing_address?: string | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
+          archived?: boolean
+          archived_at?: string | null
           avatar_url?: string | null
           created_at?: string
           default_organization_id?: string | null
@@ -563,6 +578,9 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          location?: string | null
+          mailing_address?: string | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id?: string
@@ -976,6 +994,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_organization_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_organization_roles: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_organization_roles_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

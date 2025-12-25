@@ -10,7 +10,11 @@ import { TaskMasterChat } from "@/components/TaskMasterChat";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Programmes from "./pages/Programmes";
+import ProgrammeBlueprint from "./pages/ProgrammeBlueprint";
+import ProgrammeTranches from "./pages/ProgrammeTranches";
 import Projects from "./pages/Projects";
+import ProjectBriefs from "./pages/ProjectBriefs";
+import WorkPackages from "./pages/WorkPackages";
 import Products from "./pages/Products";
 import ProductRoadmap from "./pages/ProductRoadmap";
 import FeatureBacklog from "./pages/FeatureBacklog";
@@ -43,11 +47,11 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/programmes" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
-            <Route path="/programmes/blueprint" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
-            <Route path="/programmes/tranches" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
+            <Route path="/programmes/blueprint" element={<ProtectedRoute><ProgrammeBlueprint /></ProtectedRoute>} />
+            <Route path="/programmes/tranches" element={<ProtectedRoute><ProgrammeTranches /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-            <Route path="/projects/briefs" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-            <Route path="/projects/work-packages" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/projects/briefs" element={<ProtectedRoute><ProjectBriefs /></ProtectedRoute>} />
+            <Route path="/projects/work-packages" element={<ProtectedRoute><WorkPackages /></ProtectedRoute>} />
             <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
             <Route path="/products/roadmap" element={<ProtectedRoute><ProductRoadmap /></ProtectedRoute>} />
             <Route path="/products/features" element={<ProtectedRoute><FeatureBacklog /></ProtectedRoute>} />
@@ -63,8 +67,8 @@ const App = () => (
             <Route path="/documentation" element={<ProtectedRoute><Documentation /></ProtectedRoute>} />
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/branding" element={<ProtectedRoute><BrandingSettings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><AdminPanel /></ProtectedRoute>} />
-            <Route path="/admin/branding" element={<ProtectedRoute requiredRoles={["admin"]}><BrandingSettings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TaskMasterChat />

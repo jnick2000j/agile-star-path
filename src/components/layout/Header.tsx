@@ -1,4 +1,4 @@
-import { Bell, Search, HelpCircle, Settings, Shield, ChevronDown, LogOut } from "lucide-react";
+import { Bell, Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,12 @@ export function Header({ title, subtitle }: HeaderProps) {
               <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
                 <Settings className="h-4 w-4" />
                 Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/branding" className="flex items-center gap-2 cursor-pointer">
+                <Palette className="h-4 w-4" />
+                Branding
               </Link>
             </DropdownMenuItem>
             {isAdmin && (

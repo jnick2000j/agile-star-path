@@ -13,7 +13,9 @@ import {
   Briefcase,
   Building2,
   Palette,
-  ArrowRight
+  ArrowRight,
+  Archive,
+  UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -38,6 +40,8 @@ import { Database } from "@/integrations/supabase/types";
 import { CreateOrganizationDialog } from "@/components/dialogs/CreateOrganizationDialog";
 import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
 import { UserAccessList } from "@/components/admin/UserAccessList";
+import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
+import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -46,8 +50,15 @@ interface UserWithRole {
   user_id: string;
   email: string;
   full_name: string | null;
+  phone_number: string | null;
+  address: string | null;
+  mailing_address: string | null;
+  location: string | null;
+  department: string | null;
+  archived: boolean;
   role: AppRole;
   created_at: string;
+  org_count: number;
 }
 
 interface Organization {
@@ -56,15 +67,6 @@ interface Organization {
   slug: string;
   created_at: string;
   primary_color: string | null;
-}
-
-interface UserWithRole {
-  id: string;
-  user_id: string;
-  email: string;
-  full_name: string | null;
-  role: AppRole;
-  created_at: string;
 }
 
 const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; className: string }> = {
@@ -79,6 +81,7 @@ export default function AdminPanel() {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showArchived, setShowArchived] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -96,6 +99,16 @@ export default function AdminPanel() {
 
       if (rolesError) throw rolesError;
 
+      // Get org access counts
+      const { data: orgAccess } = await supabase
+        .from("user_organization_access")
+        .select("user_id");
+
+      const orgCountMap: Record<string, number> = {};
+      orgAccess?.forEach((a) => {
+        orgCountMap[a.user_id] = (orgCountMap[a.user_id] || 0) + 1;
+      });
+
       const usersWithRoles: UserWithRole[] = (profiles || []).map((profile) => {
         const userRole = roles?.find((r) => r.user_id === profile.user_id);
         return {
@@ -103,8 +116,15 @@ export default function AdminPanel() {
           user_id: profile.user_id,
           email: profile.email,
           full_name: profile.full_name,
+          phone_number: profile.phone_number,
+          address: profile.address,
+          mailing_address: profile.mailing_address,
+          location: profile.location,
+          department: profile.department,
+          archived: profile.archived || false,
           role: userRole?.role || "stakeholder",
           created_at: profile.created_at,
+          org_count: orgCountMap[profile.user_id] || 0,
         };
       });
 
@@ -138,7 +158,6 @@ export default function AdminPanel() {
 
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
     try {
-      // Check if user already has a role entry
       const { data: existing } = await supabase
         .from("user_roles")
         .select("*")
@@ -160,7 +179,6 @@ export default function AdminPanel() {
         if (error) throw error;
       }
 
-      // Also update the profile role
       await supabase
         .from("profiles")
         .update({ role: newRole })
@@ -174,31 +192,35 @@ export default function AdminPanel() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.full_name?.toLowerCase() || "").includes(searchQuery.toLowerCase())
-  );
+      (u.full_name?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+    const matchesArchived = showArchived ? u.archived : !u.archived;
+    return matchesSearch && matchesArchived;
+  });
 
   const roleCounts = {
-    admin: users.filter((u) => u.role === "admin").length,
-    programme_owner: users.filter((u) => u.role === "programme_owner").length,
-    project_manager: users.filter((u) => u.role === "project_manager").length,
-    stakeholder: users.filter((u) => u.role === "stakeholder").length,
+    admin: users.filter((u) => u.role === "admin" && !u.archived).length,
+    programme_owner: users.filter((u) => u.role === "programme_owner" && !u.archived).length,
+    project_manager: users.filter((u) => u.role === "project_manager" && !u.archived).length,
+    stakeholder: users.filter((u) => u.role === "stakeholder" && !u.archived).length,
   };
+
+  const archivedCount = users.filter((u) => u.archived).length;
 
   return (
     <AppLayout title="Admin Panel" subtitle="Manage users, organizations, and permissions">
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList className="bg-secondary">
-          <TabsTrigger value="users">User Roles</TabsTrigger>
+          <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
           <TabsTrigger value="access">Access Control</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
           {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-4 mb-6">
+          <div className="grid gap-4 md:grid-cols-5 mb-6">
             <div className="metric-card">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -243,6 +265,17 @@ export default function AdminPanel() {
                 </div>
               </div>
             </div>
+            <div className="metric-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                  <Archive className="h-5 w-5 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold">{archivedCount}</p>
+                  <p className="text-sm text-muted-foreground">Archived</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Actions Bar */}
@@ -256,6 +289,17 @@ export default function AdminPanel() {
                 className="pl-9"
               />
             </div>
+            <div className="flex gap-2">
+              <Button
+                variant={showArchived ? "default" : "outline"}
+                onClick={() => setShowArchived(!showArchived)}
+                className="gap-2"
+              >
+                {showArchived ? <UserCheck className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                {showArchived ? "Show Active" : "Show Archived"}
+              </Button>
+              <CreateUserDialog onSuccess={fetchUsers} />
+            </div>
           </div>
 
           {/* Users Table */}
@@ -264,22 +308,23 @@ export default function AdminPanel() {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Current Role</TableHead>
-                  <TableHead>Change Role</TableHead>
-                  <TableHead>Joined</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Organizations</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       Loading users...
                     </TableCell>
                   </TableRow>
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       No users found
                     </TableCell>
                   </TableRow>
@@ -289,7 +334,7 @@ export default function AdminPanel() {
                     return (
                       <TableRow
                         key={user.id}
-                        className="animate-fade-in"
+                        className={cn("animate-fade-in", user.archived && "opacity-60")}
                         style={{ animationDelay: `${index * 0.03}s` }}
                       >
                         <TableCell>
@@ -299,21 +344,27 @@ export default function AdminPanel() {
                                 {(user.full_name || user.email)[0].toUpperCase()}
                               </span>
                             </div>
-                            <span className="font-medium">
-                              {user.full_name || "No name"}
-                            </span>
+                            <div>
+                              <span className="font-medium block">
+                                {user.full_name || "No name"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {user.email}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {user.email}
+                          <div className="text-sm">
+                            {user.phone_number && <div>{user.phone_number}</div>}
+                            {user.location && <div className="text-xs">{user.location}</div>}
+                            {!user.phone_number && !user.location && "-"}
+                          </div>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={cn("gap-1", roleConfig[user.role].className)}
-                          >
-                            <RoleIcon className="h-3 w-3" />
-                            {roleConfig[user.role].label}
+                          <Badge variant="outline" className="gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {user.org_count}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -322,24 +373,31 @@ export default function AdminPanel() {
                             onValueChange={(value: AppRole) =>
                               handleRoleChange(user.user_id, value)
                             }
+                            disabled={user.archived}
                           >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue />
+                            <SelectTrigger className="w-[160px]">
+                              <div className="flex items-center gap-2">
+                                <RoleIcon className="h-3 w-3" />
+                                <SelectValue />
+                              </div>
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="programme_owner">
-                                Programme Owner
-                              </SelectItem>
-                              <SelectItem value="project_manager">
-                                Project Manager
-                              </SelectItem>
+                              <SelectItem value="programme_owner">Programme Owner</SelectItem>
+                              <SelectItem value="project_manager">Project Manager</SelectItem>
                               <SelectItem value="stakeholder">Stakeholder</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(user.created_at).toLocaleDateString()}
+                        <TableCell>
+                          {user.archived ? (
+                            <Badge variant="destructive">Archived</Badge>
+                          ) : (
+                            <Badge variant="default" className="bg-success">Active</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <EditUserDialog user={user} onSuccess={fetchUsers} />
                         </TableCell>
                       </TableRow>
                     );
@@ -357,7 +415,7 @@ export default function AdminPanel() {
               <p className="text-sm text-muted-foreground">Manage companies and their programmes/projects</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/admin/branding">
+              <Link to="/branding">
                 <Button variant="outline" className="gap-2">
                   <Palette className="h-4 w-4" />
                   Branding Settings
@@ -394,7 +452,7 @@ export default function AdminPanel() {
                   </div>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>Created {new Date(org.created_at).toLocaleDateString()}</span>
-                    <Link to="/admin/branding" className="text-primary hover:underline flex items-center gap-1">
+                    <Link to="/branding" className="text-primary hover:underline flex items-center gap-1">
                       Manage <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>

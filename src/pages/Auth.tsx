@@ -4,15 +4,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Target, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Target, Mail, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters");
 
+type AuthMode = "login" | "signup" | "forgot-password";
+
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -39,15 +43,17 @@ export default function Auth() {
       }
     }
     
-    try {
-      passwordSchema.parse(password);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
+    if (mode !== "forgot-password") {
+      try {
+        passwordSchema.parse(password);
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          newErrors.password = e.errors[0].message;
+        }
       }
     }
     
-    if (!isLogin) {
+    if (mode === "signup") {
       try {
         nameSchema.parse(fullName);
       } catch (e) {
@@ -68,20 +74,47 @@ export default function Auth() {
     
     setLoading(true);
     
-    if (isLogin) {
+    if (mode === "login") {
       const { error } = await signIn(email, password);
       if (!error) {
         navigate("/");
       }
-    } else {
+    } else if (mode === "signup") {
       const { error } = await signUp(email, password, fullName);
       if (!error) {
-        setIsLogin(true);
+        setMode("login");
         setPassword("");
+      }
+    } else if (mode === "forgot-password") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Password reset email sent. Check your inbox.");
+        setMode("login");
       }
     }
     
     setLoading(false);
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Sign In";
+      case "signup": return "Create Account";
+      case "forgot-password": return "Reset Password";
+    }
+  };
+
+  const getButtonText = () => {
+    switch (mode) {
+      case "login": return "Sign In";
+      case "signup": return "Create Account";
+      case "forgot-password": return "Send Reset Link";
+    }
   };
 
   return (
@@ -101,11 +134,17 @@ export default function Auth() {
         {/* Form Card */}
         <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-center mb-6">
-            {isLogin ? "Sign In" : "Create Account"}
+            {getTitle()}
           </h2>
 
+          {mode === "forgot-password" && (
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Enter your email address and we'll send you a link to reset your password.
+            </p>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+            {mode === "signup" && (
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
@@ -139,47 +178,77 @@ export default function Auth() {
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9"
-                />
+            {mode !== "forgot-password" && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("forgot-password");
+                        setErrors({});
+                      }}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
-              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-            </div>
+            )}
 
             <Button type="submit" className="w-full gap-2" disabled={loading}>
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {getButtonText()}
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setErrors({});
-              }}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isLogin 
-                ? "Don't have an account? Sign up" 
-                : "Already have an account? Sign in"}
-            </button>
+          <div className="mt-4 text-center space-y-2">
+            {mode === "forgot-password" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("login");
+                  setErrors({});
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 mx-auto"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Back to sign in
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === "login" ? "signup" : "login");
+                  setErrors({});
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {mode === "login" 
+                  ? "Don't have an account? Sign up" 
+                  : "Already have an account? Sign in"}
+              </button>
+            )}
           </div>
         </div>
       </div>
