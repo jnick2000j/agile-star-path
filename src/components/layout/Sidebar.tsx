@@ -64,6 +64,7 @@ const navigation: NavItem[] = [
   { label: "Weekly Updates", icon: Calendar, href: "/weekly-updates" },
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
   { label: "Team", icon: Users, href: "/team" },
+  { label: "Admin Panel", icon: Shield, href: "/admin" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 

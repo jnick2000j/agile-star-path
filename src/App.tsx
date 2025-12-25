@@ -20,6 +20,7 @@ import Reports from "./pages/Reports";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
+import BrandingSettings from "./pages/BrandingSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><AdminPanel /></ProtectedRoute>} />
+            <Route path="/admin/branding" element={<ProtectedRoute requiredRoles={["admin"]}><BrandingSettings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TaskMasterChat />

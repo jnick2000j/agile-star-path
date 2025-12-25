@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Plus, 
   Search, 
   Filter,
   AlertCircle,
   ArrowUpRight,
   Download
 } from "lucide-react";
+import { CreateIssueDialog } from "@/components/dialogs/CreateIssueDialog";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -145,10 +146,7 @@ export default function IssueRegister() {
             <Filter className="h-4 w-4" />
             Filter
           </Button>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Raise Issue
-          </Button>
+          <CreateIssueDialog onSuccess={() => {}} />
         </div>
       </div>
 

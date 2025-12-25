@@ -24,6 +24,7 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
+          organization_id: string | null
           owner_id: string | null
           programme_id: string | null
           realization: number
@@ -42,6 +43,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
+          organization_id?: string | null
           owner_id?: string | null
           programme_id?: string | null
           realization?: number
@@ -60,6 +62,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
+          organization_id?: string | null
           owner_id?: string | null
           programme_id?: string | null
           realization?: number
@@ -71,10 +74,61 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "benefits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "benefits_programme_id_fkey"
             columns: ["programme_id"]
             isOneToOne: false
             referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branding_settings: {
+        Row: {
+          accent_color: string | null
+          created_at: string
+          font_family: string | null
+          id: string
+          logo_url: string | null
+          organization_id: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          created_at?: string
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          organization_id?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          created_at?: string
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          organization_id?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branding_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -146,6 +200,7 @@ export type Database = {
           date_raised: string | null
           description: string | null
           id: string
+          organization_id: string | null
           owner_id: string | null
           priority: string
           programme_id: string | null
@@ -163,6 +218,7 @@ export type Database = {
           date_raised?: string | null
           description?: string | null
           id?: string
+          organization_id?: string | null
           owner_id?: string | null
           priority?: string
           programme_id?: string | null
@@ -180,6 +236,7 @@ export type Database = {
           date_raised?: string | null
           description?: string | null
           id?: string
+          organization_id?: string | null
           owner_id?: string | null
           priority?: string
           programme_id?: string | null
@@ -192,6 +249,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "issues_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "issues_programme_id_fkey"
             columns: ["programme_id"]
@@ -208,10 +272,47 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          default_organization_id: string | null
           department: string | null
           email: string
           full_name: string | null
@@ -223,6 +324,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          default_organization_id?: string | null
           department?: string | null
           email: string
           full_name?: string | null
@@ -234,6 +336,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          default_organization_id?: string | null
           department?: string | null
           email?: string
           full_name?: string | null
@@ -242,7 +345,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_default_organization_id_fkey"
+            columns: ["default_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       programme_stakeholders: {
         Row: {
@@ -291,6 +402,7 @@ export type Database = {
           id: string
           manager_id: string | null
           name: string
+          organization_id: string | null
           progress: number
           sponsor: string | null
           start_date: string | null
@@ -308,6 +420,7 @@ export type Database = {
           id?: string
           manager_id?: string | null
           name: string
+          organization_id?: string | null
           progress?: number
           sponsor?: string | null
           start_date?: string | null
@@ -325,6 +438,7 @@ export type Database = {
           id?: string
           manager_id?: string | null
           name?: string
+          organization_id?: string | null
           progress?: number
           sponsor?: string | null
           start_date?: string | null
@@ -332,7 +446,15 @@ export type Database = {
           tranche?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "programmes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -345,6 +467,7 @@ export type Database = {
           manager_id: string | null
           methodology: string
           name: string
+          organization_id: string | null
           priority: string
           programme_id: string | null
           stage: string
@@ -361,6 +484,7 @@ export type Database = {
           manager_id?: string | null
           methodology?: string
           name: string
+          organization_id?: string | null
           priority?: string
           programme_id?: string | null
           stage?: string
@@ -377,6 +501,7 @@ export type Database = {
           manager_id?: string | null
           methodology?: string
           name?: string
+          organization_id?: string | null
           priority?: string
           programme_id?: string | null
           stage?: string
@@ -384,6 +509,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_programme_id_fkey"
             columns: ["programme_id"]
@@ -402,6 +534,7 @@ export type Database = {
           description: string | null
           id: string
           impact: string
+          organization_id: string | null
           owner_id: string | null
           probability: string
           programme_id: string | null
@@ -421,6 +554,7 @@ export type Database = {
           description?: string | null
           id?: string
           impact?: string
+          organization_id?: string | null
           owner_id?: string | null
           probability?: string
           programme_id?: string | null
@@ -440,6 +574,7 @@ export type Database = {
           description?: string | null
           id?: string
           impact?: string
+          organization_id?: string | null
           owner_id?: string | null
           probability?: string
           programme_id?: string | null
@@ -452,6 +587,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "risks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "risks_programme_id_fkey"
             columns: ["programme_id"]
@@ -481,6 +623,7 @@ export type Database = {
           last_contact: string | null
           name: string
           organization: string | null
+          organization_id: string | null
           role: string | null
           updated_at: string
         }
@@ -496,6 +639,7 @@ export type Database = {
           last_contact?: string | null
           name: string
           organization?: string | null
+          organization_id?: string | null
           role?: string | null
           updated_at?: string
         }
@@ -511,10 +655,115 @@ export type Database = {
           last_contact?: string | null
           name?: string
           organization?: string | null
+          organization_id?: string | null
           role?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stakeholders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_organization_access: {
+        Row: {
+          access_level: string
+          created_at: string
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_organization_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_programme_access: {
+        Row: {
+          access_level: string
+          created_at: string
+          id: string
+          programme_id: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          programme_id: string
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          programme_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_programme_access_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_project_access: {
+        Row: {
+          access_level: string
+          created_at: string
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_project_access_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -601,6 +850,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_org_access: {
+        Args: { _min_level?: string; _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_programme_access: {
+        Args: { _programme_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_project_access: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

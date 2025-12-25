@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Plus, 
   Search, 
   Filter,
   Target,
@@ -13,6 +12,8 @@ import {
   Download,
   TrendingUp
 } from "lucide-react";
+import { CreateBenefitDialog } from "@/components/dialogs/CreateBenefitDialog";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -146,10 +147,7 @@ export default function BenefitsRegister() {
             <Filter className="h-4 w-4" />
             Filter
           </Button>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Benefit
-          </Button>
+          <CreateBenefitDialog onSuccess={() => {}} />
         </div>
       </div>
 

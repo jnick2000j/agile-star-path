@@ -1,0 +1,363 @@
+import { useState, useEffect } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { Upload, Save, Palette, Image } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const fontOptions = [
+  { value: "Inter", label: "Inter" },
+  { value: "Roboto", label: "Roboto" },
+  { value: "Open Sans", label: "Open Sans" },
+  { value: "Lato", label: "Lato" },
+  { value: "Poppins", label: "Poppins" },
+  { value: "Montserrat", label: "Montserrat" },
+];
+
+export default function BrandingSettings() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [branding, setBranding] = useState({
+    logo_url: "",
+    primary_color: "#2563eb",
+    secondary_color: "#1e293b",
+    accent_color: "#3b82f6",
+    font_family: "Inter",
+  });
+  const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<string>("");
+
+  useEffect(() => {
+    fetchOrganizations();
+  }, []);
+
+  useEffect(() => {
+    if (selectedOrg) {
+      fetchBranding(selectedOrg);
+    }
+  }, [selectedOrg]);
+
+  const fetchOrganizations = async () => {
+    const { data, error } = await supabase
+      .from("organizations")
+      .select("id, name")
+      .order("name");
+    
+    if (!error && data) {
+      setOrganizations(data);
+      if (data.length > 0) {
+        setSelectedOrg(data[0].id);
+      }
+    }
+  };
+
+  const fetchBranding = async (orgId: string) => {
+    const { data, error } = await supabase
+      .from("branding_settings")
+      .select("*")
+      .eq("organization_id", orgId)
+      .maybeSingle();
+    
+    if (!error && data) {
+      setBranding({
+        logo_url: data.logo_url || "",
+        primary_color: data.primary_color || "#2563eb",
+        secondary_color: data.secondary_color || "#1e293b",
+        accent_color: data.accent_color || "#3b82f6",
+        font_family: data.font_family || "Inter",
+      });
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedOrg) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${selectedOrg}/logo.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("logos")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("logos").getPublicUrl(filePath);
+      setBranding((prev) => ({ ...prev, logo_url: data.publicUrl }));
+      toast.success("Logo uploaded successfully");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload logo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!selectedOrg) {
+      toast.error("Please select an organization");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("branding_settings")
+        .upsert({
+          organization_id: selectedOrg,
+          ...branding,
+        }, { onConflict: "organization_id" });
+
+      if (error) throw error;
+
+      // Also update organization colors
+      await supabase
+        .from("organizations")
+        .update({
+          primary_color: branding.primary_color,
+          secondary_color: branding.secondary_color,
+          logo_url: branding.logo_url,
+        })
+        .eq("id", selectedOrg);
+
+      toast.success("Branding settings saved successfully");
+      
+      // Apply colors to CSS variables
+      document.documentElement.style.setProperty("--primary", hexToHsl(branding.primary_color));
+      document.documentElement.style.setProperty("--sidebar-background", hexToHsl(branding.secondary_color));
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Failed to save branding settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hexToHsl = (hex: string): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return "217 91% 50%";
+    
+    let r = parseInt(result[1], 16) / 255;
+    let g = parseInt(result[2], 16) / 255;
+    let b = parseInt(result[3], 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  };
+
+  return (
+    <AppLayout title="Branding Settings" subtitle="Customize your organization's appearance">
+      <div className="max-w-2xl space-y-6">
+        {/* Organization Selection */}
+        <div className="metric-card">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" />
+            Select Organization
+          </h3>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Organization</Label>
+              <Select value={selectedOrg} onValueChange={setSelectedOrg}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {organizations.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No organizations found. Create one in the Admin Panel first.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Logo Upload */}
+        <div className="metric-card">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Image className="h-5 w-5 text-primary" />
+            Logo
+          </h3>
+          <div className="space-y-4">
+            {branding.logo_url && (
+              <div className="flex items-center gap-4">
+                <img
+                  src={branding.logo_url}
+                  alt="Organization logo"
+                  className="h-16 w-auto object-contain rounded-lg border border-border p-2"
+                />
+                <span className="text-sm text-muted-foreground">Current logo</span>
+              </div>
+            )}
+            <div className="flex items-center gap-4">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                disabled={uploading || !selectedOrg}
+                className="flex-1"
+              />
+              {uploading && <span className="text-sm text-muted-foreground">Uploading...</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Color Scheme */}
+        <div className="metric-card">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" />
+            Color Scheme
+          </h3>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="primaryColor">Primary Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  id="primaryColor"
+                  value={branding.primary_color}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, primary_color: e.target.value }))}
+                  className="h-10 w-14 rounded border border-border cursor-pointer"
+                />
+                <Input
+                  value={branding.primary_color}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, primary_color: e.target.value }))}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="secondaryColor">Secondary Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  id="secondaryColor"
+                  value={branding.secondary_color}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, secondary_color: e.target.value }))}
+                  className="h-10 w-14 rounded border border-border cursor-pointer"
+                />
+                <Input
+                  value={branding.secondary_color}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, secondary_color: e.target.value }))}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="accentColor">Accent Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  id="accentColor"
+                  value={branding.accent_color}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, accent_color: e.target.value }))}
+                  className="h-10 w-14 rounded border border-border cursor-pointer"
+                />
+                <Input
+                  value={branding.accent_color}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, accent_color: e.target.value }))}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Font Family */}
+        <div className="metric-card">
+          <h3 className="text-lg font-semibold mb-4">Typography</h3>
+          <div className="space-y-2">
+            <Label>Font Family</Label>
+            <Select
+              value={branding.font_family}
+              onValueChange={(value) => setBranding((prev) => ({ ...prev, font_family: value }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {fontOptions.map((font) => (
+                  <SelectItem key={font.value} value={font.value}>
+                    {font.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div className="metric-card">
+          <h3 className="text-lg font-semibold mb-4">Preview</h3>
+          <div
+            className="rounded-lg p-6 space-y-4"
+            style={{
+              backgroundColor: branding.secondary_color,
+              fontFamily: branding.font_family,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              {branding.logo_url && (
+                <img src={branding.logo_url} alt="Logo" className="h-8 w-auto" />
+              )}
+              <span className="text-white font-semibold">Your Organization</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="px-4 py-2 rounded-md text-white text-sm font-medium"
+                style={{ backgroundColor: branding.primary_color }}
+              >
+                Primary Button
+              </button>
+              <button
+                className="px-4 py-2 rounded-md text-white text-sm font-medium"
+                style={{ backgroundColor: branding.accent_color }}
+              >
+                Accent Button
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <Button onClick={handleSave} disabled={loading || !selectedOrg} className="gap-2">
+          <Save className="h-4 w-4" />
+          {loading ? "Saving..." : "Save Branding Settings"}
+        </Button>
+      </div>
+    </AppLayout>
+  );
+}
