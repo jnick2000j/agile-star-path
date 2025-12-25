@@ -1,4 +1,4 @@
-import { Bell, Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, Building2 } from "lucide-react";
+import { Bell, Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, Building2, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,6 +81,12 @@ export function Header({ title, subtitle }: HeaderProps) {
               <p className="text-xs text-muted-foreground capitalize">{userRole?.replace("_", " ") || "User"}</p>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
                 <Settings className="h-4 w-4" />

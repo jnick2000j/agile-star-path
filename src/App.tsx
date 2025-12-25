@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TaskMasterChat } from "@/components/TaskMasterChat";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import Programmes from "./pages/Programmes";
 import ProgrammeBlueprint from "./pages/ProgrammeBlueprint";
 import ProgrammeTranches from "./pages/ProgrammeTranches";
@@ -47,6 +48,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/programmes" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
             <Route path="/programmes/blueprint" element={<ProtectedRoute><ProgrammeBlueprint /></ProtectedRoute>} />
             <Route path="/programmes/tranches" element={<ProtectedRoute><ProgrammeTranches /></ProtectedRoute>} />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
   TrendingUp
 } from "lucide-react";
 import { CreateBenefitDialog } from "@/components/dialogs/CreateBenefitDialog";
-import { DocumentUpload } from "@/components/DocumentUpload";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -30,34 +29,27 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { toast } from "sonner";
 
 interface Benefit {
   id: string;
   name: string;
-  description: string;
-  programme: string;
-  category: "financial" | "operational" | "strategic" | "compliance" | "customer";
-  type: "quantitative" | "qualitative";
-  targetValue: string;
-  currentValue: string;
+  description: string | null;
+  category: string;
+  type: string;
+  target_value: string | null;
+  current_value: string | null;
   realization: number;
-  owner: string;
-  status: "identified" | "measuring" | "realized" | "sustaining";
-  startDate: string;
-  endDate: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  owner_id: string | null;
+  programme_id: string | null;
 }
 
-const benefits: Benefit[] = [
-  { id: "BEN001", name: "Operational cost reduction", description: "Reduction in manual processing costs through automation", programme: "Digital Transformation", category: "financial", type: "quantitative", targetValue: "£500K/year", currentValue: "£320K/year", realization: 64, owner: "Michael Chen", status: "measuring", startDate: "Jan 2024", endDate: "Dec 2025" },
-  { id: "BEN002", name: "Customer satisfaction improvement", description: "Increase in NPS score through enhanced digital experience", programme: "Customer Experience", category: "customer", type: "quantitative", targetValue: "+15 NPS", currentValue: "+8 NPS", realization: 53, owner: "Sarah Wilson", status: "measuring", startDate: "Mar 2024", endDate: "Sep 2025" },
-  { id: "BEN003", name: "System availability increase", description: "Improvement in overall system uptime", programme: "Infrastructure Modernization", category: "operational", type: "quantitative", targetValue: "99.9%", currentValue: "99.7%", realization: 85, owner: "James Taylor", status: "measuring", startDate: "Jun 2023", endDate: "Mar 2025" },
-  { id: "BEN004", name: "Data-driven decision making", description: "Enable real-time analytics for business decisions", programme: "Data Analytics Platform", category: "strategic", type: "qualitative", targetValue: "Fully enabled", currentValue: "Partially enabled", realization: 40, owner: "Lisa Anderson", status: "identified", startDate: "Sep 2024", endDate: "Jun 2026" },
-  { id: "BEN005", name: "Regulatory compliance", description: "Full compliance with new security regulations", programme: "Security Enhancement", category: "compliance", type: "qualitative", targetValue: "100% compliant", currentValue: "100% compliant", realization: 100, owner: "Frank Castle", status: "realized", startDate: "Jan 2023", endDate: "Dec 2024" },
-  { id: "BEN006", name: "Revenue growth from digital channels", description: "Increase in revenue through new digital services", programme: "Digital Transformation", category: "financial", type: "quantitative", targetValue: "£2M/year", currentValue: "£1.2M/year", realization: 60, owner: "Jane Smith", status: "measuring", startDate: "Jan 2024", endDate: "Dec 2025" },
-  { id: "BEN007", name: "Employee productivity", description: "Increase in employee productivity through better tools", programme: "Digital Transformation", category: "operational", type: "quantitative", targetValue: "+20%", currentValue: "+12%", realization: 60, owner: "Michael Chen", status: "measuring", startDate: "Jan 2024", endDate: "Dec 2025" },
-];
-
-const categoryConfig = {
+const categoryConfig: Record<string, { label: string; className: string }> = {
   financial: { label: "Financial", className: "bg-success/10 text-success" },
   operational: { label: "Operational", className: "bg-primary/10 text-primary" },
   strategic: { label: "Strategic", className: "bg-info/10 text-info" },
@@ -65,7 +57,7 @@ const categoryConfig = {
   customer: { label: "Customer", className: "bg-accent text-accent-foreground" },
 };
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   identified: { label: "Identified", className: "bg-muted text-muted-foreground" },
   measuring: { label: "Measuring", className: "bg-primary/10 text-primary" },
   realized: { label: "Realized", className: "bg-success/10 text-success" },
@@ -78,10 +70,40 @@ const typeOptions = [
 ];
 
 export default function BenefitsRegister() {
+  const { currentOrganization } = useOrganization();
   const [searchQuery, setSearchQuery] = useState("");
+  const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [loading, setLoading] = useState(true);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchBenefits();
+  }, [currentOrganization]);
+
+  const fetchBenefits = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from("benefits")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (currentOrganization) {
+        query = query.eq("organization_id", currentOrganization.id);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      setBenefits(data || []);
+    } catch (error) {
+      console.error("Error fetching benefits:", error);
+      toast.error("Failed to load benefits");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
     setFilters(prev => 
@@ -98,8 +120,7 @@ export default function BenefitsRegister() {
   };
 
   const filteredBenefits = benefits.filter((b) => {
-    const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.programme.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(b.category);
     const matchesStatus = statusFilters.length === 0 || statusFilters.includes(b.status);
     const matchesType = typeFilters.length === 0 || typeFilters.includes(b.type);
@@ -107,10 +128,9 @@ export default function BenefitsRegister() {
   });
 
   const activeFilterCount = categoryFilters.length + statusFilters.length + typeFilters.length;
-
-  const totalTarget = "£3.7M";
-  const totalRealized = "£2.1M";
-  const avgRealization = Math.round(benefits.reduce((acc, b) => acc + b.realization, 0) / benefits.length);
+  const avgRealization = benefits.length > 0 
+    ? Math.round(benefits.reduce((acc, b) => acc + b.realization, 0) / benefits.length) 
+    : 0;
 
   return (
     <AppLayout title="Benefits Register" subtitle="PRINCE2 MSP benefits management">
@@ -133,8 +153,8 @@ export default function BenefitsRegister() {
               <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-semibold">{totalTarget}</p>
-              <p className="text-sm text-muted-foreground">Target Value</p>
+              <p className="text-2xl font-semibold">{benefits.filter(b => b.status === "measuring").length}</p>
+              <p className="text-sm text-muted-foreground">Measuring</p>
             </div>
           </div>
         </div>
@@ -144,8 +164,8 @@ export default function BenefitsRegister() {
               <Target className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-semibold">{totalRealized}</p>
-              <p className="text-sm text-muted-foreground">Realized Value</p>
+              <p className="text-2xl font-semibold">{benefits.filter(b => b.status === "realized").length}</p>
+              <p className="text-sm text-muted-foreground">Realized</p>
             </div>
           </div>
         </div>
@@ -248,7 +268,7 @@ export default function BenefitsRegister() {
               </div>
             </PopoverContent>
           </Popover>
-          <CreateBenefitDialog onSuccess={() => {}} />
+          <CreateBenefitDialog onSuccess={fetchBenefits} />
         </div>
       </div>
 
@@ -257,61 +277,67 @@ export default function BenefitsRegister() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">ID</TableHead>
               <TableHead>Benefit Name</TableHead>
-              <TableHead>Programme</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Target</TableHead>
               <TableHead>Current</TableHead>
               <TableHead className="w-[150px]">Realization</TableHead>
-              <TableHead>Owner</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredBenefits.map((benefit, index) => (
-              <TableRow 
-                key={benefit.id} 
-                className="animate-fade-in cursor-pointer hover:bg-muted/50"
-                style={{ animationDelay: `${index * 0.03}s` }}
-              >
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {benefit.id}
-                </TableCell>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{benefit.name}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{benefit.description}</p>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{benefit.programme}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className={cn("text-xs", categoryConfig[benefit.category].className)}>
-                    {categoryConfig[benefit.category].label}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-medium">{benefit.targetValue}</TableCell>
-                <TableCell className="text-muted-foreground">{benefit.currentValue}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Progress value={benefit.realization} className="h-2 flex-1" />
-                    <span className="text-sm font-medium w-10">{benefit.realization}%</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{benefit.owner}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className={cn("text-xs", statusConfig[benefit.status].className)}>
-                    {statusConfig[benefit.status].label}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  Loading benefits...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : filteredBenefits.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  No benefits found. Create your first benefit to get started.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredBenefits.map((benefit, index) => (
+                <TableRow 
+                  key={benefit.id} 
+                  className="animate-fade-in cursor-pointer hover:bg-muted/50"
+                  style={{ animationDelay: `${index * 0.03}s` }}
+                >
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{benefit.name}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{benefit.description}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className={cn("text-xs", categoryConfig[benefit.category]?.className || "")}>
+                      {categoryConfig[benefit.category]?.label || benefit.category}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">{benefit.target_value || "N/A"}</TableCell>
+                  <TableCell className="text-muted-foreground">{benefit.current_value || "N/A"}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Progress value={benefit.realization} className="h-2 flex-1" />
+                      <span className="text-sm font-medium w-10">{benefit.realization}%</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className={cn("text-xs", statusConfig[benefit.status]?.className || "")}>
+                      {statusConfig[benefit.status]?.label || benefit.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

@@ -636,6 +636,7 @@ export type Database = {
           archived: boolean
           archived_at: string | null
           avatar_url: string | null
+          city: string | null
           created_at: string
           default_organization_id: string | null
           department: string | null
@@ -646,14 +647,17 @@ export type Database = {
           mailing_address: string | null
           phone_number: string | null
           role: Database["public"]["Enums"]["app_role"]
+          state: string | null
           updated_at: string
           user_id: string
+          zip: string | null
         }
         Insert: {
           address?: string | null
           archived?: boolean
           archived_at?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           default_organization_id?: string | null
           department?: string | null
@@ -664,14 +668,17 @@ export type Database = {
           mailing_address?: string | null
           phone_number?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          state?: string | null
           updated_at?: string
           user_id: string
+          zip?: string | null
         }
         Update: {
           address?: string | null
           archived?: boolean
           archived_at?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           default_organization_id?: string | null
           department?: string | null
@@ -682,8 +689,10 @@ export type Database = {
           mailing_address?: string | null
           phone_number?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          state?: string | null
           updated_at?: string
           user_id?: string
+          zip?: string | null
         }
         Relationships: [
           {

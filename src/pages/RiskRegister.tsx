@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,36 +27,28 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { toast } from "sonner";
 
 interface Risk {
   id: string;
   title: string;
-  description: string;
-  programme: string;
-  project?: string;
-  category: string;
-  probability: "very-low" | "low" | "medium" | "high" | "very-high";
-  impact: "very-low" | "low" | "medium" | "high" | "very-high";
+  description: string | null;
+  category: string | null;
+  probability: string;
+  impact: string;
   score: number;
-  owner: string;
-  status: "open" | "mitigating" | "closed" | "accepted";
-  response: string;
-  dateIdentified: string;
-  reviewDate: string;
+  status: string;
+  response: string | null;
+  date_identified: string | null;
+  review_date: string | null;
+  owner_id: string | null;
+  programme_id: string | null;
+  project_id: string | null;
 }
 
-const risks: Risk[] = [
-  { id: "RSK001", title: "Resource availability constraints", description: "Key technical resources may not be available during critical project phases", programme: "Digital Transformation", project: "Mobile App Redesign", category: "Resource", probability: "high", impact: "high", score: 16, owner: "Michael Chen", status: "mitigating", response: "Reduce", dateIdentified: "Jan 10, 2024", reviewDate: "Jan 25, 2024" },
-  { id: "RSK002", title: "Third-party API dependency", description: "Critical dependency on external payment provider API stability", programme: "Customer Experience", project: "Customer Portal V2", category: "Technical", probability: "medium", impact: "very-high", score: 15, owner: "Sarah Wilson", status: "open", response: "Contingency", dateIdentified: "Feb 5, 2024", reviewDate: "Feb 20, 2024" },
-  { id: "RSK003", title: "Regulatory compliance changes", description: "Upcoming GDPR amendments may require system modifications", programme: "Digital Transformation", category: "Compliance", probability: "medium", impact: "high", score: 12, owner: "Jane Smith", status: "open", response: "Accept", dateIdentified: "Jan 15, 2024", reviewDate: "Mar 1, 2024" },
-  { id: "RSK004", title: "Budget overrun potential", description: "Cloud infrastructure costs exceeding initial estimates", programme: "Infrastructure Modernization", project: "Cloud Migration", category: "Financial", probability: "high", impact: "medium", score: 12, owner: "James Taylor", status: "mitigating", response: "Reduce", dateIdentified: "Dec 20, 2023", reviewDate: "Jan 30, 2024" },
-  { id: "RSK005", title: "Stakeholder engagement decline", description: "Key business stakeholders showing reduced engagement in steering meetings", programme: "Data Analytics Platform", category: "Stakeholder", probability: "medium", impact: "medium", score: 9, owner: "Lisa Anderson", status: "open", response: "Reduce", dateIdentified: "Feb 1, 2024", reviewDate: "Feb 15, 2024" },
-  { id: "RSK006", title: "Legacy system integration issues", description: "Complex integration with legacy ERP system may cause delays", programme: "Digital Transformation", project: "API Gateway", category: "Technical", probability: "high", impact: "high", score: 16, owner: "Rachel Green", status: "mitigating", response: "Reduce", dateIdentified: "Jan 25, 2024", reviewDate: "Feb 10, 2024" },
-  { id: "RSK007", title: "Data quality concerns", description: "Source data quality may impact analytics accuracy", programme: "Data Analytics Platform", project: "Reporting Dashboard", category: "Quality", probability: "medium", impact: "high", score: 12, owner: "Irene Adler", status: "open", response: "Reduce", dateIdentified: "Feb 10, 2024", reviewDate: "Feb 25, 2024" },
-  { id: "RSK008", title: "Vendor contract expiry", description: "Key software license expiring before migration complete", programme: "Security Enhancement", category: "Commercial", probability: "low", impact: "very-high", score: 10, owner: "Frank Castle", status: "closed", response: "Avoid", dateIdentified: "Nov 15, 2023", reviewDate: "Jan 15, 2024" },
-];
-
-const probabilityConfig = {
+const probabilityConfig: Record<string, { label: string; value: number }> = {
   "very-low": { label: "Very Low", value: 1 },
   low: { label: "Low", value: 2 },
   medium: { label: "Medium", value: 3 },
@@ -64,7 +56,7 @@ const probabilityConfig = {
   "very-high": { label: "Very High", value: 5 },
 };
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   open: { label: "Open", className: "bg-destructive/10 text-destructive" },
   mitigating: { label: "Mitigating", className: "bg-warning/10 text-warning" },
   closed: { label: "Closed", className: "bg-success/10 text-success" },
@@ -81,10 +73,40 @@ const getScoreColor = (score: number) => {
 };
 
 export default function RiskRegister() {
+  const { currentOrganization } = useOrganization();
   const [searchQuery, setSearchQuery] = useState("");
+  const [risks, setRisks] = useState<Risk[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [probabilityFilters, setProbabilityFilters] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchRisks();
+  }, [currentOrganization]);
+
+  const fetchRisks = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from("risks")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (currentOrganization) {
+        query = query.eq("organization_id", currentOrganization.id);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      setRisks(data || []);
+    } catch (error) {
+      console.error("Error fetching risks:", error);
+      toast.error("Failed to load risks");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
     setFilters(prev => 
@@ -101,10 +123,9 @@ export default function RiskRegister() {
   };
 
   const filteredRisks = risks.filter((r) => {
-    const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.programme.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilters.length === 0 || statusFilters.includes(r.status);
-    const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(r.category);
+    const matchesCategory = categoryFilters.length === 0 || (r.category && categoryFilters.includes(r.category));
     const matchesProbability = probabilityFilters.length === 0 || probabilityFilters.includes(r.probability);
     return matchesSearch && matchesStatus && matchesCategory && matchesProbability;
   });
@@ -249,7 +270,7 @@ export default function RiskRegister() {
               </div>
             </PopoverContent>
           </Popover>
-          <CreateRiskDialog />
+          <CreateRiskDialog onSuccess={fetchRisks} />
         </div>
       </div>
 
@@ -258,69 +279,70 @@ export default function RiskRegister() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">ID</TableHead>
               <TableHead>Risk Title</TableHead>
-              <TableHead>Programme/Project</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-center">P</TableHead>
               <TableHead className="text-center">I</TableHead>
               <TableHead className="text-center">Score</TableHead>
               <TableHead>Response</TableHead>
-              <TableHead>Owner</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRisks.map((risk, index) => (
-              <TableRow 
-                key={risk.id} 
-                className="animate-fade-in cursor-pointer hover:bg-muted/50"
-                style={{ animationDelay: `${index * 0.03}s` }}
-              >
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {risk.id}
-                </TableCell>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{risk.title}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{risk.description}</p>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  <div>
-                    <p className="text-sm">{risk.programme}</p>
-                    {risk.project && <p className="text-xs text-muted-foreground">{risk.project}</p>}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="text-xs">{risk.category}</Badge>
-                </TableCell>
-                <TableCell className="text-center font-medium">
-                  {probabilityConfig[risk.probability].value}
-                </TableCell>
-                <TableCell className="text-center font-medium">
-                  {probabilityConfig[risk.impact].value}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Badge className={cn("text-xs", getScoreColor(risk.score))}>
-                    {risk.score}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">{risk.response}</TableCell>
-                <TableCell className="text-muted-foreground">{risk.owner}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className={cn("text-xs", statusConfig[risk.status].className)}>
-                    {statusConfig[risk.status].label}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8">
+                  Loading risks...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : filteredRisks.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8">
+                  No risks found. Create your first risk to get started.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredRisks.map((risk, index) => (
+                <TableRow 
+                  key={risk.id} 
+                  className="animate-fade-in cursor-pointer hover:bg-muted/50"
+                  style={{ animationDelay: `${index * 0.03}s` }}
+                >
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{risk.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{risk.description}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">{risk.category || "N/A"}</Badge>
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    {probabilityConfig[risk.probability]?.value || 3}
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    {probabilityConfig[risk.impact]?.value || 3}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge className={cn("text-xs", getScoreColor(risk.score))}>
+                      {risk.score}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">{risk.response || "N/A"}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className={cn("text-xs", statusConfig[risk.status]?.className || "")}>
+                      {statusConfig[risk.status]?.label || risk.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
