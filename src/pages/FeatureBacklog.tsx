@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { FeatureDetailDialog } from "@/components/dialogs/FeatureDetailDialog";
 
 interface Feature {
   id: string;
@@ -42,6 +43,8 @@ interface Feature {
   impact_score: number | null;
   confidence_score: number | null;
   effort_score: number | null;
+  story_points?: number | null;
+  sprint_id?: string | null;
 }
 
 interface Product {
@@ -78,6 +81,8 @@ export default function FeatureBacklog() {
   const [productFilter, setProductFilter] = useState<string>("all");
   const [draggedFeature, setDraggedFeature] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+  const [featureDialogOpen, setFeatureDialogOpen] = useState(false);
   const { user } = useAuth();
 
   const [newFeature, setNewFeature] = useState({
@@ -362,6 +367,10 @@ export default function FeatureBacklog() {
                         key={feature.id}
                         draggable
                         onDragStart={() => handleDragStart(feature.id)}
+                        onClick={() => {
+                          setSelectedFeature(feature);
+                          setFeatureDialogOpen(true);
+                        }}
                         className={`p-3 rounded-lg bg-card border-2 cursor-move transition-all hover:shadow-md ${priorityConf.color}`}
                       >
                         <div className="flex items-start gap-2">
@@ -412,6 +421,14 @@ export default function FeatureBacklog() {
           ))}
         </div>
       </div>
+
+      <FeatureDetailDialog
+        feature={selectedFeature}
+        open={featureDialogOpen}
+        onOpenChange={setFeatureDialogOpen}
+        onUpdate={fetchData}
+        products={products}
+      />
     </AppLayout>
   );
 }

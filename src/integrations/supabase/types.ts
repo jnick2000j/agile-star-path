@@ -323,7 +323,9 @@ export type Database = {
           priority: string
           product_id: string
           reach_score: number | null
+          sprint_id: string | null
           status: string
+          story_points: number | null
           target_release: string | null
           updated_at: string
         }
@@ -341,7 +343,9 @@ export type Database = {
           priority?: string
           product_id: string
           reach_score?: number | null
+          sprint_id?: string | null
           status?: string
+          story_points?: number | null
           target_release?: string | null
           updated_at?: string
         }
@@ -359,7 +363,9 @@ export type Database = {
           priority?: string
           product_id?: string
           reach_score?: number | null
+          sprint_id?: string | null
           status?: string
+          story_points?: number | null
           target_release?: string | null
           updated_at?: string
         }
@@ -369,6 +375,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_features_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "sprints"
             referencedColumns: ["id"]
           },
         ]
@@ -770,6 +783,66 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sprints: {
+        Row: {
+          capacity_points: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          organization_id: string | null
+          product_id: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity_points?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          organization_id?: string | null
+          product_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity_points?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          product_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sprints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sprints_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
