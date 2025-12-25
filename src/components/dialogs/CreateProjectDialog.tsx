@@ -14,16 +14,23 @@ interface CreateProjectDialogProps {
   onSuccess?: () => void;
 }
 
+interface Organization {
+  id: string;
+  name: string;
+}
+
 export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     programme_id: "",
+    organization_id: "",
     stage: "initiating",
     priority: "medium",
     health: "green",
@@ -33,11 +40,15 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
   });
 
   useEffect(() => {
-    const fetchProgrammes = async () => {
-      const { data } = await supabase.from("programmes").select("id, name");
-      if (data) setProgrammes(data);
+    const fetchData = async () => {
+      const [progsRes, orgsRes] = await Promise.all([
+        supabase.from("programmes").select("id, name"),
+        supabase.from("organizations").select("id, name").order("name"),
+      ]);
+      if (progsRes.data) setProgrammes(progsRes.data);
+      if (orgsRes.data) setOrganizations(orgsRes.data);
     };
-    if (open) fetchProgrammes();
+    if (open) fetchData();
   }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,6 +60,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
       const { error } = await supabase.from("projects").insert({
         ...formData,
         programme_id: formData.programme_id || null,
+        organization_id: formData.organization_id || null,
         created_by: user.id,
         manager_id: user.id,
       });
@@ -61,6 +73,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
         name: "",
         description: "",
         programme_id: "",
+        organization_id: "",
         stage: "initiating",
         priority: "medium",
         health: "green",
@@ -109,11 +122,24 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
                 rows={3}
               />
             </div>
-            <div className="sm:col-span-2">
+            <div>
+              <Label htmlFor="organization">Organization</Label>
+              <Select value={formData.organization_id} onValueChange={(v) => setFormData({ ...formData, organization_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label htmlFor="programme">Programme</Label>
               <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select programme (optional)" />
+                  <SelectValue placeholder="Select programme" />
                 </SelectTrigger>
                 <SelectContent>
                   {programmes.map((p) => (

@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 import { CreateOrganizationDialog } from "@/components/dialogs/CreateOrganizationDialog";
 import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
+import { UserAccessList } from "@/components/admin/UserAccessList";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -411,35 +412,10 @@ export default function AdminPanel() {
                 Configure granular access permissions for users to specific programmes and projects.
               </p>
             </div>
-            <AssignUserAccessDialog onSuccess={() => {}} />
+            <AssignUserAccessDialog onSuccess={() => window.location.reload()} />
           </div>
           
-          <div className="grid gap-4 md:grid-cols-3 mb-6">
-            <div className="metric-card">
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Organization-Level Access</h4>
-                <p className="text-sm text-muted-foreground">
-                  Users with organization access can view all programmes and projects within that organization.
-                </p>
-              </div>
-            </div>
-            <div className="metric-card">
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Programme-Level Access</h4>
-                <p className="text-sm text-muted-foreground">
-                  Grant users access to specific programmes and all projects within them.
-                </p>
-              </div>
-            </div>
-            <div className="metric-card">
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Project-Level Access</h4>
-                <p className="text-sm text-muted-foreground">
-                  Grant users access to individual projects without access to the full programme.
-                </p>
-              </div>
-            </div>
-          </div>
+          <UserAccessList />
         </TabsContent>
       </Tabs>
     </AppLayout>
