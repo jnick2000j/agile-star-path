@@ -11,107 +11,30 @@ import {
   Calendar,
   Users,
   Target,
-  ArrowUpRight
+  ArrowUpRight,
+  Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateProgrammeDialog } from "@/components/dialogs/CreateProgrammeDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface Programme {
   id: string;
   name: string;
-  description: string;
-  status: "active" | "on-hold" | "completed" | "at-risk";
+  description: string | null;
+  status: string;
   progress: number;
-  startDate: string;
-  endDate: string;
-  sponsor: string;
-  manager: string;
-  tranche: string;
-  projectCount: number;
-  budget: string;
-  benefitsTarget: string;
+  start_date: string | null;
+  end_date: string | null;
+  sponsor: string | null;
+  tranche: string | null;
+  budget: string | null;
+  benefits_target: string | null;
+  organization_id: string | null;
 }
 
-const programmes: Programme[] = [
-  {
-    id: "PRG001",
-    name: "Digital Transformation Initiative",
-    description: "Enterprise-wide digital transformation programme focusing on customer experience and operational efficiency",
-    status: "active",
-    progress: 72,
-    startDate: "Jan 2024",
-    endDate: "Dec 2025",
-    sponsor: "Jane Smith",
-    manager: "Michael Chen",
-    tranche: "Tranche 2",
-    projectCount: 8,
-    budget: "£2.5M",
-    benefitsTarget: "£4.2M",
-  },
-  {
-    id: "PRG002",
-    name: "Customer Experience Programme",
-    description: "Enhancing customer journey across all touchpoints with focus on digital channels",
-    status: "at-risk",
-    progress: 45,
-    startDate: "Mar 2024",
-    endDate: "Sep 2025",
-    sponsor: "Robert Johnson",
-    manager: "Sarah Wilson",
-    tranche: "Tranche 1",
-    projectCount: 5,
-    budget: "£1.8M",
-    benefitsTarget: "£2.9M",
-  },
-  {
-    id: "PRG003",
-    name: "Infrastructure Modernization",
-    description: "Cloud migration and infrastructure modernization programme",
-    status: "active",
-    progress: 88,
-    startDate: "Jun 2023",
-    endDate: "Mar 2025",
-    sponsor: "Emily Davis",
-    manager: "James Taylor",
-    tranche: "Tranche 3",
-    projectCount: 6,
-    budget: "£3.2M",
-    benefitsTarget: "£5.1M",
-  },
-  {
-    id: "PRG004",
-    name: "Data Analytics Platform",
-    description: "Building enterprise data analytics and business intelligence capabilities",
-    status: "on-hold",
-    progress: 23,
-    startDate: "Sep 2024",
-    endDate: "Jun 2026",
-    sponsor: "David Brown",
-    manager: "Lisa Anderson",
-    tranche: "Tranche 1",
-    projectCount: 4,
-    budget: "£1.2M",
-    benefitsTarget: "£2.0M",
-  },
-  {
-    id: "PRG005",
-    name: "Security Enhancement Programme",
-    description: "Comprehensive security improvement across all systems and processes",
-    status: "completed",
-    progress: 100,
-    startDate: "Jan 2023",
-    endDate: "Dec 2024",
-    sponsor: "Patricia Miller",
-    manager: "Thomas White",
-    tranche: "Complete",
-    projectCount: 7,
-    budget: "£1.5M",
-    benefitsTarget: "£2.3M",
-  },
-];
-
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   active: { label: "Active", className: "bg-success/10 text-success border-success/20" },
   "at-risk": { label: "At Risk", className: "bg-destructive/10 text-destructive border-destructive/20" },
   "on-hold": { label: "On Hold", className: "bg-warning/10 text-warning border-warning/20" },
@@ -120,6 +43,37 @@ const statusConfig = {
 
 export default function Programmes() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { currentOrganization } = useOrganization();
+
+  useEffect(() => {
+    fetchProgrammes();
+  }, [currentOrganization]);
+
+  const fetchProgrammes = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from("programmes")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      // Filter by organization if one is selected
+      if (currentOrganization) {
+        query = query.eq("organization_id", currentOrganization.id);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setProgrammes(data || []);
+    } catch (error) {
+      console.error("Error fetching programmes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredProgrammes = programmes.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -187,25 +141,25 @@ export default function Programmes() {
             <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>{programme.tranche}</span>
+                <span>{programme.tranche || "N/A"}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span>{programme.projectCount} Projects</span>
+                <Building2 className="h-4 w-4" />
+                <span>{programme.status}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Target className="h-4 w-4" />
-                <span>{programme.benefitsTarget}</span>
+                <span>{programme.benefits_target || "N/A"}</span>
               </div>
               <div className="text-muted-foreground">
-                Budget: {programme.budget}
+                Budget: {programme.budget || "N/A"}
               </div>
             </div>
 
             <div className="pt-4 border-t border-border flex items-center justify-between">
               <div className="text-sm">
-                <span className="text-muted-foreground">Manager: </span>
-                <span className="font-medium">{programme.manager}</span>
+                <span className="text-muted-foreground">Sponsor: </span>
+                <span className="font-medium">{programme.sponsor || "Unassigned"}</span>
               </div>
               <Button variant="ghost" size="sm" className="gap-1">
                 View Details
