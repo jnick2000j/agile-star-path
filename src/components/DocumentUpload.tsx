@@ -96,8 +96,16 @@ export function DocumentUpload({ entityType, entityId, entityName }: DocumentUpl
   };
 
   const handleDownload = async (doc: Document) => {
-    const { data } = supabase.storage.from("documents").getPublicUrl(doc.file_path);
-    window.open(data.publicUrl, "_blank");
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .createSignedUrl(doc.file_path, 3600); // 1 hour expiry
+    
+    if (error) {
+      toast.error("Failed to generate download link");
+      return;
+    }
+    
+    window.open(data.signedUrl, "_blank");
   };
 
   const formatFileSize = (bytes: number | null) => {
