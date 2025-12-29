@@ -24,6 +24,79 @@ const fontOptions = [
   { value: "Montserrat", label: "Montserrat" },
 ];
 
+const colorSchemes = [
+  { 
+    name: "Ocean Blue", 
+    primary: "#2563eb", 
+    secondary: "#1e293b", 
+    accent: "#3b82f6",
+    description: "Professional and trustworthy"
+  },
+  { 
+    name: "Forest Green", 
+    primary: "#16a34a", 
+    secondary: "#14532d", 
+    accent: "#22c55e",
+    description: "Fresh and eco-friendly"
+  },
+  { 
+    name: "Sunset Orange", 
+    primary: "#ea580c", 
+    secondary: "#431407", 
+    accent: "#f97316",
+    description: "Warm and energetic"
+  },
+  { 
+    name: "Royal Purple", 
+    primary: "#7c3aed", 
+    secondary: "#2e1065", 
+    accent: "#8b5cf6",
+    description: "Creative and premium"
+  },
+  { 
+    name: "Crimson Red", 
+    primary: "#dc2626", 
+    secondary: "#450a0a", 
+    accent: "#ef4444",
+    description: "Bold and impactful"
+  },
+  { 
+    name: "Teal", 
+    primary: "#0d9488", 
+    secondary: "#134e4a", 
+    accent: "#14b8a6",
+    description: "Calm and balanced"
+  },
+  { 
+    name: "Slate Grey", 
+    primary: "#475569", 
+    secondary: "#0f172a", 
+    accent: "#64748b",
+    description: "Modern and neutral"
+  },
+  { 
+    name: "Rose Pink", 
+    primary: "#e11d48", 
+    secondary: "#4c0519", 
+    accent: "#f43f5e",
+    description: "Vibrant and playful"
+  },
+  { 
+    name: "Amber Gold", 
+    primary: "#d97706", 
+    secondary: "#451a03", 
+    accent: "#f59e0b",
+    description: "Luxurious and warm"
+  },
+  { 
+    name: "Indigo", 
+    primary: "#4f46e5", 
+    secondary: "#1e1b4b", 
+    accent: "#6366f1",
+    description: "Deep and sophisticated"
+  },
+];
+
 export default function BrandingSettings() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -322,11 +395,58 @@ export default function BrandingSettings() {
           </div>
         </div>
 
-        {/* Color Scheme */}
+        {/* Color Scheme Presets */}
         <div className="metric-card">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Palette className="h-5 w-5 text-primary" />
-            Color Scheme
+            Color Scheme Presets
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Choose a pre-designed color scheme or customize your own below
+          </p>
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-5">
+            {colorSchemes.map((scheme) => (
+              <button
+                key={scheme.name}
+                onClick={() => setBranding((prev) => ({
+                  ...prev,
+                  primary_color: scheme.primary,
+                  secondary_color: scheme.secondary,
+                  accent_color: scheme.accent,
+                }))}
+                className={`group p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                  branding.primary_color === scheme.primary && 
+                  branding.secondary_color === scheme.secondary
+                    ? "border-primary ring-2 ring-primary/20"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <div className="flex gap-1 mb-2">
+                  <div 
+                    className="h-6 w-6 rounded-full border border-border/50"
+                    style={{ backgroundColor: scheme.primary }}
+                  />
+                  <div 
+                    className="h-6 w-6 rounded-full border border-border/50"
+                    style={{ backgroundColor: scheme.secondary }}
+                  />
+                  <div 
+                    className="h-6 w-6 rounded-full border border-border/50"
+                    style={{ backgroundColor: scheme.accent }}
+                  />
+                </div>
+                <p className="text-xs font-medium text-foreground">{scheme.name}</p>
+                <p className="text-[10px] text-muted-foreground">{scheme.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Custom Color Scheme */}
+        <div className="metric-card">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" />
+            Custom Colors
           </h3>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
