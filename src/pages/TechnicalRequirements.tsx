@@ -324,10 +324,10 @@ export default function TechnicalRequirements() {
       </div>
       <div className="space-y-2">
         <Label>Linked Business Requirement</Label>
-        <Select value={formData.business_requirement_id} onValueChange={(v) => setFormData({ ...formData, business_requirement_id: v })}>
+        <Select value={formData.business_requirement_id || "none"} onValueChange={(v) => setFormData({ ...formData, business_requirement_id: v === "none" ? "" : v })}>
           <SelectTrigger><SelectValue placeholder="Select business requirement" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none">None</SelectItem>
             {businessReqs.map(br => <SelectItem key={br.id} value={br.id}>{br.reference_number}: {br.name}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -335,30 +335,30 @@ export default function TechnicalRequirements() {
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Programme</Label>
-          <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
+          <Select value={formData.programme_id || "none"} onValueChange={(v) => setFormData({ ...formData, programme_id: v === "none" ? "" : v })}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {programmes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
           <Label>Project</Label>
-          <Select value={formData.project_id} onValueChange={(v) => setFormData({ ...formData, project_id: v })}>
+          <Select value={formData.project_id || "none"} onValueChange={(v) => setFormData({ ...formData, project_id: v === "none" ? "" : v })}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
           <Label>Product</Label>
-          <Select value={formData.product_id} onValueChange={(v) => setFormData({ ...formData, product_id: v })}>
+          <Select value={formData.product_id || "none"} onValueChange={(v) => setFormData({ ...formData, product_id: v === "none" ? "" : v })}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
