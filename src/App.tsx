@@ -33,6 +33,13 @@ import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import BrandingSettings from "./pages/BrandingSettings";
+import TaskManagement from "./pages/TaskManagement";
+import MilestoneTracking from "./pages/MilestoneTracking";
+import StageGates from "./pages/StageGates";
+import ChangeControl from "./pages/ChangeControl";
+import ExceptionManagement from "./pages/ExceptionManagement";
+import QualityManagement from "./pages/QualityManagement";
+import PRINCE2Dashboard from "./pages/PRINCE2Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +79,13 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/branding" element={<ProtectedRoute><BrandingSettings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><AdminPanel /></ProtectedRoute>} />
+            <Route path="/prince2" element={<ProtectedRoute><PRINCE2Dashboard /></ProtectedRoute>} />
+            <Route path="/prince2/tasks" element={<ProtectedRoute><TaskManagement /></ProtectedRoute>} />
+            <Route path="/prince2/milestones" element={<ProtectedRoute><MilestoneTracking /></ProtectedRoute>} />
+            <Route path="/prince2/stage-gates" element={<ProtectedRoute><StageGates /></ProtectedRoute>} />
+            <Route path="/prince2/change-control" element={<ProtectedRoute><ChangeControl /></ProtectedRoute>} />
+            <Route path="/prince2/exceptions" element={<ProtectedRoute><ExceptionManagement /></ProtectedRoute>} />
+            <Route path="/prince2/quality" element={<ProtectedRoute><QualityManagement /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TaskMasterChat />

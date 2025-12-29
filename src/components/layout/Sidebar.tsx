@@ -20,6 +20,11 @@ import {
   Calendar,
   Package,
   Building2,
+  ListTodo,
+  Flag,
+  FileEdit,
+  ClipboardCheck,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +67,19 @@ const navigation: NavItem[] = [
     ],
   },
   {
+    label: "PRINCE2",
+    icon: Shield,
+    children: [
+      { label: "Dashboard", href: "/prince2" },
+      { label: "Task Management", href: "/prince2/tasks" },
+      { label: "Milestones", href: "/prince2/milestones" },
+      { label: "Stage Gates", href: "/prince2/stage-gates" },
+      { label: "Change Control", href: "/prince2/change-control" },
+      { label: "Exceptions", href: "/prince2/exceptions" },
+      { label: "Quality Management", href: "/prince2/quality" },
+    ],
+  },
+  {
     label: "Registers",
     icon: ClipboardList,
     children: [
@@ -82,7 +100,7 @@ export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "Registers"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "PRINCE2", "Registers"]);
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
