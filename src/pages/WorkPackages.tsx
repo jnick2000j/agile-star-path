@@ -8,13 +8,13 @@ import {
   Package,
   CheckCircle2,
   Clock,
-  AlertTriangle,
   User,
   Calendar,
-  Target,
   FileText,
   ChevronRight,
   Filter,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import {
   Dialog,
@@ -41,6 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
@@ -52,22 +53,25 @@ interface Project {
   health: string;
 }
 
-// Simulated work packages - in production, this would be a database table
 interface WorkPackage {
   id: string;
-  project_id: string;
+  project_id: string | null;
+  organization_id: string | null;
   name: string;
-  description: string;
+  description: string | null;
   status: "pending" | "authorized" | "in_progress" | "completed" | "closed";
-  assigned_to: string;
-  work_description: string;
-  deliverables: string;
-  constraints: string;
-  tolerances: string;
-  reporting_requirements: string;
+  assigned_to: string | null;
+  work_description: string | null;
+  deliverables: string | null;
+  constraints: string | null;
+  tolerances: string | null;
+  reporting_requirements: string | null;
   target_start: string | null;
   target_end: string | null;
   progress: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const statusConfig = {
@@ -78,80 +82,49 @@ const statusConfig = {
   closed: { label: "Closed", color: "bg-muted text-muted-foreground", icon: CheckCircle2 },
 };
 
+type WorkPackageStatus = "pending" | "authorized" | "in_progress" | "completed" | "closed";
+
+const defaultFormState: {
+  project_id: string;
+  name: string;
+  description: string;
+  assigned_to: string;
+  work_description: string;
+  deliverables: string;
+  constraints: string;
+  tolerances: string;
+  reporting_requirements: string;
+  target_start: string;
+  target_end: string;
+  progress: number;
+  status: WorkPackageStatus;
+} = {
+  project_id: "",
+  name: "",
+  description: "",
+  assigned_to: "",
+  work_description: "",
+  deliverables: "",
+  constraints: "",
+  tolerances: "",
+  reporting_requirements: "",
+  target_start: "",
+  target_end: "",
+  progress: 0,
+  status: "pending",
+};
+
 export default function WorkPackages() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
+  const [formData, setFormData] = useState(defaultFormState);
   const { currentOrganization } = useOrganization();
-
-  // Simulated work packages
-  const [workPackages, setWorkPackages] = useState<WorkPackage[]>([
-    {
-      id: "1",
-      project_id: "",
-      name: "WP001: Requirements Analysis",
-      description: "Gather and document all business requirements",
-      status: "completed",
-      assigned_to: "Business Analyst",
-      work_description: "Interview stakeholders, document requirements, create user stories",
-      deliverables: "Requirements Document, User Stories, Acceptance Criteria",
-      constraints: "Must align with enterprise architecture standards",
-      tolerances: "Time: +5 days, Cost: +10%",
-      reporting_requirements: "Weekly checkpoint report to Project Manager",
-      target_start: "2024-01-01",
-      target_end: "2024-01-31",
-      progress: 100,
-    },
-    {
-      id: "2",
-      project_id: "",
-      name: "WP002: Solution Design",
-      description: "Design the technical solution architecture",
-      status: "in_progress",
-      assigned_to: "Solution Architect",
-      work_description: "Create solution design, review with technical leads, document decisions",
-      deliverables: "Solution Design Document, Architecture Diagrams, Technical Specifications",
-      constraints: "Must use approved technology stack",
-      tolerances: "Time: +3 days, Cost: +5%",
-      reporting_requirements: "Bi-weekly design review meetings",
-      target_start: "2024-02-01",
-      target_end: "2024-02-28",
-      progress: 65,
-    },
-    {
-      id: "3",
-      project_id: "",
-      name: "WP003: Development Phase 1",
-      description: "Develop core functionality",
-      status: "authorized",
-      assigned_to: "Development Team Lead",
-      work_description: "Implement core features according to specifications",
-      deliverables: "Working software, Unit tests, Code documentation",
-      constraints: "Follow coding standards, 80% test coverage required",
-      tolerances: "Time: +7 days, Cost: +15%",
-      reporting_requirements: "Daily standups, Sprint reviews every 2 weeks",
-      target_start: "2024-03-01",
-      target_end: "2024-04-30",
-      progress: 0,
-    },
-  ]);
-
-  const [newWorkPackage, setNewWorkPackage] = useState({
-    project_id: "",
-    name: "",
-    description: "",
-    assigned_to: "",
-    work_description: "",
-    deliverables: "",
-    constraints: "",
-    tolerances: "",
-    reporting_requirements: "",
-    target_start: "",
-    target_end: "",
-  });
 
   const fetchData = async () => {
     setLoading(true);
@@ -161,8 +134,15 @@ export default function WorkPackages() {
       projectQuery = projectQuery.eq("organization_id", currentOrganization.id);
     }
 
-    const { data } = await projectQuery;
-    setProjects(data || []);
+    let wpQuery = supabase.from("work_packages").select("*").order("created_at", { ascending: false });
+    if (currentOrganization) {
+      wpQuery = wpQuery.eq("organization_id", currentOrganization.id);
+    }
+
+    const [projectsRes, wpRes] = await Promise.all([projectQuery, wpQuery]);
+    
+    setProjects(projectsRes.data || []);
+    setWorkPackages((wpRes.data as WorkPackage[]) || []);
     setLoading(false);
   };
 
@@ -170,51 +150,140 @@ export default function WorkPackages() {
     fetchData();
   }, [currentOrganization]);
 
-  const handleCreateWorkPackage = () => {
-    if (!newWorkPackage.name || !newWorkPackage.project_id) {
+  const handleCreate = async () => {
+    if (!formData.name || !formData.project_id) {
       toast.error("Please fill in required fields");
       return;
     }
 
-    const wp: WorkPackage = {
-      id: String(Date.now()),
-      project_id: newWorkPackage.project_id,
-      name: newWorkPackage.name,
-      description: newWorkPackage.description,
-      status: "pending",
-      assigned_to: newWorkPackage.assigned_to,
-      work_description: newWorkPackage.work_description,
-      deliverables: newWorkPackage.deliverables,
-      constraints: newWorkPackage.constraints,
-      tolerances: newWorkPackage.tolerances,
-      reporting_requirements: newWorkPackage.reporting_requirements,
-      target_start: newWorkPackage.target_start || null,
-      target_end: newWorkPackage.target_end || null,
-      progress: 0,
-    };
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      toast.error("You must be logged in");
+      return;
+    }
 
-    setWorkPackages([...workPackages, wp]);
+    const { error } = await supabase.from("work_packages").insert({
+      project_id: formData.project_id,
+      organization_id: currentOrganization?.id || null,
+      name: formData.name,
+      description: formData.description || null,
+      assigned_to: formData.assigned_to || null,
+      work_description: formData.work_description || null,
+      deliverables: formData.deliverables || null,
+      constraints: formData.constraints || null,
+      tolerances: formData.tolerances || null,
+      reporting_requirements: formData.reporting_requirements || null,
+      target_start: formData.target_start || null,
+      target_end: formData.target_end || null,
+      progress: formData.progress,
+      status: formData.status,
+      created_by: userData.user.id,
+    });
+
+    if (error) {
+      toast.error("Failed to create work package");
+      return;
+    }
+
     toast.success("Work Package created");
     setIsCreateOpen(false);
-    setNewWorkPackage({
-      project_id: "",
-      name: "",
-      description: "",
-      assigned_to: "",
-      work_description: "",
-      deliverables: "",
-      constraints: "",
-      tolerances: "",
-      reporting_requirements: "",
-      target_start: "",
-      target_end: "",
-    });
+    setFormData(defaultFormState);
+    fetchData();
   };
 
-  const handleUpdateStatus = (wpId: string, newStatus: WorkPackage["status"]) => {
-    setWorkPackages(prev =>
-      prev.map(wp => wp.id === wpId ? { ...wp, status: newStatus } : wp)
-    );
+  const handleUpdate = async () => {
+    if (!selectedWorkPackage || !formData.name) {
+      toast.error("Please fill in required fields");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("work_packages")
+      .update({
+        project_id: formData.project_id || null,
+        name: formData.name,
+        description: formData.description || null,
+        assigned_to: formData.assigned_to || null,
+        work_description: formData.work_description || null,
+        deliverables: formData.deliverables || null,
+        constraints: formData.constraints || null,
+        tolerances: formData.tolerances || null,
+        reporting_requirements: formData.reporting_requirements || null,
+        target_start: formData.target_start || null,
+        target_end: formData.target_end || null,
+        progress: formData.progress,
+        status: formData.status,
+      })
+      .eq("id", selectedWorkPackage.id);
+
+    if (error) {
+      toast.error("Failed to update work package");
+      return;
+    }
+
+    toast.success("Work Package updated");
+    setIsEditOpen(false);
+    setSelectedWorkPackage(null);
+    setFormData(defaultFormState);
+    fetchData();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("work_packages").delete().eq("id", id);
+    if (error) {
+      toast.error("Failed to delete work package");
+      return;
+    }
+    toast.success("Work Package deleted");
+    fetchData();
+  };
+
+  const openEditDialog = (wp: WorkPackage) => {
+    setSelectedWorkPackage(wp);
+    setFormData({
+      project_id: wp.project_id || "",
+      name: wp.name,
+      description: wp.description || "",
+      assigned_to: wp.assigned_to || "",
+      work_description: wp.work_description || "",
+      deliverables: wp.deliverables || "",
+      constraints: wp.constraints || "",
+      tolerances: wp.tolerances || "",
+      reporting_requirements: wp.reporting_requirements || "",
+      target_start: wp.target_start || "",
+      target_end: wp.target_end || "",
+      progress: wp.progress,
+      status: wp.status,
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleQuickProgressUpdate = async (id: string, progress: number) => {
+    const { error } = await supabase
+      .from("work_packages")
+      .update({ progress })
+      .eq("id", id);
+    
+    if (error) {
+      toast.error("Failed to update progress");
+      return;
+    }
+    
+    setWorkPackages(prev => prev.map(wp => wp.id === id ? { ...wp, progress } : wp));
+  };
+
+  const handleQuickStatusUpdate = async (id: string, status: WorkPackage["status"]) => {
+    const { error } = await supabase
+      .from("work_packages")
+      .update({ status })
+      .eq("id", id);
+    
+    if (error) {
+      toast.error("Failed to update status");
+      return;
+    }
+    
+    setWorkPackages(prev => prev.map(wp => wp.id === id ? { ...wp, status } : wp));
     toast.success("Status updated");
   };
 
@@ -224,7 +293,7 @@ export default function WorkPackages() {
     return matchesProject && matchesStatus;
   });
 
-  const getProjectName = (projectId: string) => {
+  const getProjectName = (projectId: string | null) => {
     return projects.find(p => p.id === projectId)?.name || "Unassigned";
   };
 
@@ -234,6 +303,152 @@ export default function WorkPackages() {
     in_progress: workPackages.filter(wp => wp.status === "in_progress").length,
     completed: workPackages.filter(wp => wp.status === "completed").length,
   };
+
+  const WorkPackageForm = ({ isEdit = false }: { isEdit?: boolean }) => (
+    <div className="space-y-4 py-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Work Package Name *</Label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g., WP004: Testing"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Project *</Label>
+          <Select
+            value={formData.project_id}
+            onValueChange={(v) => setFormData({ ...formData, project_id: v })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select project" />
+            </SelectTrigger>
+            <SelectContent>
+              {projects.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      {isEdit && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(v) => setFormData({ ...formData, status: v as WorkPackage["status"] })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(statusConfig).map(([key, conf]) => (
+                  <SelectItem key={key} value={key}>{conf.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Progress: {formData.progress}%</Label>
+            <Slider
+              value={[formData.progress]}
+              onValueChange={([v]) => setFormData({ ...formData, progress: v })}
+              max={100}
+              step={5}
+              className="mt-2"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Brief description of the work package"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Assigned To</Label>
+          <Input
+            value={formData.assigned_to}
+            onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
+            placeholder="Team or individual"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <Label>Target Start</Label>
+            <Input
+              type="date"
+              value={formData.target_start}
+              onChange={(e) => setFormData({ ...formData, target_start: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Target End</Label>
+            <Input
+              type="date"
+              value={formData.target_end}
+              onChange={(e) => setFormData({ ...formData, target_end: e.target.value })}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Work Description</Label>
+        <Textarea
+          value={formData.work_description}
+          onChange={(e) => setFormData({ ...formData, work_description: e.target.value })}
+          placeholder="Detailed description of work to be done"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Deliverables</Label>
+        <Textarea
+          value={formData.deliverables}
+          onChange={(e) => setFormData({ ...formData, deliverables: e.target.value })}
+          placeholder="Products/deliverables expected"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Constraints</Label>
+          <Textarea
+            value={formData.constraints}
+            onChange={(e) => setFormData({ ...formData, constraints: e.target.value })}
+            placeholder="Limitations to work within"
+            rows={2}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Tolerances</Label>
+          <Textarea
+            value={formData.tolerances}
+            onChange={(e) => setFormData({ ...formData, tolerances: e.target.value })}
+            placeholder="e.g., Time: +5 days, Cost: +10%"
+            rows={2}
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Reporting Requirements</Label>
+        <Input
+          value={formData.reporting_requirements}
+          onChange={(e) => setFormData({ ...formData, reporting_requirements: e.target.value })}
+          placeholder="How and when to report progress"
+        />
+      </div>
+      <Button onClick={isEdit ? handleUpdate : handleCreate} className="w-full">
+        {isEdit ? "Update Work Package" : "Create Work Package"}
+      </Button>
+    </div>
+  );
 
   return (
     <AppLayout title="Work Packages" subtitle="PRINCE2 Work Package Authorization and Tracking">
@@ -299,7 +514,10 @@ export default function WorkPackages() {
             </Select>
           </div>
 
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <Dialog open={isCreateOpen} onOpenChange={(open) => {
+            setIsCreateOpen(open);
+            if (!open) setFormData(defaultFormState);
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -310,120 +528,26 @@ export default function WorkPackages() {
               <DialogHeader>
                 <DialogTitle>Create PRINCE2 Work Package</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Work Package Name *</Label>
-                    <Input
-                      value={newWorkPackage.name}
-                      onChange={(e) => setNewWorkPackage({ ...newWorkPackage, name: e.target.value })}
-                      placeholder="e.g., WP004: Testing"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Project *</Label>
-                    <Select
-                      value={newWorkPackage.project_id}
-                      onValueChange={(v) => setNewWorkPackage({ ...newWorkPackage, project_id: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select project" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {projects.map(p => (
-                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    value={newWorkPackage.description}
-                    onChange={(e) => setNewWorkPackage({ ...newWorkPackage, description: e.target.value })}
-                    placeholder="Brief description of the work package"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Assigned To</Label>
-                    <Input
-                      value={newWorkPackage.assigned_to}
-                      onChange={(e) => setNewWorkPackage({ ...newWorkPackage, assigned_to: e.target.value })}
-                      placeholder="Team or individual"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label>Target Start</Label>
-                      <Input
-                        type="date"
-                        value={newWorkPackage.target_start}
-                        onChange={(e) => setNewWorkPackage({ ...newWorkPackage, target_start: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Target End</Label>
-                      <Input
-                        type="date"
-                        value={newWorkPackage.target_end}
-                        onChange={(e) => setNewWorkPackage({ ...newWorkPackage, target_end: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Work Description</Label>
-                  <Textarea
-                    value={newWorkPackage.work_description}
-                    onChange={(e) => setNewWorkPackage({ ...newWorkPackage, work_description: e.target.value })}
-                    placeholder="Detailed description of work to be done"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Deliverables</Label>
-                  <Textarea
-                    value={newWorkPackage.deliverables}
-                    onChange={(e) => setNewWorkPackage({ ...newWorkPackage, deliverables: e.target.value })}
-                    placeholder="Products/deliverables expected"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Constraints</Label>
-                    <Textarea
-                      value={newWorkPackage.constraints}
-                      onChange={(e) => setNewWorkPackage({ ...newWorkPackage, constraints: e.target.value })}
-                      placeholder="Limitations to work within"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tolerances</Label>
-                    <Textarea
-                      value={newWorkPackage.tolerances}
-                      onChange={(e) => setNewWorkPackage({ ...newWorkPackage, tolerances: e.target.value })}
-                      placeholder="e.g., Time: +5 days, Cost: +10%"
-                      rows={2}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Reporting Requirements</Label>
-                  <Input
-                    value={newWorkPackage.reporting_requirements}
-                    onChange={(e) => setNewWorkPackage({ ...newWorkPackage, reporting_requirements: e.target.value })}
-                    placeholder="How and when to report progress"
-                  />
-                </div>
-                <Button onClick={handleCreateWorkPackage} className="w-full">
-                  Create Work Package
-                </Button>
-              </div>
+              <WorkPackageForm />
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={(open) => {
+          setIsEditOpen(open);
+          if (!open) {
+            setSelectedWorkPackage(null);
+            setFormData(defaultFormState);
+          }
+        }}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Work Package</DialogTitle>
+            </DialogHeader>
+            <WorkPackageForm isEdit />
+          </DialogContent>
+        </Dialog>
 
         {/* Work Packages Table */}
         <div className="metric-card overflow-hidden">
@@ -435,7 +559,7 @@ export default function WorkPackages() {
                 <TableHead>Status</TableHead>
                 <TableHead>Timeline</TableHead>
                 <TableHead>Progress</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead className="w-[120px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -452,24 +576,13 @@ export default function WorkPackages() {
                 </TableRow>
               ) : (
                 filteredWorkPackages.map(wp => {
-                  const statusConf = statusConfig[wp.status];
-                  const StatusIcon = statusConf.icon;
-
+                  const StatusIcon = statusConfig[wp.status].icon;
                   return (
-                    <TableRow
-                      key={wp.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => setSelectedWorkPackage(wp)}
-                    >
+                    <TableRow key={wp.id}>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Package className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{wp.name}</p>
-                            <p className="text-xs text-muted-foreground line-clamp-1">{wp.description}</p>
-                          </div>
+                        <div>
+                          <p className="font-medium">{wp.name}</p>
+                          <p className="text-sm text-muted-foreground">{getProjectName(wp.project_id)}</p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -481,12 +594,12 @@ export default function WorkPackages() {
                       <TableCell>
                         <Select
                           value={wp.status}
-                          onValueChange={(v) => handleUpdateStatus(wp.id, v as WorkPackage["status"])}
+                          onValueChange={(v) => handleQuickStatusUpdate(wp.id, v as WorkPackage["status"])}
                         >
-                          <SelectTrigger className="w-[140px]" onClick={(e) => e.stopPropagation()}>
-                            <Badge className={statusConf.color}>
+                          <SelectTrigger className="w-[140px] h-8">
+                            <Badge className={statusConfig[wp.status].color}>
                               <StatusIcon className="h-3 w-3 mr-1" />
-                              {statusConf.label}
+                              {statusConfig[wp.status].label}
                             </Badge>
                           </SelectTrigger>
                           <SelectContent>
@@ -497,21 +610,43 @@ export default function WorkPackages() {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          {wp.target_start ? new Date(wp.target_start).toLocaleDateString() : "TBD"} - {wp.target_end ? new Date(wp.target_end).toLocaleDateString() : "TBD"}
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {wp.target_start && wp.target_end
+                              ? `${new Date(wp.target_start).toLocaleDateString()} - ${new Date(wp.target_end).toLocaleDateString()}`
+                              : wp.target_start
+                                ? `From ${new Date(wp.target_start).toLocaleDateString()}`
+                                : wp.target_end
+                                  ? `Until ${new Date(wp.target_end).toLocaleDateString()}`
+                                  : "No dates set"}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 min-w-[100px]">
-                          <Progress value={wp.progress} className="flex-1" />
-                          <span className="text-sm font-medium w-10">{wp.progress}%</span>
+                        <div className="space-y-1 min-w-[120px]">
+                          <div className="flex justify-between text-xs">
+                            <span>Progress</span>
+                            <span>{wp.progress}%</span>
+                          </div>
+                          <Slider
+                            value={[wp.progress]}
+                            onValueCommit={([v]) => handleQuickProgressUpdate(wp.id, v)}
+                            max={100}
+                            step={5}
+                            className="cursor-pointer"
+                          />
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon">
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(wp)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(wp.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -520,66 +655,6 @@ export default function WorkPackages() {
             </TableBody>
           </Table>
         </div>
-
-        {/* Work Package Detail Dialog */}
-        <Dialog open={!!selectedWorkPackage} onOpenChange={() => setSelectedWorkPackage(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{selectedWorkPackage?.name}</DialogTitle>
-            </DialogHeader>
-            {selectedWorkPackage && (
-              <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-sm text-muted-foreground">Assigned To</p>
-                    <p className="font-medium">{selectedWorkPackage.assigned_to || "Unassigned"}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge className={statusConfig[selectedWorkPackage.status].color}>
-                      {statusConfig[selectedWorkPackage.status].label}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground mb-1">Work Description</p>
-                  <p className="text-sm">{selectedWorkPackage.work_description}</p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground mb-1">Deliverables</p>
-                  <p className="text-sm">{selectedWorkPackage.deliverables}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-sm text-muted-foreground mb-1">Constraints</p>
-                    <p className="text-sm">{selectedWorkPackage.constraints}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-warning/5 border border-warning/20">
-                    <p className="text-sm text-muted-foreground mb-1">Tolerances</p>
-                    <p className="text-sm font-medium">{selectedWorkPackage.tolerances}</p>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground mb-1">Reporting Requirements</p>
-                  <p className="text-sm">{selectedWorkPackage.reporting_requirements}</p>
-                </div>
-
-                <div className="flex justify-between items-center pt-4 border-t">
-                  <div className="text-sm text-muted-foreground">
-                    Progress: {selectedWorkPackage.progress}%
-                  </div>
-                  <Button variant="outline" onClick={() => setSelectedWorkPackage(null)}>
-                    Close
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </AppLayout>
   );

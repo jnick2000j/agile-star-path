@@ -2134,6 +2134,84 @@ export type Database = {
           },
         ]
       }
+      work_packages: {
+        Row: {
+          assigned_to: string | null
+          constraints: string | null
+          created_at: string
+          created_by: string | null
+          deliverables: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string | null
+          progress: number
+          project_id: string | null
+          reporting_requirements: string | null
+          status: string
+          target_end: string | null
+          target_start: string | null
+          tolerances: string | null
+          updated_at: string
+          work_description: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          constraints?: string | null
+          created_at?: string
+          created_by?: string | null
+          deliverables?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id?: string | null
+          progress?: number
+          project_id?: string | null
+          reporting_requirements?: string | null
+          status?: string
+          target_end?: string | null
+          target_start?: string | null
+          tolerances?: string | null
+          updated_at?: string
+          work_description?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          constraints?: string | null
+          created_at?: string
+          created_by?: string | null
+          deliverables?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          progress?: number
+          project_id?: string | null
+          reporting_requirements?: string | null
+          status?: string
+          target_end?: string | null
+          target_start?: string | null
+          tolerances?: string | null
+          updated_at?: string
+          work_description?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_packages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_packages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
