@@ -15,6 +15,9 @@ interface GlobalBranding {
   secondary_color: string | null;
   accent_color: string | null;
   font_family: string | null;
+  app_name: string | null;
+  app_tagline: string | null;
+  welcome_message: string | null;
 }
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -46,7 +49,7 @@ export default function Auth() {
     const fetchGlobalBranding = async () => {
       const { data } = await supabase
         .from("branding_settings")
-        .select("logo_url, primary_color, secondary_color, accent_color, font_family")
+        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, welcome_message")
         .is("organization_id", null)
         .maybeSingle();
       
@@ -181,8 +184,11 @@ export default function Auth() {
               </div>
             )}
           </div>
-          <h1 className="text-2xl font-bold text-foreground">PIMP</h1>
-          <p className="text-sm text-muted-foreground">Programme Information Management Platform</p>
+          <h1 className="text-2xl font-bold text-foreground">{branding?.app_name || "PIMP"}</h1>
+          <p className="text-sm text-muted-foreground">{branding?.app_tagline || "Programme Information Management Platform"}</p>
+          {branding?.welcome_message && (
+            <p className="text-sm text-muted-foreground mt-2">{branding.welcome_message}</p>
+          )}
         </div>
 
         {/* Form Card */}

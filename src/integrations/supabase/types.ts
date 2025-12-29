@@ -92,6 +92,8 @@ export type Database = {
       branding_settings: {
         Row: {
           accent_color: string | null
+          app_name: string | null
+          app_tagline: string | null
           created_at: string
           font_family: string | null
           id: string
@@ -100,9 +102,12 @@ export type Database = {
           primary_color: string | null
           secondary_color: string | null
           updated_at: string
+          welcome_message: string | null
         }
         Insert: {
           accent_color?: string | null
+          app_name?: string | null
+          app_tagline?: string | null
           created_at?: string
           font_family?: string | null
           id?: string
@@ -111,9 +116,12 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           updated_at?: string
+          welcome_message?: string | null
         }
         Update: {
           accent_color?: string | null
+          app_name?: string | null
+          app_tagline?: string | null
           created_at?: string
           font_family?: string | null
           id?: string
@@ -122,6 +130,7 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           updated_at?: string
+          welcome_message?: string | null
         }
         Relationships: [
           {

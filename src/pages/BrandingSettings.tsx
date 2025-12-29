@@ -34,6 +34,9 @@ export default function BrandingSettings() {
     secondary_color: "#1e293b",
     accent_color: "#3b82f6",
     font_family: "Inter",
+    app_name: "PIMP",
+    app_tagline: "Programme Information Management Platform",
+    welcome_message: "",
   });
   const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>("global");
@@ -77,6 +80,9 @@ export default function BrandingSettings() {
         secondary_color: data.secondary_color || "#1e293b",
         accent_color: data.accent_color || "#3b82f6",
         font_family: data.font_family || "Inter",
+        app_name: data.app_name || "PIMP",
+        app_tagline: data.app_tagline || "Programme Information Management Platform",
+        welcome_message: data.welcome_message || "",
       });
     } else {
       // Reset to defaults if no branding found
@@ -86,6 +92,9 @@ export default function BrandingSettings() {
         secondary_color: "#1e293b",
         accent_color: "#3b82f6",
         font_family: "Inter",
+        app_name: "PIMP",
+        app_tagline: "Programme Information Management Platform",
+        welcome_message: "",
       });
     }
   };
@@ -237,6 +246,48 @@ export default function BrandingSettings() {
             </div>
           </div>
         </div>
+
+        {/* Login Page Text - Only show for global branding */}
+        {selectedOrg === "global" && (
+          <div className="metric-card">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Palette className="h-5 w-5 text-primary" />
+              Login Page Text
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="appName">Application Name</Label>
+                <Input
+                  id="appName"
+                  value={branding.app_name}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, app_name: e.target.value }))}
+                  placeholder="PIMP"
+                />
+                <p className="text-sm text-muted-foreground">The main title shown on the login page</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="appTagline">Tagline</Label>
+                <Input
+                  id="appTagline"
+                  value={branding.app_tagline}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, app_tagline: e.target.value }))}
+                  placeholder="Programme Information Management Platform"
+                />
+                <p className="text-sm text-muted-foreground">Subtitle displayed below the application name</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="welcomeMessage">Welcome Message (Optional)</Label>
+                <Input
+                  id="welcomeMessage"
+                  value={branding.welcome_message}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, welcome_message: e.target.value }))}
+                  placeholder="Welcome to our platform"
+                />
+                <p className="text-sm text-muted-foreground">Additional message shown on the login page</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Logo Upload */}
         <div className="metric-card">
