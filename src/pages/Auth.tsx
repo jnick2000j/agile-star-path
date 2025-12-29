@@ -183,14 +183,14 @@ export default function Auth() {
 
   return (
     <div 
-      className="min-h-screen bg-background flex items-center justify-center px-4"
+      className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-6 md:p-12"
       style={{ fontFamily: branding?.font_family || undefined }}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         {/* Logo and Title */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           {(branding?.show_logo !== false) && (
-            <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-6">
               {branding?.logo_url ? (
                 <img 
                   src={branding.logo_url} 
@@ -198,31 +198,30 @@ export default function Auth() {
                   className={`${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`}
                 />
               ) : (
-                <div className={`flex ${defaultIconSizeClasses[branding?.logo_size || "medium"].wrapper} items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm`}>
+                <div className={`flex ${defaultIconSizeClasses[branding?.logo_size || "medium"].wrapper} items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg`}>
                   <Target className={defaultIconSizeClasses[branding?.logo_size || "medium"].icon} />
                 </div>
               )}
             </div>
           )}
-          <h1 className="text-2xl font-bold text-foreground">{branding?.app_name || "PIMP"}</h1>
-          <p className="text-muted-foreground mt-1">{branding?.app_tagline || "Programme Information Management Platform"}</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">{branding?.app_name || "PIMP"}</h1>
+          <p className="text-muted-foreground mt-2 text-base max-w-sm mx-auto">{branding?.app_tagline || "Programme Information Management Platform"}</p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-center mb-6">
+        <div className="bg-card border border-border rounded-2xl p-8 md:p-10 shadow-xl">
+          <h2 className="text-xl font-semibold text-center mb-2">
             {getTitle()}
           </h2>
+          <p className="text-sm text-muted-foreground text-center mb-8">
+            {mode === "login" && "Welcome back! Please enter your details."}
+            {mode === "signup" && "Create your account to get started."}
+            {mode === "forgot-password" && "Enter your email address and we'll send you a reset link."}
+          </p>
 
-          {mode === "forgot-password" && (
-            <p className="text-sm text-muted-foreground text-center mb-4">
-              Enter your email address and we will send you a link to reset your password.
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {mode === "signup" && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
                   <div className="relative">
@@ -233,7 +232,7 @@ export default function Auth() {
                       placeholder="John"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="pl-9"
+                      className="pl-10 h-11"
                     />
                   </div>
                   {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
@@ -246,6 +245,7 @@ export default function Auth() {
                     placeholder="Smith"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    className="h-11"
                   />
                   {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
                 </div>
@@ -262,7 +262,7 @@ export default function Auth() {
                   placeholder="you@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-9"
+                  className="pl-10 h-11"
                 />
               </div>
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
@@ -279,7 +279,7 @@ export default function Auth() {
                         setMode("forgot-password");
                         setErrors({});
                       }}
-                      className="text-xs text-primary hover:underline"
+                      className="text-sm text-primary hover:underline font-medium"
                     >
                       Forgot password?
                     </button>
@@ -293,16 +293,16 @@ export default function Auth() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9"
+                    className="pl-10 h-11"
                   />
                 </div>
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
             )}
 
-            <Button type="submit" className="w-full gap-2" disabled={loading}>
+            <Button type="submit" className="w-full h-11 gap-2 text-base font-medium mt-2" disabled={loading}>
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <>
                   {getButtonText()}
@@ -312,7 +312,7 @@ export default function Auth() {
             </Button>
           </form>
 
-          <div className="mt-4 text-center space-y-2">
+          <div className="mt-6 pt-6 border-t border-border text-center">
             {mode === "forgot-password" ? (
               <button
                 type="button"
@@ -320,24 +320,25 @@ export default function Auth() {
                   setMode("login");
                   setErrors({});
                 }}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 mx-auto"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 mx-auto font-medium"
               >
-                <ArrowLeft className="h-3 w-3" />
+                <ArrowLeft className="h-4 w-4" />
                 Back to sign in
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "signup" : "login");
-                  setErrors({});
-                }}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {mode === "login" 
-                  ? "Don't have an account? Sign up" 
-                  : "Already have an account? Sign in"}
-              </button>
+              <p className="text-sm text-muted-foreground">
+                {mode === "login" ? "Don't have an account? " : "Already have an account? "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode(mode === "login" ? "signup" : "login");
+                    setErrors({});
+                  }}
+                  className="text-primary hover:underline font-medium"
+                >
+                  {mode === "login" ? "Sign up" : "Sign in"}
+                </button>
+              </p>
             )}
           </div>
         </div>
