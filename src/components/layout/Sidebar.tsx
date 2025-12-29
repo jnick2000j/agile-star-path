@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -105,6 +106,30 @@ export function Sidebar() {
   const { user, signOut, userRole, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "PRINCE2", "Registers"]);
+  const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
+
+  // Fetch global branding logo for unassigned/global admins
+  useEffect(() => {
+    const fetchGlobalLogo = async () => {
+      const { data } = await supabase
+        .from("branding_settings")
+        .select("logo_url")
+        .is("organization_id", null)
+        .maybeSingle();
+      
+      if (data?.logo_url) {
+        setGlobalLogoUrl(data.logo_url);
+      }
+    };
+    
+    // Only fetch if no organization is selected
+    if (!currentOrganization) {
+      fetchGlobalLogo();
+    }
+  }, [currentOrganization]);
+
+  // Determine which logo to show
+  const logoUrl = currentOrganization?.logo_url || globalLogoUrl;
 
   // Get display name from profile or fallback to email
   const getDisplayName = () => {
@@ -145,9 +170,9 @@ export function Sidebar() {
       <div className="flex h-full flex-col">
         {/* Logo & Organization Selector */}
         <div className="flex h-16 items-center border-b border-sidebar-border px-3 gap-2">
-          {currentOrganization?.logo_url && (
+          {logoUrl && (
             <img 
-              src={currentOrganization.logo_url} 
+              src={logoUrl} 
               alt="Logo" 
               className="h-8 w-auto object-contain flex-shrink-0"
             />
