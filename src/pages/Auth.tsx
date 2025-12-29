@@ -19,6 +19,13 @@ interface GlobalBranding {
   app_name: string | null;
   app_tagline: string | null;
   welcome_message: string | null;
+  hero_title: string | null;
+  hero_description: string | null;
+  feature_1_label: string | null;
+  feature_1_text: string | null;
+  feature_2_label: string | null;
+  feature_2_text: string | null;
+  login_footer_text: string | null;
 }
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -50,7 +57,7 @@ export default function Auth() {
     const fetchGlobalBranding = async () => {
       const { data } = await supabase
         .from("branding_settings")
-        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, welcome_message")
+        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, welcome_message, hero_title, hero_description, feature_1_label, feature_1_text, feature_2_label, feature_2_text, login_footer_text")
         .is("organization_id", null)
         .maybeSingle();
       
@@ -192,27 +199,29 @@ export default function Auth() {
             </div>
           </header>
 
-          <section className="space-y-4">
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              {branding?.welcome_message || "Welcome back"}
-            </h1>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Secure access to programmes, projects, products and PRINCE2 controls—fully branded for your organization.
-            </p>
-            <div className="grid grid-cols-2 gap-3 max-w-md">
-              <div className="glass-card rounded-xl p-4">
-                <p className="text-xs text-muted-foreground">Multi-tenant</p>
-                <p className="text-sm font-medium text-foreground">Organization data isolation</p>
+          <section className="space-y-6">
+            <div className="space-y-3">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+                {branding?.hero_title || branding?.welcome_message || "Welcome back"}
+              </h1>
+              <p className="text-muted-foreground max-w-md leading-relaxed">
+                {branding?.hero_description || "Secure access to programmes, projects, products and PRINCE2 controls—fully branded for your organization."}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 max-w-md">
+              <div className="glass-card rounded-xl p-4 space-y-1">
+                <p className="text-xs font-medium text-primary">{branding?.feature_1_label || "Multi-tenant"}</p>
+                <p className="text-sm text-foreground">{branding?.feature_1_text || "Organization data isolation"}</p>
               </div>
-              <div className="glass-card rounded-xl p-4">
-                <p className="text-xs text-muted-foreground">Governance</p>
-                <p className="text-sm font-medium text-foreground">PRINCE2 registers & reporting</p>
+              <div className="glass-card rounded-xl p-4 space-y-1">
+                <p className="text-xs font-medium text-primary">{branding?.feature_2_label || "Governance"}</p>
+                <p className="text-sm text-foreground">{branding?.feature_2_text || "PRINCE2 registers & reporting"}</p>
               </div>
             </div>
           </section>
 
-          <footer className="text-xs text-muted-foreground">
-            Use your company email to sign in.
+          <footer className="text-sm text-muted-foreground">
+            {branding?.login_footer_text || "Use your company email to sign in."}
           </footer>
         </aside>
 

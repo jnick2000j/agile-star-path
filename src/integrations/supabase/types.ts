@@ -95,8 +95,15 @@ export type Database = {
           app_name: string | null
           app_tagline: string | null
           created_at: string
+          feature_1_label: string | null
+          feature_1_text: string | null
+          feature_2_label: string | null
+          feature_2_text: string | null
           font_family: string | null
+          hero_description: string | null
+          hero_title: string | null
           id: string
+          login_footer_text: string | null
           logo_url: string | null
           organization_id: string | null
           primary_color: string | null
@@ -109,8 +116,15 @@ export type Database = {
           app_name?: string | null
           app_tagline?: string | null
           created_at?: string
+          feature_1_label?: string | null
+          feature_1_text?: string | null
+          feature_2_label?: string | null
+          feature_2_text?: string | null
           font_family?: string | null
+          hero_description?: string | null
+          hero_title?: string | null
           id?: string
+          login_footer_text?: string | null
           logo_url?: string | null
           organization_id?: string | null
           primary_color?: string | null
@@ -123,8 +137,15 @@ export type Database = {
           app_name?: string | null
           app_tagline?: string | null
           created_at?: string
+          feature_1_label?: string | null
+          feature_1_text?: string | null
+          feature_2_label?: string | null
+          feature_2_text?: string | null
           font_family?: string | null
+          hero_description?: string | null
+          hero_title?: string | null
           id?: string
+          login_footer_text?: string | null
           logo_url?: string | null
           organization_id?: string | null
           primary_color?: string | null
