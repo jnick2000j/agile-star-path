@@ -6,7 +6,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserCog, Building2, X, Plus } from "lucide-react";
+import { UserCog, Building2, X, Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -60,12 +72,16 @@ interface EditUserDialogProps {
 }
 
 export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps) {
+  const { userRole } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [userOrgAccess, setUserOrgAccess] = useState<UserOrgAccess[]>([]);
   const [selectedOrgToAdd, setSelectedOrgToAdd] = useState<string>("");
   const [selectedAccessLevel, setSelectedAccessLevel] = useState<string>("viewer");
+  
+  const isAdmin = userRole === "admin";
   
   const [formData, setFormData] = useState({
     full_name: user.full_name || "",
@@ -119,30 +135,71 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: formData.full_name,
-          phone_number: formData.phone_number || null,
-          address: formData.address || null,
-          mailing_address: formData.mailing_address || null,
-          location: formData.location || null,
-          department: formData.department || null,
-          archived: formData.archived,
-          archived_at: formData.archived ? new Date().toISOString() : null,
-        })
-        .eq("id", user.id);
+      // If archive status changed, use edge function to ban/unban user
+      if (formData.archived !== user.archived) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const response = await supabase.functions.invoke("manage-user", {
+          body: { 
+            action: formData.archived ? "archive" : "unarchive",
+            user_id: user.user_id 
+          },
+        });
 
-      if (error) throw error;
+        if (response.error) {
+          throw new Error(response.error.message || "Failed to update user status");
+        }
+      } else {
+        // Just update profile normally
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            full_name: formData.full_name,
+            phone_number: formData.phone_number || null,
+            address: formData.address || null,
+            mailing_address: formData.mailing_address || null,
+            location: formData.location || null,
+            department: formData.department || null,
+          })
+          .eq("id", user.id);
+
+        if (error) throw error;
+      }
 
       toast.success("User updated successfully");
       setOpen(false);
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating user:", error);
-      toast.error(error.message || "Failed to update user");
+      const errorMessage = error instanceof Error ? error.message : "Failed to update user";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    setDeleting(true);
+    try {
+      const response = await supabase.functions.invoke("manage-user", {
+        body: { 
+          action: "delete",
+          user_id: user.user_id 
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to delete user");
+      }
+
+      toast.success("User permanently deleted");
+      setOpen(false);
+      onSuccess();
+    } catch (error: unknown) {
+      console.error("Error deleting user:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete user";
+      toast.error(errorMessage);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -368,6 +425,45 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
               onCheckedChange={(checked) => setFormData({ ...formData, archived: checked })}
             />
           </div>
+
+          {/* Delete User - Admin Only */}
+          {isAdmin && (
+            <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/5 p-4">
+              <div className="space-y-0.5">
+                <Label className="text-base text-destructive">Delete User Permanently</Label>
+                <p className="text-sm text-muted-foreground">
+                  This action cannot be undone. All user data will be permanently removed.
+                </p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="gap-2">
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete the user <strong>{user.email}</strong> and all their data. 
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteUser}
+                      disabled={deleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleting ? "Deleting..." : "Delete Permanently"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

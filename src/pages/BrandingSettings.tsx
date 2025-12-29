@@ -357,6 +357,24 @@ export default function BrandingSettings() {
                 />
                 <p className="text-sm text-muted-foreground">Subtitle displayed below the application name</p>
               </div>
+              <div className="space-y-2">
+                <Label>Header Text Size</Label>
+                <Select
+                  value={branding.header_font_size}
+                  onValueChange={(value) => setBranding((prev) => ({ ...prev, header_font_size: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select text size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                    <SelectItem value="xlarge">Extra Large</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">Controls the size of the application name and tagline</p>
+              </div>
             </div>
           </div>
         )}

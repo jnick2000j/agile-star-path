@@ -20,6 +20,7 @@ interface GlobalBranding {
   app_tagline: string | null;
   logo_size: string | null;
   show_logo: boolean | null;
+  header_font_size: string | null;
 }
 
 const logoSizeClasses: Record<string, string> = {
@@ -34,6 +35,13 @@ const defaultIconSizeClasses: Record<string, { wrapper: string; icon: string }> 
   medium: { wrapper: "h-14 w-14", icon: "h-8 w-8" },
   large: { wrapper: "h-20 w-20", icon: "h-12 w-12" },
   xlarge: { wrapper: "h-28 w-28", icon: "h-16 w-16" },
+};
+
+const headerFontSizeClasses: Record<string, { title: string; tagline: string }> = {
+  small: { title: "text-xl md:text-2xl", tagline: "text-xs" },
+  medium: { title: "text-2xl md:text-3xl", tagline: "text-sm" },
+  large: { title: "text-3xl md:text-4xl", tagline: "text-base" },
+  xlarge: { title: "text-4xl md:text-5xl", tagline: "text-lg" },
 };
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -202,10 +210,10 @@ export default function Auth() {
               )}
             </div>
           )}
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight leading-tight">
+          <h1 className={`${headerFontSizeClasses[branding?.header_font_size || "medium"].title} font-bold text-foreground tracking-tight leading-tight`}>
             {branding?.app_name || "PIMP"}
           </h1>
-          <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto leading-relaxed">
+          <p className={`${headerFontSizeClasses[branding?.header_font_size || "medium"].tagline} text-muted-foreground mt-3 max-w-md mx-auto leading-relaxed`}>
             {branding?.app_tagline || "Programme Information Management Platform"}
           </p>
         </div>
