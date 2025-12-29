@@ -36,16 +36,14 @@ export default function BrandingSettings() {
     font_family: "Inter",
   });
   const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
-  const [selectedOrg, setSelectedOrg] = useState<string>("");
+  const [selectedOrg, setSelectedOrg] = useState<string>("global");
 
   useEffect(() => {
     fetchOrganizations();
   }, []);
 
   useEffect(() => {
-    if (selectedOrg) {
-      fetchBranding(selectedOrg);
-    }
+    fetchBranding(selectedOrg);
   }, [selectedOrg]);
 
   const fetchOrganizations = async () => {
@@ -56,18 +54,21 @@ export default function BrandingSettings() {
     
     if (!error && data) {
       setOrganizations(data);
-      if (data.length > 0) {
-        setSelectedOrg(data[0].id);
-      }
     }
   };
 
   const fetchBranding = async (orgId: string) => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("branding_settings")
-      .select("*")
-      .eq("organization_id", orgId)
-      .maybeSingle();
+      .select("*");
+    
+    if (orgId === "global") {
+      query = query.is("organization_id", null);
+    } else {
+      query = query.eq("organization_id", orgId);
+    }
+    
+    const { data, error } = await query.maybeSingle();
     
     if (!error && data) {
       setBranding({
@@ -77,17 +78,27 @@ export default function BrandingSettings() {
         accent_color: data.accent_color || "#3b82f6",
         font_family: data.font_family || "Inter",
       });
+    } else {
+      // Reset to defaults if no branding found
+      setBranding({
+        logo_url: "",
+        primary_color: "#2563eb",
+        secondary_color: "#1e293b",
+        accent_color: "#3b82f6",
+        font_family: "Inter",
+      });
     }
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !selectedOrg) return;
+    if (!file) return;
 
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const filePath = `${selectedOrg}/logo.${fileExt}`;
+      const folderName = selectedOrg === "global" ? "global" : selectedOrg;
+      const filePath = `${folderName}/logo.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("logos")
@@ -107,37 +118,56 @@ export default function BrandingSettings() {
   };
 
   const handleSave = async () => {
-    if (!selectedOrg) {
-      toast.error("Please select an organization");
-      return;
-    }
-
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from("branding_settings")
-        .upsert({
-          organization_id: selectedOrg,
-          ...branding,
-        }, { onConflict: "organization_id" });
+      if (selectedOrg === "global") {
+        // Update global branding (organization_id = NULL)
+        const { data: existing } = await supabase
+          .from("branding_settings")
+          .select("id")
+          .is("organization_id", null)
+          .maybeSingle();
+        
+        if (existing) {
+          const { error } = await supabase
+            .from("branding_settings")
+            .update(branding)
+            .is("organization_id", null);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("branding_settings")
+            .insert({ organization_id: null, ...branding });
+          if (error) throw error;
+        }
+      } else {
+        const { error } = await supabase
+          .from("branding_settings")
+          .upsert({
+            organization_id: selectedOrg,
+            ...branding,
+          }, { onConflict: "organization_id" });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Also update organization colors
-      await supabase
-        .from("organizations")
-        .update({
-          primary_color: branding.primary_color,
-          secondary_color: branding.secondary_color,
-          logo_url: branding.logo_url,
-        })
-        .eq("id", selectedOrg);
+        // Also update organization colors
+        await supabase
+          .from("organizations")
+          .update({
+            primary_color: branding.primary_color,
+            secondary_color: branding.secondary_color,
+            logo_url: branding.logo_url,
+          })
+          .eq("id", selectedOrg);
+      }
 
       toast.success("Branding settings saved successfully");
       
-      // Apply colors to CSS variables
-      document.documentElement.style.setProperty("--primary", hexToHsl(branding.primary_color));
-      document.documentElement.style.setProperty("--sidebar-background", hexToHsl(branding.secondary_color));
+      // Apply colors to CSS variables if not global
+      if (selectedOrg !== "global") {
+        document.documentElement.style.setProperty("--primary", hexToHsl(branding.primary_color));
+        document.documentElement.style.setProperty("--sidebar-background", hexToHsl(branding.secondary_color));
+      }
     } catch (error) {
       console.error("Save error:", error);
       toast.error("Failed to save branding settings");
@@ -179,16 +209,19 @@ export default function BrandingSettings() {
         <div className="metric-card">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Palette className="h-5 w-5 text-primary" />
-            Select Organization
+            Select Branding Target
           </h3>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Organization</Label>
+              <Label>Branding For</Label>
               <Select value={selectedOrg} onValueChange={setSelectedOrg}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select an organization" />
+                  <SelectValue placeholder="Select branding target" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="global">
+                    🌐 Global (Login Page & Unassigned Admins)
+                  </SelectItem>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>
                       {org.name}
@@ -196,11 +229,11 @@ export default function BrandingSettings() {
                   ))}
                 </SelectContent>
               </Select>
-              {organizations.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No organizations found. Create one in the Admin Panel first.
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground">
+                {selectedOrg === "global" 
+                  ? "This branding applies to the login page and admins not assigned to any organization."
+                  : "This branding applies to users within this organization."}
+              </p>
             </div>
           </div>
         </div>
@@ -227,7 +260,7 @@ export default function BrandingSettings() {
                 type="file"
                 accept="image/*"
                 onChange={handleLogoUpload}
-                disabled={uploading || !selectedOrg}
+                disabled={uploading}
                 className="flex-1"
               />
               {uploading && <span className="text-sm text-muted-foreground">Uploading...</span>}
@@ -353,7 +386,7 @@ export default function BrandingSettings() {
         </div>
 
         {/* Save Button */}
-        <Button onClick={handleSave} disabled={loading || !selectedOrg} className="gap-2">
+        <Button onClick={handleSave} disabled={loading} className="gap-2">
           <Save className="h-4 w-4" />
           {loading ? "Saving..." : "Save Branding Settings"}
         </Button>

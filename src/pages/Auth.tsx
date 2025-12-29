@@ -9,6 +9,14 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+interface GlobalBranding {
+  logo_url: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  accent_color: string | null;
+  font_family: string | null;
+}
+
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(1, "Name is required");
@@ -23,6 +31,7 @@ export default function Auth() {
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; firstName?: string; lastName?: string }>({});
+  const [branding, setBranding] = useState<GlobalBranding | null>(null);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +41,21 @@ export default function Auth() {
       navigate("/");
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    const fetchGlobalBranding = async () => {
+      const { data } = await supabase
+        .from("branding_settings")
+        .select("logo_url, primary_color, secondary_color, accent_color, font_family")
+        .is("organization_id", null)
+        .maybeSingle();
+      
+      if (data) {
+        setBranding(data);
+      }
+    };
+    fetchGlobalBranding();
+  }, []);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; firstName?: string; lastName?: string } = {};
@@ -126,15 +150,36 @@ export default function Auth() {
     }
   };
 
+  const brandingStyles = branding ? {
+    "--auth-primary": branding.primary_color || undefined,
+    "--auth-secondary": branding.secondary_color || undefined,
+    "--auth-accent": branding.accent_color || undefined,
+    fontFamily: branding.font_family || undefined,
+  } as React.CSSProperties : {};
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div 
+      className="min-h-screen bg-background flex items-center justify-center px-4"
+      style={brandingStyles}
+    >
       <div className="w-full max-w-sm">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <Target className="h-7 w-7 text-primary-foreground" />
-            </div>
+            {branding?.logo_url ? (
+              <img 
+                src={branding.logo_url} 
+                alt="Logo" 
+                className="h-12 w-auto object-contain"
+              />
+            ) : (
+              <div 
+                className="flex h-12 w-12 items-center justify-center rounded-xl"
+                style={{ backgroundColor: branding?.primary_color || 'hsl(var(--primary))' }}
+              >
+                <Target className="h-7 w-7 text-primary-foreground" />
+              </div>
+            )}
           </div>
           <h1 className="text-2xl font-bold text-foreground">PIMP</h1>
           <p className="text-sm text-muted-foreground">Programme Information Management Platform</p>
