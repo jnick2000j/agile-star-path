@@ -18,14 +18,6 @@ interface GlobalBranding {
   font_family: string | null;
   app_name: string | null;
   app_tagline: string | null;
-  welcome_message: string | null;
-  hero_title: string | null;
-  hero_description: string | null;
-  feature_1_label: string | null;
-  feature_1_text: string | null;
-  feature_2_label: string | null;
-  feature_2_text: string | null;
-  login_footer_text: string | null;
 }
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -57,7 +49,7 @@ export default function Auth() {
     const fetchGlobalBranding = async () => {
       const { data } = await supabase
         .from("branding_settings")
-        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, welcome_message, hero_title, hero_description, feature_1_label, feature_1_text, feature_2_label, feature_2_text, login_footer_text")
+        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline")
         .is("organization_id", null)
         .maybeSingle();
       
@@ -174,217 +166,163 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background" style={{ fontFamily: branding?.font_family || undefined }}>
-      <div className="min-h-screen grid lg:grid-cols-2">
-        {/* Brand panel */}
-        <aside className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-primary/12 via-background to-background border-r border-border">
-          <header className="flex items-center gap-3">
+    <div 
+      className="min-h-screen bg-background flex items-center justify-center px-4"
+      style={{ fontFamily: branding?.font_family || undefined }}
+    >
+      <div className="w-full max-w-sm">
+        {/* Logo and Title */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
             {branding?.logo_url ? (
-              <img
-                src={branding.logo_url}
-                alt={`${branding?.app_name || "Application"} logo`}
-                className="h-10 w-auto object-contain"
-                loading="eager"
+              <img 
+                src={branding.logo_url} 
+                alt="Logo" 
+                className="h-12 w-auto object-contain"
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                <Target className="h-5 w-5" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                <Target className="h-7 w-7" />
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{branding?.app_name || "PIMP"}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {branding?.app_tagline || "Programme Information Management Platform"}
-              </p>
-            </div>
-          </header>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">{branding?.app_name || "PIMP"}</h1>
+          <p className="text-sm text-muted-foreground">{branding?.app_tagline || "Programme Information Management Platform"}</p>
+        </div>
 
-          <section className="space-y-6">
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-                {branding?.hero_title || branding?.welcome_message || "Welcome back"}
-              </h1>
-              <p className="text-muted-foreground max-w-md leading-relaxed">
-                {branding?.hero_description || "Secure access to programmes, projects, products and PRINCE2 controls—fully branded for your organization."}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 max-w-md">
-              <div className="glass-card rounded-xl p-4 space-y-1">
-                <p className="text-xs font-medium text-primary">{branding?.feature_1_label || "Multi-tenant"}</p>
-                <p className="text-sm text-foreground">{branding?.feature_1_text || "Organization data isolation"}</p>
-              </div>
-              <div className="glass-card rounded-xl p-4 space-y-1">
-                <p className="text-xs font-medium text-primary">{branding?.feature_2_label || "Governance"}</p>
-                <p className="text-sm text-foreground">{branding?.feature_2_text || "PRINCE2 registers & reporting"}</p>
-              </div>
-            </div>
-          </section>
+        {/* Form Card */}
+        <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-center mb-6">
+            {getTitle()}
+          </h2>
 
-          <footer className="text-sm text-muted-foreground">
-            {branding?.login_footer_text || "Use your company email to sign in."}
-          </footer>
-        </aside>
+          {mode === "forgot-password" && (
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Enter your email address and we will send you a link to reset your password.
+            </p>
+          )}
 
-        {/* Form panel */}
-        <main className="flex items-center justify-center p-6 lg:p-10">
-          <div className="w-full max-w-md">
-            {/* Mobile header */}
-            <div className="lg:hidden text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                {branding?.logo_url ? (
-                  <img
-                    src={branding.logo_url}
-                    alt={`${branding?.app_name || "Application"} logo`}
-                    className="h-12 w-auto object-contain"
-                    loading="eager"
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                    <Target className="h-6 w-6" />
-                  </div>
-                )}
-              </div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{branding?.app_name || "PIMP"}</h1>
-              <p className="text-sm text-muted-foreground">
-                {branding?.app_tagline || "Programme Information Management Platform"}
-              </p>
-            </div>
-
-            <div className="glass-card rounded-2xl p-6 md:p-8">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-foreground">{getTitle()}</h2>
-                {mode === "forgot-password" && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Enter your email address and we’ll send a reset link.
-                  </p>
-                )}
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {mode === "signup" && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          id="firstName"
-                          type="text"
-                          placeholder="John"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                          className="pl-9"
-                        />
-                      </div>
-                      {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          id="lastName"
-                          type="text"
-                          placeholder="Smith"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                          className="pl-9"
-                        />
-                      </div>
-                      {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
-                    </div>
-                  </div>
-                )}
-
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === "signup" && (
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="firstName">First Name</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="firstName"
+                      type="text"
+                      placeholder="John"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
                       className="pl-9"
                     />
                   </div>
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                  {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
                 </div>
-
-                {mode !== "forgot-password" && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
-                      {mode === "login" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMode("forgot-password");
-                            setErrors({});
-                          }}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          Forgot password?
-                        </button>
-                      )}
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                  </div>
-                )}
-
-                <Button type="submit" className="w-full gap-2" disabled={loading}>
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      {getButtonText()}
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              <div className="mt-5 text-center">
-                {mode === "forgot-password" ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("login");
-                      setErrors({});
-                    }}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-                  >
-                    <ArrowLeft className="h-3 w-3" />
-                    Back to sign in
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode(mode === "login" ? "signup" : "login");
-                      setErrors({});
-                    }}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {mode === "login" ? "Don’t have an account? Sign up" : "Already have an account? Sign in"}
-                  </button>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Smith"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                  {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
+                </div>
               </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
+
+            {mode !== "forgot-password" && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("forgot-password");
+                        setErrors({});
+                      }}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full gap-2" disabled={loading}>
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {getButtonText()}
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-4 text-center space-y-2">
+            {mode === "forgot-password" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("login");
+                  setErrors({});
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 mx-auto"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Back to sign in
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === "login" ? "signup" : "login");
+                  setErrors({});
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {mode === "login" 
+                  ? "Don't have an account? Sign up" 
+                  : "Already have an account? Sign in"}
+              </button>
+            )}
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

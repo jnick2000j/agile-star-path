@@ -109,14 +109,6 @@ export default function BrandingSettings() {
     font_family: "Inter",
     app_name: "PIMP",
     app_tagline: "Programme Information Management Platform",
-    welcome_message: "",
-    hero_title: "Welcome back",
-    hero_description: "Secure access to programmes, projects, products and PRINCE2 controls—fully branded for your organization.",
-    feature_1_label: "Multi-tenant",
-    feature_1_text: "Organization data isolation",
-    feature_2_label: "Governance",
-    feature_2_text: "PRINCE2 registers & reporting",
-    login_footer_text: "Use your company email to sign in.",
   });
   const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>("global");
@@ -162,14 +154,6 @@ export default function BrandingSettings() {
         font_family: data.font_family || "Inter",
         app_name: data.app_name || "PIMP",
         app_tagline: data.app_tagline || "Programme Information Management Platform",
-        welcome_message: data.welcome_message || "",
-        hero_title: data.hero_title || "Welcome back",
-        hero_description: data.hero_description || "Secure access to programmes, projects, products and PRINCE2 controls—fully branded for your organization.",
-        feature_1_label: data.feature_1_label || "Multi-tenant",
-        feature_1_text: data.feature_1_text || "Organization data isolation",
-        feature_2_label: data.feature_2_label || "Governance",
-        feature_2_text: data.feature_2_text || "PRINCE2 registers & reporting",
-        login_footer_text: data.login_footer_text || "Use your company email to sign in.",
       });
     } else {
       // Reset to defaults if no branding found
@@ -181,14 +165,6 @@ export default function BrandingSettings() {
         font_family: "Inter",
         app_name: "PIMP",
         app_tagline: "Programme Information Management Platform",
-        welcome_message: "",
-        hero_title: "Welcome back",
-        hero_description: "Secure access to programmes, projects, products and PRINCE2 controls—fully branded for your organization.",
-        feature_1_label: "Multi-tenant",
-        feature_1_text: "Organization data isolation",
-        feature_2_label: "Governance",
-        feature_2_text: "PRINCE2 registers & reporting",
-        login_footer_text: "Use your company email to sign in.",
       });
     }
   };
@@ -375,100 +351,6 @@ export default function BrandingSettings() {
           </div>
         </div>
         )}
-
-        {/* Login Page Left Panel Content - Only show for global branding */}
-        {selectedOrg === "global" && (
-          <div className="metric-card">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Palette className="h-5 w-5 text-primary" />
-              Login Page Content (Left Panel)
-            </h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="heroTitle">Hero Title</Label>
-                <Input
-                  id="heroTitle"
-                  value={branding.hero_title}
-                  onChange={(e) => setBranding((prev) => ({ ...prev, hero_title: e.target.value }))}
-                  placeholder="Welcome back"
-                />
-                <p className="text-sm text-muted-foreground">Main heading on the left panel</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="heroDescription">Hero Description</Label>
-                <textarea
-                  id="heroDescription"
-                  value={branding.hero_description}
-                  onChange={(e) => setBranding((prev) => ({ ...prev, hero_description: e.target.value }))}
-                  placeholder="Describe your platform benefits..."
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  rows={3}
-                />
-                <p className="text-sm text-muted-foreground">Supporting text below the hero title</p>
-              </div>
-              
-              <div className="border-t border-border pt-4 mt-4">
-                <p className="text-sm font-medium text-foreground mb-3">Feature Cards</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="feature1Label">Feature 1 Label</Label>
-                      <Input
-                        id="feature1Label"
-                        value={branding.feature_1_label}
-                        onChange={(e) => setBranding((prev) => ({ ...prev, feature_1_label: e.target.value }))}
-                        placeholder="Multi-tenant"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="feature1Text">Feature 1 Text</Label>
-                      <Input
-                        id="feature1Text"
-                        value={branding.feature_1_text}
-                        onChange={(e) => setBranding((prev) => ({ ...prev, feature_1_text: e.target.value }))}
-                        placeholder="Organization data isolation"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="feature2Label">Feature 2 Label</Label>
-                      <Input
-                        id="feature2Label"
-                        value={branding.feature_2_label}
-                        onChange={(e) => setBranding((prev) => ({ ...prev, feature_2_label: e.target.value }))}
-                        placeholder="Governance"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="feature2Text">Feature 2 Text</Label>
-                      <Input
-                        id="feature2Text"
-                        value={branding.feature_2_text}
-                        onChange={(e) => setBranding((prev) => ({ ...prev, feature_2_text: e.target.value }))}
-                        placeholder="PRINCE2 registers & reporting"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-border pt-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="loginFooterText">Footer Text</Label>
-                  <Input
-                    id="loginFooterText"
-                    value={branding.login_footer_text}
-                    onChange={(e) => setBranding((prev) => ({ ...prev, login_footer_text: e.target.value }))}
-                    placeholder="Use your company email to sign in."
-                  />
-                  <p className="text-sm text-muted-foreground">Displayed at the bottom of the left panel</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Logo Upload */}
         <div className="metric-card">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -653,9 +535,6 @@ export default function BrandingSettings() {
               </div>
               <h2 className="text-xl font-bold text-center text-foreground">{branding.app_name || "PIMP"}</h2>
               <p className="text-sm text-muted-foreground text-center">{branding.app_tagline || "Programme Information Management Platform"}</p>
-              {branding.welcome_message && (
-                <p className="text-sm text-muted-foreground text-center">{branding.welcome_message}</p>
-              )}
               <div className="flex gap-2 justify-center mt-4">
                 <button
                   className="px-4 py-2 rounded-md text-white text-sm font-medium"
