@@ -133,6 +133,98 @@ export type Database = {
           },
         ]
       }
+      business_requirements: {
+        Row: {
+          acceptance_criteria: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string | null
+          owner_id: string | null
+          priority: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          rationale: string | null
+          reference_number: string
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          acceptance_criteria?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id?: string | null
+          owner_id?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          rationale?: string | null
+          reference_number: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          acceptance_criteria?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          owner_id?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          rationale?: string | null
+          reference_number?: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_requirements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_requirements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_requirements_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_requirements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       change_requests: {
         Row: {
           benefits: string | null
@@ -1135,6 +1227,72 @@ export type Database = {
           },
         ]
       }
+      programme_definitions: {
+        Row: {
+          constraints: string | null
+          created_at: string
+          created_by: string | null
+          dependencies: string | null
+          id: string
+          key_assumptions: string | null
+          organization_id: string | null
+          out_of_scope: string | null
+          programme_id: string
+          scope_statement: string | null
+          strategic_objectives: string | null
+          success_criteria: string | null
+          updated_at: string
+          vision_statement: string | null
+        }
+        Insert: {
+          constraints?: string | null
+          created_at?: string
+          created_by?: string | null
+          dependencies?: string | null
+          id?: string
+          key_assumptions?: string | null
+          organization_id?: string | null
+          out_of_scope?: string | null
+          programme_id: string
+          scope_statement?: string | null
+          strategic_objectives?: string | null
+          success_criteria?: string | null
+          updated_at?: string
+          vision_statement?: string | null
+        }
+        Update: {
+          constraints?: string | null
+          created_at?: string
+          created_by?: string | null
+          dependencies?: string | null
+          id?: string
+          key_assumptions?: string | null
+          organization_id?: string | null
+          out_of_scope?: string | null
+          programme_id?: string
+          scope_statement?: string | null
+          strategic_objectives?: string | null
+          success_criteria?: string | null
+          updated_at?: string
+          vision_statement?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_definitions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programme_definitions_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: true
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programme_stakeholders: {
         Row: {
           created_at: string
@@ -1728,6 +1886,72 @@ export type Database = {
           },
         ]
       }
+      success_plans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          critical_success_factors: string | null
+          id: string
+          key_milestones: string | null
+          organization_id: string | null
+          programme_id: string
+          resource_requirements: string | null
+          review_schedule: string | null
+          risk_mitigation: string | null
+          success_measures: string | null
+          target_outcomes: string | null
+          timeline_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          critical_success_factors?: string | null
+          id?: string
+          key_milestones?: string | null
+          organization_id?: string | null
+          programme_id: string
+          resource_requirements?: string | null
+          review_schedule?: string | null
+          risk_mitigation?: string | null
+          success_measures?: string | null
+          target_outcomes?: string | null
+          timeline_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          critical_success_factors?: string | null
+          id?: string
+          key_milestones?: string | null
+          organization_id?: string | null
+          programme_id?: string
+          resource_requirements?: string | null
+          review_schedule?: string | null
+          risk_mitigation?: string | null
+          success_measures?: string | null
+          target_outcomes?: string | null
+          timeline_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "success_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "success_plans_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: true
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           actual_end: string | null
@@ -1835,6 +2059,108 @@ export type Database = {
           },
           {
             foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_requirements: {
+        Row: {
+          acceptance_criteria: string | null
+          business_requirement_id: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          dependencies: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string | null
+          owner_id: string | null
+          priority: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reference_number: string
+          status: string
+          technical_specification: string | null
+          updated_at: string
+        }
+        Insert: {
+          acceptance_criteria?: string | null
+          business_requirement_id?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          dependencies?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id?: string | null
+          owner_id?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number: string
+          status?: string
+          technical_specification?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acceptance_criteria?: string | null
+          business_requirement_id?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          dependencies?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          owner_id?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string
+          status?: string
+          technical_specification?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_requirements_business_requirement_id_fkey"
+            columns: ["business_requirement_id"]
+            isOneToOne: false
+            referencedRelation: "business_requirements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_requirements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_requirements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_requirements_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_requirements_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
