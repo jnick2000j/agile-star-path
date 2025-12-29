@@ -18,7 +18,23 @@ interface GlobalBranding {
   font_family: string | null;
   app_name: string | null;
   app_tagline: string | null;
+  logo_size: string | null;
+  show_logo: boolean | null;
 }
+
+const logoSizeClasses: Record<string, string> = {
+  small: "h-10 w-auto",
+  medium: "h-14 w-auto",
+  large: "h-20 w-auto",
+  xlarge: "h-28 w-auto",
+};
+
+const defaultIconSizeClasses: Record<string, { wrapper: string; icon: string }> = {
+  small: { wrapper: "h-10 w-10", icon: "h-5 w-5" },
+  medium: { wrapper: "h-14 w-14", icon: "h-8 w-8" },
+  large: { wrapper: "h-20 w-20", icon: "h-12 w-12" },
+  xlarge: { wrapper: "h-28 w-28", icon: "h-16 w-16" },
+};
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -49,7 +65,7 @@ export default function Auth() {
     const fetchGlobalBranding = async () => {
       const { data } = await supabase
         .from("branding_settings")
-        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline")
+        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, logo_size, show_logo")
         .is("organization_id", null)
         .maybeSingle();
       
@@ -170,24 +186,26 @@ export default function Auth() {
       className="min-h-screen bg-background flex items-center justify-center px-4"
       style={{ fontFamily: branding?.font_family || undefined }}
     >
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            {branding?.logo_url ? (
-              <img 
-                src={branding.logo_url} 
-                alt="Logo" 
-                className="h-12 w-auto object-contain"
-              />
-            ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                <Target className="h-7 w-7" />
-              </div>
-            )}
-          </div>
+          {(branding?.show_logo !== false) && (
+            <div className="flex items-center justify-center mb-4">
+              {branding?.logo_url ? (
+                <img 
+                  src={branding.logo_url} 
+                  alt="Logo" 
+                  className={`${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`}
+                />
+              ) : (
+                <div className={`flex ${defaultIconSizeClasses[branding?.logo_size || "medium"].wrapper} items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm`}>
+                  <Target className={defaultIconSizeClasses[branding?.logo_size || "medium"].icon} />
+                </div>
+              )}
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-foreground">{branding?.app_name || "PIMP"}</h1>
-          <p className="text-sm text-muted-foreground">{branding?.app_tagline || "Programme Information Management Platform"}</p>
+          <p className="text-muted-foreground mt-1">{branding?.app_tagline || "Programme Information Management Platform"}</p>
         </div>
 
         {/* Form Card */}

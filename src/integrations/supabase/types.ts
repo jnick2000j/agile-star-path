@@ -104,10 +104,12 @@ export type Database = {
           hero_title: string | null
           id: string
           login_footer_text: string | null
+          logo_size: string | null
           logo_url: string | null
           organization_id: string | null
           primary_color: string | null
           secondary_color: string | null
+          show_logo: boolean | null
           updated_at: string
           welcome_message: string | null
         }
@@ -125,10 +127,12 @@ export type Database = {
           hero_title?: string | null
           id?: string
           login_footer_text?: string | null
+          logo_size?: string | null
           logo_url?: string | null
           organization_id?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          show_logo?: boolean | null
           updated_at?: string
           welcome_message?: string | null
         }
@@ -146,10 +150,12 @@ export type Database = {
           hero_title?: string | null
           id?: string
           login_footer_text?: string | null
+          logo_size?: string | null
           logo_url?: string | null
           organization_id?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          show_logo?: boolean | null
           updated_at?: string
           welcome_message?: string | null
         }

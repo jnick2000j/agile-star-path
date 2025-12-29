@@ -109,6 +109,8 @@ export default function BrandingSettings() {
     font_family: "Inter",
     app_name: "PIMP",
     app_tagline: "Programme Information Management Platform",
+    logo_size: "medium",
+    show_logo: true,
   });
   const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>("global");
@@ -154,6 +156,8 @@ export default function BrandingSettings() {
         font_family: data.font_family || "Inter",
         app_name: data.app_name || "PIMP",
         app_tagline: data.app_tagline || "Programme Information Management Platform",
+        logo_size: data.logo_size || "medium",
+        show_logo: data.show_logo !== false,
       });
     } else {
       // Reset to defaults if no branding found
@@ -165,6 +169,8 @@ export default function BrandingSettings() {
         font_family: "Inter",
         app_name: "PIMP",
         app_tagline: "Programme Information Management Platform",
+        logo_size: "medium",
+        show_logo: true,
       });
     }
   };
@@ -351,33 +357,88 @@ export default function BrandingSettings() {
           </div>
         </div>
         )}
-        {/* Logo Upload */}
+        {/* Logo Settings */}
         <div className="metric-card">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Image className="h-5 w-5 text-primary" />
-            Logo
+            Logo Settings
           </h3>
           <div className="space-y-4">
-            {branding.logo_url && (
-              <div className="flex items-center gap-4">
-                <img
-                  src={branding.logo_url}
-                  alt="Organization logo"
-                  className="h-16 w-auto object-contain rounded-lg border border-border p-2"
-                />
-                <span className="text-sm text-muted-foreground">Current logo</span>
+            {/* Show/Hide Logo Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Show Logo</Label>
+                <p className="text-sm text-muted-foreground">Display the logo on the login page</p>
               </div>
-            )}
-            <div className="flex items-center gap-4">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                disabled={uploading}
-                className="flex-1"
-              />
-              {uploading && <span className="text-sm text-muted-foreground">Uploading...</span>}
+              <Button
+                type="button"
+                variant={branding.show_logo ? "default" : "outline"}
+                size="sm"
+                onClick={() => setBranding((prev) => ({ ...prev, show_logo: !prev.show_logo }))}
+              >
+                {branding.show_logo ? "Visible" : "Hidden"}
+              </Button>
             </div>
+
+            {branding.show_logo && (
+              <>
+                {/* Logo Size */}
+                <div className="space-y-2">
+                  <Label>Logo Size</Label>
+                  <Select
+                    value={branding.logo_size}
+                    onValueChange={(value) => setBranding((prev) => ({ ...prev, logo_size: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select logo size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                      <SelectItem value="xlarge">Extra Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Current Logo Preview */}
+                {branding.logo_url && (
+                  <div className="space-y-2">
+                    <Label>Current Logo</Label>
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={branding.logo_url}
+                        alt="Organization logo"
+                        className="h-16 w-auto object-contain rounded-lg border border-border p-2"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setBranding((prev) => ({ ...prev, logo_url: "" }))}
+                      >
+                        Remove Logo
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload New Logo */}
+                <div className="space-y-2">
+                  <Label>Upload Logo</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      disabled={uploading}
+                      className="flex-1"
+                    />
+                    {uploading && <span className="text-sm text-muted-foreground">Uploading...</span>}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
