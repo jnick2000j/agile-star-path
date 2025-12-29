@@ -102,9 +102,33 @@ const navigation: NavItem[] = [
 
 export function Sidebar() {
   const location = useLocation();
-  const { user, signOut, userRole } = useAuth();
+  const { user, signOut, userRole, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "PRINCE2", "Registers"]);
+
+  // Get display name from profile or fallback to email
+  const getDisplayName = () => {
+    if (userProfile?.first_name && userProfile?.last_name) {
+      return `${userProfile.first_name} ${userProfile.last_name}`;
+    }
+    if (userProfile?.full_name) {
+      return userProfile.full_name;
+    }
+    return user?.email?.split("@")[0] || "User";
+  };
+
+  const getInitials = () => {
+    if (userProfile?.first_name && userProfile?.last_name) {
+      return `${userProfile.first_name[0]}${userProfile.last_name[0]}`.toUpperCase();
+    }
+    if (userProfile?.full_name) {
+      const parts = userProfile.full_name.split(" ");
+      return parts.length >= 2 
+        ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+        : userProfile.full_name.substring(0, 2).toUpperCase();
+    }
+    return user?.email?.substring(0, 2).toUpperCase() || "U";
+  };
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
@@ -184,10 +208,10 @@ export function Sidebar() {
         <div className="border-t border-sidebar-border p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent text-sm font-medium text-sidebar-foreground">
-              {user?.email?.substring(0, 2).toUpperCase() || "U"}
+              {getInitials()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.email?.split("@")[0] || "User"}</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{getDisplayName()}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate capitalize">{userRole?.replace("_", " ") || "User"}</p>
             </div>
             <button onClick={signOut} className="p-2 rounded-lg hover:bg-sidebar-accent transition-colors" title="Sign out">

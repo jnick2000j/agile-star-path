@@ -4,6 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+interface UserProfile {
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -12,6 +18,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   userRole: string | null;
+  userProfile: UserProfile | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -37,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setUserRole(null);
+          setUserProfile(null);
         }
       }
     );
@@ -58,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, first_name, last_name, full_name")
         .eq("user_id", userId)
         .single();
 
@@ -68,6 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUserRole(data?.role || "stakeholder");
+      setUserProfile({
+        first_name: data?.first_name || null,
+        last_name: data?.last_name || null,
+        full_name: data?.full_name || null,
+      });
     } catch (error) {
       console.error("Error fetching user role:", error);
     }
@@ -139,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, userRole }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, userRole, userProfile }}>
       {children}
     </AuthContext.Provider>
   );
