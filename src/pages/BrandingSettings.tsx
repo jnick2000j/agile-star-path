@@ -398,6 +398,8 @@ export default function BrandingSettings() {
                     <SelectContent>
                       <SelectItem value="small">Small</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                      <SelectItem value="xlarge">Extra Large</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -426,17 +428,18 @@ export default function BrandingSettings() {
 
                 {/* Upload New Logo */}
                 <div className="space-y-2">
-                  <Label>Upload Logo</Label>
+                  <Label>Upload Logo (PNG only, transparent recommended)</Label>
                   <div className="flex items-center gap-4">
                     <Input
                       type="file"
-                      accept="image/*"
+                      accept="image/png"
                       onChange={handleLogoUpload}
                       disabled={uploading}
                       className="flex-1"
                     />
                     {uploading && <span className="text-sm text-muted-foreground">Uploading...</span>}
                   </div>
+                  <p className="text-xs text-muted-foreground">For best results, use a transparent PNG file</p>
                 </div>
               </>
             )}
