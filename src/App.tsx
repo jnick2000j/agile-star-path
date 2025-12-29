@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import Programmes from "./pages/Programmes";
 import ProgrammeBlueprint from "./pages/ProgrammeBlueprint";
 import ProgrammeTranches from "./pages/ProgrammeTranches";
+import ProgrammeDefinition from "./pages/ProgrammeDefinition";
+import SuccessPlan from "./pages/SuccessPlan";
 import Projects from "./pages/Projects";
 import ProjectBriefs from "./pages/ProjectBriefs";
 import WorkPackages from "./pages/WorkPackages";
@@ -25,6 +27,8 @@ import RiskRegister from "./pages/RiskRegister";
 import IssueRegister from "./pages/IssueRegister";
 import BenefitsRegister from "./pages/BenefitsRegister";
 import StakeholderRegister from "./pages/StakeholderRegister";
+import BusinessRequirements from "./pages/BusinessRequirements";
+import TechnicalRequirements from "./pages/TechnicalRequirements";
 import LessonsLearned from "./pages/LessonsLearned";
 import Documentation from "./pages/Documentation";
 import WeeklyUpdates from "./pages/WeeklyUpdates";
@@ -59,6 +63,8 @@ const App = () => (
             <Route path="/programmes" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
             <Route path="/programmes/blueprint" element={<ProtectedRoute><ProgrammeBlueprint /></ProtectedRoute>} />
             <Route path="/programmes/tranches" element={<ProtectedRoute><ProgrammeTranches /></ProtectedRoute>} />
+            <Route path="/programmes/definition" element={<ProtectedRoute><ProgrammeDefinition /></ProtectedRoute>} />
+            <Route path="/programmes/success-plan" element={<ProtectedRoute><SuccessPlan /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/projects/briefs" element={<ProtectedRoute><ProjectBriefs /></ProtectedRoute>} />
             <Route path="/projects/work-packages" element={<ProtectedRoute><WorkPackages /></ProtectedRoute>} />
@@ -71,6 +77,8 @@ const App = () => (
             <Route path="/registers/issues" element={<ProtectedRoute><IssueRegister /></ProtectedRoute>} />
             <Route path="/registers/benefits" element={<ProtectedRoute><BenefitsRegister /></ProtectedRoute>} />
             <Route path="/registers/stakeholders" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
+            <Route path="/registers/business-requirements" element={<ProtectedRoute><BusinessRequirements /></ProtectedRoute>} />
+            <Route path="/registers/technical-requirements" element={<ProtectedRoute><TechnicalRequirements /></ProtectedRoute>} />
             <Route path="/registers/lessons" element={<ProtectedRoute><LessonsLearned /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/weekly-updates" element={<ProtectedRoute><WeeklyUpdates /></ProtectedRoute>} />

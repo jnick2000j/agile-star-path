@@ -43,6 +43,8 @@ const navigation: NavItem[] = [
     children: [
       { label: "All Programmes", href: "/programmes" },
       { label: "Programme Blueprint", href: "/programmes/blueprint" },
+      { label: "Programme Definition", href: "/programmes/definition" },
+      { label: "Success Plan", href: "/programmes/success-plan" },
       { label: "Tranches", href: "/programmes/tranches" },
     ],
   },
@@ -87,6 +89,8 @@ const navigation: NavItem[] = [
       { label: "Issue Register", href: "/registers/issues" },
       { label: "Benefits Register", href: "/registers/benefits" },
       { label: "Stakeholder Register", href: "/registers/stakeholders" },
+      { label: "Business Requirements", href: "/registers/business-requirements" },
+      { label: "Technical Requirements", href: "/registers/technical-requirements" },
       { label: "Lessons Learned", href: "/registers/lessons" },
     ],
   },

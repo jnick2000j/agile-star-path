@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Target,
   Users,
@@ -15,6 +18,9 @@ import {
   Clock,
   Building2,
   Layers,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 import {
   Select,
@@ -23,8 +29,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useToast } from "@/hooks/use-toast";
 
 interface Programme {
   id: string;
@@ -38,6 +51,19 @@ interface Programme {
   tranche: string | null;
   budget: string | null;
   benefits_target: string | null;
+}
+
+interface ProgrammeDefinition {
+  id: string;
+  programme_id: string;
+  vision_statement: string | null;
+  strategic_objectives: string | null;
+  scope_statement: string | null;
+  out_of_scope: string | null;
+  success_criteria: string | null;
+  key_assumptions: string | null;
+  constraints: string | null;
+  dependencies: string | null;
 }
 
 interface Project {
@@ -66,12 +92,16 @@ interface Risk {
 
 export default function ProgrammeBlueprint() {
   const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmeDefinition, setProgrammeDefinition] = useState<ProgrammeDefinition | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
   const [selectedProgramme, setSelectedProgramme] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [editingSection, setEditingSection] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<ProgrammeDefinition & Programme>>({});
   const { currentOrganization } = useOrganization();
+  const { toast } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -100,9 +130,25 @@ export default function ProgrammeBlueprint() {
     setLoading(false);
   };
 
+  const fetchDefinition = async (programmeId: string) => {
+    const { data } = await supabase
+      .from("programme_definitions")
+      .select("*")
+      .eq("programme_id", programmeId)
+      .maybeSingle();
+    
+    setProgrammeDefinition(data);
+  };
+
   useEffect(() => {
     fetchData();
   }, [currentOrganization]);
+
+  useEffect(() => {
+    if (selectedProgramme) {
+      fetchDefinition(selectedProgramme);
+    }
+  }, [selectedProgramme]);
 
   const currentProgramme = programmes.find(p => p.id === selectedProgramme);
   const programmeProjects = projects.filter(p => p.programme_id === selectedProgramme);
@@ -120,6 +166,97 @@ export default function ProgrammeBlueprint() {
     : 0;
 
   const highRisks = programmeRisks.filter(r => r.score >= 15 && r.status === "open").length;
+
+  const handleEditVision = () => {
+    setEditForm({
+      vision_statement: programmeDefinition?.vision_statement || "",
+      strategic_objectives: programmeDefinition?.strategic_objectives || "",
+      scope_statement: programmeDefinition?.scope_statement || "",
+      out_of_scope: programmeDefinition?.out_of_scope || "",
+      success_criteria: programmeDefinition?.success_criteria || "",
+      key_assumptions: programmeDefinition?.key_assumptions || "",
+      constraints: programmeDefinition?.constraints || "",
+      dependencies: programmeDefinition?.dependencies || "",
+    });
+    setEditingSection("vision");
+  };
+
+  const handleEditBrief = () => {
+    setEditForm({
+      sponsor: currentProgramme?.sponsor || "",
+      tranche: currentProgramme?.tranche || "",
+      budget: currentProgramme?.budget || "",
+      benefits_target: currentProgramme?.benefits_target || "",
+      description: currentProgramme?.description || "",
+    });
+    setEditingSection("brief");
+  };
+
+  const handleSaveVision = async () => {
+    if (!selectedProgramme || !currentOrganization) return;
+
+    const definitionData = {
+      programme_id: selectedProgramme,
+      organization_id: currentOrganization.id,
+      vision_statement: editForm.vision_statement || null,
+      strategic_objectives: editForm.strategic_objectives || null,
+      scope_statement: editForm.scope_statement || null,
+      out_of_scope: editForm.out_of_scope || null,
+      success_criteria: editForm.success_criteria || null,
+      key_assumptions: editForm.key_assumptions || null,
+      constraints: editForm.constraints || null,
+      dependencies: editForm.dependencies || null,
+    };
+
+    if (programmeDefinition) {
+      const { error } = await supabase
+        .from("programme_definitions")
+        .update(definitionData)
+        .eq("id", programmeDefinition.id);
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        return;
+      }
+    } else {
+      const { error } = await supabase
+        .from("programme_definitions")
+        .insert(definitionData);
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+        return;
+      }
+    }
+
+    toast({ title: "Saved", description: "Vision & objectives updated successfully" });
+    fetchDefinition(selectedProgramme);
+    setEditingSection(null);
+  };
+
+  const handleSaveBrief = async () => {
+    if (!selectedProgramme) return;
+
+    const { error } = await supabase
+      .from("programmes")
+      .update({
+        sponsor: editForm.sponsor || null,
+        tranche: editForm.tranche || null,
+        budget: editForm.budget || null,
+        benefits_target: editForm.benefits_target || null,
+        description: editForm.description || null,
+      })
+      .eq("id", selectedProgramme);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "Saved", description: "Programme brief updated successfully" });
+    fetchData();
+    setEditingSection(null);
+  };
 
   return (
     <AppLayout title="Programme Blueprint" subtitle="PRINCE2 MSP Programme Definition Document">
@@ -163,28 +300,56 @@ export default function ProgrammeBlueprint() {
             <TabsContent value="vision" className="space-y-6">
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="metric-card">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Target className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Programme Vision</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold">Programme Vision</h3>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleEditVision}>
+                      <Edit className="h-4 w-4 mr-1" /> Edit
+                    </Button>
                   </div>
-                  <p className="text-muted-foreground mb-4">
-                    {currentProgramme.description || "No vision statement defined. The Programme Vision should describe the desired end state and strategic intent."}
-                  </p>
-                  <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                    <h4 className="font-medium text-sm mb-2">PRINCE2 MSP Blueprint Elements</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Vision Statement defining desired future state</li>
-                      <li>• Strategic alignment with organizational goals</li>
-                      <li>• Scope boundaries and exclusions</li>
-                      <li>• Success criteria and KPIs</li>
-                    </ul>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Vision Statement</Label>
+                      <p className="text-sm mt-1">
+                        {programmeDefinition?.vision_statement || currentProgramme.description || "Click Edit to define the programme vision statement."}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Strategic Objectives</Label>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">
+                        {programmeDefinition?.strategic_objectives || "Not yet defined."}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Scope Statement</Label>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">
+                        {programmeDefinition?.scope_statement || "Not yet defined."}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Success Criteria</Label>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">
+                        {programmeDefinition?.success_criteria || "Not yet defined."}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="metric-card">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Programme Brief</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold">Programme Brief</h3>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleEditBrief}>
+                      <Edit className="h-4 w-4 mr-1" /> Edit
+                    </Button>
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
@@ -202,6 +367,27 @@ export default function ProgrammeBlueprint() {
                     <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
                       <span className="text-sm">Benefits Target</span>
                       <span className="font-medium">{currentProgramme.benefits_target || "TBD"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Key Assumptions</Label>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">
+                        {programmeDefinition?.key_assumptions || "Not yet defined."}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Constraints</Label>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">
+                        {programmeDefinition?.constraints || "Not yet defined."}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Dependencies</Label>
+                      <p className="text-sm mt-1 whitespace-pre-wrap">
+                        {programmeDefinition?.dependencies || "Not yet defined."}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -384,30 +570,181 @@ export default function ProgrammeBlueprint() {
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
                       <CheckCircle2 className="h-5 w-5 text-success" />
                       <div>
-                        <p className="font-medium text-sm">Risk & Issue Management</p>
-                        <p className="text-xs text-muted-foreground">Escalation paths and tolerance levels</p>
+                        <p className="font-medium text-sm">Project Assurance</p>
+                        <p className="text-xs text-muted-foreground">Independent review of project performance</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
                       <CheckCircle2 className="h-5 w-5 text-success" />
                       <div>
-                        <p className="font-medium text-sm">Quality Assurance</p>
-                        <p className="text-xs text-muted-foreground">Programme-level quality standards</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                      <div>
-                        <p className="font-medium text-sm">Stakeholder Engagement</p>
-                        <p className="text-xs text-muted-foreground">Communication and engagement strategy</p>
+                        <p className="font-medium text-sm">Exception Reporting</p>
+                        <p className="text-xs text-muted-foreground">Escalation when tolerances exceeded</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Out of Scope */}
+              <div className="metric-card">
+                <div className="flex items-center gap-2 mb-4">
+                  <X className="h-5 w-5 text-muted-foreground" />
+                  <h3 className="font-semibold">Out of Scope</h3>
+                </div>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {programmeDefinition?.out_of_scope || "Not yet defined. Click Edit on the Vision section to define scope exclusions."}
+                </p>
+              </div>
             </TabsContent>
           </Tabs>
         )}
+
+        {/* Edit Vision Dialog */}
+        <Dialog open={editingSection === "vision"} onOpenChange={() => setEditingSection(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Vision & Objectives</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Vision Statement</Label>
+                <Textarea
+                  value={editForm.vision_statement || ""}
+                  onChange={(e) => setEditForm({ ...editForm, vision_statement: e.target.value })}
+                  placeholder="Describe the desired end state and strategic intent..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Strategic Objectives</Label>
+                <Textarea
+                  value={editForm.strategic_objectives || ""}
+                  onChange={(e) => setEditForm({ ...editForm, strategic_objectives: e.target.value })}
+                  placeholder="List the key strategic objectives..."
+                  rows={4}
+                />
+              </div>
+              <div>
+                <Label>Scope Statement</Label>
+                <Textarea
+                  value={editForm.scope_statement || ""}
+                  onChange={(e) => setEditForm({ ...editForm, scope_statement: e.target.value })}
+                  placeholder="Define what is included in scope..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Out of Scope</Label>
+                <Textarea
+                  value={editForm.out_of_scope || ""}
+                  onChange={(e) => setEditForm({ ...editForm, out_of_scope: e.target.value })}
+                  placeholder="Define what is explicitly excluded..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Success Criteria</Label>
+                <Textarea
+                  value={editForm.success_criteria || ""}
+                  onChange={(e) => setEditForm({ ...editForm, success_criteria: e.target.value })}
+                  placeholder="Define measurable success criteria..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Key Assumptions</Label>
+                <Textarea
+                  value={editForm.key_assumptions || ""}
+                  onChange={(e) => setEditForm({ ...editForm, key_assumptions: e.target.value })}
+                  placeholder="List key assumptions..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Constraints</Label>
+                <Textarea
+                  value={editForm.constraints || ""}
+                  onChange={(e) => setEditForm({ ...editForm, constraints: e.target.value })}
+                  placeholder="List known constraints..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Dependencies</Label>
+                <Textarea
+                  value={editForm.dependencies || ""}
+                  onChange={(e) => setEditForm({ ...editForm, dependencies: e.target.value })}
+                  placeholder="List external dependencies..."
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setEditingSection(null)}>Cancel</Button>
+                <Button onClick={handleSaveVision}>
+                  <Save className="h-4 w-4 mr-1" /> Save
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Brief Dialog */}
+        <Dialog open={editingSection === "brief"} onOpenChange={() => setEditingSection(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Programme Brief</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Programme Description</Label>
+                <Textarea
+                  value={editForm.description || ""}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  placeholder="Brief description of the programme..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label>Programme Sponsor</Label>
+                <Input
+                  value={editForm.sponsor || ""}
+                  onChange={(e) => setEditForm({ ...editForm, sponsor: e.target.value })}
+                  placeholder="Enter sponsor name..."
+                />
+              </div>
+              <div>
+                <Label>Current Tranche</Label>
+                <Input
+                  value={editForm.tranche || ""}
+                  onChange={(e) => setEditForm({ ...editForm, tranche: e.target.value })}
+                  placeholder="e.g., Tranche 1, Tranche 2..."
+                />
+              </div>
+              <div>
+                <Label>Budget Allocation</Label>
+                <Input
+                  value={editForm.budget || ""}
+                  onChange={(e) => setEditForm({ ...editForm, budget: e.target.value })}
+                  placeholder="e.g., $5,000,000..."
+                />
+              </div>
+              <div>
+                <Label>Benefits Target</Label>
+                <Input
+                  value={editForm.benefits_target || ""}
+                  onChange={(e) => setEditForm({ ...editForm, benefits_target: e.target.value })}
+                  placeholder="e.g., $10,000,000 annual savings..."
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setEditingSection(null)}>Cancel</Button>
+                <Button onClick={handleSaveBrief}>
+                  <Save className="h-4 w-4 mr-1" /> Save
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
