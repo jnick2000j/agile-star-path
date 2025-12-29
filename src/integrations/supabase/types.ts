@@ -133,6 +133,131 @@ export type Database = {
           },
         ]
       }
+      change_requests: {
+        Row: {
+          benefits: string | null
+          change_type: string
+          cost_impact: number | null
+          created_at: string
+          created_by: string | null
+          date_decided: string | null
+          date_implemented: string | null
+          date_raised: string
+          date_required: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          description: string | null
+          id: string
+          impact_summary: string | null
+          organization_id: string | null
+          owner_id: string | null
+          priority: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          quality_impact: string | null
+          raised_by: string | null
+          reason: string | null
+          reference_number: string
+          risk_impact: string | null
+          status: Database["public"]["Enums"]["change_status"]
+          time_impact_days: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          benefits?: string | null
+          change_type?: string
+          cost_impact?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_decided?: string | null
+          date_implemented?: string | null
+          date_raised?: string
+          date_required?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          id?: string
+          impact_summary?: string | null
+          organization_id?: string | null
+          owner_id?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          quality_impact?: string | null
+          raised_by?: string | null
+          reason?: string | null
+          reference_number: string
+          risk_impact?: string | null
+          status?: Database["public"]["Enums"]["change_status"]
+          time_impact_days?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string | null
+          change_type?: string
+          cost_impact?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_decided?: string | null
+          date_implemented?: string | null
+          date_raised?: string
+          date_required?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          id?: string
+          impact_summary?: string | null
+          organization_id?: string | null
+          owner_id?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          quality_impact?: string | null
+          raised_by?: string | null
+          reason?: string | null
+          reference_number?: string
+          risk_impact?: string | null
+          status?: Database["public"]["Enums"]["change_status"]
+          time_impact_days?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_requests_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -243,6 +368,127 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: []
+      }
+      exceptions: {
+        Row: {
+          cause: string | null
+          created_at: string
+          created_by: string | null
+          current_forecast: string | null
+          date_raised: string
+          description: string | null
+          escalated_to: string | null
+          escalation_date: string | null
+          escalation_notes: string | null
+          exception_type: string
+          id: string
+          impact: string | null
+          options: string[] | null
+          organization_id: string | null
+          original_tolerance: string | null
+          owner_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          raised_by: string | null
+          recommendation: string | null
+          reference_number: string
+          resolution: string | null
+          resolution_date: string | null
+          resolved_by: string | null
+          severity: string
+          status: Database["public"]["Enums"]["exception_status"]
+          title: string
+          tolerance_type: string | null
+          updated_at: string
+          variance: string | null
+        }
+        Insert: {
+          cause?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_forecast?: string | null
+          date_raised?: string
+          description?: string | null
+          escalated_to?: string | null
+          escalation_date?: string | null
+          escalation_notes?: string | null
+          exception_type?: string
+          id?: string
+          impact?: string | null
+          options?: string[] | null
+          organization_id?: string | null
+          original_tolerance?: string | null
+          owner_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          raised_by?: string | null
+          recommendation?: string | null
+          reference_number: string
+          resolution?: string | null
+          resolution_date?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: Database["public"]["Enums"]["exception_status"]
+          title: string
+          tolerance_type?: string | null
+          updated_at?: string
+          variance?: string | null
+        }
+        Update: {
+          cause?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_forecast?: string | null
+          date_raised?: string
+          description?: string | null
+          escalated_to?: string | null
+          escalation_date?: string | null
+          escalation_notes?: string | null
+          exception_type?: string
+          id?: string
+          impact?: string | null
+          options?: string[] | null
+          organization_id?: string | null
+          original_tolerance?: string | null
+          owner_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          raised_by?: string | null
+          recommendation?: string | null
+          reference_number?: string
+          resolution?: string | null
+          resolution_date?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: Database["public"]["Enums"]["exception_status"]
+          title?: string
+          tolerance_type?: string | null
+          updated_at?: string
+          variance?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exceptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exceptions_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exceptions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feature_dependencies: {
         Row: {
@@ -461,6 +707,98 @@ export type Database = {
           },
           {
             foreignKeyName: "lessons_learned_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          acceptance_criteria: string | null
+          actual_date: string | null
+          created_at: string
+          created_by: string | null
+          deliverables: string[] | null
+          description: string | null
+          id: string
+          is_stage_boundary: boolean | null
+          milestone_type: string
+          name: string
+          organization_id: string | null
+          owner_id: string | null
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["milestone_status"]
+          target_date: string
+          updated_at: string
+        }
+        Insert: {
+          acceptance_criteria?: string | null
+          actual_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deliverables?: string[] | null
+          description?: string | null
+          id?: string
+          is_stage_boundary?: boolean | null
+          milestone_type?: string
+          name: string
+          organization_id?: string | null
+          owner_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["milestone_status"]
+          target_date: string
+          updated_at?: string
+        }
+        Update: {
+          acceptance_criteria?: string | null
+          actual_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deliverables?: string[] | null
+          description?: string | null
+          id?: string
+          is_stage_boundary?: boolean | null
+          milestone_type?: string
+          name?: string
+          organization_id?: string | null
+          owner_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["milestone_status"]
+          target_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -967,6 +1305,131 @@ export type Database = {
           },
         ]
       }
+      quality_records: {
+        Row: {
+          acceptance_criteria: string | null
+          actual_date: string | null
+          approval_comments: string | null
+          approval_date: string | null
+          approved: boolean | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          defects_found: number | null
+          deliverable_name: string | null
+          deliverable_version: string | null
+          description: string | null
+          id: string
+          organization_id: string | null
+          owner_id: string | null
+          planned_date: string | null
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          quality_criteria: string[] | null
+          quality_type: string
+          reference_number: string
+          results: string | null
+          review_method: string | null
+          reviewer_id: string | null
+          reviewers: string[] | null
+          status: Database["public"]["Enums"]["quality_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acceptance_criteria?: string | null
+          actual_date?: string | null
+          approval_comments?: string | null
+          approval_date?: string | null
+          approved?: boolean | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          defects_found?: number | null
+          deliverable_name?: string | null
+          deliverable_version?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          owner_id?: string | null
+          planned_date?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          quality_criteria?: string[] | null
+          quality_type?: string
+          reference_number: string
+          results?: string | null
+          review_method?: string | null
+          reviewer_id?: string | null
+          reviewers?: string[] | null
+          status?: Database["public"]["Enums"]["quality_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acceptance_criteria?: string | null
+          actual_date?: string | null
+          approval_comments?: string | null
+          approval_date?: string | null
+          approved?: boolean | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          defects_found?: number | null
+          deliverable_name?: string | null
+          deliverable_version?: string | null
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          owner_id?: string | null
+          planned_date?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          quality_criteria?: string[] | null
+          quality_type?: string
+          reference_number?: string
+          results?: string | null
+          review_method?: string | null
+          reviewer_id?: string | null
+          reviewers?: string[] | null
+          status?: Database["public"]["Enums"]["quality_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quality_records_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quality_records_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quality_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risks: {
         Row: {
           category: string | null
@@ -1112,6 +1575,100 @@ export type Database = {
           },
         ]
       }
+      stage_gates: {
+        Row: {
+          actual_date: string | null
+          attendees: string[] | null
+          created_at: string
+          created_by: string | null
+          criteria_met: Json | null
+          decision_date: string | null
+          decision_notes: string | null
+          description: string | null
+          entry_criteria: string[] | null
+          exit_criteria: string[] | null
+          gate_decision: Database["public"]["Enums"]["gate_decision"]
+          id: string
+          name: string
+          organization_id: string | null
+          planned_date: string | null
+          programme_id: string | null
+          project_id: string | null
+          review_date: string | null
+          reviewed_by: string | null
+          stage_number: number
+          updated_at: string
+        }
+        Insert: {
+          actual_date?: string | null
+          attendees?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          criteria_met?: Json | null
+          decision_date?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          entry_criteria?: string[] | null
+          exit_criteria?: string[] | null
+          gate_decision?: Database["public"]["Enums"]["gate_decision"]
+          id?: string
+          name: string
+          organization_id?: string | null
+          planned_date?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          review_date?: string | null
+          reviewed_by?: string | null
+          stage_number: number
+          updated_at?: string
+        }
+        Update: {
+          actual_date?: string | null
+          attendees?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          criteria_met?: Json | null
+          decision_date?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          entry_criteria?: string[] | null
+          exit_criteria?: string[] | null
+          gate_decision?: Database["public"]["Enums"]["gate_decision"]
+          id?: string
+          name?: string
+          organization_id?: string | null
+          planned_date?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          review_date?: string | null
+          reviewed_by?: string | null
+          stage_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_gates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_gates_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_gates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stakeholders: {
         Row: {
           communication_frequency: string | null
@@ -1167,6 +1724,204 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          actual_end: string | null
+          actual_hours: number | null
+          actual_start: string | null
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          depends_on: string[] | null
+          description: string | null
+          estimated_hours: number | null
+          id: string
+          name: string
+          organization_id: string | null
+          parent_task_id: string | null
+          planned_end: string | null
+          planned_start: string | null
+          priority: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          story_points: number | null
+          updated_at: string
+          work_package_id: string | null
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_hours?: number | null
+          actual_start?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          depends_on?: string[] | null
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          name: string
+          organization_id?: string | null
+          parent_task_id?: string | null
+          planned_end?: string | null
+          planned_start?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          story_points?: number | null
+          updated_at?: string
+          work_package_id?: string | null
+        }
+        Update: {
+          actual_end?: string | null
+          actual_hours?: number | null
+          actual_start?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          depends_on?: string[] | null
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          parent_task_id?: string | null
+          planned_end?: string | null
+          planned_start?: string | null
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          story_points?: number | null
+          updated_at?: string
+          work_package_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tranches: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          gate_decision: Database["public"]["Enums"]["gate_decision"] | null
+          gate_notes: string | null
+          gate_review_date: string | null
+          id: string
+          name: string
+          objectives: string[] | null
+          organization_id: string | null
+          owner_id: string | null
+          planned_end: string | null
+          planned_start: string | null
+          programme_id: string
+          progress: number | null
+          sequence_number: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          gate_decision?: Database["public"]["Enums"]["gate_decision"] | null
+          gate_notes?: string | null
+          gate_review_date?: string | null
+          id?: string
+          name: string
+          objectives?: string[] | null
+          organization_id?: string | null
+          owner_id?: string | null
+          planned_end?: string | null
+          planned_start?: string | null
+          programme_id: string
+          progress?: number | null
+          sequence_number: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          gate_decision?: Database["public"]["Enums"]["gate_decision"] | null
+          gate_notes?: string | null
+          gate_review_date?: string | null
+          id?: string
+          name?: string
+          objectives?: string[] | null
+          organization_id?: string | null
+          owner_id?: string | null
+          planned_end?: string | null
+          planned_start?: string | null
+          programme_id?: string
+          progress?: number | null
+          sequence_number?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tranches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tranches_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
             referencedColumns: ["id"]
           },
         ]
@@ -1407,6 +2162,43 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "programme_owner" | "project_manager" | "stakeholder"
+      change_status:
+        | "pending"
+        | "under_review"
+        | "approved"
+        | "rejected"
+        | "implemented"
+        | "withdrawn"
+      exception_status:
+        | "raised"
+        | "under_review"
+        | "escalated"
+        | "resolved"
+        | "closed"
+      gate_decision:
+        | "pending"
+        | "approved"
+        | "conditional"
+        | "rejected"
+        | "deferred"
+      milestone_status:
+        | "planned"
+        | "in_progress"
+        | "achieved"
+        | "missed"
+        | "deferred"
+      quality_status:
+        | "planned"
+        | "in_progress"
+        | "passed"
+        | "failed"
+        | "conditional"
+      task_status:
+        | "not_started"
+        | "in_progress"
+        | "on_hold"
+        | "completed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1535,6 +2327,49 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "programme_owner", "project_manager", "stakeholder"],
+      change_status: [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "implemented",
+        "withdrawn",
+      ],
+      exception_status: [
+        "raised",
+        "under_review",
+        "escalated",
+        "resolved",
+        "closed",
+      ],
+      gate_decision: [
+        "pending",
+        "approved",
+        "conditional",
+        "rejected",
+        "deferred",
+      ],
+      milestone_status: [
+        "planned",
+        "in_progress",
+        "achieved",
+        "missed",
+        "deferred",
+      ],
+      quality_status: [
+        "planned",
+        "in_progress",
+        "passed",
+        "failed",
+        "conditional",
+      ],
+      task_status: [
+        "not_started",
+        "in_progress",
+        "on_hold",
+        "completed",
+        "cancelled",
+      ],
     },
   },
 } as const
