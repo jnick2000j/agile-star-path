@@ -29,7 +29,11 @@ import {
   Check,
   ChevronRight,
   Edit2,
-  Eye
+  Eye,
+  Users,
+  FileEdit,
+  Shield,
+  Building2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -825,12 +829,165 @@ export default function Documentation() {
         </div>
       </div>
 
-      <Tabs defaultValue="principles" className="space-y-6">
+      <Tabs defaultValue="app-guide" className="space-y-6">
         <TabsList className="bg-secondary">
+          <TabsTrigger value="app-guide">Application Guide</TabsTrigger>
           <TabsTrigger value="principles">Principles</TabsTrigger>
           <TabsTrigger value="templates">Templates & Guides</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="app-guide" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* User Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">User Management</h3>
+                  <p className="text-sm text-muted-foreground">Managing users and access</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Creating Users</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Admin Panel → Users</li>
+                    <li>• Click "Create User" and enter First Name, Last Name, and Email</li>
+                    <li>• Select the user's role and organization assignment</li>
+                    <li>• Users receive login credentials via email</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Archiving Users</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Click on a user to open the Edit User dialog</li>
+                    <li>• Toggle "Archive User" to disable their account</li>
+                    <li>• Archived users cannot log in and are hidden from active lists</li>
+                    <li>• Unarchive users by toggling the archive status off</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Deleting Users (Admin Only)</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Only administrators can permanently delete users</li>
+                    <li>• Open Edit User dialog and click "Delete User Permanently"</li>
+                    <li>• Confirm the deletion - this action cannot be undone</li>
+                    <li>• All user data and assignments will be removed</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Branding & Customization */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <FileEdit className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Branding & Customization</h3>
+                  <p className="text-sm text-muted-foreground">Customize your organization's look</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Organization Branding</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Settings → Branding</li>
+                    <li>• Upload your organization logo (PNG format recommended for transparency)</li>
+                    <li>• Set primary, secondary, and accent colors</li>
+                    <li>• Organization logo appears in the page header next to the title</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Global Branding (Admin)</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Admins can set global branding for the login page</li>
+                    <li>• Configure app name, tagline, and welcome message</li>
+                    <li>• Set feature highlights displayed on the login page</li>
+                    <li>• Adjust header font sizing (small to extra large)</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Logo Guidelines</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Use PNG format for best transparency support</li>
+                    <li>• Logo size can be adjusted: small, medium, large, or extra large</li>
+                    <li>• Logo appears in page headers for easy brand visibility</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Role Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+                  <Shield className="h-5 w-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Roles & Permissions</h3>
+                  <p className="text-sm text-muted-foreground">Understanding user roles</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">System Roles</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Admin:</strong> Full system access, user management, delete users</li>
+                    <li>• <strong>Programme Manager:</strong> Manage programmes and projects</li>
+                    <li>• <strong>Project Manager:</strong> Manage assigned projects</li>
+                    <li>• <strong>Team Member:</strong> View and update assigned tasks</li>
+                    <li>• <strong>Viewer:</strong> Read-only access to assigned areas</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Custom Roles</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Admins can create custom roles with specific permissions</li>
+                    <li>• Assign granular permissions for each module</li>
+                    <li>• Custom roles can be assigned to users like system roles</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Organization Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+                  <Building2 className="h-5 w-5 text-warning" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Organization Management</h3>
+                  <p className="text-sm text-muted-foreground">Multi-org structure</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Creating Organizations</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Admin Panel → Organizations</li>
+                    <li>• Click "Create Organization" and enter details</li>
+                    <li>• Each organization has its own branding settings</li>
+                    <li>• Assign users to organizations for data segregation</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Switching Organizations</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Use the organization selector in the sidebar</li>
+                    <li>• Users only see organizations they have access to</li>
+                    <li>• Data is filtered by the selected organization</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
 
         <TabsContent value="principles" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">

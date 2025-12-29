@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,16 +26,40 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
   const isAdmin = userRole === "admin";
+  const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
+
+  // Fetch global branding logo for unassigned/global admins
+  useEffect(() => {
+    const fetchGlobalLogo = async () => {
+      const { data } = await supabase
+        .from("branding_settings")
+        .select("logo_url")
+        .is("organization_id", null)
+        .maybeSingle();
+      
+      if (data?.logo_url) {
+        setGlobalLogoUrl(data.logo_url);
+      }
+    };
+    
+    // Only fetch if no organization is selected
+    if (!currentOrganization) {
+      fetchGlobalLogo();
+    }
+  }, [currentOrganization]);
+
+  // Determine which logo to show
+  const logoUrl = currentOrganization?.logo_url || globalLogoUrl;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
       <div className="flex items-center gap-4">
-        {/* Organization Logo in Header */}
-        {currentOrganization?.logo_url && (
+        {/* Organization Logo in Header - left of title */}
+        {logoUrl && (
           <img 
-            src={currentOrganization.logo_url} 
-            alt={currentOrganization.name}
-            className="h-8 w-8 object-contain rounded-lg hidden lg:block"
+            src={logoUrl} 
+            alt="Organization logo"
+            className="h-8 w-auto object-contain"
           />
         )}
         <div>
