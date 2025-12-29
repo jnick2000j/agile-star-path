@@ -8,6 +8,7 @@ import { Target, Mail, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { applyBrandingCssVars, DEFAULT_BRANDING } from "@/lib/branding";
 
 interface GlobalBranding {
   logo_url: string | null;
@@ -55,6 +56,18 @@ export default function Auth() {
       
       if (data) {
         setBranding(data);
+
+        // Apply branding CSS variables for the login page
+        applyBrandingCssVars({
+          primaryHex: data.primary_color ?? DEFAULT_BRANDING.primaryHex,
+          secondaryHex: data.secondary_color ?? DEFAULT_BRANDING.secondaryHex,
+          accentHex: data.accent_color ?? DEFAULT_BRANDING.accentHex,
+        });
+
+        // Update document title dynamically
+        document.title = data.app_name
+          ? `${data.app_name} – Sign In`
+          : "Programme Information Management Platform";
       }
     };
     fetchGlobalBranding();
