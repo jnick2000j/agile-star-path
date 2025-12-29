@@ -111,6 +111,7 @@ export default function BrandingSettings() {
     app_tagline: "Programme Information Management Platform",
     logo_size: "medium",
     show_logo: true,
+    header_font_size: "medium",
   });
   const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<string>("global");
@@ -158,6 +159,7 @@ export default function BrandingSettings() {
         app_tagline: data.app_tagline || "Programme Information Management Platform",
         logo_size: data.logo_size || "medium",
         show_logo: data.show_logo !== false,
+        header_font_size: data.header_font_size || "medium",
       });
     } else {
       // Reset to defaults if no branding found
@@ -171,6 +173,7 @@ export default function BrandingSettings() {
         app_tagline: "Programme Information Management Platform",
         logo_size: "medium",
         show_logo: true,
+        header_font_size: "medium",
       });
     }
   };
@@ -329,33 +332,51 @@ export default function BrandingSettings() {
         {/* Login Page Text - Only show for global branding */}
         {selectedOrg === "global" && (
           <div className="metric-card">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Palette className="h-5 w-5 text-primary" />
-            Login Page Header
-          </h3>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="appName">Application Name</Label>
-              <Input
-                id="appName"
-                value={branding.app_name}
-                onChange={(e) => setBranding((prev) => ({ ...prev, app_name: e.target.value }))}
-                placeholder="PIMP"
-              />
-              <p className="text-sm text-muted-foreground">The main title shown in the header</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="appTagline">Tagline</Label>
-              <Input
-                id="appTagline"
-                value={branding.app_tagline}
-                onChange={(e) => setBranding((prev) => ({ ...prev, app_tagline: e.target.value }))}
-                placeholder="Programme Information Management Platform"
-              />
-              <p className="text-sm text-muted-foreground">Subtitle displayed below the application name</p>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Palette className="h-5 w-5 text-primary" />
+              Login Page Header
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="appName">Application Name</Label>
+                <Input
+                  id="appName"
+                  value={branding.app_name}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, app_name: e.target.value }))}
+                  placeholder="PIMP"
+                />
+                <p className="text-sm text-muted-foreground">The main title shown in the header</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="appTagline">Tagline</Label>
+                <Input
+                  id="appTagline"
+                  value={branding.app_tagline}
+                  onChange={(e) => setBranding((prev) => ({ ...prev, app_tagline: e.target.value }))}
+                  placeholder="Programme Information Management Platform"
+                />
+                <p className="text-sm text-muted-foreground">Subtitle displayed below the application name</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Header Text Size</Label>
+                <Select
+                  value={branding.header_font_size}
+                  onValueChange={(value) => setBranding((prev) => ({ ...prev, header_font_size: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select text size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                    <SelectItem value="xlarge">Extra Large</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">Controls the size of the application name and tagline</p>
+              </div>
             </div>
           </div>
-        </div>
         )}
         {/* Logo Settings */}
         <div className="metric-card">

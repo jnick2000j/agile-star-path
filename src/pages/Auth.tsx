@@ -20,6 +20,7 @@ interface GlobalBranding {
   app_tagline: string | null;
   logo_size: string | null;
   show_logo: boolean | null;
+  header_font_size: string | null;
 }
 
 const logoSizeClasses: Record<string, string> = {
@@ -34,6 +35,13 @@ const defaultIconSizeClasses: Record<string, { wrapper: string; icon: string }> 
   medium: { wrapper: "h-14 w-14", icon: "h-8 w-8" },
   large: { wrapper: "h-20 w-20", icon: "h-12 w-12" },
   xlarge: { wrapper: "h-28 w-28", icon: "h-16 w-16" },
+};
+
+const headerFontSizeClasses: Record<string, { title: string; tagline: string }> = {
+  small: { title: "text-xl", tagline: "text-sm" },
+  medium: { title: "text-2xl md:text-3xl", tagline: "text-base" },
+  large: { title: "text-3xl md:text-4xl", tagline: "text-lg" },
+  xlarge: { title: "text-4xl md:text-5xl", tagline: "text-xl" },
 };
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -65,7 +73,7 @@ export default function Auth() {
     const fetchGlobalBranding = async () => {
       const { data } = await supabase
         .from("branding_settings")
-        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, logo_size, show_logo")
+        .select("logo_url, primary_color, secondary_color, accent_color, font_family, app_name, app_tagline, logo_size, show_logo, header_font_size")
         .is("organization_id", null)
         .maybeSingle();
       
@@ -188,9 +196,9 @@ export default function Auth() {
     >
       <div className="w-full max-w-lg">
         {/* Logo and Title */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-12">
           {(branding?.show_logo !== false) && (
-            <div className="flex items-center justify-center mb-6">
+            <div className="flex items-center justify-center mb-8">
               {branding?.logo_url ? (
                 <img 
                   src={branding.logo_url} 
@@ -204,8 +212,12 @@ export default function Auth() {
               )}
             </div>
           )}
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">{branding?.app_name || "PIMP"}</h1>
-          <p className="text-muted-foreground mt-2 text-base max-w-sm mx-auto">{branding?.app_tagline || "Programme Information Management Platform"}</p>
+          <h1 className={`${headerFontSizeClasses[branding?.header_font_size || "medium"].title} font-bold text-foreground tracking-tight leading-tight`}>
+            {branding?.app_name || "PIMP"}
+          </h1>
+          <p className={`${headerFontSizeClasses[branding?.header_font_size || "medium"].tagline} text-muted-foreground mt-3 max-w-md mx-auto leading-relaxed`}>
+            {branding?.app_tagline || "Programme Information Management Platform"}
+          </p>
         </div>
 
         {/* Form Card */}

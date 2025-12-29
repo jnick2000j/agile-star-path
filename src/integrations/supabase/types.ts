@@ -100,6 +100,7 @@ export type Database = {
           feature_2_label: string | null
           feature_2_text: string | null
           font_family: string | null
+          header_font_size: string | null
           hero_description: string | null
           hero_title: string | null
           id: string
@@ -123,6 +124,7 @@ export type Database = {
           feature_2_label?: string | null
           feature_2_text?: string | null
           font_family?: string | null
+          header_font_size?: string | null
           hero_description?: string | null
           hero_title?: string | null
           id?: string
@@ -146,6 +148,7 @@ export type Database = {
           feature_2_label?: string | null
           feature_2_text?: string | null
           font_family?: string | null
+          header_font_size?: string | null
           hero_description?: string | null
           hero_title?: string | null
           id?: string
