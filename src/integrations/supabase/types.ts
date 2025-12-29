@@ -376,10 +376,23 @@ export type Database = {
       }
       custom_roles: {
         Row: {
+          can_manage_benefits: boolean | null
+          can_manage_change_requests: boolean | null
+          can_manage_exceptions: boolean | null
+          can_manage_issues: boolean | null
+          can_manage_lessons: boolean | null
+          can_manage_milestones: boolean | null
           can_manage_products: boolean | null
           can_manage_programmes: boolean | null
           can_manage_projects: boolean | null
+          can_manage_quality: boolean | null
+          can_manage_requirements: boolean | null
+          can_manage_risks: boolean | null
+          can_manage_stage_gates: boolean | null
+          can_manage_stakeholders: boolean | null
+          can_manage_tranches: boolean | null
           can_manage_users: boolean | null
+          can_manage_work_packages: boolean | null
           can_view_reports: boolean | null
           color: string | null
           created_at: string
@@ -392,10 +405,23 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          can_manage_benefits?: boolean | null
+          can_manage_change_requests?: boolean | null
+          can_manage_exceptions?: boolean | null
+          can_manage_issues?: boolean | null
+          can_manage_lessons?: boolean | null
+          can_manage_milestones?: boolean | null
           can_manage_products?: boolean | null
           can_manage_programmes?: boolean | null
           can_manage_projects?: boolean | null
+          can_manage_quality?: boolean | null
+          can_manage_requirements?: boolean | null
+          can_manage_risks?: boolean | null
+          can_manage_stage_gates?: boolean | null
+          can_manage_stakeholders?: boolean | null
+          can_manage_tranches?: boolean | null
           can_manage_users?: boolean | null
+          can_manage_work_packages?: boolean | null
           can_view_reports?: boolean | null
           color?: string | null
           created_at?: string
@@ -408,10 +434,23 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          can_manage_benefits?: boolean | null
+          can_manage_change_requests?: boolean | null
+          can_manage_exceptions?: boolean | null
+          can_manage_issues?: boolean | null
+          can_manage_lessons?: boolean | null
+          can_manage_milestones?: boolean | null
           can_manage_products?: boolean | null
           can_manage_programmes?: boolean | null
           can_manage_projects?: boolean | null
+          can_manage_quality?: boolean | null
+          can_manage_requirements?: boolean | null
+          can_manage_risks?: boolean | null
+          can_manage_stage_gates?: boolean | null
+          can_manage_stakeholders?: boolean | null
+          can_manage_tranches?: boolean | null
           can_manage_users?: boolean | null
+          can_manage_work_packages?: boolean | null
           can_view_reports?: boolean | null
           color?: string | null
           created_at?: string
