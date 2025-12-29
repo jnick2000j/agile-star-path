@@ -143,9 +143,18 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
-        {/* Organization Selector */}
-        <div className="flex h-16 items-center border-b border-sidebar-border px-3">
-          <OrganizationSelector />
+        {/* Logo & Organization Selector */}
+        <div className="flex h-16 items-center border-b border-sidebar-border px-3 gap-2">
+          {currentOrganization?.logo_url && (
+            <img 
+              src={currentOrganization.logo_url} 
+              alt="Logo" 
+              className="h-8 w-auto object-contain flex-shrink-0"
+            />
+          )}
+          <div className="flex-1 min-w-0">
+            <OrganizationSelector />
+          </div>
         </div>
 
         {/* Navigation */}

@@ -32,7 +32,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    full_name: "",
+    first_name: "",
+    last_name: "",
     phone_number: "",
     department: "",
     location: "",
@@ -54,6 +55,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     setLoading(true);
 
     try {
+      const fullName = `${formData.first_name} ${formData.last_name}`.trim();
+      
       // Create the user via admin API (this would normally be done server-side)
       // For now, we'll use signUp which creates a user
       const { data, error } = await supabase.auth.signUp({
@@ -61,7 +64,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         password: formData.password,
         options: {
           data: {
-            full_name: formData.full_name,
+            full_name: fullName,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
           },
           emailRedirectTo: `${window.location.origin}/auth`,
         },
@@ -76,7 +81,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           await supabase
             .from("profiles")
             .update({
-              full_name: formData.full_name,
+              full_name: fullName,
+              first_name: formData.first_name || null,
+              last_name: formData.last_name || null,
               phone_number: formData.phone_number || null,
               department: formData.department || null,
               location: formData.location || null,
@@ -90,7 +97,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       setFormData({
         email: "",
         password: "",
-        full_name: "",
+        first_name: "",
+        last_name: "",
         phone_number: "",
         department: "",
         location: "",
@@ -147,13 +155,23 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input
-              id="full_name"
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="first_name">First Name</Label>
+              <Input
+                id="first_name"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input
+                id="last_name"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

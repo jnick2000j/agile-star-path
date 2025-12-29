@@ -25,11 +25,15 @@ interface GlobalBranding {
 const logoSizeClasses: Record<string, string> = {
   small: "h-10 w-auto",
   medium: "h-14 w-auto",
+  large: "h-20 w-auto",
+  xlarge: "h-28 w-auto",
 };
 
 const defaultIconSizeClasses: Record<string, { wrapper: string; icon: string }> = {
   small: { wrapper: "h-10 w-10", icon: "h-5 w-5" },
   medium: { wrapper: "h-14 w-14", icon: "h-8 w-8" },
+  large: { wrapper: "h-20 w-20", icon: "h-12 w-12" },
+  xlarge: { wrapper: "h-28 w-28", icon: "h-16 w-16" },
 };
 
 const emailSchema = z.string().email("Please enter a valid email address");
