@@ -7,11 +7,12 @@ import {
   Search, 
   Filter,
   AlertTriangle,
-  ArrowUpRight,
+  Pencil,
   Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateRiskDialog } from "@/components/dialogs/CreateRiskDialog";
+import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import {
   Table,
   TableBody,
@@ -29,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 
 interface Risk {
@@ -74,12 +76,17 @@ const getScoreColor = (score: number) => {
 
 export default function RiskRegister() {
   const { currentOrganization } = useOrganization();
+  const { canManage } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
   const [risks, setRisks] = useState<Risk[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [probabilityFilters, setProbabilityFilters] = useState<string[]>([]);
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
 
   useEffect(() => {
     fetchRisks();
@@ -133,6 +140,11 @@ export default function RiskRegister() {
   const activeFilterCount = statusFilters.length + categoryFilters.length + probabilityFilters.length;
   const openRisks = risks.filter(r => r.status === "open" || r.status === "mitigating").length;
   const highRisks = risks.filter(r => r.score >= 15).length;
+
+  const handleEditClick = (risk: Risk) => {
+    setSelectedRisk(risk);
+    setEditDialogOpen(true);
+  };
 
   return (
     <AppLayout title="Risk Register" subtitle="PRINCE2 MSP risk management">
@@ -270,7 +282,7 @@ export default function RiskRegister() {
               </div>
             </PopoverContent>
           </Popover>
-          <CreateRiskDialog onSuccess={fetchRisks} />
+          {canManage("risks") && <CreateRiskDialog onSuccess={fetchRisks} />}
         </div>
       </div>
 
@@ -286,7 +298,7 @@ export default function RiskRegister() {
               <TableHead className="text-center">Score</TableHead>
               <TableHead>Response</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -308,6 +320,7 @@ export default function RiskRegister() {
                   key={risk.id} 
                   className="animate-fade-in cursor-pointer hover:bg-muted/50"
                   style={{ animationDelay: `${index * 0.03}s` }}
+                  onClick={() => handleEditClick(risk)}
                 >
                   <TableCell>
                     <div>
@@ -336,8 +349,16 @@ export default function RiskRegister() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <ArrowUpRight className="h-4 w-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick(risk);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -346,6 +367,17 @@ export default function RiskRegister() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Risk Dialog */}
+      {selectedRisk && (
+        <EditRegisterItemDialog
+          item={selectedRisk}
+          type="risks"
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSuccess={fetchRisks}
+        />
+      )}
     </AppLayout>
   );
 }

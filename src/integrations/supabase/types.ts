@@ -2042,6 +2042,7 @@ export type Database = {
           description: string | null
           estimated_hours: number | null
           id: string
+          milestone_id: string | null
           name: string
           organization_id: string | null
           parent_task_id: string | null
@@ -2067,6 +2068,7 @@ export type Database = {
           description?: string | null
           estimated_hours?: number | null
           id?: string
+          milestone_id?: string | null
           name: string
           organization_id?: string | null
           parent_task_id?: string | null
@@ -2092,6 +2094,7 @@ export type Database = {
           description?: string | null
           estimated_hours?: number | null
           id?: string
+          milestone_id?: string | null
           name?: string
           organization_id?: string | null
           parent_task_id?: string | null
@@ -2107,6 +2110,13 @@ export type Database = {
           work_package_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_organization_id_fkey"
             columns: ["organization_id"]

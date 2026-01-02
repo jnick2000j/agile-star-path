@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
+import { PermissionsProvider } from "@/hooks/usePermissions";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TaskMasterChat } from "@/components/TaskMasterChat";
 import Index from "./pages/Index";
@@ -56,6 +57,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <OrganizationProvider>
+          <PermissionsProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -97,6 +99,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TaskMasterChat />
+          </PermissionsProvider>
           </OrganizationProvider>
         </AuthProvider>
       </BrowserRouter>

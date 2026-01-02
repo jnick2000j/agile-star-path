@@ -7,10 +7,11 @@ import {
   Search, 
   Filter,
   AlertCircle,
-  ArrowUpRight,
+  Pencil,
   Download
 } from "lucide-react";
 import { CreateIssueDialog } from "@/components/dialogs/CreateIssueDialog";
+import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -29,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 
 interface Issue {
@@ -70,12 +72,17 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 export default function IssueRegister() {
   const { currentOrganization } = useOrganization();
+  const { canManage } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
 
   useEffect(() => {
     fetchIssues();
@@ -127,6 +134,11 @@ export default function IssueRegister() {
   });
 
   const activeFilterCount = typeFilters.length + priorityFilters.length + statusFilters.length;
+
+  const handleEditClick = (issue: Issue) => {
+    setSelectedIssue(issue);
+    setEditDialogOpen(true);
+  };
 
   return (
     <AppLayout title="Issue Register" subtitle="PRINCE2 MSP issue management">
@@ -264,7 +276,7 @@ export default function IssueRegister() {
               </div>
             </PopoverContent>
           </Popover>
-          <CreateIssueDialog onSuccess={fetchIssues} />
+          {canManage("issues") && <CreateIssueDialog onSuccess={fetchIssues} />}
         </div>
       </div>
 
@@ -278,7 +290,7 @@ export default function IssueRegister() {
               <TableHead>Priority</TableHead>
               <TableHead>Target Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -300,6 +312,7 @@ export default function IssueRegister() {
                   key={issue.id} 
                   className="animate-fade-in cursor-pointer hover:bg-muted/50"
                   style={{ animationDelay: `${index * 0.03}s` }}
+                  onClick={() => handleEditClick(issue)}
                 >
                   <TableCell>
                     <div>
@@ -324,8 +337,16 @@ export default function IssueRegister() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <ArrowUpRight className="h-4 w-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick(issue);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -334,6 +355,17 @@ export default function IssueRegister() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Issue Dialog */}
+      {selectedIssue && (
+        <EditRegisterItemDialog
+          item={selectedIssue}
+          type="issues"
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSuccess={fetchIssues}
+        />
+      )}
     </AppLayout>
   );
 }

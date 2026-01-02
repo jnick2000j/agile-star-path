@@ -8,7 +8,7 @@ import {
   Filter,
   LayoutGrid,
   List,
-  ArrowUpRight
+  Pencil
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -20,8 +20,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateProjectDialog } from "@/components/dialogs/CreateProjectDialog";
+import { EditProjectDialog } from "@/components/dialogs/EditProjectDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   Popover,
   PopoverContent,
@@ -42,6 +44,7 @@ interface Project {
   end_date: string | null;
   organization_id: string | null;
   programme_id: string | null;
+  manager_id: string | null;
 }
 
 const stageConfig: Record<string, { label: string; className: string }> = {
@@ -70,9 +73,14 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
+  const { canManage } = usePermissions();
   const [stageFilters, setStageFilters] = useState<string[]>([]);
   const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
   const [healthFilters, setHealthFilters] = useState<string[]>([]);
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -124,6 +132,11 @@ export default function Projects() {
   });
 
   const activeFilterCount = stageFilters.length + priorityFilters.length + healthFilters.length;
+
+  const handleEditClick = (project: Project) => {
+    setSelectedProject(project);
+    setEditDialogOpen(true);
+  };
 
   return (
     <AppLayout title="Projects" subtitle="Manage all projects across programmes">
@@ -225,7 +238,7 @@ export default function Projects() {
               </div>
             </PopoverContent>
           </Popover>
-          <CreateProjectDialog onSuccess={fetchProjects} />
+          {canManage("projects") && <CreateProjectDialog onSuccess={fetchProjects} />}
         </div>
       </div>
 
@@ -240,7 +253,7 @@ export default function Projects() {
               <TableHead>Health</TableHead>
               <TableHead>Methodology</TableHead>
               <TableHead>Timeline</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -262,6 +275,7 @@ export default function Projects() {
                   key={project.id} 
                   className="animate-fade-in cursor-pointer hover:bg-muted/50"
                   style={{ animationDelay: `${index * 0.03}s` }}
+                  onClick={() => handleEditClick(project)}
                 >
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>
@@ -289,8 +303,16 @@ export default function Projects() {
                     {project.start_date || "N/A"} - {project.end_date || "N/A"}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <ArrowUpRight className="h-4 w-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick(project);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -299,6 +321,16 @@ export default function Projects() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Project Dialog */}
+      {selectedProject && (
+        <EditProjectDialog
+          project={selectedProject}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSuccess={fetchProjects}
+        />
+      )}
     </AppLayout>
   );
 }
