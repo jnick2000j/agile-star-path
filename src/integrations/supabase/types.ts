@@ -26,7 +26,9 @@ export type Database = {
           name: string
           organization_id: string | null
           owner_id: string | null
+          product_id: string | null
           programme_id: string | null
+          project_id: string | null
           realization: number
           start_date: string | null
           status: string
@@ -45,7 +47,9 @@ export type Database = {
           name: string
           organization_id?: string | null
           owner_id?: string | null
+          product_id?: string | null
           programme_id?: string | null
+          project_id?: string | null
           realization?: number
           start_date?: string | null
           status?: string
@@ -64,7 +68,9 @@ export type Database = {
           name?: string
           organization_id?: string | null
           owner_id?: string | null
+          product_id?: string | null
           programme_id?: string | null
+          project_id?: string | null
           realization?: number
           start_date?: string | null
           status?: string
@@ -81,10 +87,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "benefits_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "benefits_programme_id_fkey"
             columns: ["programme_id"]
             isOneToOne: false
             referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -557,6 +577,7 @@ export type Database = {
           organization_id: string | null
           original_tolerance: string | null
           owner_id: string | null
+          product_id: string | null
           programme_id: string | null
           project_id: string | null
           raised_by: string | null
@@ -589,6 +610,7 @@ export type Database = {
           organization_id?: string | null
           original_tolerance?: string | null
           owner_id?: string | null
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           raised_by?: string | null
@@ -621,6 +643,7 @@ export type Database = {
           organization_id?: string | null
           original_tolerance?: string | null
           owner_id?: string | null
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           raised_by?: string | null
@@ -642,6 +665,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exceptions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
@@ -715,6 +745,7 @@ export type Database = {
           organization_id: string | null
           owner_id: string | null
           priority: string
+          product_id: string | null
           programme_id: string | null
           project_id: string | null
           resolution: string | null
@@ -733,6 +764,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string | null
           priority?: string
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           resolution?: string | null
@@ -751,6 +783,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string | null
           priority?: string
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           resolution?: string | null
@@ -766,6 +799,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
@@ -800,6 +840,7 @@ export type Database = {
           outcome: string | null
           owner_id: string | null
           priority: string
+          product_id: string | null
           programme_id: string | null
           project_id: string | null
           project_stage: string | null
@@ -825,6 +866,7 @@ export type Database = {
           outcome?: string | null
           owner_id?: string | null
           priority?: string
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           project_stage?: string | null
@@ -850,6 +892,7 @@ export type Database = {
           outcome?: string | null
           owner_id?: string | null
           priority?: string
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           project_stage?: string | null
@@ -866,6 +909,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_learned_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
@@ -1678,6 +1728,7 @@ export type Database = {
           organization_id: string | null
           owner_id: string | null
           probability: string
+          product_id: string | null
           programme_id: string | null
           project_id: string | null
           response: string | null
@@ -1698,6 +1749,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string | null
           probability?: string
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           response?: string | null
@@ -1718,6 +1770,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string | null
           probability?: string
+          product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           response?: string | null
@@ -1733,6 +1786,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
@@ -1762,6 +1822,8 @@ export type Database = {
           name: string
           organization_id: string | null
           product_id: string | null
+          programme_id: string | null
+          project_id: string | null
           start_date: string | null
           status: string
           updated_at: string
@@ -1776,6 +1838,8 @@ export type Database = {
           name: string
           organization_id?: string | null
           product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
           start_date?: string | null
           status?: string
           updated_at?: string
@@ -1790,6 +1854,8 @@ export type Database = {
           name?: string
           organization_id?: string | null
           product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
           start_date?: string | null
           status?: string
           updated_at?: string
@@ -1807,6 +1873,20 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sprints_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sprints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1919,6 +1999,9 @@ export type Database = {
           name: string
           organization: string | null
           organization_id: string | null
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
           role: string | null
           updated_at: string
         }
@@ -1935,6 +2018,9 @@ export type Database = {
           name: string
           organization?: string | null
           organization_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
           role?: string | null
           updated_at?: string
         }
@@ -1951,6 +2037,9 @@ export type Database = {
           name?: string
           organization?: string | null
           organization_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
           role?: string | null
           updated_at?: string
         }
@@ -1960,6 +2049,27 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stakeholders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stakeholders_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stakeholders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
