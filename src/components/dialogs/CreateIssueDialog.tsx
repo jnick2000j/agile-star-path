@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { EntitySelector } from "@/components/EntitySelector";
 
 interface CreateIssueDialogProps {
   onSuccess?: () => void;
@@ -18,26 +20,20 @@ export function CreateIssueDialog({ onSuccess }: CreateIssueDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
+  const { currentOrganization } = useOrganization();
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     programme_id: "",
+    project_id: "",
+    product_id: "",
     type: "problem",
     priority: "medium",
     status: "open",
     resolution: "",
     target_date: "",
   });
-
-  useEffect(() => {
-    const fetchProgrammes = async () => {
-      const { data } = await supabase.from("programmes").select("id, name");
-      if (data) setProgrammes(data);
-    };
-    if (open) fetchProgrammes();
-  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +42,17 @@ export function CreateIssueDialog({ onSuccess }: CreateIssueDialogProps) {
     setLoading(true);
     try {
       const { error } = await supabase.from("issues").insert({
-        ...formData,
+        title: formData.title,
+        description: formData.description || null,
         programme_id: formData.programme_id || null,
+        project_id: formData.project_id || null,
+        product_id: formData.product_id || null,
+        type: formData.type,
+        priority: formData.priority,
+        status: formData.status,
+        resolution: formData.resolution || null,
+        target_date: formData.target_date || null,
+        organization_id: currentOrganization?.id,
         created_by: user.id,
         owner_id: user.id,
       });
@@ -60,6 +65,8 @@ export function CreateIssueDialog({ onSuccess }: CreateIssueDialogProps) {
         title: "",
         description: "",
         programme_id: "",
+        project_id: "",
+        product_id: "",
         type: "problem",
         priority: "medium",
         status: "open",
@@ -107,19 +114,18 @@ export function CreateIssueDialog({ onSuccess }: CreateIssueDialogProps) {
                 rows={3}
               />
             </div>
-            <div>
-              <Label htmlFor="programme">Programme</Label>
-              <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
-                </SelectTrigger>
-                <SelectContent>
-                  {programmes.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="sm:col-span-2">
+              <EntitySelector
+                programmeId={formData.programme_id}
+                projectId={formData.project_id}
+                productId={formData.product_id}
+                onProgrammeChange={(v) => setFormData({ ...formData, programme_id: v })}
+                onProjectChange={(v) => setFormData({ ...formData, project_id: v })}
+                onProductChange={(v) => setFormData({ ...formData, product_id: v })}
+              />
             </div>
+
             <div>
               <Label htmlFor="type">Type</Label>
               <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>

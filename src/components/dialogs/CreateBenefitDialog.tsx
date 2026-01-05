@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { EntitySelector } from "@/components/EntitySelector";
 
 interface CreateBenefitDialogProps {
   onSuccess?: () => void;
@@ -18,12 +20,14 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
+  const { currentOrganization } = useOrganization();
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     programme_id: "",
+    project_id: "",
+    product_id: "",
     type: "quantitative",
     category: "operational",
     status: "identified",
@@ -33,14 +37,6 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
     end_date: "",
   });
 
-  useEffect(() => {
-    const fetchProgrammes = async () => {
-      const { data } = await supabase.from("programmes").select("id, name");
-      if (data) setProgrammes(data);
-    };
-    if (open) fetchProgrammes();
-  }, [open]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -48,8 +44,19 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
     setLoading(true);
     try {
       const { error } = await supabase.from("benefits").insert({
-        ...formData,
+        name: formData.name,
+        description: formData.description || null,
         programme_id: formData.programme_id || null,
+        project_id: formData.project_id || null,
+        product_id: formData.product_id || null,
+        type: formData.type,
+        category: formData.category,
+        status: formData.status,
+        target_value: formData.target_value || null,
+        current_value: formData.current_value || null,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        organization_id: currentOrganization?.id,
         created_by: user.id,
         owner_id: user.id,
         realization: 0,
@@ -63,6 +70,8 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
         name: "",
         description: "",
         programme_id: "",
+        project_id: "",
+        product_id: "",
         type: "quantitative",
         category: "operational",
         status: "identified",
@@ -112,19 +121,18 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
                 rows={3}
               />
             </div>
-            <div>
-              <Label htmlFor="programme">Programme</Label>
-              <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
-                </SelectTrigger>
-                <SelectContent>
-                  {programmes.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="sm:col-span-2">
+              <EntitySelector
+                programmeId={formData.programme_id}
+                projectId={formData.project_id}
+                productId={formData.product_id}
+                onProgrammeChange={(v) => setFormData({ ...formData, programme_id: v })}
+                onProjectChange={(v) => setFormData({ ...formData, project_id: v })}
+                onProductChange={(v) => setFormData({ ...formData, product_id: v })}
+              />
             </div>
+
             <div>
               <Label htmlFor="type">Type</Label>
               <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>

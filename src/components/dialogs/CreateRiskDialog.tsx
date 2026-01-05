@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
+import { EntitySelector } from "@/components/EntitySelector";
 
 interface CreateRiskDialogProps {
   onSuccess?: () => void;
@@ -21,12 +23,14 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
+  const { currentOrganization } = useOrganization();
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     programme_id: "",
+    project_id: "",
+    product_id: "",
     category: "",
     probability: "medium",
     impact: "medium",
@@ -34,14 +38,6 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
     response: "",
     review_date: "",
   });
-
-  useEffect(() => {
-    const fetchProgrammes = async () => {
-      const { data } = await supabase.from("programmes").select("id, name");
-      if (data) setProgrammes(data);
-    };
-    if (open) fetchProgrammes();
-  }, [open]);
 
   const calculateScore = () => {
     const p = probabilityValues[formData.probability as keyof typeof probabilityValues] || 3;
@@ -56,9 +52,19 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
     setLoading(true);
     try {
       const { error } = await supabase.from("risks").insert({
-        ...formData,
+        title: formData.title,
+        description: formData.description || null,
         programme_id: formData.programme_id || null,
+        project_id: formData.project_id || null,
+        product_id: formData.product_id || null,
+        category: formData.category || null,
+        probability: formData.probability,
+        impact: formData.impact,
+        status: formData.status,
+        response: formData.response || null,
+        review_date: formData.review_date || null,
         score: calculateScore(),
+        organization_id: currentOrganization?.id,
         created_by: user.id,
         owner_id: user.id,
       });
@@ -71,6 +77,8 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
         title: "",
         description: "",
         programme_id: "",
+        project_id: "",
+        product_id: "",
         category: "",
         probability: "medium",
         impact: "medium",
@@ -119,19 +127,18 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
                 rows={3}
               />
             </div>
-            <div>
-              <Label htmlFor="programme">Programme</Label>
-              <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
-                </SelectTrigger>
-                <SelectContent>
-                  {programmes.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="sm:col-span-2">
+              <EntitySelector
+                programmeId={formData.programme_id}
+                projectId={formData.project_id}
+                productId={formData.product_id}
+                onProgrammeChange={(v) => setFormData({ ...formData, programme_id: v })}
+                onProjectChange={(v) => setFormData({ ...formData, project_id: v })}
+                onProductChange={(v) => setFormData({ ...formData, product_id: v })}
+              />
             </div>
+
             <div>
               <Label htmlFor="category">Category</Label>
               <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
@@ -146,6 +153,20 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
                   <SelectItem value="Compliance">Compliance</SelectItem>
                   <SelectItem value="Stakeholder">Stakeholder</SelectItem>
                   <SelectItem value="Quality">Quality</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="mitigating">Mitigating</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -184,18 +205,13 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
               <div className="mt-2 text-2xl font-bold text-primary">{calculateScore()}</div>
             </div>
             <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="mitigating">Mitigating</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="review_date">Review Date</Label>
+              <Input
+                id="review_date"
+                type="date"
+                value={formData.review_date}
+                onChange={(e) => setFormData({ ...formData, review_date: e.target.value })}
+              />
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="response">Response Strategy</Label>
@@ -211,15 +227,6 @@ export function CreateRiskDialog({ onSuccess }: CreateRiskDialogProps) {
                   <SelectItem value="Contingency">Contingency</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="review_date">Review Date</Label>
-              <Input
-                id="review_date"
-                type="date"
-                value={formData.review_date}
-                onChange={(e) => setFormData({ ...formData, review_date: e.target.value })}
-              />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">

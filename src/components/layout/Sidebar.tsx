@@ -64,8 +64,15 @@ const navigation: NavItem[] = [
       { label: "All Products", href: "/products" },
       { label: "Roadmap", href: "/products/roadmap" },
       { label: "Features", href: "/products/features" },
-      { label: "Sprint Planning", href: "/products/sprints" },
       { label: "Dependencies", href: "/products/dependencies" },
+    ],
+  },
+  {
+    label: "Planning",
+    icon: ListTodo,
+    children: [
+      { label: "Unified Backlog", href: "/planning/backlog" },
+      { label: "Sprint Planning", href: "/planning/sprints" },
     ],
   },
   {
@@ -103,7 +110,7 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "PRINCE2", "Registers"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "Planning", "PRINCE2", "Registers"]);
 
   // Get display name from profile or fallback to email
   const getDisplayName = () => {
