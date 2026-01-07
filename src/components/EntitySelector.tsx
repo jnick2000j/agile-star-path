@@ -125,12 +125,12 @@ export function EntitySelector({
       {showProgramme && (
         <div>
           <Label>{programmeLabel}</Label>
-          <Select value={programmeId} onValueChange={onProgrammeChange}>
+          <Select value={programmeId || "none"} onValueChange={(v) => onProgrammeChange(v === "none" ? "" : v)}>
             <SelectTrigger className="mt-1">
               <SelectValue placeholder="Select programme" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {programmes.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   {p.name}
@@ -143,12 +143,12 @@ export function EntitySelector({
       {showProject && (
         <div>
           <Label>{projectLabel}</Label>
-          <Select value={projectId} onValueChange={onProjectChange}>
+          <Select value={projectId || "none"} onValueChange={(v) => onProjectChange(v === "none" ? "" : v)}>
             <SelectTrigger className="mt-1">
               <SelectValue placeholder="Select project" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {filteredProjects.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   {p.name}
@@ -161,12 +161,12 @@ export function EntitySelector({
       {showProduct && (
         <div>
           <Label>{productLabel}</Label>
-          <Select value={productId} onValueChange={onProductChange}>
+          <Select value={productId || "none"} onValueChange={(v) => onProductChange(v === "none" ? "" : v)}>
             <SelectTrigger className="mt-1">
               <SelectValue placeholder="Select product" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {filteredProducts.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   {p.name}
