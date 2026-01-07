@@ -66,6 +66,7 @@ interface Task {
   project_id: string | null;
   programme_id: string | null;
   product_id: string | null;
+  work_package_id: string | null;
   assigned_to: string | null;
   planned_start: string | null;
   planned_end: string | null;
@@ -76,6 +77,12 @@ interface Task {
   organization_id: string | null;
   created_by: string | null;
   created_at: string;
+}
+
+interface WorkPackage {
+  id: string;
+  name: string;
+  project_id: string | null;
 }
 
 const statusConfig: Record<TaskStatus, { label: string; icon: React.ElementType; color: string }> = {
@@ -101,6 +108,7 @@ export default function TaskManagement() {
     status: "not_started" as TaskStatus,
     entity_type: "project",
     entity_id: "",
+    work_package_id: "",
     planned_start: "",
     planned_end: "",
     estimated_hours: "",
@@ -167,6 +175,21 @@ export default function TaskManagement() {
     enabled: !!currentOrganization?.id,
   });
 
+  // Fetch work packages for linking
+  const { data: workPackages = [] } = useQuery({
+    queryKey: ["work-packages-list", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data, error } = await supabase
+        .from("work_packages")
+        .select("id, name, project_id")
+        .eq("organization_id", currentOrganization.id);
+      if (error) throw error;
+      return data as WorkPackage[];
+    },
+    enabled: !!currentOrganization?.id,
+  });
+
   // Create task mutation
   const createTask = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -183,6 +206,7 @@ export default function TaskManagement() {
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
         programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
+        work_package_id: data.work_package_id || null,
       });
       if (error) throw error;
     },
@@ -197,6 +221,7 @@ export default function TaskManagement() {
         status: "not_started",
         entity_type: "project",
         entity_id: "",
+        work_package_id: "",
         planned_start: "",
         planned_end: "",
         estimated_hours: "",
@@ -264,6 +289,11 @@ export default function TaskManagement() {
     if (formData.entity_type === "programme") return programmes;
     if (formData.entity_type === "product") return products;
     return [];
+  };
+
+  const getWorkPackageName = (workPackageId: string | null) => {
+    if (!workPackageId) return null;
+    return workPackages.find((wp) => wp.id === workPackageId)?.name || null;
   };
 
   return (
@@ -418,6 +448,29 @@ export default function TaskManagement() {
                   </Select>
                 </div>
               </div>
+              {formData.entity_type === "project" && formData.entity_id && (
+                <div>
+                  <label className="text-sm font-medium">Work Package (Optional)</label>
+                  <Select
+                    value={formData.work_package_id || "none"}
+                    onValueChange={(v) => setFormData({ ...formData, work_package_id: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select work package" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {workPackages
+                        .filter((wp) => wp.project_id === formData.entity_id)
+                        .map((wp) => (
+                          <SelectItem key={wp.id} value={wp.id}>
+                            {wp.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Priority</label>
@@ -525,7 +578,14 @@ export default function TaskManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{getEntityName(task)}</Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline">{getEntityName(task)}</Badge>
+                          {task.work_package_id && (
+                            <Badge variant="secondary" className="text-xs">
+                              WP: {getWorkPackageName(task.work_package_id)}
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge

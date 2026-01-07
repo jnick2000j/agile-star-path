@@ -54,6 +54,7 @@ interface MilestoneData {
   project_id: string | null;
   programme_id: string | null;
   product_id: string | null;
+  work_package_id: string | null;
   target_date: string;
   actual_date: string | null;
   deliverables: string[] | null;
@@ -63,6 +64,12 @@ interface MilestoneData {
   owner_id: string | null;
   created_by: string | null;
   created_at: string;
+}
+
+interface WorkPackage {
+  id: string;
+  name: string;
+  project_id: string | null;
 }
 
 const statusConfig: Record<MilestoneStatus, { label: string; icon: React.ElementType; color: string }> = {
@@ -87,6 +94,7 @@ export default function MilestoneTracking() {
     milestone_type: "deliverable",
     entity_type: "project",
     entity_id: "",
+    work_package_id: "",
     target_date: "",
     acceptance_criteria: "",
     is_stage_boundary: false,
@@ -151,6 +159,21 @@ export default function MilestoneTracking() {
     enabled: !!currentOrganization?.id,
   });
 
+  // Fetch work packages for linking
+  const { data: workPackages = [] } = useQuery({
+    queryKey: ["work-packages-list", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data, error } = await supabase
+        .from("work_packages")
+        .select("id, name, project_id")
+        .eq("organization_id", currentOrganization.id);
+      if (error) throw error;
+      return data as WorkPackage[];
+    },
+    enabled: !!currentOrganization?.id,
+  });
+
   // Create milestone mutation
   const createMilestone = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -167,6 +190,7 @@ export default function MilestoneTracking() {
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
         programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
+        work_package_id: data.work_package_id || null,
       });
       if (error) throw error;
     },
@@ -180,6 +204,7 @@ export default function MilestoneTracking() {
         milestone_type: "deliverable",
         entity_type: "project",
         entity_id: "",
+        work_package_id: "",
         target_date: "",
         acceptance_criteria: "",
         is_stage_boundary: false,
@@ -242,6 +267,11 @@ export default function MilestoneTracking() {
     if (formData.entity_type === "programme") return programmes;
     if (formData.entity_type === "product") return products;
     return [];
+  };
+
+  const getWorkPackageName = (workPackageId: string | null) => {
+    if (!workPackageId) return null;
+    return workPackages.find((wp) => wp.id === workPackageId)?.name || null;
   };
 
   const getDaysUntil = (dateStr: string) => {
@@ -436,6 +466,29 @@ export default function MilestoneTracking() {
                   </Select>
                 </div>
               </div>
+              {formData.entity_type === "project" && formData.entity_id && (
+                <div>
+                  <label className="text-sm font-medium">Work Package (Optional)</label>
+                  <Select
+                    value={formData.work_package_id || "none"}
+                    onValueChange={(v) => setFormData({ ...formData, work_package_id: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select work package" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {workPackages
+                        .filter((wp) => wp.project_id === formData.entity_id)
+                        .map((wp) => (
+                          <SelectItem key={wp.id} value={wp.id}>
+                            {wp.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium">Acceptance Criteria</label>
                 <Textarea
@@ -528,6 +581,11 @@ export default function MilestoneTracking() {
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">
                               {getEntityName(milestone)}
+                              {milestone.work_package_id && (
+                                <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded">
+                                  WP: {getWorkPackageName(milestone.work_package_id)}
+                                </span>
+                              )}
                             </p>
                             {milestone.description && (
                               <p className="text-sm text-muted-foreground mb-2">

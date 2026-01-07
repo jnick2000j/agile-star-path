@@ -954,6 +954,7 @@ export type Database = {
           status: Database["public"]["Enums"]["milestone_status"]
           target_date: string
           updated_at: string
+          work_package_id: string | null
         }
         Insert: {
           acceptance_criteria?: string | null
@@ -974,6 +975,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date: string
           updated_at?: string
+          work_package_id?: string | null
         }
         Update: {
           acceptance_criteria?: string | null
@@ -994,6 +996,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string
           updated_at?: string
+          work_package_id?: string | null
         }
         Relationships: [
           {
@@ -1022,6 +1025,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
             referencedColumns: ["id"]
           },
         ]
