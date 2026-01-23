@@ -12,10 +12,14 @@ import {
   Calendar,
   FileText,
   ChevronRight,
+  ChevronDown,
   Filter,
   Edit,
   Trash2,
+  ListTodo,
+  Target,
 } from "lucide-react";
+import { WorkPackageDetails } from "@/components/workpackages/WorkPackageDetails";
 import {
   Dialog,
   DialogContent,
@@ -124,6 +128,7 @@ export default function WorkPackages() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
   const [formData, setFormData] = useState(defaultFormState);
+  const [expandedWorkPackage, setExpandedWorkPackage] = useState<string | null>(null);
   const { currentOrganization } = useOrganization();
 
   const fetchData = async () => {
@@ -554,6 +559,7 @@ export default function WorkPackages() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10"></TableHead>
                 <TableHead>Work Package</TableHead>
                 <TableHead>Assigned To</TableHead>
                 <TableHead>Status</TableHead>
@@ -565,11 +571,11 @@ export default function WorkPackages() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">Loading...</TableCell>
+                  <TableCell colSpan={7} className="text-center py-8">Loading...</TableCell>
                 </TableRow>
               ) : filteredWorkPackages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <Package className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">No work packages found</p>
                   </TableCell>
@@ -577,78 +583,106 @@ export default function WorkPackages() {
               ) : (
                 filteredWorkPackages.map(wp => {
                   const StatusIcon = statusConfig[wp.status].icon;
+                  const isExpanded = expandedWorkPackage === wp.id;
                   return (
-                    <TableRow key={wp.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{wp.name}</p>
-                          <p className="text-sm text-muted-foreground">{getProjectName(wp.project_id)}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{wp.assigned_to || "Unassigned"}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={wp.status}
-                          onValueChange={(v) => handleQuickStatusUpdate(wp.id, v as WorkPackage["status"])}
-                        >
-                          <SelectTrigger className="w-[140px] h-8">
-                            <Badge className={statusConfig[wp.status].color}>
-                              <StatusIcon className="h-3 w-3 mr-1" />
-                              {statusConfig[wp.status].label}
-                            </Badge>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(statusConfig).map(([key, conf]) => (
-                              <SelectItem key={key} value={key}>{conf.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            {wp.target_start && wp.target_end
-                              ? `${new Date(wp.target_start).toLocaleDateString()} - ${new Date(wp.target_end).toLocaleDateString()}`
-                              : wp.target_start
-                                ? `From ${new Date(wp.target_start).toLocaleDateString()}`
-                                : wp.target_end
-                                  ? `Until ${new Date(wp.target_end).toLocaleDateString()}`
-                                  : "No dates set"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1 min-w-[120px]">
-                          <div className="flex justify-between text-xs">
-                            <span>Progress</span>
-                            <span>{wp.progress}%</span>
+                    <>
+                      <TableRow key={wp.id} className={isExpanded ? "border-b-0" : ""}>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => setExpandedWorkPackage(isExpanded ? null : wp.id)}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{wp.name}</p>
+                            <p className="text-sm text-muted-foreground">{getProjectName(wp.project_id)}</p>
                           </div>
-                          <Slider
-                            value={[wp.progress]}
-                            onValueCommit={([v]) => handleQuickProgressUpdate(wp.id, v)}
-                            max={100}
-                            step={5}
-                            className="cursor-pointer"
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(wp)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(wp.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span>{wp.assigned_to || "Unassigned"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={wp.status}
+                            onValueChange={(v) => handleQuickStatusUpdate(wp.id, v as WorkPackage["status"])}
+                          >
+                            <SelectTrigger className="w-[140px] h-8">
+                              <Badge className={statusConfig[wp.status].color}>
+                                <StatusIcon className="h-3 w-3 mr-1" />
+                                {statusConfig[wp.status].label}
+                              </Badge>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(statusConfig).map(([key, conf]) => (
+                                <SelectItem key={key} value={key}>{conf.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                              {wp.target_start && wp.target_end
+                                ? `${new Date(wp.target_start).toLocaleDateString()} - ${new Date(wp.target_end).toLocaleDateString()}`
+                                : wp.target_start
+                                  ? `From ${new Date(wp.target_start).toLocaleDateString()}`
+                                  : wp.target_end
+                                    ? `Until ${new Date(wp.target_end).toLocaleDateString()}`
+                                    : "No dates set"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1 min-w-[120px]">
+                            <div className="flex justify-between text-xs">
+                              <span>Progress</span>
+                              <span>{wp.progress}%</span>
+                            </div>
+                            <Slider
+                              value={[wp.progress]}
+                              onValueCommit={([v]) => handleQuickProgressUpdate(wp.id, v)}
+                              max={100}
+                              step={5}
+                              className="cursor-pointer"
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(wp)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(wp.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {isExpanded && (
+                        <TableRow key={`${wp.id}-details`}>
+                          <TableCell colSpan={7} className="p-0">
+                            <WorkPackageDetails
+                              workPackageId={wp.id}
+                              projectId={wp.project_id}
+                              organizationId={wp.organization_id}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   );
                 })
               )}
