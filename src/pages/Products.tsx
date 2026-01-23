@@ -11,8 +11,6 @@ import {
   TrendingUp, 
   Target,
   BarChart3,
-  Calendar,
-  Users,
   Lightbulb,
   Rocket,
   ArrowUpRight,
@@ -35,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateProductDialog } from "@/components/dialogs/CreateProductDialog";
+import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { useOrganization } from "@/hooks/useOrganization";
 
 interface Product {
@@ -197,16 +196,17 @@ export default function Products() {
                   <TableHead>Target Market</TableHead>
                   <TableHead>Launch Date</TableHead>
                   <TableHead>RICE Score</TableHead>
+                  <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">Loading products...</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8">Loading products...</TableCell>
                   </TableRow>
                 ) : filteredProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       No products found. Create your first product to get started.
                     </TableCell>
                   </TableRow>
@@ -253,6 +253,16 @@ export default function Products() {
                           ) : (
                             <span className="text-muted-foreground">-</span>
                           )}
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <EntityStatusActions
+                            entityType="product"
+                            entityId={product.id}
+                            entityName={product.name}
+                            currentStatus={product.status}
+                            onStatusChange={fetchProducts}
+                            compact
+                          />
                         </TableCell>
                       </TableRow>
                     );

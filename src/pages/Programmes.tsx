@@ -7,16 +7,14 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Search, 
   Filter, 
-  MoreVertical, 
   Calendar,
-  Users,
   Target,
   ArrowUpRight,
   Building2,
-  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateProgrammeDialog } from "@/components/dialogs/CreateProgrammeDialog";
+import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import {
@@ -47,6 +45,10 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   "at-risk": { label: "At Risk", className: "bg-destructive/10 text-destructive border-destructive/20" },
   "on-hold": { label: "On Hold", className: "bg-warning/10 text-warning border-warning/20" },
   completed: { label: "Completed", className: "bg-primary/10 text-primary border-primary/20" },
+  pending: { label: "Pending", className: "bg-info/10 text-info border-info/20" },
+  rejected: { label: "Rejected", className: "bg-destructive/10 text-destructive border-destructive/20" },
+  deferred: { label: "Deferred", className: "bg-muted text-muted-foreground border-muted" },
+  closed: { label: "Closed", className: "bg-muted text-muted-foreground border-muted" },
 };
 
 export default function Programmes() {
@@ -183,7 +185,14 @@ export default function Programmes() {
                 </h3>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
+                <EntityStatusActions
+                  entityType="programme"
+                  entityId={programme.id}
+                  entityName={programme.name}
+                  currentStatus={programme.status}
+                  onStatusChange={fetchProgrammes}
+                  compact
+                />
               </Button>
             </div>
 

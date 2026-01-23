@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { CreateProjectDialog } from "@/components/dialogs/CreateProjectDialog";
 import { EditProjectDialog } from "@/components/dialogs/EditProjectDialog";
+import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -303,17 +304,29 @@ export default function Projects() {
                     {project.start_date || "N/A"} - {project.end_date || "N/A"}
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditClick(project);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(project);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <EntityStatusActions
+                          entityType="project"
+                          entityId={project.id}
+                          entityName={project.name}
+                          currentStatus={project.stage}
+                          onStatusChange={fetchProjects}
+                          compact
+                        />
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
