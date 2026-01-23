@@ -244,7 +244,7 @@ export default function Programmes() {
                 variant="ghost" 
                 size="sm" 
                 className="gap-1"
-                onClick={() => navigate(`/programme-definition?id=${programme.id}`)}
+                onClick={() => navigate(`/programmes/details?id=${programme.id}`)}
               >
                 View Details
                 <ArrowUpRight className="h-3 w-3" />

@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Programmes from "./pages/Programmes";
+import ProgrammeDetails from "./pages/ProgrammeDetails";
 import ProgrammeBlueprint from "./pages/ProgrammeBlueprint";
 import ProgrammeTranches from "./pages/ProgrammeTranches";
 import ProgrammeDefinition from "./pages/ProgrammeDefinition";
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/programmes" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
+            <Route path="/programmes/details" element={<ProtectedRoute><ProgrammeDetails /></ProtectedRoute>} />
             <Route path="/programmes/blueprint" element={<ProtectedRoute><ProgrammeBlueprint /></ProtectedRoute>} />
             <Route path="/programmes/tranches" element={<ProtectedRoute><ProgrammeTranches /></ProtectedRoute>} />
             <Route path="/programmes/definition" element={<ProtectedRoute><ProgrammeDefinition /></ProtectedRoute>} />

@@ -68,11 +68,20 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: "Planning",
+    label: "Tasks",
     icon: ListTodo,
     children: [
-      { label: "Unified Backlog", href: "/planning/backlog" },
+      { label: "Task Management", href: "/prince2/tasks" },
       { label: "Sprint Planning", href: "/planning/sprints" },
+      { label: "Unified Backlog", href: "/planning/backlog" },
+    ],
+  },
+  {
+    label: "Milestones",
+    icon: Flag,
+    children: [
+      { label: "Milestone Tracking", href: "/prince2/milestones" },
+      { label: "Stage Gates", href: "/prince2/stage-gates" },
     ],
   },
   {
@@ -80,9 +89,6 @@ const navigation: NavItem[] = [
     icon: Shield,
     children: [
       { label: "Dashboard", href: "/prince2" },
-      { label: "Task Management", href: "/prince2/tasks" },
-      { label: "Milestones", href: "/prince2/milestones" },
-      { label: "Stage Gates", href: "/prince2/stage-gates" },
       { label: "Change Control", href: "/prince2/change-control" },
       { label: "Exceptions", href: "/prince2/exceptions" },
       { label: "Quality Management", href: "/prince2/quality" },
@@ -110,7 +116,7 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "Planning", "PRINCE2", "Registers"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "Tasks", "Milestones", "PRINCE2", "Registers"]);
 
   // Get display name from profile or fallback to email
   const getDisplayName = () => {
