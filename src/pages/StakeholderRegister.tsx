@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
@@ -517,17 +518,27 @@ export default function StakeholderRegister() {
                     {stakeholder.communication_frequency?.replace('-', ' ') || "N/A"}
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditClick(stakeholder);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DocumentUpload
+                          entityType="stakeholder"
+                          entityId={stakeholder.id}
+                          entityName={stakeholder.name}
+                          variant="icon"
+                        />
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(stakeholder);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import {
   Plus,
   ClipboardCheck,
@@ -636,9 +637,17 @@ export default function QualityManagement() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedRecord(qr); }}>
-                          View
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <DocumentUpload
+                            entityType="quality_record"
+                            entityId={qr.id}
+                            entityName={qr.title}
+                            variant="icon"
+                          />
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedRecord(qr); }}>
+                            View
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

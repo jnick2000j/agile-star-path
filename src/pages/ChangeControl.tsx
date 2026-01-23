@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import {
   Plus,
   FileEdit,
@@ -641,9 +642,17 @@ export default function ChangeControl() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedRequest(cr); }}>
-                          View
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <DocumentUpload
+                            entityType="change_request"
+                            entityId={cr.id}
+                            entityName={cr.title}
+                            variant="icon"
+                          />
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedRequest(cr); }}>
+                            View
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CreateRiskDialog } from "@/components/dialogs/CreateRiskDialog";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import {
   Table,
   TableBody,
@@ -349,17 +350,27 @@ export default function RiskRegister() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditClick(risk);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DocumentUpload
+                          entityType="risk"
+                          entityId={risk.id}
+                          entityName={risk.title}
+                          variant="icon"
+                        />
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(risk);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

@@ -45,6 +45,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { DocumentUpload } from "@/components/DocumentUpload";
 
 interface Lesson {
   id: string;
@@ -597,6 +598,12 @@ export default function LessonsLearned() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
+                        <DocumentUpload
+                          entityType="lesson_learned"
+                          entityId={lesson.id}
+                          entityName={lesson.title}
+                          variant="icon"
+                        />
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(lesson)}>
                           <Edit2 className="h-4 w-4" />
                         </Button>

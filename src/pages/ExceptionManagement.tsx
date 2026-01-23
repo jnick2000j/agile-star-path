@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import {
   Plus,
   AlertTriangle,
@@ -617,9 +618,17 @@ export default function ExceptionManagement() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedException(ex); }}>
-                          View
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <DocumentUpload
+                            entityType="exception"
+                            entityId={ex.id}
+                            entityName={ex.title}
+                            variant="icon"
+                          />
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedException(ex); }}>
+                            View
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

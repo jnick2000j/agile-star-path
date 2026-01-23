@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { CreateIssueDialog } from "@/components/dialogs/CreateIssueDialog";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -337,17 +338,27 @@ export default function IssueRegister() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditClick(issue);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DocumentUpload
+                          entityType="issue"
+                          entityId={issue.id}
+                          entityName={issue.title}
+                          variant="icon"
+                        />
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(issue);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
