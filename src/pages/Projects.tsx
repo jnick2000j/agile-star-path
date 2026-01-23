@@ -22,6 +22,7 @@ import {
 import { CreateProjectDialog } from "@/components/dialogs/CreateProjectDialog";
 import { EditProjectDialog } from "@/components/dialogs/EditProjectDialog";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -316,6 +317,14 @@ export default function Projects() {
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DocumentUpload
+                          entityType="project"
+                          entityId={project.id}
+                          entityName={project.name}
+                          variant="icon"
+                        />
+                      </div>
                       <div onClick={(e) => e.stopPropagation()}>
                         <EntityStatusActions
                           entityType="project"

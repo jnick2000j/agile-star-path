@@ -16,13 +16,30 @@ interface Document {
   created_at: string;
 }
 
+type EntityType = 
+  | "programme" 
+  | "project" 
+  | "product"
+  | "risk" 
+  | "issue" 
+  | "benefit" 
+  | "stakeholder"
+  | "task"
+  | "milestone"
+  | "work_package"
+  | "change_request"
+  | "exception"
+  | "lesson_learned"
+  | "quality_record";
+
 interface DocumentUploadProps {
-  entityType: "programme" | "project" | "risk" | "issue" | "benefit" | "stakeholder";
+  entityType: EntityType;
   entityId: string;
   entityName?: string;
+  variant?: "button" | "icon";
 }
 
-export function DocumentUpload({ entityType, entityId, entityName }: DocumentUploadProps) {
+export function DocumentUpload({ entityType, entityId, entityName, variant = "button" }: DocumentUploadProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -118,10 +135,16 @@ export function DocumentUpload({ entityType, entityId, entityName }: DocumentUpl
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <File className="h-4 w-4" />
-          Documents ({documents.length})
-        </Button>
+        {variant === "icon" ? (
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Attachments">
+            <File className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className="gap-2">
+            <File className="h-4 w-4" />
+            Documents ({documents.length})
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>

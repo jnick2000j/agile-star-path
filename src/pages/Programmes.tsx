@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CreateProgrammeDialog } from "@/components/dialogs/CreateProgrammeDialog";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import {
@@ -184,7 +185,13 @@ export default function Programmes() {
                   {programme.name}
                 </h3>
               </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <div className="flex items-center gap-1">
+                <DocumentUpload
+                  entityType="programme"
+                  entityId={programme.id}
+                  entityName={programme.name}
+                  variant="icon"
+                />
                 <EntityStatusActions
                   entityType="programme"
                   entityId={programme.id}
@@ -193,7 +200,7 @@ export default function Programmes() {
                   onStatusChange={fetchProgrammes}
                   compact
                 />
-              </Button>
+              </div>
             </div>
 
             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">

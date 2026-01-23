@@ -34,6 +34,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { CreateProductDialog } from "@/components/dialogs/CreateProductDialog";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { useOrganization } from "@/hooks/useOrganization";
 
 interface Product {
@@ -255,14 +256,22 @@ export default function Products() {
                           )}
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
-                          <EntityStatusActions
-                            entityType="product"
-                            entityId={product.id}
-                            entityName={product.name}
-                            currentStatus={product.status}
-                            onStatusChange={fetchProducts}
-                            compact
-                          />
+                          <div className="flex items-center gap-1">
+                            <DocumentUpload
+                              entityType="product"
+                              entityId={product.id}
+                              entityName={product.name}
+                              variant="icon"
+                            />
+                            <EntityStatusActions
+                              entityType="product"
+                              entityId={product.id}
+                              entityName={product.name}
+                              currentStatus={product.status}
+                              onStatusChange={fetchProducts}
+                              compact
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

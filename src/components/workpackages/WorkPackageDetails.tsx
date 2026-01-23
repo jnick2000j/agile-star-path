@@ -43,9 +43,11 @@ import {
   User,
   Timer,
   TrendingUp,
+  Paperclip,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { DocumentUpload } from "@/components/DocumentUpload";
 
 type TaskStatus = "not_started" | "in_progress" | "on_hold" | "completed" | "cancelled";
 type MilestoneStatus = "planned" | "in_progress" | "achieved" | "missed" | "deferred";
@@ -425,6 +427,7 @@ export function WorkPackageDetails({ workPackageId, projectId, organizationId }:
                   <TableHead>Effort</TableHead>
                   <TableHead>Timeline</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -501,6 +504,14 @@ export function WorkPackageDetails({ workPackageId, projectId, organizationId }:
                             ))}
                           </SelectContent>
                         </Select>
+                      </TableCell>
+                      <TableCell>
+                        <DocumentUpload
+                          entityType="task"
+                          entityId={task.id}
+                          entityName={task.name}
+                          variant="icon"
+                        />
                       </TableCell>
                     </TableRow>
                   );
@@ -600,6 +611,7 @@ export function WorkPackageDetails({ workPackageId, projectId, organizationId }:
                   <TableHead>Target Date</TableHead>
                   <TableHead>Actual Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -649,6 +661,14 @@ export function WorkPackageDetails({ workPackageId, projectId, organizationId }:
                             ))}
                           </SelectContent>
                         </Select>
+                      </TableCell>
+                      <TableCell>
+                        <DocumentUpload
+                          entityType="milestone"
+                          entityId={milestone.id}
+                          entityName={milestone.name}
+                          variant="icon"
+                        />
                       </TableCell>
                     </TableRow>
                   );

@@ -20,6 +20,7 @@ import {
   Target,
 } from "lucide-react";
 import { WorkPackageDetails } from "@/components/workpackages/WorkPackageDetails";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import {
   Dialog,
   DialogContent,
@@ -662,6 +663,12 @@ export default function WorkPackages() {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
+                            <DocumentUpload
+                              entityType="work_package"
+                              entityId={wp.id}
+                              entityName={wp.name}
+                              variant="icon"
+                            />
                             <Button variant="ghost" size="icon" onClick={() => openEditDialog(wp)}>
                               <Edit className="h-4 w-4" />
                             </Button>
