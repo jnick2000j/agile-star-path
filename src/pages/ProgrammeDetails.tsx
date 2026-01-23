@@ -24,6 +24,7 @@ import {
   RefreshCw,
   XCircle,
   Archive,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +71,16 @@ interface Benefit {
   type: string;
 }
 
+interface ProductItem {
+  id: string;
+  name: string;
+  description: string | null;
+  stage: string;
+  status: string;
+  product_type: string;
+  launch_date: string | null;
+}
+
 interface StatusHistoryEntry {
   id: string;
   old_status: string | null;
@@ -114,6 +125,16 @@ const benefitStatusConfig: Record<string, { label: string; className: string }> 
   measured: { label: "Measured", className: "bg-primary/10 text-primary" },
 };
 
+const productStageConfig: Record<string, { label: string; className: string }> = {
+  ideation: { label: "Ideation", className: "bg-purple-500/10 text-purple-600" },
+  discovery: { label: "Discovery", className: "bg-info/10 text-info" },
+  development: { label: "Development", className: "bg-warning/10 text-warning" },
+  launch: { label: "Launch", className: "bg-success/10 text-success" },
+  growth: { label: "Growth", className: "bg-primary/10 text-primary" },
+  maturity: { label: "Maturity", className: "bg-muted text-muted-foreground" },
+  sunset: { label: "Sunset", className: "bg-orange-500/10 text-orange-600" },
+};
+
 const actionIcons: Record<string, React.ElementType> = {
   created: CheckCircle2,
   approved: CheckCircle2,
@@ -141,6 +162,7 @@ export default function ProgrammeDetails() {
 
   const [programme, setProgramme] = useState<Programme | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -169,6 +191,18 @@ export default function ProgrammeDetails() {
       .order("name");
 
     setProjects(data || []);
+  };
+
+  const fetchProducts = async () => {
+    if (!programmeId) return;
+
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .eq("programme_id", programmeId)
+      .order("name");
+
+    setProducts(data || []);
   };
 
   const fetchBenefits = async () => {
@@ -223,7 +257,7 @@ export default function ProgrammeDetails() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchProgramme(), fetchProjects(), fetchBenefits(), fetchStatusHistory()]);
+    await Promise.all([fetchProgramme(), fetchProjects(), fetchProducts(), fetchBenefits(), fetchStatusHistory()]);
     setLoading(false);
   };
 
@@ -373,7 +407,11 @@ export default function ProgrammeDetails() {
           <TabsList>
             <TabsTrigger value="projects" className="gap-2">
               <FolderKanban className="h-4 w-4" />
-              Linked Projects ({projects.length})
+              Projects ({projects.length})
+            </TabsTrigger>
+            <TabsTrigger value="products" className="gap-2">
+              <Package className="h-4 w-4" />
+              Products ({products.length})
             </TabsTrigger>
             <TabsTrigger value="benefits" className="gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -426,6 +464,63 @@ export default function ProgrammeDetails() {
                             </Badge>
                             <Badge variant="outline" className="text-xs capitalize">
                               {project.priority}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Products Tab */}
+          <TabsContent value="products">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Linked Products</CardTitle>
+                    <CardDescription>Products within this programme</CardDescription>
+                  </div>
+                  <Button variant="outline" onClick={() => navigate("/products")}>
+                    <Package className="h-4 w-4 mr-2" />
+                    View All Products
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {products.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No products linked to this programme</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {products.map((product) => {
+                      const prodStage = productStageConfig[product.stage] || productStageConfig.ideation;
+                      const prodStatus = statusConfig[product.status] || statusConfig.pending;
+
+                      return (
+                        <div
+                          key={product.id}
+                          className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/products/details?id=${product.id}`)}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium">{product.name}</h4>
+                            <Badge className={cn("text-xs", prodStage.className)}>{prodStage.label}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {product.description || "No description"}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={cn("text-xs", prodStatus.className)}>
+                              {prodStatus.label}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {product.product_type}
                             </Badge>
                           </div>
                         </div>

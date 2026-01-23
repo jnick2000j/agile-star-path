@@ -18,9 +18,11 @@ import ProgrammeTranches from "./pages/ProgrammeTranches";
 import ProgrammeDefinition from "./pages/ProgrammeDefinition";
 import SuccessPlan from "./pages/SuccessPlan";
 import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
 import ProjectBriefs from "./pages/ProjectBriefs";
 import WorkPackages from "./pages/WorkPackages";
 import Products from "./pages/Products";
+import ProductDetails from "./pages/ProductDetails";
 import ProductRoadmap from "./pages/ProductRoadmap";
 import FeatureBacklog from "./pages/FeatureBacklog";
 import SprintPlanning from "./pages/SprintPlanning";
@@ -71,9 +73,11 @@ const App = () => (
             <Route path="/programmes/definition" element={<ProtectedRoute><ProgrammeDefinition /></ProtectedRoute>} />
             <Route path="/programmes/success-plan" element={<ProtectedRoute><SuccessPlan /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/projects/details" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
             <Route path="/projects/briefs" element={<ProtectedRoute><ProjectBriefs /></ProtectedRoute>} />
             <Route path="/projects/work-packages" element={<ProtectedRoute><WorkPackages /></ProtectedRoute>} />
             <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+            <Route path="/products/details" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
             <Route path="/products/roadmap" element={<ProtectedRoute><ProductRoadmap /></ProtectedRoute>} />
             <Route path="/products/features" element={<ProtectedRoute><FeatureBacklog /></ProtectedRoute>} />
             <Route path="/products/dependencies" element={<ProtectedRoute><FeatureDependencies /></ProtectedRoute>} />
