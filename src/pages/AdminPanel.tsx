@@ -87,7 +87,11 @@ const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; clas
   product_manager: { label: "Product Manager", icon: Briefcase, className: "bg-accent/10 text-accent-foreground" },
   product_team_member: { label: "Product Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
   project_team_member: { label: "Project Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
-  stakeholder: { label: "Stakeholder", icon: Users, className: "bg-muted text-muted-foreground" },
+  org_stakeholder: { label: "Org Stakeholder", icon: Building2, className: "bg-muted text-muted-foreground" },
+  programme_stakeholder: { label: "Program Stakeholder", icon: Briefcase, className: "bg-muted text-muted-foreground" },
+  project_stakeholder: { label: "Project Stakeholder", icon: FolderKanban, className: "bg-muted text-muted-foreground" },
+  product_stakeholder: { label: "Product Stakeholder", icon: Package, className: "bg-muted text-muted-foreground" },
+  stakeholder: { label: "Stakeholder (Legacy)", icon: Users, className: "bg-muted text-muted-foreground" },
 };
 
 export default function AdminPanel() {
@@ -446,7 +450,11 @@ export default function AdminPanel() {
                               <SelectItem value="product_manager">Product Manager</SelectItem>
                               <SelectItem value="product_team_member">Product Team Member</SelectItem>
                               <SelectItem value="project_team_member">Project Team Member</SelectItem>
-                              <SelectItem value="stakeholder">Stakeholder</SelectItem>
+                              <SelectItem value="org_stakeholder">Org Stakeholder</SelectItem>
+                              <SelectItem value="programme_stakeholder">Program Stakeholder</SelectItem>
+                              <SelectItem value="project_stakeholder">Project Stakeholder</SelectItem>
+                              <SelectItem value="product_stakeholder">Product Stakeholder</SelectItem>
+                              <SelectItem value="stakeholder">Stakeholder (Legacy)</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>

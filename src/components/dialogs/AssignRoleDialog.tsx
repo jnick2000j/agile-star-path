@@ -157,7 +157,10 @@ export function AssignRoleDialog({ onSuccess }: AssignRoleDialogProps) {
                 <SelectItem value="product_manager">Product Manager</SelectItem>
                 <SelectItem value="product_team_member">Product Team Member</SelectItem>
                 <SelectItem value="project_team_member">Project Team Member</SelectItem>
-                <SelectItem value="stakeholder">Stakeholder</SelectItem>
+                <SelectItem value="org_stakeholder">Org Stakeholder</SelectItem>
+                <SelectItem value="programme_stakeholder">Program Stakeholder</SelectItem>
+                <SelectItem value="project_stakeholder">Project Stakeholder</SelectItem>
+                <SelectItem value="product_stakeholder">Product Stakeholder</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
@@ -167,7 +170,10 @@ export function AssignRoleDialog({ onSuccess }: AssignRoleDialogProps) {
               {selectedRole === "product_manager" && "Manages products, features, roadmaps and related registers"}
               {selectedRole === "product_team_member" && "Works on products and assigned tasks only"}
               {selectedRole === "project_team_member" && "Works on projects and assigned tasks only"}
-              {selectedRole === "stakeholder" && "View access to assigned items"}
+              {selectedRole === "org_stakeholder" && "View-only access to everything in the organization"}
+              {selectedRole === "programme_stakeholder" && "View-only access to assigned programmes"}
+              {selectedRole === "project_stakeholder" && "View-only access to assigned projects"}
+              {selectedRole === "product_stakeholder" && "View-only access to assigned products"}
             </p>
           </div>
         </div>
