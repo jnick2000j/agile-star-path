@@ -152,7 +152,7 @@ export default function Products() {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentOrganization, user, userRole]);
+  }, [currentOrganization, user, userRole, hasFullOrgAccess]);
 
   const calculateRICEScore = (product: Product) => {
     const { reach_score, impact_score, confidence_score, effort_score } = product;
