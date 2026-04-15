@@ -6,11 +6,13 @@ import { RiskSummary } from "@/components/dashboard/RiskSummary";
 import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { BenefitsTracker } from "@/components/dashboard/BenefitsTracker";
 import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
+import { PlanUsageBar } from "@/components/PlanUsageBar";
 import { Layers, FolderKanban, AlertTriangle, Target } from "lucide-react";
 
 export default function Dashboard() {
   return (
     <AppLayout title="Dashboard" subtitle="Program portfolio overview">
+      <PlanUsageBar />
       {/* Metrics Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <MetricCard
