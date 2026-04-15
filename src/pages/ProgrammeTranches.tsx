@@ -423,7 +423,7 @@ export default function ProgrammeTranches() {
               return (
                 <div key={tranche.id} className="relative pb-8">
                   {/* Timeline connector */}
-                  {index < tranches.length - 1 && (
+                  {index < filteredTranches.length - 1 && (
                     <div className="absolute left-6 top-12 w-0.5 h-full bg-border" />
                   )}
 
