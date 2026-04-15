@@ -242,13 +242,6 @@ export default function SprintPlanning({ embedded }: { embedded?: boolean }) {
     if (!draggedItem) return;
 
     const table = draggedItem.type === "feature" ? "product_features" : "tasks";
-    
-    // For tasks, we don't have sprint_id, so skip
-    if (draggedItem.type === "task") {
-      toast.info("Task sprint assignment coming soon");
-      setDraggedItem(null);
-      return;
-    }
 
     const { error } = await supabase
       .from(table)
@@ -261,6 +254,10 @@ export default function SprintPlanning({ embedded }: { embedded?: boolean }) {
       if (draggedItem.type === "feature") {
         setFeatures(prev =>
           prev.map(f => f.id === draggedItem.id ? { ...f, sprint_id: sprintId } : f)
+        );
+      } else {
+        setTasks(prev =>
+          prev.map(t => t.id === draggedItem.id ? { ...t, sprint_id: sprintId } : t)
         );
       }
       toast.success(sprintId ? "Item added to sprint" : "Item removed from sprint");
