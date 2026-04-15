@@ -7,6 +7,10 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { BlueprintTabContent } from "@/components/programme-tabs/BlueprintTabContent";
+import { DefinitionTabContent } from "@/components/programme-tabs/DefinitionTabContent";
+import { SuccessPlanTabContent } from "@/components/programme-tabs/SuccessPlanTabContent";
+import { TranchesTabContent } from "@/components/programme-tabs/TranchesTabContent";
 import {
   ArrowLeft,
   Building2,
@@ -404,7 +408,7 @@ export default function ProgrammeDetails() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="projects" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="projects" className="gap-2">
               <FolderKanban className="h-4 w-4" />
               Projects ({projects.length})
@@ -417,9 +421,25 @@ export default function ProgrammeDetails() {
               <TrendingUp className="h-4 w-4" />
               Benefits ({benefits.length})
             </TabsTrigger>
+            <TabsTrigger value="blueprint" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Blueprint
+            </TabsTrigger>
+            <TabsTrigger value="definition" className="gap-2">
+              <Target className="h-4 w-4" />
+              Definition
+            </TabsTrigger>
+            <TabsTrigger value="success-plan" className="gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Success Plan
+            </TabsTrigger>
+            <TabsTrigger value="tranches" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              Tranches
+            </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
-              Status Timeline
+              Timeline
             </TabsTrigger>
           </TabsList>
 
@@ -610,6 +630,26 @@ export default function ProgrammeDetails() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Blueprint Tab */}
+          <TabsContent value="blueprint">
+            <BlueprintTabContent programmeId={programmeId!} />
+          </TabsContent>
+
+          {/* Definition Tab */}
+          <TabsContent value="definition">
+            <DefinitionTabContent programmeId={programmeId!} />
+          </TabsContent>
+
+          {/* Success Plan Tab */}
+          <TabsContent value="success-plan">
+            <SuccessPlanTabContent programmeId={programmeId!} />
+          </TabsContent>
+
+          {/* Tranches Tab */}
+          <TabsContent value="tranches">
+            <TranchesTabContent programmeId={programmeId!} />
           </TabsContent>
 
           {/* Status Timeline Tab */}

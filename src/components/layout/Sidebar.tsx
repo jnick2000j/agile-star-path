@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
-import { useOrganization } from "@/hooks/useOrganization";
-import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -15,7 +13,6 @@ import {
   LogOut,
   BookOpen,
   ChevronDown,
-  ChevronRight,
   Layers,
   ClipboardList,
   TrendingUp,
@@ -35,27 +32,11 @@ interface NavItem {
   icon: React.ElementType;
   href?: string;
   children?: { label: string; href: string }[];
-  isDynamic?: boolean;
 }
-
-const programConfigItems = [
-  { label: "Details", path: "details" },
-  { label: "Blueprint", path: "blueprint" },
-  { label: "Definition", path: "definition" },
-  { label: "Success Plan", path: "success-plan" },
-  { label: "Tranches", path: "tranches" },
-];
 
 const navigation: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
-  {
-    label: "Programs",
-    icon: Layers,
-    isDynamic: true,
-    children: [
-      { label: "All Programs", href: "/programmes" },
-    ],
-  },
+  { label: "Programs", icon: Layers, href: "/programmes" },
   {
     label: "Projects",
     icon: FolderKanban,
@@ -121,30 +102,10 @@ const navigation: NavItem[] = [
   { label: "Project Teams", icon: Users, href: "/team" },
 ];
 
-interface Programme {
-  id: string;
-  name: string;
-}
-
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
-  const { currentOrganization } = useOrganization();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Programs", "Projects", "Products", "Tasks", "Milestones", "PRINCE2", "Registers"]);
-  const [expandedPrograms, setExpandedPrograms] = useState<string[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
-
-  useEffect(() => {
-    const fetchProgrammes = async () => {
-      let query = supabase.from("programmes").select("id, name").order("name");
-      if (currentOrganization) {
-        query = query.eq("organization_id", currentOrganization.id);
-      }
-      const { data } = await query;
-      setProgrammes(data || []);
-    };
-    fetchProgrammes();
-  }, [currentOrganization]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Projects", "Products", "Tasks", "Milestones", "PRINCE2", "Registers"]);
 
   const getDisplayName = () => {
     if (userProfile?.first_name && userProfile?.last_name) {
@@ -175,30 +136,9 @@ export function Sidebar() {
     );
   };
 
-  const toggleProgramExpand = (programId: string) => {
-    setExpandedPrograms((prev) =>
-      prev.includes(programId) ? prev.filter((id) => id !== programId) : [...prev, programId]
-    );
-  };
-
-  const isActive = (href: string) => {
-    const [path, search] = href.split("?");
-    if (search) {
-      return location.pathname === path && location.search === `?${search}`;
-    }
-    return location.pathname === path;
-  };
-
+  const isActive = (href: string) => location.pathname === href;
   const isParentActive = (children?: { label: string; href: string }[]) =>
-    children?.some((child) => isActive(child.href));
-
-  const isProgramActive = (programId: string) => {
-    const searchParams = new URLSearchParams(location.search);
-    const idParam = searchParams.get("id");
-    return idParam === programId && (
-      location.pathname.startsWith("/programmes/")
-    );
-  };
+    children?.some((child) => location.pathname === child.href);
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
@@ -247,49 +187,6 @@ export function Sidebar() {
                         >
                           {child.label}
                         </Link>
-                      ))}
-                      {/* Dynamic program list under Programs */}
-                      {item.isDynamic && programmes.map((prog) => (
-                        <div key={prog.id}>
-                          <button
-                            onClick={() => toggleProgramExpand(prog.id)}
-                            className={cn(
-                              "flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors",
-                              isProgramActive(prog.id)
-                                ? "bg-sidebar-accent text-sidebar-foreground"
-                                : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                            )}
-                          >
-                            <span className="truncate">{prog.name}</span>
-                            <ChevronRight
-                              className={cn(
-                                "h-3 w-3 shrink-0 transition-transform",
-                                expandedPrograms.includes(prog.id) && "rotate-90"
-                              )}
-                            />
-                          </button>
-                          {expandedPrograms.includes(prog.id) && (
-                            <div className="ml-4 mt-1 space-y-1">
-                              {programConfigItems.map((config) => {
-                                const href = `/programmes/${config.path}?id=${prog.id}`;
-                                return (
-                                  <Link
-                                    key={config.path}
-                                    to={href}
-                                    className={cn(
-                                      "block px-3 py-1.5 text-xs rounded-md transition-colors",
-                                      isActive(href)
-                                        ? "bg-sidebar-accent text-sidebar-foreground"
-                                        : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                                    )}
-                                  >
-                                    {config.label}
-                                  </Link>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
                       ))}
                     </div>
                   )}
