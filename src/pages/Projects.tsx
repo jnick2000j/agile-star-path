@@ -279,7 +279,7 @@ export default function Projects() {
                   key={project.id} 
                   className="animate-fade-in cursor-pointer hover:bg-muted/50"
                   style={{ animationDelay: `${index * 0.03}s` }}
-                  onClick={() => handleEditClick(project)}
+                  onClick={() => navigate(`/projects/details?id=${project.id}`)}
                 >
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>
