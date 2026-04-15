@@ -134,6 +134,12 @@ const healthConfig: Record<string, { label: string; className: string }> = {
   red: { label: "Red", className: "bg-destructive/10 text-destructive" },
 };
 
+const priorityConfig: Record<string, { label: string; className: string }> = {
+  high: { label: "High", className: "bg-destructive/10 text-destructive" },
+  medium: { label: "Medium", className: "bg-warning/10 text-warning" },
+  low: { label: "Low", className: "bg-muted text-muted-foreground" },
+};
+
 const benefitStatusConfig: Record<string, { label: string; className: string }> = {
   identified: { label: "Identified", className: "bg-muted text-muted-foreground" },
   planned: { label: "Planned", className: "bg-info/10 text-info" },
