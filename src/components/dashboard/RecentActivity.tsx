@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const typeIcons = {
   risk: AlertTriangle,
-  programme: Layers,
+  program: Layers,
   project: FileText,
   stakeholder: Users,
   benefit: CheckCircle,
@@ -14,7 +14,7 @@ const typeIcons = {
 
 const typeColors = {
   risk: "bg-warning/10 text-warning",
-  programme: "bg-primary/10 text-primary",
+  program: "bg-primary/10 text-primary",
   project: "bg-info/10 text-info",
   stakeholder: "bg-muted text-muted-foreground",
   benefit: "bg-success/10 text-success",
