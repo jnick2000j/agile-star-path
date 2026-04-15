@@ -37,7 +37,7 @@ interface Organization {
   name: string;
 }
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   organization_id: string | null;
@@ -55,7 +55,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   
   const [selectedUser, setSelectedUser] = useState("");

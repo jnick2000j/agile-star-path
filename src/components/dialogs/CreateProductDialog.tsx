@@ -19,7 +19,7 @@ interface Organization {
   name: string;
 }
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
 }
@@ -28,7 +28,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({

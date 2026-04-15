@@ -32,7 +32,7 @@ import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { format } from "date-fns";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   description: string | null;
@@ -160,7 +160,7 @@ export default function ProgrammeDetails() {
   const navigate = useNavigate();
   const programmeId = searchParams.get("id");
 
-  const [programme, setProgramme] = useState<Programme | null>(null);
+  const [programme, setProgramme] = useState<Program | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
@@ -294,10 +294,10 @@ export default function ProgrammeDetails() {
 
   if (!programme) {
     return (
-      <AppLayout title="Program Details" subtitle="Programme not found">
+      <AppLayout title="Program Details" subtitle="Program not found">
         <div className="flex flex-col items-center justify-center py-12">
           <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
-          <p className="text-muted-foreground">Programme not found</p>
+          <p className="text-muted-foreground">Program not found</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate("/programmes")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Programmes
@@ -341,7 +341,7 @@ export default function ProgrammeDetails() {
           </div>
         </div>
 
-        {/* Programme Overview Card */}
+        {/* Program Overview Card */}
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -538,7 +538,7 @@ export default function ProgrammeDetails() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                 <div>
-                    <CardTitle>Programme Benefits</CardTitle>
+                    <CardTitle>Program Benefits</CardTitle>
                     <CardDescription>
                       {realizedBenefits} of {benefits.length} benefits realized • Avg realization: {avgRealization}%
                     </CardDescription>

@@ -401,7 +401,7 @@ export function RoleTypesManager({ onRolesChange }: RoleTypesManagerProps) {
               
               <div className="flex flex-wrap gap-1.5 mt-auto">
                 {role.can_manage_programmes && (
-                  <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">Programmes</span>
+                  <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">Programs</span>
                 )}
                 {role.can_manage_projects && (
                   <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded">Projects</span>

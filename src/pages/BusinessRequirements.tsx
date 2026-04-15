@@ -57,7 +57,7 @@ interface BusinessRequirement {
   product_id: string | null;
 }
 
-interface Programme { id: string; name: string; }
+interface Program { id: string; name: string; }
 interface Project { id: string; name: string; programme_id: string | null; }
 interface Product { id: string; name: string; programme_id: string | null; }
 
@@ -91,7 +91,7 @@ const defaultFormState = {
 
 export default function BusinessRequirements() {
   const [requirements, setRequirements] = useState<BusinessRequirement[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);

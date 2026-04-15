@@ -60,7 +60,7 @@ interface TechnicalRequirement {
 }
 
 interface BusinessRequirement { id: string; reference_number: string; name: string; }
-interface Programme { id: string; name: string; }
+interface Program { id: string; name: string; }
 interface Project { id: string; name: string; }
 interface Product { id: string; name: string; }
 
@@ -96,7 +96,7 @@ const defaultFormState = {
 export default function TechnicalRequirements() {
   const [requirements, setRequirements] = useState<TechnicalRequirement[]>([]);
   const [businessReqs, setBusinessReqs] = useState<BusinessRequirement[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);

@@ -152,7 +152,7 @@ export function AssignRoleDialog({ onSuccess }: AssignRoleDialogProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="programme_owner">Programme Owner</SelectItem>
+                <SelectItem value="programme_owner">Program Owner</SelectItem>
                 <SelectItem value="project_manager">Project Manager</SelectItem>
                 <SelectItem value="stakeholder">Stakeholder</SelectItem>
               </SelectContent>

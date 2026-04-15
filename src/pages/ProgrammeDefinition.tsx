@@ -24,7 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   status: string;
@@ -44,7 +44,7 @@ interface ProgrammeDefinition {
 }
 
 export default function ProgrammeDefinition() {
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [selectedProgramme, setSelectedProgramme] = useState<string>("");
   const [definition, setDefinition] = useState<ProgrammeDefinition | null>(null);
   const [loading, setLoading] = useState(true);
@@ -179,7 +179,7 @@ export default function ProgrammeDefinition() {
   return (
     <AppLayout title="Program Definition" subtitle="MSP Program Definition Document">
       <div className="space-y-6">
-        {/* Programme Selector */}
+        {/* Program Selector */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>

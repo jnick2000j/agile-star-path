@@ -281,7 +281,7 @@ const templates: Template[] = [
     type: "Template",
     content: `# Risk Register
 
-## Project/Programme: [Name]
+## Project/Program: [Name]
 ## Last Updated: [Date]
 
 | ID | Risk Description | Category | Probability | Impact | Score | Owner | Response Strategy | Response Actions | Status | Date Identified | Review Date |
@@ -525,7 +525,7 @@ RICE Score = (5000 × 2 × 0.8) / 2 = 4000
     type: "Template",
     content: `# Lessons Learned Log
 
-## Project/Programme: [Name]
+## Project/Program: [Name]
 ## Date: [Date]
 
 | ID | Date | Category | What Happened | Root Cause | Lesson | Recommendation | Applicable To | Priority | Status |
@@ -711,7 +711,7 @@ const prince2Processes = [
 
 const mspPhases = [
   {
-    name: "Identifying a Programme",
+    name: "Identifying a Program",
     purpose: "Confirm there is a viable programme worth pursuing",
     activities: [
       "Understand strategic objectives",
@@ -722,7 +722,7 @@ const mspPhases = [
     outputs: ["Program Mandate", "Strategic alignment confirmation"]
   },
   {
-    name: "Defining a Programme",
+    name: "Defining a Program",
     purpose: "Develop the program to the point where it can be approved",
     activities: [
       "Develop the Vision Statement",
@@ -769,7 +769,7 @@ const mspPhases = [
     outputs: ["Benefits Realization Reports", "Updated Benefits Register", "Benefits Review reports"]
   },
   {
-    name: "Closing a Programme",
+    name: "Closing a Program",
     purpose: "Confirm the program has achieved its objectives and can close",
     activities: [
       "Confirm benefits realization plan handover",

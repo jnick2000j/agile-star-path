@@ -26,7 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   status: string;
@@ -46,7 +46,7 @@ interface SuccessPlan {
 }
 
 export default function SuccessPlanPage() {
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [selectedProgramme, setSelectedProgramme] = useState<string>("");
   const [successPlan, setSuccessPlan] = useState<SuccessPlan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -179,7 +179,7 @@ export default function SuccessPlanPage() {
   return (
     <AppLayout title="Success Plan" subtitle="MSP Program Success Plan">
       <div className="space-y-6">
-        {/* Programme Selector */}
+        {/* Program Selector */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>

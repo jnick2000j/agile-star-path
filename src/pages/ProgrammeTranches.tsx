@@ -38,7 +38,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   status: string;
@@ -82,7 +82,7 @@ const defaultFormState = {
 };
 
 export default function ProgrammeTranches() {
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [tranches, setTranches] = useState<Tranche[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -246,7 +246,7 @@ export default function ProgrammeTranches() {
         />
       </div>
       <div className="space-y-2">
-        <Label>Programme *</Label>
+        <Label>Program *</Label>
         <Select
           value={formData.programme_id}
           onValueChange={(v) => setFormData({ ...formData, programme_id: v })}

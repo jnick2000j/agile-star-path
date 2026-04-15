@@ -39,7 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useToast } from "@/hooks/use-toast";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   description: string | null;
@@ -91,7 +91,7 @@ interface Risk {
 }
 
 export default function ProgrammeBlueprint() {
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [programmeDefinition, setProgrammeDefinition] = useState<ProgrammeDefinition | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
@@ -99,7 +99,7 @@ export default function ProgrammeBlueprint() {
   const [selectedProgramme, setSelectedProgramme] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<ProgrammeDefinition & Programme>>({});
+  const [editForm, setEditForm] = useState<Partial<ProgrammeDefinition & Program>>({});
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
@@ -253,7 +253,7 @@ export default function ProgrammeBlueprint() {
       return;
     }
 
-    toast({ title: "Saved", description: "Programme brief updated successfully" });
+    toast({ title: "Saved", description: "Program brief updated successfully" });
     fetchData();
     setEditingSection(null);
   };
@@ -261,7 +261,7 @@ export default function ProgrammeBlueprint() {
   return (
     <AppLayout title="Program Blueprint" subtitle="PRINCE2 MSP Program Definition Document">
       <div className="space-y-6">
-        {/* Programme Selector */}
+        {/* Program Selector */}
         <div className="flex items-center gap-4">
           <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>
             <SelectTrigger className="w-[300px]">
@@ -303,7 +303,7 @@ export default function ProgrammeBlueprint() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Target className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold">Programme Vision</h3>
+                      <h3 className="font-semibold">Program Vision</h3>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleEditVision}>
                       <Edit className="h-4 w-4 mr-1" /> Edit
@@ -525,7 +525,7 @@ export default function ProgrammeBlueprint() {
                 <div className="metric-card">
                   <div className="flex items-center gap-2 mb-4">
                     <Shield className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Programme Governance Structure</h3>
+                    <h3 className="font-semibold">Program Governance Structure</h3>
                   </div>
                   <div className="space-y-4">
                     <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
@@ -696,7 +696,7 @@ export default function ProgrammeBlueprint() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Programme Description</Label>
+                <Label>Program Description</Label>
                 <Textarea
                   value={editForm.description || ""}
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}

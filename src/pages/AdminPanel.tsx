@@ -82,7 +82,7 @@ interface Organization {
 
 const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; className: string }> = {
   admin: { label: "Admin", icon: Crown, className: "bg-primary/10 text-primary" },
-  programme_owner: { label: "Programme Owner", icon: Briefcase, className: "bg-success/10 text-success" },
+  programme_owner: { label: "Program Owner", icon: Briefcase, className: "bg-success/10 text-success" },
   project_manager: { label: "Project Manager", icon: UserCog, className: "bg-warning/10 text-warning" },
   stakeholder: { label: "Stakeholder", icon: Users, className: "bg-muted text-muted-foreground" },
 };
@@ -438,7 +438,7 @@ export default function AdminPanel() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="programme_owner">Programme Owner</SelectItem>
+                              <SelectItem value="programme_owner">Program Owner</SelectItem>
                               <SelectItem value="project_manager">Project Manager</SelectItem>
                               <SelectItem value="stakeholder">Stakeholder</SelectItem>
                             </SelectContent>
