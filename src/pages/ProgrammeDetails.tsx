@@ -182,6 +182,7 @@ export default function ProgrammeDetails() {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProgramme = async () => {
