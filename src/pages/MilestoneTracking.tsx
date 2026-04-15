@@ -286,8 +286,8 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
     return acc;
   }, {} as Record<string, MilestoneData[]>);
 
-  return (
-    <AppLayout title="Milestone Tracking" subtitle="Track key deliverables, stage gates, and programme tranches">
+  const content = (
+    <>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <Card>

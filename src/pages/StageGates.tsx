@@ -231,11 +231,8 @@ export default function StageGates({ embedded }: { embedded?: boolean }) {
     return acc;
   }, {} as Record<string, StageGate[]>);
 
-  return (
-    <AppLayout
-      title="Stage Gates"
-      subtitle="PRINCE2 stage boundary reviews and go/no-go decision points"
-    >
+  const content = (
+    <>
       {/* PRINCE2 Info Card */}
       <Card className="mb-6 bg-primary/5 border-primary/20">
         <CardContent className="pt-4">
