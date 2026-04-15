@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -5,8 +6,12 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import ChangeControl from "./ChangeControl";
+import ExceptionManagement from "./ExceptionManagement";
+import QualityManagement from "./QualityManagement";
 import {
   ListTodo,
   Target,
@@ -19,6 +24,7 @@ import {
   XCircle,
   ArrowRight,
   TrendingUp,
+  LayoutDashboard,
 } from "lucide-react";
 import { format, parseISO, differenceInDays } from "date-fns";
 
@@ -193,7 +199,28 @@ export default function PRINCE2Dashboard() {
   const qualityPassRate = qualityStats.total > 0 ? Math.round((qualityStats.passed / (qualityStats.passed + qualityStats.failed || 1)) * 100) : 0;
 
   return (
-    <AppLayout title="PRINCE2 Dashboard" subtitle="Project management overview aligned with PRINCE2 methodology">
+    <AppLayout title="PRINCE2" subtitle="Project management aligned with PRINCE2 methodology">
+      <Tabs defaultValue="dashboard" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="dashboard" className="gap-2">
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="change-control" className="gap-2">
+            <FileEdit className="h-4 w-4" />
+            Change Control
+          </TabsTrigger>
+          <TabsTrigger value="exceptions" className="gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Exceptions
+          </TabsTrigger>
+          <TabsTrigger value="quality" className="gap-2">
+            <ClipboardCheck className="h-4 w-4" />
+            Quality
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dashboard">
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <Card>
@@ -517,6 +544,20 @@ export default function PRINCE2Dashboard() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="change-control">
+          <ChangeControl embedded />
+        </TabsContent>
+
+        <TabsContent value="exceptions">
+          <ExceptionManagement embedded />
+        </TabsContent>
+
+        <TabsContent value="quality">
+          <QualityManagement embedded />
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 }

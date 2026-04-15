@@ -56,16 +56,7 @@ const navigation: NavItem[] = [
       { label: "Stage Gates", href: "/prince2/stage-gates" },
     ],
   },
-  {
-    label: "PRINCE2",
-    icon: Shield,
-    children: [
-      { label: "Dashboard", href: "/prince2" },
-      { label: "Change Control", href: "/prince2/change-control" },
-      { label: "Exceptions", href: "/prince2/exceptions" },
-      { label: "Quality Management", href: "/prince2/quality" },
-    ],
-  },
+  { label: "PRINCE2", icon: Shield, href: "/prince2" },
   {
     label: "Registers",
     icon: ClipboardList,
@@ -88,7 +79,7 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Tasks", "Milestones", "PRINCE2", "Registers"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Tasks", "Milestones", "Registers"]);
 
   const getDisplayName = () => {
     if (userProfile?.first_name && userProfile?.last_name) {
