@@ -559,6 +559,44 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_updates: {
+        Row: {
+          created_at: string
+          created_by: string
+          entity_id: string
+          entity_type: string
+          id: string
+          organization_id: string | null
+          update_text: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          organization_id?: string | null
+          update_text: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          organization_id?: string | null
+          update_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_updates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exceptions: {
         Row: {
           cause: string | null
@@ -2790,6 +2828,7 @@ export type Database = {
       }
       weekly_reports: {
         Row: {
+          ai_summary: string | null
           approved_at: string | null
           approved_by: string | null
           created_at: string
@@ -2797,15 +2836,20 @@ export type Database = {
           id: string
           next_week: string[] | null
           overall_health: string
+          product_summary: string | null
           programme_id: string
+          programme_summary: string | null
+          project_summary: string | null
           risks_issues: string[] | null
           status: string
           submitted_at: string | null
           submitted_by: string | null
+          task_summary: string | null
           updated_at: string
           week_ending: string
         }
         Insert: {
+          ai_summary?: string | null
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string
@@ -2813,15 +2857,20 @@ export type Database = {
           id?: string
           next_week?: string[] | null
           overall_health?: string
+          product_summary?: string | null
           programme_id: string
+          programme_summary?: string | null
+          project_summary?: string | null
           risks_issues?: string[] | null
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
+          task_summary?: string | null
           updated_at?: string
           week_ending: string
         }
         Update: {
+          ai_summary?: string | null
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string
@@ -2829,11 +2878,15 @@ export type Database = {
           id?: string
           next_week?: string[] | null
           overall_health?: string
+          product_summary?: string | null
           programme_id?: string
+          programme_summary?: string | null
+          project_summary?: string | null
           risks_issues?: string[] | null
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
+          task_summary?: string | null
           updated_at?: string
           week_ending?: string
         }
