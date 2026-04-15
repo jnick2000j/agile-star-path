@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,6 +80,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 };
 
 export default function Products() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -218,7 +220,7 @@ export default function Products() {
                     const StageIcon = stageConf.icon;
                     const riceScore = calculateRICEScore(product);
                     return (
-                      <TableRow key={product.id} className="cursor-pointer hover:bg-muted/50">
+                      <TableRow key={product.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/products/details?id=${product.id}`)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
