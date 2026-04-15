@@ -51,7 +51,7 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Milestones"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const getDisplayName = () => {
     if (userProfile?.first_name && userProfile?.last_name) {
