@@ -37,6 +37,7 @@ import { CreateProductDialog } from "@/components/dialogs/CreateProductDialog";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Product {
   id: string;
@@ -86,6 +87,7 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("all");
   const { currentOrganization } = useOrganization();
+  const { user, userRole } = useAuth();
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -93,6 +95,27 @@ export default function Products() {
     
     if (currentOrganization) {
       query = query.eq("organization_id", currentOrganization.id);
+    }
+
+    // Product managers only see products assigned to them
+    if (userRole === "product_manager" && user) {
+      query = query.eq("product_owner_id", user.id);
+    }
+
+    // Product team members only see products they have access to
+    if (userRole === "product_team_member" && user) {
+      const { data: accessData } = await supabase
+        .from("user_product_access")
+        .select("product_id")
+        .eq("user_id", user.id);
+      const productIds = accessData?.map(a => a.product_id) || [];
+      if (productIds.length > 0) {
+        query = query.in("id", productIds);
+      } else {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
     }
 
     const { data, error } = await query;
@@ -106,7 +129,7 @@ export default function Products() {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentOrganization]);
+  }, [currentOrganization, user, userRole]);
 
   const calculateRICEScore = (product: Product) => {
     const { reach_score, impact_score, confidence_score, effort_score } = product;

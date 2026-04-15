@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trash2, Pencil, Building2, Briefcase, FolderKanban } from "lucide-react";
+import { Trash2, Pencil, Building2, Briefcase, FolderKanban, Package } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -36,7 +36,7 @@ interface AccessAssignment {
   user_id: string;
   user_email: string;
   user_name: string | null;
-  entity_type: "organization" | "program" | "project";
+  entity_type: "organization" | "program" | "project" | "product";
   entity_id: string;
   entity_name: string;
   access_level: string;
@@ -50,10 +50,11 @@ const accessLevelColors: Record<string, string> = {
   viewer: "bg-muted text-muted-foreground",
 };
 
-const entityIcons = {
+const entityIcons: Record<string, React.ElementType> = {
   organization: Building2,
   programme: Briefcase,
   project: FolderKanban,
+  product: Package,
 };
 
 export function UserAccessList() {
@@ -64,7 +65,7 @@ export function UserAccessList() {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const [orgAccess, progAccess, projAccess] = await Promise.all([
+      const [orgAccess, progAccess, projAccess, prodAccess] = await Promise.all([
         supabase
           .from("user_organization_access")
           .select("id, user_id, access_level, organization_id, organizations(name)")
@@ -76,6 +77,10 @@ export function UserAccessList() {
         supabase
           .from("user_project_access")
           .select("id, user_id, access_level, project_id, projects(name)")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_product_access")
+          .select("id, user_id, access_level, product_id, products(name)")
           .order("created_at", { ascending: false }),
       ]);
 
@@ -126,6 +131,20 @@ export function UserAccessList() {
         });
       });
 
+      prodAccess.data?.forEach((a: any) => {
+        const profile = profileMap.get(a.user_id);
+        allAssignments.push({
+          id: a.id,
+          user_id: a.user_id,
+          user_email: profile?.email || "Unknown",
+          user_name: profile?.full_name || null,
+          entity_type: "product",
+          entity_id: a.product_id,
+          entity_name: a.products?.name || "Unknown",
+          access_level: a.access_level,
+        });
+      });
+
       setAssignments(allAssignments);
     } catch (error) {
       console.error("Error fetching assignments:", error);
@@ -146,6 +165,8 @@ export function UserAccessList() {
           ? "user_organization_access"
           : assignment.entity_type === "program"
           ? "user_programme_access"
+          : assignment.entity_type === "product"
+          ? "user_product_access"
           : "user_project_access";
 
       const { error } = await supabase.from(table).update({ access_level: newLevel }).eq("id", assignment.id);
@@ -168,6 +189,8 @@ export function UserAccessList() {
           ? "user_organization_access"
           : assignment.entity_type === "program"
           ? "user_programme_access"
+          : assignment.entity_type === "product"
+          ? "user_product_access"
           : "user_project_access";
 
       const { error } = await supabase.from(table).delete().eq("id", assignment.id);

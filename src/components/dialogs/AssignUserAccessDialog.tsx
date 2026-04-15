@@ -50,6 +50,12 @@ interface Project {
   organization_id: string | null;
 }
 
+interface Product {
+  id: string;
+  name: string;
+  organization_id: string | null;
+}
+
 export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,9 +63,10 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   
   const [selectedUser, setSelectedUser] = useState("");
-  const [accessType, setAccessType] = useState<"organization" | "program" | "project">("organization");
+  const [accessType, setAccessType] = useState<"organization" | "program" | "project" | "product">("organization");
   const [selectedEntity, setSelectedEntity] = useState("");
   const [accessLevel, setAccessLevel] = useState("viewer");
 
@@ -70,17 +77,19 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
   }, [open]);
 
   const fetchData = async () => {
-    const [usersRes, orgsRes, progsRes, projsRes] = await Promise.all([
+    const [usersRes, orgsRes, progsRes, projsRes, prodsRes] = await Promise.all([
       supabase.from("profiles").select("id, user_id, email, full_name").order("email"),
       supabase.from("organizations").select("id, name").order("name"),
       supabase.from("programmes").select("id, name, organization_id").order("name"),
       supabase.from("projects").select("id, name, programme_id, organization_id").order("name"),
+      supabase.from("products").select("id, name, organization_id").order("name"),
     ]);
 
     if (usersRes.data) setUsers(usersRes.data);
     if (orgsRes.data) setOrganizations(orgsRes.data);
     if (progsRes.data) setProgrammes(progsRes.data);
     if (projsRes.data) setProjects(projsRes.data);
+    if (prodsRes.data) setProducts(prodsRes.data);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,6 +133,15 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
             access_level: accessLevel,
           }, { onConflict: "user_id,project_id" });
         error = insertError;
+      } else if (accessType === "product") {
+        const { error: insertError } = await supabase
+          .from("user_product_access")
+          .upsert({
+            user_id: user.user_id,
+            product_id: selectedEntity,
+            access_level: accessLevel,
+          }, { onConflict: "user_id,product_id" });
+        error = insertError;
       }
 
       if (error) throw error;
@@ -155,6 +173,8 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
         return programmes;
       case "project":
         return projects;
+      case "product":
+        return products;
       default:
         return [];
     }
@@ -226,6 +246,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
                   <SelectItem value="organization">Organization</SelectItem>
                   <SelectItem value="program">Program</SelectItem>
                   <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="product">Product</SelectItem>
                 </SelectContent>
               </Select>
             </div>

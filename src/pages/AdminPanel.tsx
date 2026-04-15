@@ -443,6 +443,9 @@ export default function AdminPanel() {
                               <SelectItem value="admin">Admin</SelectItem>
                               <SelectItem value="programme_owner">Program Owner</SelectItem>
                               <SelectItem value="project_manager">Project Manager</SelectItem>
+                              <SelectItem value="product_manager">Product Manager</SelectItem>
+                              <SelectItem value="product_team_member">Product Team Member</SelectItem>
+                              <SelectItem value="project_team_member">Project Team Member</SelectItem>
                               <SelectItem value="stakeholder">Stakeholder</SelectItem>
                             </SelectContent>
                           </Select>

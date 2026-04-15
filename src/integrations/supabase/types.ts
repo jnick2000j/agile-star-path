@@ -2750,6 +2750,38 @@ export type Database = {
           },
         ]
       }
+      user_product_access: {
+        Row: {
+          access_level: string
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_product_access_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_programme_access: {
         Row: {
           access_level: string
@@ -3031,6 +3063,10 @@ export type Database = {
       }
       has_org_access: {
         Args: { _min_level?: string; _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_product_access: {
+        Args: { _product_id: string; _user_id: string }
         Returns: boolean
       }
       has_programme_access: {
