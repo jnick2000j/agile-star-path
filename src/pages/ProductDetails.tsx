@@ -846,6 +846,24 @@ export default function ProductDetails() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="updates">
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress Updates</CardTitle>
+                <CardDescription>Timestamped updates for this product — these feed into weekly reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {product && (
+                  <EntityUpdates
+                    entityType="product"
+                    entityId={product.id}
+                    organizationId={product.organization_id}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </AppLayout>

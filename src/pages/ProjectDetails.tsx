@@ -1015,6 +1015,24 @@ export default function ProjectDetails() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="updates">
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress Updates</CardTitle>
+                <CardDescription>Timestamped updates for this project — these feed into weekly reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {project && (
+                  <EntityUpdates
+                    entityType="project"
+                    entityId={project.id}
+                    organizationId={project.organization_id}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </AppLayout>

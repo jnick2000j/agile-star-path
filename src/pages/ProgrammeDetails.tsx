@@ -825,6 +825,24 @@ export default function ProgrammeDetails() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="updates">
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress Updates</CardTitle>
+                <CardDescription>Timestamped updates for this programme — these feed into weekly reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {programme && (
+                  <EntityUpdates
+                    entityType="programme"
+                    entityId={programme.id}
+                    organizationId={programme.organization_id}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </AppLayout>
