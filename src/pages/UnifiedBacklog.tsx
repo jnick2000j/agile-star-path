@@ -73,7 +73,7 @@ const entityTypeConfig = {
   product: { icon: Package, color: "bg-warning/10 text-warning" },
 };
 
-export default function UnifiedBacklog() {
+export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
   const [items, setItems] = useState<BacklogItem[]>([]);
   const [programmes, setProgrammes] = useState<Entity[]>([]);
   const [projects, setProjects] = useState<Entity[]>([]);
@@ -307,8 +307,8 @@ export default function UnifiedBacklog() {
     return filteredItems.filter((item) => item.status === status);
   };
 
-  return (
-    <AppLayout title="Unified Backlog" subtitle="Manage work items across programmes, projects, and products">
+  const content = (
+    <>
       <div className="space-y-6">
         {/* Header Controls */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -531,6 +531,14 @@ export default function UnifiedBacklog() {
           ))}
         </div>
       </div>
+    </>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <AppLayout title="Unified Backlog" subtitle="Manage work items across programmes, projects, and products">
+      {content}
     </AppLayout>
   );
 }

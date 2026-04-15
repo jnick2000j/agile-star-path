@@ -106,7 +106,7 @@ const entityTypeConfig: Record<EntityType, { icon: React.ElementType; color: str
   product: { icon: Package, color: "bg-warning/10 text-warning", label: "Products" },
 };
 
-export default function SprintPlanning() {
+export default function SprintPlanning({ embedded }: { embedded?: boolean }) {
   const [sprints, setSprints] = useState<Sprint[]>([]);
   const [features, setFeatures] = useState<Feature[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -342,8 +342,8 @@ export default function SprintPlanning() {
     return s.product_id === entityFilter;
   });
 
-  return (
-    <AppLayout title="Sprint Planning" subtitle="Plan and manage sprints across programmes, projects, and products">
+  const content = (
+    <>
       <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as EntityType); setEntityFilter("all"); }}>
         <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
           <TabsList>
@@ -697,6 +697,14 @@ export default function SprintPlanning() {
         onUpdate={fetchData}
         products={products}
       />
+    </>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <AppLayout title="Sprint Planning" subtitle="Plan and manage sprints across programmes, projects, and products">
+      {content}
     </AppLayout>
   );
 }

@@ -93,7 +93,7 @@ const statusConfig: Record<TaskStatus, { label: string; icon: React.ElementType;
   cancelled: { label: "Cancelled", icon: XCircle, color: "bg-destructive/20 text-destructive" },
 };
 
-export default function TaskManagement() {
+export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -296,8 +296,8 @@ export default function TaskManagement() {
     return workPackages.find((wp) => wp.id === workPackageId)?.name || null;
   };
 
-  return (
-    <AppLayout title="Task Management" subtitle="PRINCE2 aligned task tracking with hierarchy">
+  const content = (
+    <>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <Card>
@@ -656,6 +656,14 @@ export default function TaskManagement() {
           </Table>
         </CardContent>
       </Card>
+    </>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <AppLayout title="Task Management" subtitle="PRINCE2 aligned task tracking with hierarchy">
+      {content}
     </AppLayout>
   );
 }
