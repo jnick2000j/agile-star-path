@@ -49,6 +49,7 @@ import ChangeControl from "./pages/ChangeControl";
 import ExceptionManagement from "./pages/ExceptionManagement";
 import QualityManagement from "./pages/QualityManagement";
 import PRINCE2Dashboard from "./pages/PRINCE2Dashboard";
+import Registers from "./pages/Registers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/products/dependencies" element={<ProtectedRoute><FeatureDependencies /></ProtectedRoute>} />
             <Route path="/planning/backlog" element={<ProtectedRoute><UnifiedBacklog /></ProtectedRoute>} />
             <Route path="/planning/sprints" element={<ProtectedRoute><SprintPlanning /></ProtectedRoute>} />
+            <Route path="/registers" element={<ProtectedRoute><Registers /></ProtectedRoute>} />
             <Route path="/registers/risks" element={<ProtectedRoute><RiskRegister /></ProtectedRoute>} />
             <Route path="/registers/issues" element={<ProtectedRoute><IssueRegister /></ProtectedRoute>} />
             <Route path="/registers/benefits" element={<ProtectedRoute><BenefitsRegister /></ProtectedRoute>} />
