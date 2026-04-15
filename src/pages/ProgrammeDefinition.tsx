@@ -166,18 +166,18 @@ export default function ProgrammeDefinition() {
   };
 
   const sections = [
-    { key: "vision_statement", label: "Vision Statement", icon: Target, description: "The desired future state the programme will deliver" },
+    { key: "vision_statement", label: "Vision Statement", icon: Target, description: "The desired future state the program will deliver" },
     { key: "strategic_objectives", label: "Strategic Objectives", icon: Target, description: "Key objectives aligned with organizational strategy" },
-    { key: "scope_statement", label: "Scope Statement", icon: FileText, description: "What is included within the programme boundaries" },
-    { key: "out_of_scope", label: "Out of Scope", icon: AlertCircle, description: "What is explicitly excluded from the programme" },
-    { key: "success_criteria", label: "Success Criteria", icon: CheckCircle2, description: "Measurable criteria to determine programme success" },
-    { key: "key_assumptions", label: "Key Assumptions", icon: FileText, description: "Assumptions that underpin the programme approach" },
+    { key: "scope_statement", label: "Scope Statement", icon: FileText, description: "What is included within the program boundaries" },
+    { key: "out_of_scope", label: "Out of Scope", icon: AlertCircle, description: "What is explicitly excluded from the program" },
+    { key: "success_criteria", label: "Success Criteria", icon: CheckCircle2, description: "Measurable criteria to determine program success" },
+    { key: "key_assumptions", label: "Key Assumptions", icon: FileText, description: "Assumptions that underpin the program approach" },
     { key: "constraints", label: "Constraints", icon: AlertCircle, description: "Limitations that affect programme delivery" },
-    { key: "dependencies", label: "Dependencies", icon: FileText, description: "External factors the programme depends on" },
+    { key: "dependencies", label: "Dependencies", icon: FileText, description: "External factors the program depends on" },
   ];
 
   return (
-    <AppLayout title="Programme Definition" subtitle="MSP Programme Definition Document">
+    <AppLayout title="Program Definition" subtitle="MSP Program Definition Document">
       <div className="space-y-6">
         {/* Programme Selector */}
         <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function ProgrammeDefinition() {
             <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>
               <SelectTrigger className="w-[300px]">
                 <Building2 className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Select programme" />
+                <SelectValue placeholder="Select program" />
               </SelectTrigger>
               <SelectContent>
                 {programmes.map(p => (
@@ -235,10 +235,10 @@ export default function ProgrammeDefinition() {
 
         {/* MSP Info */}
         <div className="p-4 rounded-lg bg-info/5 border border-info/20">
-          <h4 className="font-medium text-sm mb-2 text-info">MSP Programme Definition</h4>
+          <h4 className="font-medium text-sm mb-2 text-info">MSP Program Definition</h4>
           <p className="text-sm text-muted-foreground">
-            The Programme Definition Document captures the vision, scope, and strategic objectives. 
-            It provides a clear picture of what the programme will deliver and the boundaries within which it operates.
+            The Program Definition Document captures the vision, scope, and strategic objectives. 
+            It provides a clear picture of what the program will deliver and the boundaries within which it operates.
           </p>
         </div>
 
@@ -247,7 +247,7 @@ export default function ProgrammeDefinition() {
         ) : !selectedProgramme ? (
           <div className="metric-card text-center py-12">
             <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No programmes found</p>
+            <p className="text-muted-foreground">No programs found</p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">

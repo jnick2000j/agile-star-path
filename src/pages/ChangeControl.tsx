@@ -202,7 +202,7 @@ export default function ChangeControl() {
         raised_by: user?.id,
         owner_id: user?.id,
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
-        programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
+        programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
       });
       if (error) throw error;
@@ -258,7 +258,7 @@ export default function ChangeControl() {
       return projects.find((p) => p.id === cr.project_id)?.name || "Project";
     }
     if (cr.programme_id) {
-      return programmes.find((p) => p.id === cr.programme_id)?.name || "Programme";
+      return programmes.find((p) => p.id === cr.programme_id)?.name || "Program";
     }
     if (cr.product_id) {
       return products.find((p) => p.id === cr.product_id)?.name || "Product";
@@ -268,7 +268,7 @@ export default function ChangeControl() {
 
   const getEntityOptions = () => {
     if (formData.entity_type === "project") return projects;
-    if (formData.entity_type === "programme") return programmes;
+    if (formData.entity_type === "program") return programmes;
     if (formData.entity_type === "product") return products;
     return [];
   };
@@ -470,7 +470,7 @@ export default function ChangeControl() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="programme">Programme</SelectItem>
+                      <SelectItem value="program">Programme</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>
@@ -537,7 +537,7 @@ export default function ChangeControl() {
                   <Textarea
                     value={formData.impact_summary}
                     onChange={(e) => setFormData({ ...formData, impact_summary: e.target.value })}
-                    placeholder="Describe overall impact on project/programme"
+                    placeholder="Describe overall impact on project/program"
                   />
                 </div>
               </div>

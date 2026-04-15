@@ -259,14 +259,14 @@ export default function ProgrammeBlueprint() {
   };
 
   return (
-    <AppLayout title="Programme Blueprint" subtitle="PRINCE2 MSP Programme Definition Document">
+    <AppLayout title="Program Blueprint" subtitle="PRINCE2 MSP Program Definition Document">
       <div className="space-y-6">
         {/* Programme Selector */}
         <div className="flex items-center gap-4">
           <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>
             <SelectTrigger className="w-[300px]">
               <Building2 className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Select programme" />
+              <SelectValue placeholder="Select program" />
             </SelectTrigger>
             <SelectContent>
               {programmes.map(p => (
@@ -284,8 +284,8 @@ export default function ProgrammeBlueprint() {
         ) : !currentProgramme ? (
           <div className="metric-card text-center py-12">
             <Layers className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No programmes found</p>
-            <p className="text-sm text-muted-foreground">Create a programme to view its blueprint</p>
+            <p className="text-muted-foreground">No programs found</p>
+            <p className="text-sm text-muted-foreground">Create a program to view its blueprint</p>
           </div>
         ) : (
           <Tabs defaultValue="vision" className="space-y-6">
@@ -314,7 +314,7 @@ export default function ProgrammeBlueprint() {
                     <div>
                       <Label className="text-xs text-muted-foreground">Vision Statement</Label>
                       <p className="text-sm mt-1">
-                        {programmeDefinition?.vision_statement || currentProgramme.description || "Click Edit to define the programme vision statement."}
+                        {programmeDefinition?.vision_statement || currentProgramme.description || "Click Edit to define the program vision statement."}
                       </p>
                     </div>
                     
@@ -353,7 +353,7 @@ export default function ProgrammeBlueprint() {
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                      <span className="text-sm">Programme Sponsor</span>
+                      <span className="text-sm">Program Sponsor</span>
                       <span className="font-medium">{currentProgramme.sponsor || "Not assigned"}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
@@ -397,7 +397,7 @@ export default function ProgrammeBlueprint() {
               <div className="metric-card">
                 <div className="flex items-center gap-2 mb-4">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Programme Progress</h3>
+                  <h3 className="font-semibold">Program Progress</h3>
                 </div>
                 <div className="grid gap-4 md:grid-cols-4">
                   <div className="p-4 rounded-lg bg-secondary/50 text-center">
@@ -433,7 +433,7 @@ export default function ProgrammeBlueprint() {
                 </div>
                 
                 {programmeBenefits.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No benefits defined for this programme</p>
+                  <p className="text-muted-foreground text-center py-8">No benefits defined for this program</p>
                 ) : (
                   <div className="space-y-4">
                     {programmeBenefits.map(benefit => (
@@ -497,7 +497,7 @@ export default function ProgrammeBlueprint() {
                 </div>
 
                 {programmeProjects.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No projects in this programme</p>
+                  <p className="text-muted-foreground text-center py-8">No projects in this program</p>
                 ) : (
                   <div className="space-y-3">
                     {programmeProjects.map(project => (
@@ -537,8 +537,8 @@ export default function ProgrammeBlueprint() {
                       <p className="text-sm text-muted-foreground">Decision-making body for programme-level issues</p>
                     </div>
                     <div className="p-4 rounded-lg border">
-                      <h4 className="font-medium mb-2">Programme Manager</h4>
-                      <p className="text-sm text-muted-foreground">Day-to-day management of the programme</p>
+                      <h4 className="font-medium mb-2">Program Manager</h4>
+                      <p className="text-sm text-muted-foreground">Day-to-day management of the program</p>
                     </div>
                     <div className="p-4 rounded-lg border">
                       <h4 className="font-medium mb-2">Business Change Managers</h4>
@@ -692,7 +692,7 @@ export default function ProgrammeBlueprint() {
         <Dialog open={editingSection === "brief"} onOpenChange={() => setEditingSection(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Programme Brief</DialogTitle>
+              <DialogTitle>Edit Program Brief</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -700,12 +700,12 @@ export default function ProgrammeBlueprint() {
                 <Textarea
                   value={editForm.description || ""}
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  placeholder="Brief description of the programme..."
+                  placeholder="Brief description of the program..."
                   rows={3}
                 />
               </div>
               <div>
-                <Label>Programme Sponsor</Label>
+                <Label>Program Sponsor</Label>
                 <Input
                   value={editForm.sponsor || ""}
                   onChange={(e) => setEditForm({ ...editForm, sponsor: e.target.value })}

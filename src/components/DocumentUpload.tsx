@@ -17,7 +17,7 @@ interface Document {
 }
 
 type EntityType = 
-  | "programme" 
+  | "program" 
   | "project" 
   | "product"
   | "risk" 

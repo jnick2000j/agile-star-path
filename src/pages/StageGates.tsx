@@ -152,7 +152,7 @@ export default function StageGates() {
         organization_id: currentOrganization?.id,
         created_by: user?.id,
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
-        programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
+        programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
       });
       if (error) throw error;
     },
@@ -203,14 +203,14 @@ export default function StageGates() {
       return projects.find((p) => p.id === gate.project_id)?.name || "Project";
     }
     if (gate.programme_id) {
-      return programmes.find((p) => p.id === gate.programme_id)?.name || "Programme";
+      return programmes.find((p) => p.id === gate.programme_id)?.name || "Program";
     }
     return "—";
   };
 
   const getEntityOptions = () => {
     if (formData.entity_type === "project") return projects;
-    if (formData.entity_type === "programme") return programmes;
+    if (formData.entity_type === "program") return programmes;
     return [];
   };
 
@@ -364,7 +364,7 @@ export default function StageGates() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="programme">Programme</SelectItem>
+                      <SelectItem value="program">Programme</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

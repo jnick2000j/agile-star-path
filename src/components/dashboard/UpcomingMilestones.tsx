@@ -78,7 +78,7 @@ export function UpcomingMilestones() {
                 <div>
                   <p className="text-sm font-medium text-foreground">{project.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {project.programmes?.name || "No programme"}
+                    {project.programmes?.name || "No program"}
                   </p>
                 </div>
                 <div className="text-right">

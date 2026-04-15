@@ -166,10 +166,10 @@ export default function SuccessPlanPage() {
   };
 
   const sections = [
-    { key: "target_outcomes", label: "Target Outcomes", icon: Target, description: "The specific outcomes the programme aims to achieve" },
+    { key: "target_outcomes", label: "Target Outcomes", icon: Target, description: "The specific outcomes the program aims to achieve" },
     { key: "success_measures", label: "Success Measures", icon: TrendingUp, description: "How success will be measured and tracked" },
     { key: "key_milestones", label: "Key Milestones", icon: Calendar, description: "Major milestones and decision points" },
-    { key: "critical_success_factors", label: "Critical Success Factors", icon: CheckCircle2, description: "Factors essential for programme success" },
+    { key: "critical_success_factors", label: "Critical Success Factors", icon: CheckCircle2, description: "Factors essential for program success" },
     { key: "risk_mitigation", label: "Risk Mitigation", icon: Shield, description: "Key risks and mitigation strategies" },
     { key: "resource_requirements", label: "Resource Requirements", icon: Users, description: "Resources needed for successful delivery" },
     { key: "timeline_summary", label: "Timeline Summary", icon: Clock, description: "High-level timeline and key dates" },
@@ -177,7 +177,7 @@ export default function SuccessPlanPage() {
   ];
 
   return (
-    <AppLayout title="Success Plan" subtitle="MSP Programme Success Plan">
+    <AppLayout title="Success Plan" subtitle="MSP Program Success Plan">
       <div className="space-y-6">
         {/* Programme Selector */}
         <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function SuccessPlanPage() {
             <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>
               <SelectTrigger className="w-[300px]">
                 <Building2 className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Select programme" />
+                <SelectValue placeholder="Select program" />
               </SelectTrigger>
               <SelectContent>
                 {programmes.map(p => (
@@ -226,7 +226,7 @@ export default function SuccessPlanPage() {
         <div className="p-4 rounded-lg bg-info/5 border border-info/20">
           <h4 className="font-medium text-sm mb-2 text-info">MSP Success Plan</h4>
           <p className="text-sm text-muted-foreground">
-            The Success Plan defines how the programme will achieve its objectives, including target outcomes,
+            The Success Plan defines how the program will achieve its objectives, including target outcomes,
             success measures, critical success factors, and the approach to risk mitigation.
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function SuccessPlanPage() {
         ) : !selectedProgramme ? (
           <div className="metric-card text-center py-12">
             <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No programmes found</p>
+            <p className="text-muted-foreground">No programs found</p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">

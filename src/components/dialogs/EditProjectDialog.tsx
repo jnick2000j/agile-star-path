@@ -200,14 +200,14 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
               </Select>
             </div>
             <div>
-              <Label htmlFor="programme">Programme</Label>
+              <Label htmlFor="program">Programme</Label>
               <Select 
                 value={formData.programme_id} 
                 onValueChange={(v) => setFormData({ ...formData, programme_id: v })}
                 disabled={!canEdit}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
+                  <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
                   {programmes.map((p) => (

@@ -69,8 +69,8 @@ export function RecentActivity() {
         programmesRes.data.forEach(prog => {
           allActivities.push({
             id: prog.id,
-            type: "programme",
-            title: "Programme created",
+            type: "program",
+            title: "Program created",
             description: prog.name,
             time: prog.created_at,
           });

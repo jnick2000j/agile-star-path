@@ -11,7 +11,7 @@ export type StatusAction = "approved" | "rejected" | "deferred" | "reopened" | "
 interface StatusChangeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  entityType: "project" | "programme" | "product";
+  entityType: "project" | "program" | "product";
   entityName: string;
   currentStatus: string;
   action: StatusAction;

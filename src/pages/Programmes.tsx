@@ -110,7 +110,7 @@ export default function Programmes() {
   const activeFilterCount = statusFilters.length;
 
   return (
-    <AppLayout title="Programmes" subtitle="Manage programme portfolio">
+    <AppLayout title="Programs" subtitle="Manage programme portfolio">
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
@@ -189,13 +189,13 @@ export default function Programmes() {
               </div>
               <div className="flex items-center gap-1">
                 <DocumentUpload
-                  entityType="programme"
+                  entityType="program"
                   entityId={programme.id}
                   entityName={programme.name}
                   variant="icon"
                 />
                 <EntityStatusActions
-                  entityType="programme"
+                  entityType="program"
                   entityId={programme.id}
                   entityName={programme.name}
                   currentStatus={programme.status}

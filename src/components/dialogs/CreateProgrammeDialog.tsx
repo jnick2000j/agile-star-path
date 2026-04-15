@@ -62,7 +62,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
 
       if (error) throw error;
 
-      toast.success("Programme created successfully");
+      toast.success("Program created successfully");
       setOpen(false);
       setFormData({
         name: "",
@@ -79,7 +79,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
       onSuccess?.();
     } catch (error) {
       console.error("Error creating programme:", error);
-      toast.error("Failed to create programme");
+      toast.error("Failed to create program");
     } finally {
       setLoading(false);
     }
@@ -90,12 +90,12 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
-          New Programme
+          New Program
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Programme</DialogTitle>
+          <DialogTitle>Create New Program</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -113,7 +113,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
               </Select>
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="name">Programme Name *</Label>
+              <Label htmlFor="name">Program Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -202,7 +202,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Programme"}
+              {loading ? "Creating..." : "Create Program"}
             </Button>
           </div>
         </form>

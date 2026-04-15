@@ -198,7 +198,7 @@ export default function QualityManagement() {
         owner_id: user?.id,
         reviewer_id: user?.id,
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
-        programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
+        programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
       });
       if (error) throw error;
@@ -270,7 +270,7 @@ export default function QualityManagement() {
       return projects.find((p) => p.id === qr.project_id)?.name || "Project";
     }
     if (qr.programme_id) {
-      return programmes.find((p) => p.id === qr.programme_id)?.name || "Programme";
+      return programmes.find((p) => p.id === qr.programme_id)?.name || "Program";
     }
     if (qr.product_id) {
       return products.find((p) => p.id === qr.product_id)?.name || "Product";
@@ -280,7 +280,7 @@ export default function QualityManagement() {
 
   const getEntityOptions = () => {
     if (formData.entity_type === "project") return projects;
-    if (formData.entity_type === "programme") return programmes;
+    if (formData.entity_type === "program") return programmes;
     if (formData.entity_type === "product") return products;
     return [];
   };
@@ -472,7 +472,7 @@ export default function QualityManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="programme">Programme</SelectItem>
+                      <SelectItem value="program">Programme</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>

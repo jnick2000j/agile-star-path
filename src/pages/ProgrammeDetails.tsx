@@ -223,7 +223,7 @@ export default function ProgrammeDetails() {
     const { data } = await supabase
       .from("status_history")
       .select("*")
-      .eq("entity_type", "programme")
+      .eq("entity_type", "program")
       .eq("entity_id", programmeId)
       .order("changed_at", { ascending: false });
 
@@ -269,7 +269,7 @@ export default function ProgrammeDetails() {
 
   if (!programmeId) {
     return (
-      <AppLayout title="Programme Details" subtitle="View programme information">
+      <AppLayout title="Program Details" subtitle="View programme information">
         <div className="flex flex-col items-center justify-center py-12">
           <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground">No programme selected</p>
@@ -284,7 +284,7 @@ export default function ProgrammeDetails() {
 
   if (loading) {
     return (
-      <AppLayout title="Programme Details" subtitle="Loading...">
+      <AppLayout title="Program Details" subtitle="Loading...">
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -294,7 +294,7 @@ export default function ProgrammeDetails() {
 
   if (!programme) {
     return (
-      <AppLayout title="Programme Details" subtitle="Programme not found">
+      <AppLayout title="Program Details" subtitle="Programme not found">
         <div className="flex flex-col items-center justify-center py-12">
           <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
           <p className="text-muted-foreground">Programme not found</p>
@@ -316,7 +316,7 @@ export default function ProgrammeDetails() {
   return (
     <AppLayout 
       title={programme.name} 
-      subtitle="Programme Details"
+      subtitle="Program Details"
     >
       <div className="space-y-6">
         {/* Header with actions */}
@@ -327,12 +327,12 @@ export default function ProgrammeDetails() {
           </Button>
           <div className="flex items-center gap-2">
             <DocumentUpload
-              entityType="programme"
+              entityType="program"
               entityId={programme.id}
               entityName={programme.name}
             />
             <EntityStatusActions
-              entityType="programme"
+              entityType="program"
               entityId={programme.id}
               entityName={programme.name}
               currentStatus={programme.status}
@@ -428,13 +428,13 @@ export default function ProgrammeDetails() {
             <Card>
               <CardHeader>
                 <CardTitle>Linked Projects</CardTitle>
-                <CardDescription>Projects that are part of this programme</CardDescription>
+                <CardDescription>Projects that are part of this program</CardDescription>
               </CardHeader>
               <CardContent>
                 {projects.length === 0 ? (
                   <div className="text-center py-8">
                     <FolderKanban className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No projects linked to this programme</p>
+                    <p className="text-muted-foreground">No projects linked to this program</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate("/projects")}>
                       View All Projects
                     </Button>
@@ -482,7 +482,7 @@ export default function ProgrammeDetails() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Linked Products</CardTitle>
-                    <CardDescription>Products within this programme</CardDescription>
+                    <CardDescription>Products within this program</CardDescription>
                   </div>
                   <Button variant="outline" onClick={() => navigate("/products")}>
                     <Package className="h-4 w-4 mr-2" />
@@ -494,7 +494,7 @@ export default function ProgrammeDetails() {
                 {products.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No products linked to this programme</p>
+                    <p className="text-muted-foreground">No products linked to this program</p>
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -553,7 +553,7 @@ export default function ProgrammeDetails() {
                 {benefits.length === 0 ? (
                   <div className="text-center py-8">
                     <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No benefits registered for this programme</p>
+                    <p className="text-muted-foreground">No benefits registered for this program</p>
                     <Button variant="outline" className="mt-4" onClick={() => navigate("/registers/benefits")}>
                       Register Benefits
                     </Button>
@@ -617,7 +617,7 @@ export default function ProgrammeDetails() {
             <Card>
               <CardHeader>
                 <CardTitle>Status Timeline</CardTitle>
-                <CardDescription>History of status changes for this programme</CardDescription>
+                <CardDescription>History of status changes for this program</CardDescription>
               </CardHeader>
               <CardContent>
                 {statusHistory.length === 0 ? (

@@ -414,10 +414,10 @@ export default function BusinessRequirements() {
           <Select value={filterProgramme} onValueChange={setFilterProgramme}>
             <SelectTrigger className="w-[250px]">
               <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by programme" />
+              <SelectValue placeholder="Filter by program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programmes</SelectItem>
+              <SelectItem value="all">All Programs</SelectItem>
               {programmes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>

@@ -42,7 +42,7 @@ interface BacklogItem {
   status: string;
   priority: string;
   story_points: number | null;
-  entity_type: "programme" | "project" | "product";
+  entity_type: "program" | "project" | "product";
   entity_id: string;
   entity_name: string;
   sprint_id: string | null;
@@ -128,7 +128,7 @@ export default function UnifiedBacklog() {
 
     // Transform tasks to backlog items
     const taskItems: BacklogItem[] = (tasksRes.data || []).map((task: any) => {
-      let entityType: "programme" | "project" | "product" = "project";
+      let entityType: "program" | "project" | "product" = "project";
       let entityId = "";
       let entityName = "";
 
@@ -141,7 +141,7 @@ export default function UnifiedBacklog() {
         entityId = task.project_id;
         entityName = projectsRes.data?.find((p: Entity) => p.id === task.project_id)?.name || "Unknown";
       } else if (task.programme_id) {
-        entityType = "programme";
+        entityType = "program";
         entityId = task.programme_id;
         entityName = programmesRes.data?.find((p: Entity) => p.id === task.programme_id)?.name || "Unknown";
       }
@@ -232,13 +232,13 @@ export default function UnifiedBacklog() {
     }
 
     // Determine which entity type to create for
-    let entityType: "programme" | "project" | "product" | null = null;
+    let entityType: "program" | "project" | "product" | null = null;
     if (newItem.product_id) entityType = "product";
     else if (newItem.project_id) entityType = "project";
-    else if (newItem.programme_id) entityType = "programme";
+    else if (newItem.programme_id) entityType = "program";
 
     if (!entityType) {
-      toast.error("Please select a programme, project, or product");
+      toast.error("Please select a program, project, or product");
       return;
     }
 
@@ -329,7 +329,7 @@ export default function UnifiedBacklog() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="programme">Programmes</SelectItem>
+                <SelectItem value="program">Programmes</SelectItem>
                 <SelectItem value="project">Projects</SelectItem>
                 <SelectItem value="product">Products</SelectItem>
               </SelectContent>

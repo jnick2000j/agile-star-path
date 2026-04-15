@@ -86,7 +86,7 @@ interface Entity {
   name: string;
 }
 
-type EntityType = "programme" | "project" | "product";
+type EntityType = "program" | "project" | "product";
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   planning: { label: "Planning", color: "bg-muted text-muted-foreground", icon: Calendar },
@@ -101,7 +101,7 @@ const priorityColors: Record<string, string> = {
 };
 
 const entityTypeConfig: Record<EntityType, { icon: React.ElementType; color: string; label: string }> = {
-  programme: { icon: Layers, color: "bg-primary/10 text-primary", label: "Programmes" },
+  programme: { icon: Layers, color: "bg-primary/10 text-primary", label: "Programs" },
   project: { icon: FolderKanban, color: "bg-success/10 text-success", label: "Projects" },
   product: { icon: Package, color: "bg-warning/10 text-warning", label: "Products" },
 };
@@ -201,7 +201,7 @@ export default function SprintPlanning() {
     };
 
     // Set the appropriate entity ID
-    if (newSprint.entity_type === "programme") {
+    if (newSprint.entity_type === "program") {
       insertData.programme_id = newSprint.entity_id;
     } else if (newSprint.entity_type === "project") {
       insertData.project_id = newSprint.entity_id;
@@ -270,7 +270,7 @@ export default function SprintPlanning() {
 
   const getSprintsByEntityType = (type: EntityType) => {
     return sprints.filter(s => {
-      if (type === "programme") return s.programme_id != null;
+      if (type === "program") return s.programme_id != null;
       if (type === "project") return s.project_id != null;
       return s.product_id != null;
     });
@@ -290,7 +290,7 @@ export default function SprintPlanning() {
     }
     // For programmes and projects, return tasks without sprint
     return tasks.filter(t => {
-      if (type === "programme") return t.programme_id != null && !t.project_id;
+      if (type === "program") return t.programme_id != null && !t.project_id;
       return t.project_id != null;
     });
   };
@@ -330,14 +330,14 @@ export default function SprintPlanning() {
   };
 
   const getEntitiesForType = (type: EntityType) => {
-    if (type === "programme") return programmes;
+    if (type === "program") return programmes;
     if (type === "project") return projects;
     return products;
   };
 
   const filteredSprints = getSprintsByEntityType(activeTab).filter(s => {
     if (entityFilter === "all") return true;
-    if (activeTab === "programme") return s.programme_id === entityFilter;
+    if (activeTab === "program") return s.programme_id === entityFilter;
     if (activeTab === "project") return s.project_id === entityFilter;
     return s.product_id === entityFilter;
   });
@@ -410,7 +410,7 @@ export default function SprintPlanning() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="programme">Programme</SelectItem>
+                          <SelectItem value="program">Programme</SelectItem>
                           <SelectItem value="project">Project</SelectItem>
                           <SelectItem value="product">Product</SelectItem>
                         </SelectContent>

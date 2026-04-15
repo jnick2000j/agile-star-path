@@ -59,7 +59,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
   const [projects, setProjects] = useState<Project[]>([]);
   
   const [selectedUser, setSelectedUser] = useState("");
-  const [accessType, setAccessType] = useState<"organization" | "programme" | "project">("organization");
+  const [accessType, setAccessType] = useState<"organization" | "program" | "project">("organization");
   const [selectedEntity, setSelectedEntity] = useState("");
   const [accessLevel, setAccessLevel] = useState("viewer");
 
@@ -106,7 +106,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
             access_level: accessLevel,
           }, { onConflict: "user_id,organization_id" });
         error = insertError;
-      } else if (accessType === "programme") {
+      } else if (accessType === "program") {
         const { error: insertError } = await supabase
           .from("user_programme_access")
           .upsert({
@@ -151,7 +151,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
     switch (accessType) {
       case "organization":
         return organizations;
-      case "programme":
+      case "program":
         return programmes;
       case "project":
         return projects;
@@ -224,7 +224,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
                   <SelectItem value="organization">Organization</SelectItem>
-                  <SelectItem value="programme">Programme</SelectItem>
+                  <SelectItem value="program">Programme</SelectItem>
                   <SelectItem value="project">Project</SelectItem>
                 </SelectContent>
               </Select>
@@ -232,7 +232,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
 
             <div className="space-y-2">
               <Label>
-                {accessType === "organization" ? "Organization" : accessType === "programme" ? "Programme" : "Project"}
+                {accessType === "organization" ? "Organization" : accessType === "program" ? "Program" : "Project"}
               </Label>
               <Select value={selectedEntity} onValueChange={setSelectedEntity}>
                 <SelectTrigger>

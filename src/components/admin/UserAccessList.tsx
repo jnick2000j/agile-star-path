@@ -36,7 +36,7 @@ interface AccessAssignment {
   user_id: string;
   user_email: string;
   user_name: string | null;
-  entity_type: "organization" | "programme" | "project";
+  entity_type: "organization" | "program" | "project";
   entity_id: string;
   entity_name: string;
   access_level: string;
@@ -105,7 +105,7 @@ export function UserAccessList() {
           user_id: a.user_id,
           user_email: profile?.email || "Unknown",
           user_name: profile?.full_name || null,
-          entity_type: "programme",
+          entity_type: "program",
           entity_id: a.programme_id,
           entity_name: a.programmes?.name || "Unknown",
           access_level: a.access_level,
@@ -144,7 +144,7 @@ export function UserAccessList() {
       const table =
         assignment.entity_type === "organization"
           ? "user_organization_access"
-          : assignment.entity_type === "programme"
+          : assignment.entity_type === "program"
           ? "user_programme_access"
           : "user_project_access";
 
@@ -166,7 +166,7 @@ export function UserAccessList() {
       const table =
         assignment.entity_type === "organization"
           ? "user_organization_access"
-          : assignment.entity_type === "programme"
+          : assignment.entity_type === "program"
           ? "user_programme_access"
           : "user_project_access";
 

@@ -51,7 +51,7 @@ const mspPrinciples = [
   { title: "Remaining Aligned with Corporate Strategy", description: "The programme must remain aligned with the organization's strategic objectives throughout its lifecycle." },
   { title: "Leading Change", description: "Transformation requires active leadership to drive change across the organization and overcome resistance." },
   { title: "Envisioning and Communicating a Better Future", description: "A compelling vision must be developed and communicated to stakeholders to generate support and commitment." },
-  { title: "Focusing on Benefits and Threats to Them", description: "Benefits realization is the primary measure of programme success. Threats must be actively managed." },
+  { title: "Focusing on Benefits and Threats to Them", description: "Benefits realization is the primary measure of program success. Threats must be actively managed." },
   { title: "Adding Value", description: "The programme must deliver more value than the sum of its component projects." },
   { title: "Designing and Delivering a Coherent Capability", description: "Projects must be coordinated to deliver capabilities that enable benefit realization." },
   { title: "Learning from Experience", description: "Continuous improvement through capturing and applying lessons learned." },
@@ -97,7 +97,7 @@ const templates: Template[] = [
     content: `# Programme Mandate
 
 ## 1. Programme Background
-[Describe the strategic context and drivers for this programme]
+[Describe the strategic context and drivers for this program]
 
 ## 2. Programme Objectives
 - Objective 1: [Description]
@@ -121,7 +121,7 @@ const templates: Template[] = [
 
 ## 5. Key Stakeholders
 - Sponsor: [Name]
-- Programme Manager: [Name]
+- Program Manager: [Name]
 - Key Stakeholders: [List]
 
 ## 6. Initial Estimates
@@ -717,18 +717,18 @@ const mspPhases = [
       "Understand strategic objectives",
       "Identify candidate programmes",
       "Develop initial vision",
-      "Create Programme Mandate"
+      "Create Program Mandate"
     ],
     outputs: ["Programme Mandate", "Strategic alignment confirmation"]
   },
   {
     name: "Defining a Programme",
-    purpose: "Develop the programme to the point where it can be approved",
+    purpose: "Develop the program to the point where it can be approved",
     activities: [
       "Develop the Vision Statement",
       "Create the Blueprint",
       "Identify benefits and design Benefits Realization",
-      "Design the programme organization",
+      "Design the program organization",
       "Plan the tranches",
       "Develop the Business Case"
     ],
@@ -770,7 +770,7 @@ const mspPhases = [
   },
   {
     name: "Closing a Programme",
-    purpose: "Confirm the programme has achieved its objectives and can close",
+    purpose: "Confirm the program has achieved its objectives and can close",
     activities: [
       "Confirm benefits realization plan handover",
       "Close remaining projects",
@@ -938,7 +938,7 @@ export default function Documentation() {
                   <h4 className="font-medium mb-2">System Roles</h4>
                   <ul className="space-y-1 text-muted-foreground">
                     <li>• <strong>Admin:</strong> Full system access, user management, delete users</li>
-                    <li>• <strong>Programme Manager:</strong> Manage programmes and projects</li>
+                    <li>• <strong>Program Manager:</strong> Manage programs and projects</li>
                     <li>• <strong>Project Manager:</strong> Manage assigned projects</li>
                     <li>• <strong>Team Member:</strong> View and update assigned tasks</li>
                     <li>• <strong>Viewer:</strong> Read-only access to assigned areas</li>

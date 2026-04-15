@@ -19,7 +19,7 @@ serve(async (req) => {
 
     console.log("Checking for notifications to create...");
 
-    // Get all users who are programme managers or admins
+    // Get all users who are program managers or admins
     const { data: users } = await supabase
       .from("profiles")
       .select("user_id, email")

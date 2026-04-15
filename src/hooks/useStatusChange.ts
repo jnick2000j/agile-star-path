@@ -18,7 +18,7 @@ export function useStatusChange() {
   const { user } = useAuth();
 
   const changeStatus = async (
-    entityType: "project" | "programme" | "product" | "work_package",
+    entityType: "project" | "program" | "product" | "work_package",
     entityId: string,
     currentStatus: string,
     action: StatusAction,
@@ -36,7 +36,7 @@ export function useStatusChange() {
       // Update the entity status based on entity type
       let updateError: Error | null = null;
       
-      if (entityType === "programme") {
+      if (entityType === "program") {
         const { error } = await supabase
           .from("programmes")
           .update({ 
@@ -111,7 +111,7 @@ export function useStatusChange() {
   };
 
   const recordInitialStatus = async (
-    entityType: "project" | "programme" | "product" | "work_package",
+    entityType: "project" | "program" | "product" | "work_package",
     entityId: string,
     status: string
   ) => {

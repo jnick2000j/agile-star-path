@@ -252,7 +252,7 @@ export default function ProgrammeTranches() {
           onValueChange={(v) => setFormData({ ...formData, programme_id: v })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select programme" />
+            <SelectValue placeholder="Select program" />
           </SelectTrigger>
           <SelectContent>
             {programmes.map(p => (
@@ -335,7 +335,7 @@ export default function ProgrammeTranches() {
   );
 
   return (
-    <AppLayout title="Programme Tranches" subtitle="MSP Tranche Management and Gate Reviews">
+    <AppLayout title="Program Tranches" subtitle="MSP Tranche Management and Gate Reviews">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -389,7 +389,7 @@ export default function ProgrammeTranches() {
         <div className="p-4 rounded-lg bg-info/5 border border-info/20">
           <h4 className="font-medium text-sm mb-2 text-info">MSP Tranche Management</h4>
           <p className="text-sm text-muted-foreground">
-            Tranches are discrete periods within a programme where specific outcomes are delivered. 
+            Tranches are discrete periods within a program where specific outcomes are delivered. 
             Each tranche ends with a gate review to assess progress, validate benefits, and authorize the next tranche.
           </p>
         </div>
