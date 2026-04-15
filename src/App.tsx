@@ -43,6 +43,7 @@ import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import BrandingSettings from "./pages/BrandingSettings";
 import TaskManagement from "./pages/TaskManagement";
+import Tasks from "./pages/Tasks";
 import MilestoneTracking from "./pages/MilestoneTracking";
 import StageGates from "./pages/StageGates";
 import ChangeControl from "./pages/ChangeControl";
@@ -100,6 +101,7 @@ const App = () => (
             <Route path="/branding" element={<ProtectedRoute><BrandingSettings /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><AdminPanel /></ProtectedRoute>} />
             <Route path="/prince2" element={<ProtectedRoute><PRINCE2Dashboard /></ProtectedRoute>} />
+            <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
             <Route path="/prince2/tasks" element={<ProtectedRoute><TaskManagement /></ProtectedRoute>} />
             <Route path="/prince2/milestones" element={<ProtectedRoute><MilestoneTracking /></ProtectedRoute>} />
             <Route path="/prince2/stage-gates" element={<ProtectedRoute><StageGates /></ProtectedRoute>} />
