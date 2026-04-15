@@ -556,6 +556,14 @@ export default function PRINCE2Dashboard() {
       </Card>
         </TabsContent>
 
+        <TabsContent value="milestones">
+          <MilestoneTracking embedded />
+        </TabsContent>
+
+        <TabsContent value="stage-gates">
+          <StageGates embedded />
+        </TabsContent>
+
         <TabsContent value="change-control">
           <ChangeControl embedded />
         </TabsContent>
