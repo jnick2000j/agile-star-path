@@ -460,6 +460,10 @@ export default function ProductDetails() {
               <Link2 className="h-4 w-4" />
               Dependencies ({dependencies.length})
             </TabsTrigger>
+            <TabsTrigger value="updates" className="gap-2">
+              <MessageSquarePlus className="h-4 w-4" />
+              Updates
+            </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
               Status Timeline
