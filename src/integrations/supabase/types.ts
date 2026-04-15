@@ -2221,6 +2221,7 @@ export type Database = {
           product_id: string | null
           programme_id: string | null
           project_id: string | null
+          sprint_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           story_points: number | null
           updated_at: string
@@ -2247,6 +2248,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
           updated_at?: string
@@ -2273,6 +2275,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
           updated_at?: string
@@ -2319,6 +2322,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "sprints"
             referencedColumns: ["id"]
           },
         ]

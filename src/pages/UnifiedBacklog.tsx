@@ -3,7 +3,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   Plus,
@@ -12,6 +11,8 @@ import {
   Layers,
   FolderKanban,
   Package,
+  ListTodo,
+  Sparkles,
 } from "lucide-react";
 import {
   Dialog,
@@ -34,14 +35,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { EntitySelector } from "@/components/EntitySelector";
+import { EditBacklogItemDialog } from "@/components/dialogs/EditBacklogItemDialog";
 
 interface BacklogItem {
   id: string;
+  raw_id: string;
   name: string;
   description: string | null;
   status: string;
   priority: string;
   story_points: number | null;
+  item_type: "task" | "feature";
   entity_type: "program" | "project" | "product";
   entity_id: string;
   entity_name: string;
@@ -73,6 +77,11 @@ const entityTypeConfig = {
   product: { icon: Package, color: "bg-warning/10 text-warning" },
 };
 
+const itemTypeConfig = {
+  task: { icon: ListTodo, color: "bg-blue-500/10 text-blue-600 border-blue-500/30", label: "Task" },
+  feature: { icon: Sparkles, color: "bg-purple-500/10 text-purple-600 border-purple-500/30", label: "Feature" },
+};
+
 export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
   const [items, setItems] = useState<BacklogItem[]>([]);
   const [programmes, setProgrammes] = useState<Entity[]>([]);
@@ -82,8 +91,11 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [itemTypeFilter, setItemTypeFilter] = useState<string>("all");
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<BacklogItem | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
 
@@ -100,7 +112,6 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
   const fetchData = async () => {
     setLoading(true);
 
-    // Build queries with org filtering
     let programmesQuery = supabase.from("programmes").select("id, name").order("name");
     let projectsQuery = supabase.from("projects").select("id, name").order("name");
     let productsQuery = supabase.from("products").select("id, name").order("name");
@@ -126,7 +137,6 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
     setProjects(projectsRes.data || []);
     setProducts(productsRes.data || []);
 
-    // Transform tasks to backlog items
     const taskItems: BacklogItem[] = (tasksRes.data || []).map((task: any) => {
       let entityType: "program" | "project" | "product" = "project";
       let entityId = "";
@@ -146,7 +156,6 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
         entityName = programmesRes.data?.find((p: Entity) => p.id === task.programme_id)?.name || "Unknown";
       }
 
-      // Map task status to backlog status
       let status = "backlog";
       if (task.status === "not_started") status = "backlog";
       else if (task.status === "in_progress") status = "in_progress";
@@ -155,26 +164,29 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
 
       return {
         id: `task-${task.id}`,
+        raw_id: task.id,
         name: task.name,
         description: task.description,
         status,
         priority: task.priority,
         story_points: task.story_points,
+        item_type: "task" as const,
         entity_type: entityType,
         entity_id: entityId,
         entity_name: entityName,
-        sprint_id: null,
+        sprint_id: task.sprint_id || null,
       };
     });
 
-    // Transform features to backlog items
     const featureItems: BacklogItem[] = (featuresRes.data || []).map((feature: any) => ({
       id: `feature-${feature.id}`,
+      raw_id: feature.id,
       name: feature.name,
       description: feature.description,
       status: feature.status,
       priority: feature.priority,
       story_points: feature.story_points,
+      item_type: "feature" as const,
       entity_type: "product" as const,
       entity_id: feature.product_id,
       entity_name: productsRes.data?.find((p: Entity) => p.id === feature.product_id)?.name || "Unknown",
@@ -200,12 +212,13 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
   const handleDrop = async (newStatus: string) => {
     if (!draggedItem) return;
 
-    const [type, id] = draggedItem.split("-");
-    const table = type === "task" ? "tasks" : "product_features";
+    const item = items.find(i => i.id === draggedItem);
+    if (!item) return;
 
-    // Map backlog status to task/feature status
+    const table = item.item_type === "task" ? "tasks" : "product_features";
+
     let dbStatus = newStatus;
-    if (type === "task") {
+    if (item.item_type === "task") {
       if (newStatus === "backlog") dbStatus = "not_started";
       else if (newStatus === "planned") dbStatus = "on_hold";
       else if (newStatus === "review") dbStatus = "in_progress";
@@ -213,9 +226,9 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
     }
 
     try {
-      await supabase.from(table).update({ status: dbStatus }).eq("id", id);
+      await supabase.from(table).update({ status: dbStatus }).eq("id", item.raw_id);
       setItems((prev) =>
-        prev.map((item) => (item.id === draggedItem ? { ...item, status: newStatus } : item))
+        prev.map((i) => (i.id === draggedItem ? { ...i, status: newStatus } : i))
       );
       toast.success("Item status updated");
     } catch (error) {
@@ -225,13 +238,17 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
     setDraggedItem(null);
   };
 
+  const handleItemClick = (item: BacklogItem) => {
+    setSelectedItem(item);
+    setEditDialogOpen(true);
+  };
+
   const handleCreateItem = async () => {
     if (!newItem.name) {
       toast.error("Please enter a name");
       return;
     }
 
-    // Determine which entity type to create for
     let entityType: "program" | "project" | "product" | null = null;
     if (newItem.product_id) entityType = "product";
     else if (newItem.project_id) entityType = "project";
@@ -242,7 +259,6 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
       return;
     }
 
-    // Create as task for programmes/projects, feature for products
     if (entityType === "product") {
       const { error } = await supabase.from("product_features").insert({
         name: newItem.name,
@@ -300,7 +316,8 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesEntity = entityFilter === "all" || item.entity_id === entityFilter;
     const matchesType = typeFilter === "all" || item.entity_type === typeFilter;
-    return matchesSearch && matchesEntity && matchesType;
+    const matchesItemType = itemTypeFilter === "all" || item.item_type === itemTypeFilter;
+    return matchesSearch && matchesEntity && matchesType && matchesItemType;
   });
 
   const getItemsForStatus = (status: string) => {
@@ -322,6 +339,16 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
                 className="pl-9"
               />
             </div>
+            <Select value={itemTypeFilter} onValueChange={setItemTypeFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Item type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="task">Tasks</SelectItem>
+                <SelectItem value="feature">Features</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[150px]">
                 <Filter className="h-4 w-4 mr-2" />
@@ -479,19 +506,26 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
                     const priorityConf = priorityConfig[item.priority] || priorityConfig.medium;
                     const entityConf = entityTypeConfig[item.entity_type];
                     const EntityIcon = entityConf.icon;
+                    const itemConf = itemTypeConfig[item.item_type];
+                    const ItemTypeIcon = itemConf.icon;
 
                     return (
                       <div
                         key={item.id}
                         draggable
                         onDragStart={() => handleDragStart(item.id)}
-                        className={`p-3 rounded-lg bg-card border-2 cursor-move transition-all hover:shadow-md ${priorityConf.color}`}
+                        onClick={() => handleItemClick(item)}
+                        className={`p-3 rounded-lg bg-card border-2 cursor-pointer transition-all hover:shadow-md hover:ring-2 hover:ring-primary/30 ${priorityConf.color}`}
                       >
                         <div className="flex items-start gap-2">
                           <GripVertical className="h-4 w-4 mt-0.5 opacity-50 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm">{item.name}</p>
-                            <div className="flex items-center gap-1 mt-1">
+                            <div className="flex items-center gap-1 mt-1 flex-wrap">
+                              <Badge variant="outline" className={`text-xs ${itemConf.color}`}>
+                                <ItemTypeIcon className="h-3 w-3 mr-1" />
+                                {itemConf.label}
+                              </Badge>
                               <Badge className={`text-xs ${entityConf.color}`}>
                                 <EntityIcon className="h-3 w-3 mr-1" />
                                 {item.entity_type}
@@ -531,6 +565,25 @@ export default function UnifiedBacklog({ embedded }: { embedded?: boolean }) {
           ))}
         </div>
       </div>
+
+      <EditBacklogItemDialog
+        item={selectedItem ? {
+          id: selectedItem.raw_id,
+          name: selectedItem.name,
+          description: selectedItem.description,
+          status: selectedItem.item_type === "task" 
+            ? (selectedItem.status === "backlog" ? "not_started" : selectedItem.status === "planned" ? "on_hold" : selectedItem.status === "done" ? "completed" : selectedItem.status)
+            : selectedItem.status,
+          priority: selectedItem.priority,
+          story_points: selectedItem.story_points,
+          item_type: selectedItem.item_type,
+          entity_type: selectedItem.entity_type,
+          entity_name: selectedItem.entity_name,
+        } : null}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdate={fetchData}
+      />
     </>
   );
 
