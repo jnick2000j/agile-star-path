@@ -310,18 +310,16 @@ export default function ProjectDetails() {
   const fetchProducts = async () => {
     if (!projectId) return;
 
-    // Fetch products linked to the same programme as this project
-    if (!project?.programme_id) {
-      setProducts([]);
-      return;
+    // Fetch products directly linked to this project, or linked via the same programme
+    let query = supabase.from("products").select("*").order("name");
+
+    if (project?.programme_id) {
+      query = query.or(`project_id.eq.${projectId},programme_id.eq.${project.programme_id}`);
+    } else {
+      query = query.eq("project_id", projectId);
     }
 
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .eq("programme_id", project.programme_id)
-      .order("name");
-
+    const { data } = await query;
     setProducts(data || []);
   };
 

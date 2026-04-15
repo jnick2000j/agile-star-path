@@ -24,11 +24,18 @@ interface Program {
   name: string;
 }
 
+interface ProjectItem {
+  id: string;
+  name: string;
+  programme_id: string | null;
+}
+
 export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [programmes, setProgrammes] = useState<Program[]>([]);
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -36,6 +43,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
     description: "",
     organization_id: "",
     programme_id: "",
+    project_id: "",
     stage: "discovery",
     product_type: "digital",
     status: "concept",
@@ -49,12 +57,14 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [orgsRes, progsRes] = await Promise.all([
+      const [orgsRes, progsRes, projsRes] = await Promise.all([
         supabase.from("organizations").select("id, name").order("name"),
         supabase.from("programmes").select("id, name").order("name"),
+        supabase.from("projects").select("id, name, programme_id").order("name"),
       ]);
       if (orgsRes.data) setOrganizations(orgsRes.data);
       if (progsRes.data) setProgrammes(progsRes.data);
+      if (projsRes.data) setProjects(projsRes.data);
     };
     if (open) fetchData();
   }, [open]);
@@ -69,6 +79,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
         ...formData,
         organization_id: formData.organization_id || null,
         programme_id: formData.programme_id || null,
+        project_id: formData.project_id && formData.project_id !== "none" ? formData.project_id : null,
         launch_date: formData.launch_date || null,
         created_by: user.id,
         product_owner_id: user.id,
@@ -83,6 +94,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
         description: "",
         organization_id: "",
         programme_id: "",
+        project_id: "",
         stage: "discovery",
         product_type: "digital",
         status: "concept",
@@ -157,6 +169,22 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
                   {programmes.map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="project">Related Project</Label>
+              <Select value={formData.project_id} onValueChange={(v) => setFormData({ ...formData, project_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {projects
+                    .filter((p) => !formData.programme_id || p.programme_id === formData.programme_id || !p.programme_id)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
