@@ -103,9 +103,22 @@ export default function WeeklyUpdates() {
     },
   });
 
-  const filteredReports = reports.filter((r: any) =>
-    r.programmes?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const getReportEntityName = (report: any) => {
+    if (report.report_type === "project" && report.projects?.name) return report.projects.name;
+    if (report.report_type === "product" && report.products?.name) return report.products.name;
+    return report.programmes?.name || "Unknown";
+  };
+
+  const getReportTypeLabel = (report: any) => {
+    if (report.report_type === "project") return "Project";
+    if (report.report_type === "product") return "Product";
+    return "Program";
+  };
+
+  const filteredReports = reports.filter((r: any) => {
+    const name = getReportEntityName(r);
+    return name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const draftCount = reports.filter((r: any) => r.status === "draft").length;
   const submittedCount = reports.filter((r: any) => r.status === "submitted").length;
