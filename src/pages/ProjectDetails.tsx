@@ -141,6 +141,7 @@ const productStageConfig: Record<string, { label: string; className: string }> =
   sunset: { label: "Sunset", className: "bg-orange-500/10 text-orange-600" },
 };
 
+const wpStatusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "Pending", className: "bg-muted text-muted-foreground" },
   authorized: { label: "Authorized", className: "bg-info/10 text-info" },
   in_progress: { label: "In Progress", className: "bg-warning/10 text-warning" },
