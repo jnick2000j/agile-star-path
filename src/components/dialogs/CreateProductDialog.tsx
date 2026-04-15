@@ -19,7 +19,7 @@ interface Organization {
   name: string;
 }
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
 }
@@ -28,7 +28,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -148,10 +148,10 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="programme">Related Programme</Label>
+              <Label htmlFor="program">Related Program</Label>
               <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
+                  <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
                   {programmes.map((p) => (

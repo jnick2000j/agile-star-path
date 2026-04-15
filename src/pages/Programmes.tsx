@@ -27,7 +27,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   description: string | null;
@@ -56,7 +56,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function Programmes() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
@@ -101,7 +101,7 @@ export default function Programmes() {
     setStatusFilters([]);
   };
 
-  const filteredProgrammes = programmes.filter((p) => {
+  const filteredPrograms = programmes.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilters.length === 0 || statusFilters.includes(p.status);
     return matchesSearch && matchesStatus;
@@ -110,7 +110,7 @@ export default function Programmes() {
   const activeFilterCount = statusFilters.length;
 
   return (
-    <AppLayout title="Programmes" subtitle="Manage programme portfolio">
+    <AppLayout title="Programs" subtitle="Manage programme portfolio">
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
@@ -167,9 +167,9 @@ export default function Programmes() {
         </div>
       </div>
 
-      {/* Programme Cards */}
+      {/* Program Cards */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {filteredProgrammes.map((programme, index) => (
+        {filteredPrograms.map((programme, index) => (
           <div
             key={programme.id}
             className="metric-card group animate-slide-up"
@@ -189,13 +189,13 @@ export default function Programmes() {
               </div>
               <div className="flex items-center gap-1">
                 <DocumentUpload
-                  entityType="programme"
+                  entityType="program"
                   entityId={programme.id}
                   entityName={programme.name}
                   variant="icon"
                 />
                 <EntityStatusActions
-                  entityType="programme"
+                  entityType="program"
                   entityId={programme.id}
                   entityName={programme.name}
                   currentStatus={programme.status}

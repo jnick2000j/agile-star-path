@@ -13,7 +13,7 @@ import { StatusHistoryDialog } from "@/components/dialogs/StatusHistoryDialog";
 import { useStatusChange } from "@/hooks/useStatusChange";
 
 interface EntityStatusActionsProps {
-  entityType: "project" | "programme" | "product" | "work_package";
+  entityType: "project" | "program" | "product" | "work_package";
   entityId: string;
   entityName: string;
   currentStatus: string;

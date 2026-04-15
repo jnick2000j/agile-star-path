@@ -101,16 +101,16 @@ export function CreateWeeklyReportDialog({ open, onOpenChange }: CreateWeeklyRep
         <DialogHeader>
           <DialogTitle>Create Weekly Report</DialogTitle>
           <DialogDescription>
-            Create a new weekly status report for a programme.
+            Create a new weekly status report for a program.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Programme</Label>
+              <Label>Program</Label>
               <Select onValueChange={(value) => setValue("programme_id", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
+                  <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
                   {programmes?.map((programme) => (

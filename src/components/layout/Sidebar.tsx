@@ -38,12 +38,12 @@ interface NavItem {
 const navigation: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   {
-    label: "Programmes",
+    label: "Programs",
     icon: Layers,
     children: [
-      { label: "All Programmes", href: "/programmes" },
-      { label: "Programme Blueprint", href: "/programmes/blueprint" },
-      { label: "Programme Definition", href: "/programmes/definition" },
+      { label: "All Programs", href: "/programmes" },
+      { label: "Program Blueprint", href: "/programmes/blueprint" },
+      { label: "Program Definition", href: "/programmes/definition" },
       { label: "Success Plan", href: "/programmes/success-plan" },
       { label: "Tranches", href: "/programmes/tranches" },
     ],
@@ -116,7 +116,7 @@ const navigation: NavItem[] = [
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Programmes", "Projects", "Products", "Tasks", "Milestones", "PRINCE2", "Registers"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Programs", "Projects", "Products", "Tasks", "Milestones", "PRINCE2", "Registers"]);
 
   // Get display name from profile or fallback to email
   const getDisplayName = () => {

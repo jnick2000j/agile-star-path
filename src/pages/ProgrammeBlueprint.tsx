@@ -39,7 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useToast } from "@/hooks/use-toast";
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
   description: string | null;
@@ -91,7 +91,7 @@ interface Risk {
 }
 
 export default function ProgrammeBlueprint() {
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [programmeDefinition, setProgrammeDefinition] = useState<ProgrammeDefinition | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
@@ -99,7 +99,7 @@ export default function ProgrammeBlueprint() {
   const [selectedProgramme, setSelectedProgramme] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<ProgrammeDefinition & Programme>>({});
+  const [editForm, setEditForm] = useState<Partial<ProgrammeDefinition & Program>>({});
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
@@ -253,20 +253,20 @@ export default function ProgrammeBlueprint() {
       return;
     }
 
-    toast({ title: "Saved", description: "Programme brief updated successfully" });
+    toast({ title: "Saved", description: "Program brief updated successfully" });
     fetchData();
     setEditingSection(null);
   };
 
   return (
-    <AppLayout title="Programme Blueprint" subtitle="PRINCE2 MSP Programme Definition Document">
+    <AppLayout title="Program Blueprint" subtitle="PRINCE2 MSP Program Definition Document">
       <div className="space-y-6">
-        {/* Programme Selector */}
+        {/* Program Selector */}
         <div className="flex items-center gap-4">
           <Select value={selectedProgramme} onValueChange={setSelectedProgramme}>
             <SelectTrigger className="w-[300px]">
               <Building2 className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Select programme" />
+              <SelectValue placeholder="Select program" />
             </SelectTrigger>
             <SelectContent>
               {programmes.map(p => (
@@ -284,8 +284,8 @@ export default function ProgrammeBlueprint() {
         ) : !currentProgramme ? (
           <div className="metric-card text-center py-12">
             <Layers className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No programmes found</p>
-            <p className="text-sm text-muted-foreground">Create a programme to view its blueprint</p>
+            <p className="text-muted-foreground">No programs found</p>
+            <p className="text-sm text-muted-foreground">Create a program to view its blueprint</p>
           </div>
         ) : (
           <Tabs defaultValue="vision" className="space-y-6">
@@ -303,7 +303,7 @@ export default function ProgrammeBlueprint() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Target className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold">Programme Vision</h3>
+                      <h3 className="font-semibold">Program Vision</h3>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleEditVision}>
                       <Edit className="h-4 w-4 mr-1" /> Edit
@@ -314,7 +314,7 @@ export default function ProgrammeBlueprint() {
                     <div>
                       <Label className="text-xs text-muted-foreground">Vision Statement</Label>
                       <p className="text-sm mt-1">
-                        {programmeDefinition?.vision_statement || currentProgramme.description || "Click Edit to define the programme vision statement."}
+                        {programmeDefinition?.vision_statement || currentProgramme.description || "Click Edit to define the program vision statement."}
                       </p>
                     </div>
                     
@@ -345,7 +345,7 @@ export default function ProgrammeBlueprint() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold">Programme Brief</h3>
+                      <h3 className="font-semibold">Program Brief</h3>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleEditBrief}>
                       <Edit className="h-4 w-4 mr-1" /> Edit
@@ -353,7 +353,7 @@ export default function ProgrammeBlueprint() {
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                      <span className="text-sm">Programme Sponsor</span>
+                      <span className="text-sm">Program Sponsor</span>
                       <span className="font-medium">{currentProgramme.sponsor || "Not assigned"}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
@@ -397,7 +397,7 @@ export default function ProgrammeBlueprint() {
               <div className="metric-card">
                 <div className="flex items-center gap-2 mb-4">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Programme Progress</h3>
+                  <h3 className="font-semibold">Program Progress</h3>
                 </div>
                 <div className="grid gap-4 md:grid-cols-4">
                   <div className="p-4 rounded-lg bg-secondary/50 text-center">
@@ -433,7 +433,7 @@ export default function ProgrammeBlueprint() {
                 </div>
                 
                 {programmeBenefits.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No benefits defined for this programme</p>
+                  <p className="text-muted-foreground text-center py-8">No benefits defined for this program</p>
                 ) : (
                   <div className="space-y-4">
                     {programmeBenefits.map(benefit => (
@@ -497,7 +497,7 @@ export default function ProgrammeBlueprint() {
                 </div>
 
                 {programmeProjects.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No projects in this programme</p>
+                  <p className="text-muted-foreground text-center py-8">No projects in this program</p>
                 ) : (
                   <div className="space-y-3">
                     {programmeProjects.map(project => (
@@ -525,7 +525,7 @@ export default function ProgrammeBlueprint() {
                 <div className="metric-card">
                   <div className="flex items-center gap-2 mb-4">
                     <Shield className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Programme Governance Structure</h3>
+                    <h3 className="font-semibold">Program Governance Structure</h3>
                   </div>
                   <div className="space-y-4">
                     <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
@@ -533,12 +533,12 @@ export default function ProgrammeBlueprint() {
                       <p className="text-sm text-muted-foreground">Owns the business case, provides strategic direction</p>
                     </div>
                     <div className="p-4 rounded-lg border">
-                      <h4 className="font-medium mb-2">Programme Board</h4>
+                      <h4 className="font-medium mb-2">Program Board</h4>
                       <p className="text-sm text-muted-foreground">Decision-making body for programme-level issues</p>
                     </div>
                     <div className="p-4 rounded-lg border">
-                      <h4 className="font-medium mb-2">Programme Manager</h4>
-                      <p className="text-sm text-muted-foreground">Day-to-day management of the programme</p>
+                      <h4 className="font-medium mb-2">Program Manager</h4>
+                      <p className="text-sm text-muted-foreground">Day-to-day management of the program</p>
                     </div>
                     <div className="p-4 rounded-lg border">
                       <h4 className="font-medium mb-2">Business Change Managers</h4>
@@ -692,20 +692,20 @@ export default function ProgrammeBlueprint() {
         <Dialog open={editingSection === "brief"} onOpenChange={() => setEditingSection(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Programme Brief</DialogTitle>
+              <DialogTitle>Edit Program Brief</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Programme Description</Label>
+                <Label>Program Description</Label>
                 <Textarea
                   value={editForm.description || ""}
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  placeholder="Brief description of the programme..."
+                  placeholder="Brief description of the program..."
                   rows={3}
                 />
               </div>
               <div>
-                <Label>Programme Sponsor</Label>
+                <Label>Program Sponsor</Label>
                 <Input
                   value={editForm.sponsor || ""}
                   onChange={(e) => setEditForm({ ...editForm, sponsor: e.target.value })}

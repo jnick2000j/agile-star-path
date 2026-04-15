@@ -34,7 +34,7 @@ export function ProgrammeProgress() {
   if (isLoading) {
     return (
       <div className="metric-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
-        <h3 className="text-lg font-semibold text-foreground mb-6">Programme Progress</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-6">Program Progress</h3>
         <div className="text-center py-8 text-muted-foreground">Loading...</div>
       </div>
     );
@@ -43,9 +43,9 @@ export function ProgrammeProgress() {
   if (programmes.length === 0) {
     return (
       <div className="metric-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
-        <h3 className="text-lg font-semibold text-foreground mb-6">Programme Progress</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-6">Program Progress</h3>
         <div className="text-center py-8 text-muted-foreground">
-          No programmes yet. Create your first programme to track progress.
+          No programs yet. Create your first program to track progress.
         </div>
       </div>
     );
@@ -53,7 +53,7 @@ export function ProgrammeProgress() {
 
   return (
     <div className="metric-card animate-slide-up" style={{ animationDelay: "0.1s" }}>
-      <h3 className="text-lg font-semibold text-foreground mb-6">Programme Progress</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-6">Program Progress</h3>
       <div className="space-y-5">
         {programmes.map((programme) => (
           <div key={programme.id} className="space-y-2">

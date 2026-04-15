@@ -136,10 +136,10 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="programme">Programme</Label>
+              <Label htmlFor="program">Program</Label>
               <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select programme" />
+                  <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
                   {programmes.map((p) => (

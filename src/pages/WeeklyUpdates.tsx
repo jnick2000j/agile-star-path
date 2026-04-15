@@ -90,7 +90,7 @@ export default function WeeklyUpdates() {
   const approvedCount = reports.filter(r => r.status === "approved").length;
 
   return (
-    <AppLayout title="Weekly Updates" subtitle="Programme status reports and communications">
+    <AppLayout title="Weekly Updates" subtitle="Program status reports and communications">
       {/* Summary */}
       <div className="grid gap-4 md:grid-cols-4 mb-6">
         <div className="metric-card">
@@ -187,7 +187,7 @@ export default function WeeklyUpdates() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <div className={cn("h-3 w-3 rounded-full", healthConfig[health] || "bg-muted")} />
-                        <CardTitle className="text-lg">{report.programmes?.name || "Unknown Programme"}</CardTitle>
+                        <CardTitle className="text-lg">{report.programmes?.name || "Unknown Program"}</CardTitle>
                       </div>
                       <CardDescription>
                         Week ending {format(new Date(report.week_ending), "MMM d, yyyy")}

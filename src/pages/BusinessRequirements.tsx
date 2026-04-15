@@ -57,7 +57,7 @@ interface BusinessRequirement {
   product_id: string | null;
 }
 
-interface Programme { id: string; name: string; }
+interface Program { id: string; name: string; }
 interface Project { id: string; name: string; programme_id: string | null; }
 interface Product { id: string; name: string; programme_id: string | null; }
 
@@ -91,7 +91,7 @@ const defaultFormState = {
 
 export default function BusinessRequirements() {
   const [requirements, setRequirements] = useState<BusinessRequirement[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -315,7 +315,7 @@ export default function BusinessRequirements() {
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>Programme</Label>
+          <Label>Program</Label>
           <Select value={formData.programme_id || "none"} onValueChange={(v) => setFormData({ ...formData, programme_id: v === "none" ? "" : v })}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
@@ -414,10 +414,10 @@ export default function BusinessRequirements() {
           <Select value={filterProgramme} onValueChange={setFilterProgramme}>
             <SelectTrigger className="w-[250px]">
               <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by programme" />
+              <SelectValue placeholder="Filter by program" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Programmes</SelectItem>
+              <SelectItem value="all">All Programs</SelectItem>
               {programmes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>

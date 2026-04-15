@@ -50,7 +50,7 @@ interface Project {
   programme_id: string | null;
 }
 
-interface Programme {
+interface Program {
   id: string;
   name: string;
 }
@@ -73,7 +73,7 @@ interface ProjectBrief {
 
 export default function ProjectBriefs() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [programmes, setProgrammes] = useState<Programme[]>([]);
+  const [programmes, setProgrammes] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -350,7 +350,7 @@ export default function ProjectBriefs() {
                     </div>
                     {programme && (
                       <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                        <span className="text-sm">Programme</span>
+                        <span className="text-sm">Program</span>
                         <Badge variant="outline">{programme.name}</Badge>
                       </div>
                     )}

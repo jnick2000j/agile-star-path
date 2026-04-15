@@ -156,7 +156,7 @@ export default function ProjectDetails() {
   const projectId = searchParams.get("id");
 
   const [project, setProject] = useState<Project | null>(null);
-  const [programmeName, setProgrammeName] = useState<string | null>(null);
+  const [programName, setProgrammeName] = useState<string | null>(null);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -367,9 +367,9 @@ export default function ProjectDetails() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Layers className="h-4 w-4" />
-                  Programme
+                  
                 </div>
-                <p className="font-medium">{programmeName || "Not linked"}</p>
+                <p className="font-medium">{programName || "Not linked"}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

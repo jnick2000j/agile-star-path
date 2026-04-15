@@ -20,7 +20,7 @@ interface StatusHistoryEntry {
 interface StatusHistoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  entityType: "project" | "programme" | "product";
+  entityType: "project" | "program" | "product";
   entityId: string;
   entityName: string;
 }

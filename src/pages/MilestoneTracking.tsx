@@ -188,7 +188,7 @@ export default function MilestoneTracking() {
         created_by: user?.id,
         owner_id: user?.id,
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
-        programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
+        programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
         work_package_id: data.work_package_id || null,
       });
@@ -234,7 +234,7 @@ export default function MilestoneTracking() {
   // Filter milestones
   const filteredMilestones = milestones.filter((m) => {
     if (entityFilter === "project" && !m.project_id) return false;
-    if (entityFilter === "programme" && !m.programme_id) return false;
+    if (entityFilter === "program" && !m.programme_id) return false;
     if (entityFilter === "product" && !m.product_id) return false;
     if (typeFilter !== "all" && m.milestone_type !== typeFilter) return false;
     return true;
@@ -254,7 +254,7 @@ export default function MilestoneTracking() {
       return projects.find((p) => p.id === milestone.project_id)?.name || "Project";
     }
     if (milestone.programme_id) {
-      return programmes.find((p) => p.id === milestone.programme_id)?.name || "Programme";
+      return programmes.find((p) => p.id === milestone.programme_id)?.name || "Program";
     }
     if (milestone.product_id) {
       return products.find((p) => p.id === milestone.product_id)?.name || "Product";
@@ -264,7 +264,7 @@ export default function MilestoneTracking() {
 
   const getEntityOptions = () => {
     if (formData.entity_type === "project") return projects;
-    if (formData.entity_type === "programme") return programmes;
+    if (formData.entity_type === "program") return programmes;
     if (formData.entity_type === "product") return products;
     return [];
   };
@@ -357,7 +357,7 @@ export default function MilestoneTracking() {
             <SelectContent>
               <SelectItem value="all">All Entities</SelectItem>
               <SelectItem value="project">Projects</SelectItem>
-              <SelectItem value="programme">Programmes</SelectItem>
+              <SelectItem value="program">Programs</SelectItem>
               <SelectItem value="product">Products</SelectItem>
             </SelectContent>
           </Select>
@@ -416,7 +416,7 @@ export default function MilestoneTracking() {
                     <SelectContent>
                       <SelectItem value="deliverable">Key Deliverable</SelectItem>
                       <SelectItem value="stage_gate">Stage Gate</SelectItem>
-                      <SelectItem value="tranche">Programme Tranche</SelectItem>
+                      <SelectItem value="tranche">Program Tranche</SelectItem>
                       <SelectItem value="review">Review Point</SelectItem>
                     </SelectContent>
                   </Select>
@@ -442,7 +442,7 @@ export default function MilestoneTracking() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="programme">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>

@@ -90,7 +90,7 @@ export default function Auth() {
         // Update document title dynamically
         document.title = data.app_name
           ? `${data.app_name} – Sign In`
-          : "Programme Information Management Platform";
+          : "Program Information Management Platform";
       }
     };
     fetchGlobalBranding();
@@ -214,7 +214,7 @@ export default function Auth() {
             {branding?.app_name || "PIMP"}
           </h1>
           <p className={`${headerFontSizeClasses[branding?.header_font_size || "medium"].tagline} text-muted-foreground mt-3 max-w-md mx-auto leading-relaxed`}>
-            {branding?.app_tagline || "Programme Information Management Platform"}
+            {branding?.app_tagline || "Program Information Management Platform"}
           </p>
         </div>
 

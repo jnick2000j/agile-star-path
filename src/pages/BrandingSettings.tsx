@@ -108,7 +108,7 @@ export default function BrandingSettings() {
     accent_color: "#3b82f6",
     font_family: "Inter",
     app_name: "PIMP",
-    app_tagline: "Programme Information Management Platform",
+    app_tagline: "Program Information Management Platform",
     logo_size: "medium",
     show_logo: true,
     header_font_size: "medium",
@@ -156,7 +156,7 @@ export default function BrandingSettings() {
         accent_color: data.accent_color || "#3b82f6",
         font_family: data.font_family || "Inter",
         app_name: data.app_name || "PIMP",
-        app_tagline: data.app_tagline || "Programme Information Management Platform",
+        app_tagline: data.app_tagline || "Program Information Management Platform",
         logo_size: data.logo_size || "medium",
         show_logo: data.show_logo !== false,
         header_font_size: data.header_font_size || "medium",
@@ -170,7 +170,7 @@ export default function BrandingSettings() {
         accent_color: "#3b82f6",
         font_family: "Inter",
         app_name: "PIMP",
-        app_tagline: "Programme Information Management Platform",
+        app_tagline: "Program Information Management Platform",
         logo_size: "medium",
         show_logo: true,
         header_font_size: "medium",
@@ -353,7 +353,7 @@ export default function BrandingSettings() {
                   id="appTagline"
                   value={branding.app_tagline}
                   onChange={(e) => setBranding((prev) => ({ ...prev, app_tagline: e.target.value }))}
-                  placeholder="Programme Information Management Platform"
+                  placeholder="Program Information Management Platform"
                 />
                 <p className="text-sm text-muted-foreground">Subtitle displayed below the application name</p>
               </div>
@@ -617,7 +617,7 @@ export default function BrandingSettings() {
                 )}
               </div>
               <h2 className="text-xl font-bold text-center text-foreground">{branding.app_name || "PIMP"}</h2>
-              <p className="text-sm text-muted-foreground text-center">{branding.app_tagline || "Programme Information Management Platform"}</p>
+              <p className="text-sm text-muted-foreground text-center">{branding.app_tagline || "Program Information Management Platform"}</p>
               <div className="flex gap-2 justify-center mt-4">
                 <button
                   className="px-4 py-2 rounded-md text-white text-sm font-medium"

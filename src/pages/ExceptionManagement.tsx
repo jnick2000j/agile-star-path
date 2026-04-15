@@ -197,7 +197,7 @@ export default function ExceptionManagement() {
         raised_by: user?.id,
         owner_id: user?.id,
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
-        programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
+        programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
       });
       if (error) throw error;
     },
@@ -253,14 +253,14 @@ export default function ExceptionManagement() {
       return projects.find((p) => p.id === ex.project_id)?.name || "Project";
     }
     if (ex.programme_id) {
-      return programmes.find((p) => p.id === ex.programme_id)?.name || "Programme";
+      return programmes.find((p) => p.id === ex.programme_id)?.name || "Program";
     }
     return "—";
   };
 
   const getEntityOptions = () => {
     if (formData.entity_type === "project") return projects;
-    if (formData.entity_type === "programme") return programmes;
+    if (formData.entity_type === "program") return programmes;
     return [];
   };
 
@@ -449,7 +449,7 @@ export default function ExceptionManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="programme">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

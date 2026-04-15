@@ -60,7 +60,7 @@ const permissionGroups: PermissionGroup[] = [
   {
     label: "Core Management",
     permissions: [
-      { key: "can_manage_programmes", label: "Manage Programmes", description: "Create, edit, and delete programmes" },
+      { key: "can_manage_programmes", label: "Manage Programs", description: "Create, edit, and delete programs" },
       { key: "can_manage_projects", label: "Manage Projects", description: "Create, edit, and delete projects" },
       { key: "can_manage_products", label: "Manage Products", description: "Create, edit, and delete products" },
       { key: "can_manage_users", label: "Manage Users", description: "Create users and assign roles" },
@@ -401,7 +401,7 @@ export function RoleTypesManager({ onRolesChange }: RoleTypesManagerProps) {
               
               <div className="flex flex-wrap gap-1.5 mt-auto">
                 {role.can_manage_programmes && (
-                  <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">Programmes</span>
+                  <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">Programs</span>
                 )}
                 {role.can_manage_projects && (
                   <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded">Projects</span>

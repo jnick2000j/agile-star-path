@@ -204,7 +204,7 @@ export default function TaskManagement() {
         organization_id: currentOrganization?.id,
         created_by: user?.id,
         project_id: data.entity_type === "project" && data.entity_id ? data.entity_id : null,
-        programme_id: data.entity_type === "programme" && data.entity_id ? data.entity_id : null,
+        programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
         work_package_id: data.work_package_id || null,
       });
@@ -255,7 +255,7 @@ export default function TaskManagement() {
   const filteredTasks = tasks.filter((task) => {
     if (statusFilter !== "all" && task.status !== statusFilter) return false;
     if (entityFilter === "project" && !task.project_id) return false;
-    if (entityFilter === "programme" && !task.programme_id) return false;
+    if (entityFilter === "program" && !task.programme_id) return false;
     if (entityFilter === "product" && !task.product_id) return false;
     return true;
   });
@@ -276,7 +276,7 @@ export default function TaskManagement() {
       return projects.find((p) => p.id === task.project_id)?.name || "Project";
     }
     if (task.programme_id) {
-      return programmes.find((p) => p.id === task.programme_id)?.name || "Programme";
+      return programmes.find((p) => p.id === task.programme_id)?.name || "Program";
     }
     if (task.product_id) {
       return products.find((p) => p.id === task.product_id)?.name || "Product";
@@ -286,7 +286,7 @@ export default function TaskManagement() {
 
   const getEntityOptions = () => {
     if (formData.entity_type === "project") return projects;
-    if (formData.entity_type === "programme") return programmes;
+    if (formData.entity_type === "program") return programmes;
     if (formData.entity_type === "product") return products;
     return [];
   };
@@ -365,7 +365,7 @@ export default function TaskManagement() {
             <SelectContent>
               <SelectItem value="all">All Entities</SelectItem>
               <SelectItem value="project">Projects</SelectItem>
-              <SelectItem value="programme">Programmes</SelectItem>
+              <SelectItem value="program">Programs</SelectItem>
               <SelectItem value="product">Products</SelectItem>
             </SelectContent>
           </Select>
@@ -424,7 +424,7 @@ export default function TaskManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="programme">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>

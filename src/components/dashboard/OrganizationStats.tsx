@@ -5,7 +5,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 
 interface OrgStats {
   totalOrganizations: number;
-  totalProgrammes: number;
+  totalPrograms: number;
   totalProjects: number;
   totalUsersWithAccess: number;
   orgBreakdown: {
@@ -48,7 +48,7 @@ export function OrganizationStats() {
 
         setStats({
           totalOrganizations: orgs.length,
-          totalProgrammes: progs.length,
+          totalPrograms: progs.length,
           totalProjects: projs.length,
           totalUsersWithAccess: new Set(access.map((a) => a.user_id)).size,
           orgBreakdown,
@@ -105,8 +105,8 @@ export function OrganizationStats() {
         </div>
         <div className="text-center p-3 rounded-lg bg-info/10">
           <Layers className="h-5 w-5 mx-auto mb-1 text-info" />
-          <p className="text-2xl font-bold">{stats.totalProgrammes}</p>
-          <p className="text-xs text-muted-foreground">Programmes</p>
+          <p className="text-2xl font-bold">{stats.totalPrograms}</p>
+          <p className="text-xs text-muted-foreground">Programs</p>
         </div>
         <div className="text-center p-3 rounded-lg bg-success/10">
           <FolderKanban className="h-5 w-5 mx-auto mb-1 text-success" />

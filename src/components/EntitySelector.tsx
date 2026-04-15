@@ -41,7 +41,7 @@ export function EntitySelector({
   showProgramme = true,
   showProject = true,
   showProduct = true,
-  programmeLabel = "Programme",
+  programmeLabel = "Program",
   projectLabel = "Project",
   productLabel = "Product",
   className = "",
@@ -127,7 +127,7 @@ export function EntitySelector({
           <Label>{programmeLabel}</Label>
           <Select value={programmeId || "none"} onValueChange={(v) => onProgrammeChange(v === "none" ? "" : v)}>
             <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Select programme" />
+              <SelectValue placeholder="Select program" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>

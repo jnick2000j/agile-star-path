@@ -52,7 +52,7 @@ interface TeamMember {
 
 const roleConfig: Record<string, { label: string; className: string }> = {
   admin: { label: "Administrator", className: "bg-destructive/10 text-destructive" },
-  programme_owner: { label: "Programme Owner", className: "bg-primary/10 text-primary" },
+  programme_owner: { label: "Program Owner", className: "bg-primary/10 text-primary" },
   project_manager: { label: "Project Manager", className: "bg-success/10 text-success" },
   stakeholder: { label: "Stakeholder", className: "bg-info/10 text-info" },
 };

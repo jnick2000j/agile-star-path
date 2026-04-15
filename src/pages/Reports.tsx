@@ -129,16 +129,16 @@ export default function Reports() {
     
     // Create a simple report
     const reportContent = `
-Programme Portfolio Report
+Program Portfolio Report
 Generated: ${new Date().toLocaleDateString()}
 
 Summary:
-- Total Programmes: ${programmes.length}
+- Total Programs: ${programmes.length}
 - Total Projects: ${projects.length}
 - Open Risks: ${risks.filter(r => r.status === "open").length}
 - Benefits Tracked: ${benefits.length}
 
-Programme Status:
+Program Status:
 ${programmes.map(p => `- ${p.name}: ${p.status} (${p.progress}% complete)`).join("\n")}
     `.trim();
 
@@ -207,7 +207,7 @@ ${programmes.map(p => `- ${p.name}: ${p.status} (${p.progress}% complete)`).join
   };
 
   return (
-    <AppLayout title="Reports & Analytics" subtitle="Programme insights and automated reporting">
+    <AppLayout title="Reports & Analytics" subtitle="Program insights and automated reporting">
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3 mb-6">
         <Button className="gap-2" onClick={handleGenerateReport}>
@@ -226,10 +226,10 @@ ${programmes.map(p => `- ${p.name}: ${p.status} (${p.progress}% complete)`).join
 
       {/* Charts Grid */}
       <div className="grid gap-6 lg:grid-cols-2 mb-6">
-        {/* Project Status by Programme */}
+        {/* Project Status by Program */}
         <div className="metric-card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Project Status by Programme</h3>
+            <h3 className="text-lg font-semibold">Project Status by Program</h3>
             <BarChart3 className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="h-[300px]">
@@ -352,7 +352,7 @@ ${programmes.map(p => `- ${p.name}: ${p.status} (${p.progress}% complete)`).join
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg bg-primary/10 text-center">
               <p className="text-3xl font-bold text-primary">{programmes.length}</p>
-              <p className="text-sm text-muted-foreground">Programmes</p>
+              <p className="text-sm text-muted-foreground">Programs</p>
             </div>
             <div className="p-4 rounded-lg bg-success/10 text-center">
               <p className="text-3xl font-bold text-success">{projects.length}</p>

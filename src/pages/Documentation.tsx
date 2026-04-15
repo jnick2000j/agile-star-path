@@ -51,7 +51,7 @@ const mspPrinciples = [
   { title: "Remaining Aligned with Corporate Strategy", description: "The programme must remain aligned with the organization's strategic objectives throughout its lifecycle." },
   { title: "Leading Change", description: "Transformation requires active leadership to drive change across the organization and overcome resistance." },
   { title: "Envisioning and Communicating a Better Future", description: "A compelling vision must be developed and communicated to stakeholders to generate support and commitment." },
-  { title: "Focusing on Benefits and Threats to Them", description: "Benefits realization is the primary measure of programme success. Threats must be actively managed." },
+  { title: "Focusing on Benefits and Threats to Them", description: "Benefits realization is the primary measure of program success. Threats must be actively managed." },
   { title: "Adding Value", description: "The programme must deliver more value than the sum of its component projects." },
   { title: "Designing and Delivering a Coherent Capability", description: "Projects must be coordinated to deliver capabilities that enable benefit realization." },
   { title: "Learning from Experience", description: "Continuous improvement through capturing and applying lessons learned." },
@@ -91,15 +91,15 @@ interface Template {
 
 const templates: Template[] = [
   { 
-    name: "Programme Mandate Template", 
+    name: "Program Mandate Template", 
     category: "MSP", 
     type: "Template",
-    content: `# Programme Mandate
+    content: `# Program Mandate
 
-## 1. Programme Background
-[Describe the strategic context and drivers for this programme]
+## 1. Program Background
+[Describe the strategic context and drivers for this program]
 
-## 2. Programme Objectives
+## 2. Program Objectives
 - Objective 1: [Description]
 - Objective 2: [Description]
 - Objective 3: [Description]
@@ -121,7 +121,7 @@ const templates: Template[] = [
 
 ## 5. Key Stakeholders
 - Sponsor: [Name]
-- Programme Manager: [Name]
+- Program Manager: [Name]
 - Key Stakeholders: [List]
 
 ## 6. Initial Estimates
@@ -139,7 +139,7 @@ const templates: Template[] = [
 | Role | Name | Signature | Date |
 |------|------|-----------|------|
 | Sponsor | | | |
-| Programme Board | | | |`
+| Program Board | | | |`
   },
   { 
     name: "Project Brief Template", 
@@ -281,7 +281,7 @@ const templates: Template[] = [
     type: "Template",
     content: `# Risk Register
 
-## Project/Programme: [Name]
+## Project/Program: [Name]
 ## Last Updated: [Date]
 
 | ID | Risk Description | Category | Probability | Impact | Score | Owner | Response Strategy | Response Actions | Status | Date Identified | Review Date |
@@ -525,7 +525,7 @@ RICE Score = (5000 × 2 × 0.8) / 2 = 4000
     type: "Template",
     content: `# Lessons Learned Log
 
-## Project/Programme: [Name]
+## Project/Program: [Name]
 ## Date: [Date]
 
 | ID | Date | Category | What Happened | Root Cause | Lesson | Recommendation | Applicable To | Priority | Status |
@@ -549,7 +549,7 @@ RICE Score = (5000 × 2 × 0.8) / 2 = 4000
 
 ## Distribution
 - Project Team
-- Programme Board
+- Program Board
 - PMO
 - Other relevant stakeholders`
   },
@@ -711,28 +711,28 @@ const prince2Processes = [
 
 const mspPhases = [
   {
-    name: "Identifying a Programme",
+    name: "Identifying a Program",
     purpose: "Confirm there is a viable programme worth pursuing",
     activities: [
       "Understand strategic objectives",
       "Identify candidate programmes",
       "Develop initial vision",
-      "Create Programme Mandate"
+      "Create Program Mandate"
     ],
-    outputs: ["Programme Mandate", "Strategic alignment confirmation"]
+    outputs: ["Program Mandate", "Strategic alignment confirmation"]
   },
   {
-    name: "Defining a Programme",
-    purpose: "Develop the programme to the point where it can be approved",
+    name: "Defining a Program",
+    purpose: "Develop the program to the point where it can be approved",
     activities: [
       "Develop the Vision Statement",
       "Create the Blueprint",
       "Identify benefits and design Benefits Realization",
-      "Design the programme organization",
+      "Design the program organization",
       "Plan the tranches",
       "Develop the Business Case"
     ],
-    outputs: ["Programme Brief", "Vision Statement", "Blueprint", "Benefits Map", "Stakeholder Engagement Strategy"]
+    outputs: ["Program Brief", "Vision Statement", "Blueprint", "Benefits Map", "Stakeholder Engagement Strategy"]
   },
   {
     name: "Managing the Tranches",
@@ -744,7 +744,7 @@ const mspPhases = [
       "Review and update programme governance",
       "Manage stakeholder engagement"
     ],
-    outputs: ["Tranche Reviews", "Updated Programme Plan", "Issue and Risk updates"]
+    outputs: ["Tranche Reviews", "Updated Program Plan", "Issue and Risk updates"]
   },
   {
     name: "Delivering the Capability",
@@ -769,8 +769,8 @@ const mspPhases = [
     outputs: ["Benefits Realization Reports", "Updated Benefits Register", "Benefits Review reports"]
   },
   {
-    name: "Closing a Programme",
-    purpose: "Confirm the programme has achieved its objectives and can close",
+    name: "Closing a Program",
+    purpose: "Confirm the program has achieved its objectives and can close",
     activities: [
       "Confirm benefits realization plan handover",
       "Close remaining projects",
@@ -778,7 +778,7 @@ const mspPhases = [
       "Disband programme organization",
       "Celebrate success"
     ],
-    outputs: ["Programme Closure Report", "Lessons Learned Report", "Benefits handover documentation"]
+    outputs: ["Program Closure Report", "Lessons Learned Report", "Benefits handover documentation"]
   },
 ];
 
@@ -938,7 +938,7 @@ export default function Documentation() {
                   <h4 className="font-medium mb-2">System Roles</h4>
                   <ul className="space-y-1 text-muted-foreground">
                     <li>• <strong>Admin:</strong> Full system access, user management, delete users</li>
-                    <li>• <strong>Programme Manager:</strong> Manage programmes and projects</li>
+                    <li>• <strong>Program Manager:</strong> Manage programs and projects</li>
                     <li>• <strong>Project Manager:</strong> Manage assigned projects</li>
                     <li>• <strong>Team Member:</strong> View and update assigned tasks</li>
                     <li>• <strong>Viewer:</strong> Read-only access to assigned areas</li>
@@ -1063,7 +1063,7 @@ export default function Documentation() {
                 </div>
                 <div>
                   <h3 className="font-semibold">MSP Principles</h3>
-                  <p className="text-sm text-muted-foreground">Programme Management</p>
+                  <p className="text-sm text-muted-foreground">Program Management</p>
                 </div>
               </div>
               <Accordion type="single" collapsible className="w-full">
