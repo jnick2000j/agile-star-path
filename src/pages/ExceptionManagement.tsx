@@ -59,6 +59,7 @@ interface Exception {
   exception_type: string;
   project_id: string | null;
   programme_id: string | null;
+  product_id: string | null;
   status: ExceptionStatus;
   severity: string;
   tolerance_type: string | null;
