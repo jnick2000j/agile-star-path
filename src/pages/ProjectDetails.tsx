@@ -28,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
+import { EntityUpdates } from "@/components/EntityUpdates";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
