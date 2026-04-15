@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +91,15 @@ export default function ProgrammeTranches() {
   const [selectedTranche, setSelectedTranche] = useState<Tranche | null>(null);
   const [formData, setFormData] = useState(defaultFormState);
   const { currentOrganization } = useOrganization();
+  const [searchParams] = useSearchParams();
+  const urlProgramId = searchParams.get("id");
+
+  const filteredTranches = useMemo(() => {
+    if (urlProgramId) {
+      return tranches.filter(t => t.programme_id === urlProgramId);
+    }
+    return tranches;
+  }, [tranches, urlProgramId]);
 
   const fetchData = async () => {
     setLoading(true);
