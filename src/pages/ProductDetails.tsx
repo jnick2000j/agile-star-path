@@ -69,6 +69,14 @@ interface Feature {
   target_release: string | null;
 }
 
+interface Dependency {
+  id: string;
+  feature_id: string;
+  depends_on_id: string;
+  dependency_type: string;
+  description: string | null;
+}
+
 interface StatusHistoryEntry {
   id: string;
   old_status: string | null;
