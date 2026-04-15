@@ -203,6 +203,7 @@ export default function ProductDetails() {
     setDependencies(data || []);
   };
 
+  const fetchStatusHistory = async () => {
     if (!productId) return;
 
     const { data } = await supabase
