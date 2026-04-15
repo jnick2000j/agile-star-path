@@ -566,7 +566,9 @@ export type Database = {
           entity_id: string
           entity_type: string
           id: string
+          is_risk_flagged: boolean
           organization_id: string | null
+          risk_criticality: string | null
           update_text: string
         }
         Insert: {
@@ -575,7 +577,9 @@ export type Database = {
           entity_id: string
           entity_type: string
           id?: string
+          is_risk_flagged?: boolean
           organization_id?: string | null
+          risk_criticality?: string | null
           update_text: string
         }
         Update: {
@@ -584,7 +588,9 @@ export type Database = {
           entity_id?: string
           entity_type?: string
           id?: string
+          is_risk_flagged?: boolean
           organization_id?: string | null
+          risk_criticality?: string | null
           update_text?: string
         }
         Relationships: [
@@ -2363,6 +2369,7 @@ export type Database = {
           actual_hours: number | null
           actual_start: string | null
           assigned_to: string | null
+          completion_percentage: number
           created_at: string
           created_by: string | null
           depends_on: string[] | null
@@ -2390,6 +2397,7 @@ export type Database = {
           actual_hours?: number | null
           actual_start?: string | null
           assigned_to?: string | null
+          completion_percentage?: number
           created_at?: string
           created_by?: string | null
           depends_on?: string[] | null
@@ -2417,6 +2425,7 @@ export type Database = {
           actual_hours?: number | null
           actual_start?: string | null
           assigned_to?: string | null
+          completion_percentage?: number
           created_at?: string
           created_by?: string | null
           depends_on?: string[] | null
