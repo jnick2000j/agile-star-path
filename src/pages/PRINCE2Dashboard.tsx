@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import ChangeControl from "./ChangeControl";
 import ExceptionManagement from "./ExceptionManagement";
 import QualityManagement from "./QualityManagement";
+import MilestoneTracking from "./MilestoneTracking";
+import StageGates from "./StageGates";
 import {
   ListTodo,
   Target,
@@ -201,10 +203,18 @@ export default function PRINCE2Dashboard() {
   return (
     <AppLayout title="PRINCE2" subtitle="Project management aligned with PRINCE2 methodology">
       <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="dashboard" className="gap-2">
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="milestones" className="gap-2">
+            <Target className="h-4 w-4" />
+            Milestones
+          </TabsTrigger>
+          <TabsTrigger value="stage-gates" className="gap-2">
+            <Flag className="h-4 w-4" />
+            Stage Gates
           </TabsTrigger>
           <TabsTrigger value="change-control" className="gap-2">
             <FileEdit className="h-4 w-4" />
@@ -544,6 +554,14 @@ export default function PRINCE2Dashboard() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="milestones">
+          <MilestoneTracking embedded />
+        </TabsContent>
+
+        <TabsContent value="stage-gates">
+          <StageGates embedded />
         </TabsContent>
 
         <TabsContent value="change-control">

@@ -80,7 +80,7 @@ const statusConfig: Record<MilestoneStatus, { label: string; icon: React.Element
   deferred: { label: "Deferred", icon: Clock, color: "bg-warning/20 text-warning" },
 };
 
-export default function MilestoneTracking() {
+export default function MilestoneTracking({ embedded }: { embedded?: boolean }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -286,8 +286,8 @@ export default function MilestoneTracking() {
     return acc;
   }, {} as Record<string, MilestoneData[]>);
 
-  return (
-    <AppLayout title="Milestone Tracking" subtitle="Track key deliverables, stage gates, and programme tranches">
+  const content = (
+    <>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <Card>
@@ -650,6 +650,14 @@ export default function MilestoneTracking() {
           ))}
         </div>
       )}
+    </>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <AppLayout title="Milestone Tracking" subtitle="Track key deliverables, stage gates, and programme tranches">
+      {content}
     </AppLayout>
   );
 }

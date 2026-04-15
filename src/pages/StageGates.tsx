@@ -76,7 +76,7 @@ const decisionConfig: Record<GateDecision, { label: string; icon: React.ElementT
   deferred: { label: "Deferred", icon: Clock, color: "bg-muted text-muted-foreground" },
 };
 
-export default function StageGates() {
+export default function StageGates({ embedded }: { embedded?: boolean }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -231,11 +231,8 @@ export default function StageGates() {
     return acc;
   }, {} as Record<string, StageGate[]>);
 
-  return (
-    <AppLayout
-      title="Stage Gates"
-      subtitle="PRINCE2 stage boundary reviews and go/no-go decision points"
-    >
+  const content = (
+    <>
       {/* PRINCE2 Info Card */}
       <Card className="mb-6 bg-primary/5 border-primary/20">
         <CardContent className="pt-4">
@@ -620,6 +617,14 @@ export default function StageGates() {
           )}
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <AppLayout title="Stage Gates" subtitle="PRINCE2 stage boundary reviews and go/no-go decision points">
+      {content}
     </AppLayout>
   );
 }
