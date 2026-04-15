@@ -1204,6 +1204,7 @@ export type Database = {
           product_owner_id: string | null
           product_type: string
           programme_id: string | null
+          project_id: string | null
           reach_score: number | null
           revenue_target: string | null
           secondary_metrics: string[] | null
@@ -1231,6 +1232,7 @@ export type Database = {
           product_owner_id?: string | null
           product_type?: string
           programme_id?: string | null
+          project_id?: string | null
           reach_score?: number | null
           revenue_target?: string | null
           secondary_metrics?: string[] | null
@@ -1258,6 +1260,7 @@ export type Database = {
           product_owner_id?: string | null
           product_type?: string
           programme_id?: string | null
+          project_id?: string | null
           reach_score?: number | null
           revenue_target?: string | null
           secondary_metrics?: string[] | null
@@ -1281,6 +1284,13 @@ export type Database = {
             columns: ["programme_id"]
             isOneToOne: false
             referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
