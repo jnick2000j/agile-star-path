@@ -38,16 +38,7 @@ const navigation: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Programs", icon: Layers, href: "/programmes" },
   { label: "Projects", icon: FolderKanban, href: "/projects" },
-  {
-    label: "Products",
-    icon: Package,
-    children: [
-      { label: "All Products", href: "/products" },
-      { label: "Roadmap", href: "/products/roadmap" },
-      { label: "Features", href: "/products/features" },
-      { label: "Dependencies", href: "/products/dependencies" },
-    ],
-  },
+  { label: "Products", icon: Package, href: "/products" },
   {
     label: "Tasks",
     icon: ListTodo,
