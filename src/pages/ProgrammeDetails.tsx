@@ -29,6 +29,7 @@ import {
   XCircle,
   Archive,
   Package,
+  ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +84,18 @@ interface ProductItem {
   status: string;
   product_type: string;
   launch_date: string | null;
+}
+
+interface TaskItem {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  assigned_to: string | null;
+  planned_start: string | null;
+  planned_end: string | null;
+  story_points: number | null;
 }
 
 interface StatusHistoryEntry {
