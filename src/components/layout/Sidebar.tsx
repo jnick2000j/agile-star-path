@@ -45,7 +45,7 @@ const navigation: NavItem[] = [
   { label: "Tasks", icon: ListTodo, href: "/tasks" },
   { label: "PRINCE2", icon: Shield, href: "/prince2" },
   { label: "Registers", icon: ClipboardList, href: "/registers" },
-  { label: "Reports & Updates", icon: BarChart3, children: [
+  { label: "Reporting", icon: BarChart3, children: [
     { label: "Reports", href: "/reports" },
     { label: "Weekly Updates", href: "/weekly-updates" },
   ]},
