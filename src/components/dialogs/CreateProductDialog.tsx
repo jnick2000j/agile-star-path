@@ -79,7 +79,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
         ...formData,
         organization_id: formData.organization_id || null,
         programme_id: formData.programme_id || null,
-        project_id: (formData as any).project_id || null,
+        project_id: formData.project_id && formData.project_id !== "none" ? formData.project_id : null,
         launch_date: formData.launch_date || null,
         created_by: user.id,
         product_owner_id: user.id,
