@@ -148,11 +148,12 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
             </div>
             <div>
               <Label htmlFor="organization">Organization</Label>
-              <Select value={formData.organization_id} onValueChange={(v) => setFormData({ ...formData, organization_id: v })}>
+              <Select value={formData.organization_id || "none"} onValueChange={(v) => setFormData({ ...formData, organization_id: v === "none" ? "" : v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select organization" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
                   ))}
@@ -161,11 +162,12 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
             </div>
             <div>
               <Label htmlFor="program">Related Program</Label>
-              <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
+              <Select value={formData.programme_id || "none"} onValueChange={(v) => setFormData({ ...formData, programme_id: v === "none" ? "" : v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
                   {programmes.map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
