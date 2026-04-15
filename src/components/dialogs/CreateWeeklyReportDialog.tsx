@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +31,8 @@ interface CreateWeeklyReportDialogProps {
 }
 
 interface FormData {
-  programme_id: string;
+  report_type: string;
+  entity_id: string;
   week_ending: string;
   overall_health: string;
   highlights: string;
@@ -40,26 +42,65 @@ interface FormData {
 
 export function CreateWeeklyReportDialog({ open, onOpenChange }: CreateWeeklyReportDialogProps) {
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>();
+  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({
+    defaultValues: { report_type: "programme", overall_health: "green" },
+  });
+
+  const reportType = watch("report_type");
 
   const { data: programmes } = useQuery({
-    queryKey: ["programmes"],
+    queryKey: ["programmes-for-report"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("programmes").select("id, name").order("name");
+      let query = supabase.from("programmes").select("id, name").order("name");
+      if (currentOrganization) query = query.eq("organization_id", currentOrganization.id);
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: open,
   });
+
+  const { data: projects } = useQuery({
+    queryKey: ["projects-for-report"],
+    queryFn: async () => {
+      let query = supabase.from("projects").select("id, name").order("name");
+      if (currentOrganization) query = query.eq("organization_id", currentOrganization.id);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: open,
+  });
+
+  const { data: products } = useQuery({
+    queryKey: ["products-for-report"],
+    queryFn: async () => {
+      let query = supabase.from("products").select("id, name").order("name");
+      if (currentOrganization) query = query.eq("organization_id", currentOrganization.id);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: open,
+  });
+
+  const getEntityOptions = () => {
+    if (reportType === "programme") return programmes || [];
+    if (reportType === "project") return projects || [];
+    if (reportType === "product") return products || [];
+    return [];
+  };
 
   const createReport = useMutation({
     mutationFn: async (data: FormData) => {
-      const highlights = data.highlights.split("\n").filter(Boolean);
-      const risksIssues = data.risks_issues.split("\n").filter(Boolean);
-      const nextWeek = data.next_week.split("\n").filter(Boolean);
+      const highlights = data.highlights?.split("\n").filter(Boolean) || [];
+      const risksIssues = data.risks_issues?.split("\n").filter(Boolean) || [];
+      const nextWeek = data.next_week?.split("\n").filter(Boolean) || [];
 
-      const { error } = await supabase.from("weekly_reports").insert({
-        programme_id: data.programme_id,
+      const insertData: Record<string, unknown> = {
+        report_type: data.report_type,
         week_ending: data.week_ending,
         overall_health: data.overall_health,
         highlights,
@@ -67,7 +108,14 @@ export function CreateWeeklyReportDialog({ open, onOpenChange }: CreateWeeklyRep
         next_week: nextWeek,
         submitted_by: user?.id,
         status: "draft",
-      });
+        organization_id: currentOrganization?.id || null,
+      };
+
+      if (data.report_type === "programme") insertData.programme_id = data.entity_id;
+      if (data.report_type === "project") insertData.project_id = data.entity_id;
+      if (data.report_type === "product") insertData.product_id = data.entity_id;
+
+      const { error } = await supabase.from("weekly_reports").insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -85,7 +133,6 @@ export function CreateWeeklyReportDialog({ open, onOpenChange }: CreateWeeklyRep
     createReport.mutate(data);
   };
 
-  // Default to current week ending (Friday)
   const getDefaultWeekEnding = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -95,32 +142,56 @@ export function CreateWeeklyReportDialog({ open, onOpenChange }: CreateWeeklyRep
     return friday.toISOString().split("T")[0];
   };
 
+  const entityLabel = reportType === "programme" ? "Program" : reportType === "project" ? "Project" : "Product";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Weekly Report</DialogTitle>
           <DialogDescription>
-            Create a new weekly status report for a program.
+            Create a new weekly status report for a program, project, or product.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Program</Label>
-              <Select onValueChange={(value) => setValue("programme_id", value)}>
+              <Label>Report Type</Label>
+              <Select
+                defaultValue="programme"
+                onValueChange={(value) => {
+                  setValue("report_type", value);
+                  setValue("entity_id", "");
+                }}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select program" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {programmes?.map((programme) => (
-                    <SelectItem key={programme.id} value={programme.id}>
-                      {programme.name}
+                  <SelectItem value="programme">Program</SelectItem>
+                  <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="product">Product</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{entityLabel}</Label>
+              <Select onValueChange={(value) => setValue("entity_id", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={`Select ${entityLabel.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {getEntityOptions().map((entity) => (
+                    <SelectItem key={entity.id} value={entity.id}>
+                      {entity.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Week Ending</Label>
               <Input
@@ -129,20 +200,19 @@ export function CreateWeeklyReportDialog({ open, onOpenChange }: CreateWeeklyRep
                 {...register("week_ending", { required: true })}
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Overall Health</Label>
-            <Select onValueChange={(value) => setValue("overall_health", value)} defaultValue="green">
-              <SelectTrigger>
-                <SelectValue placeholder="Select health" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="green">Green - On Track</SelectItem>
-                <SelectItem value="amber">Amber - At Risk</SelectItem>
-                <SelectItem value="red">Red - Delayed</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label>Overall Health</Label>
+              <Select onValueChange={(value) => setValue("overall_health", value)} defaultValue="green">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select health" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="green">Green - On Track</SelectItem>
+                  <SelectItem value="amber">Amber - At Risk</SelectItem>
+                  <SelectItem value="red">Red - Delayed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
