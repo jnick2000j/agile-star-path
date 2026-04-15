@@ -2844,11 +2844,15 @@ export type Database = {
           highlights: string[] | null
           id: string
           next_week: string[] | null
+          organization_id: string | null
           overall_health: string
+          product_id: string | null
           product_summary: string | null
-          programme_id: string
+          programme_id: string | null
           programme_summary: string | null
+          project_id: string | null
           project_summary: string | null
+          report_type: string
           risks_issues: string[] | null
           status: string
           submitted_at: string | null
@@ -2865,11 +2869,15 @@ export type Database = {
           highlights?: string[] | null
           id?: string
           next_week?: string[] | null
+          organization_id?: string | null
           overall_health?: string
+          product_id?: string | null
           product_summary?: string | null
-          programme_id: string
+          programme_id?: string | null
           programme_summary?: string | null
+          project_id?: string | null
           project_summary?: string | null
+          report_type?: string
           risks_issues?: string[] | null
           status?: string
           submitted_at?: string | null
@@ -2886,11 +2894,15 @@ export type Database = {
           highlights?: string[] | null
           id?: string
           next_week?: string[] | null
+          organization_id?: string | null
           overall_health?: string
+          product_id?: string | null
           product_summary?: string | null
-          programme_id?: string
+          programme_id?: string | null
           programme_summary?: string | null
+          project_id?: string | null
           project_summary?: string | null
+          report_type?: string
           risks_issues?: string[] | null
           status?: string
           submitted_at?: string | null
@@ -2901,10 +2913,31 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "weekly_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_reports_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "weekly_reports_programme_id_fkey"
             columns: ["programme_id"]
             isOneToOne: false
             referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
