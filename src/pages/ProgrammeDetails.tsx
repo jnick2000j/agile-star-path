@@ -29,6 +29,7 @@ import {
   XCircle,
   Archive,
   Package,
+  ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +86,18 @@ interface ProductItem {
   launch_date: string | null;
 }
 
+interface TaskItem {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  assigned_to: string | null;
+  planned_start: string | null;
+  planned_end: string | null;
+  story_points: number | null;
+}
+
 interface StatusHistoryEntry {
   id: string;
   old_status: string | null;
@@ -119,6 +132,12 @@ const healthConfig: Record<string, { label: string; className: string }> = {
   green: { label: "Green", className: "bg-success/10 text-success" },
   amber: { label: "Amber", className: "bg-warning/10 text-warning" },
   red: { label: "Red", className: "bg-destructive/10 text-destructive" },
+};
+
+const priorityConfig: Record<string, { label: string; className: string }> = {
+  high: { label: "High", className: "bg-destructive/10 text-destructive" },
+  medium: { label: "Medium", className: "bg-warning/10 text-warning" },
+  low: { label: "Low", className: "bg-muted text-muted-foreground" },
 };
 
 const benefitStatusConfig: Record<string, { label: string; className: string }> = {
@@ -169,6 +188,7 @@ export default function ProgrammeDetails() {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProgramme = async () => {
@@ -221,6 +241,18 @@ export default function ProgrammeDetails() {
     setBenefits(data || []);
   };
 
+  const fetchTasks = async () => {
+    if (!programmeId) return;
+
+    const { data } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("programme_id", programmeId)
+      .order("created_at", { ascending: false });
+
+    setTasks(data || []);
+  };
+
   const fetchStatusHistory = async () => {
     if (!programmeId) return;
 
@@ -261,7 +293,7 @@ export default function ProgrammeDetails() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchProgramme(), fetchProjects(), fetchProducts(), fetchBenefits(), fetchStatusHistory()]);
+    await Promise.all([fetchProgramme(), fetchProjects(), fetchProducts(), fetchBenefits(), fetchTasks(), fetchStatusHistory()]);
     setLoading(false);
   };
 
@@ -416,6 +448,10 @@ export default function ProgrammeDetails() {
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
               Products ({products.length})
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2">
+              <ListTodo className="h-4 w-4" />
+              Tasks ({tasks.length})
             </TabsTrigger>
             <TabsTrigger value="benefits" className="gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -622,6 +658,66 @@ export default function ProgrammeDetails() {
                               <span className="text-muted-foreground">Realization: </span>
                               <span className="font-medium">{benefit.realization}%</span>
                             </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tasks Tab */}
+          <TabsContent value="tasks">
+            <Card>
+              <CardHeader>
+                <CardTitle>Linked Tasks</CardTitle>
+                <CardDescription>Tasks associated with this program</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {tasks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ListTodo className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No tasks linked to this program yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {tasks.map((task) => {
+                      const taskPriority = priorityConfig[task.priority] || { label: task.priority, className: "bg-muted text-muted-foreground" };
+                      const taskStatusMap: Record<string, { label: string; className: string }> = {
+                        not_started: { label: "Not Started", className: "bg-muted text-muted-foreground" },
+                        in_progress: { label: "In Progress", className: "bg-warning/10 text-warning" },
+                        completed: { label: "Completed", className: "bg-success/10 text-success" },
+                        on_hold: { label: "On Hold", className: "bg-info/10 text-info" },
+                        cancelled: { label: "Cancelled", className: "bg-destructive/10 text-destructive" },
+                      };
+                      const taskStatus = taskStatusMap[task.status] || { label: task.status, className: "bg-muted text-muted-foreground" };
+                      return (
+                        <div key={task.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                          <div className="space-y-1">
+                            <p className="font-medium">{task.name}</p>
+                            {task.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-1">{task.description}</p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              {task.planned_start && task.planned_end && (
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(task.planned_start), "MMM d")} - {format(new Date(task.planned_end), "MMM d, yyyy")}
+                                </span>
+                              )}
+                              {task.story_points && (
+                                <Badge variant="outline" className="text-xs">{task.story_points} pts</Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={cn("text-xs", taskPriority.className)}>
+                              {taskPriority.label}
+                            </Badge>
+                            <Badge variant="secondary" className={cn("text-xs", taskStatus.className)}>
+                              {taskStatus.label}
+                            </Badge>
                           </div>
                         </div>
                       );

@@ -22,6 +22,7 @@ import {
   XCircle,
   Archive,
   Layers,
+  ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +78,28 @@ interface Issue {
   date_raised: string | null;
 }
 
+interface TaskItem {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  assigned_to: string | null;
+  planned_start: string | null;
+  planned_end: string | null;
+  story_points: number | null;
+}
+
+interface ProductItem {
+  id: string;
+  name: string;
+  description: string | null;
+  stage: string;
+  status: string;
+  product_type: string;
+  launch_date: string | null;
+}
+
 interface StatusHistoryEntry {
   id: string;
   old_status: string | null;
@@ -106,6 +129,16 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
   high: { label: "High", className: "bg-destructive/10 text-destructive" },
   medium: { label: "Medium", className: "bg-warning/10 text-warning" },
   low: { label: "Low", className: "bg-muted text-muted-foreground" },
+};
+
+const productStageConfig: Record<string, { label: string; className: string }> = {
+  ideation: { label: "Ideation", className: "bg-purple-500/10 text-purple-600" },
+  discovery: { label: "Discovery", className: "bg-info/10 text-info" },
+  development: { label: "Development", className: "bg-warning/10 text-warning" },
+  launch: { label: "Launch", className: "bg-success/10 text-success" },
+  growth: { label: "Growth", className: "bg-primary/10 text-primary" },
+  maturity: { label: "Maturity", className: "bg-muted text-muted-foreground" },
+  sunset: { label: "Sunset", className: "bg-orange-500/10 text-orange-600" },
 };
 
 const wpStatusConfig: Record<string, { label: string; className: string }> = {
@@ -161,6 +194,8 @@ export default function ProjectDetails() {
   const [risks, setRisks] = useState<Risk[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProject = async () => {
@@ -260,9 +295,39 @@ export default function ProjectDetails() {
     }
   };
 
+  const fetchTasks = async () => {
+    if (!projectId) return;
+
+    const { data } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
+
+    setTasks(data || []);
+  };
+
+  const fetchProducts = async () => {
+    if (!projectId) return;
+
+    // Fetch products linked to the same programme as this project
+    if (!project?.programme_id) {
+      setProducts([]);
+      return;
+    }
+
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .eq("programme_id", project.programme_id)
+      .order("name");
+
+    setProducts(data || []);
+  };
+
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchProject(), fetchWorkPackages(), fetchRisks(), fetchIssues(), fetchStatusHistory()]);
+    await Promise.all([fetchProject(), fetchWorkPackages(), fetchRisks(), fetchIssues(), fetchTasks(), fetchStatusHistory()]);
     setLoading(false);
   };
 
@@ -271,6 +336,12 @@ export default function ProjectDetails() {
       fetchAllData();
     }
   }, [projectId]);
+
+  useEffect(() => {
+    if (project?.programme_id) {
+      fetchProducts();
+    }
+  }, [project?.programme_id]);
 
   if (!projectId) {
     return (
@@ -432,10 +503,18 @@ export default function ProjectDetails() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="workpackages" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="workpackages" className="gap-2">
               <Package className="h-4 w-4" />
               Work Packages ({workPackages.length})
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2">
+              <ListTodo className="h-4 w-4" />
+              Tasks ({tasks.length})
+            </TabsTrigger>
+            <TabsTrigger value="products" className="gap-2">
+              <Layers className="h-4 w-4" />
+              Products ({products.length})
             </TabsTrigger>
             <TabsTrigger value="risks" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -499,6 +578,115 @@ export default function ProjectDetails() {
                             </div>
                           </div>
                           <Progress value={wp.progress} className="h-2 mt-2" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tasks Tab */}
+          <TabsContent value="tasks">
+            <Card>
+              <CardHeader>
+                <CardTitle>Linked Tasks</CardTitle>
+                <CardDescription>Tasks associated with this project</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {tasks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ListTodo className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No tasks linked to this project yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {tasks.map((task) => {
+                      const taskPriority = priorityConfig[task.priority] || { label: task.priority, className: "bg-muted text-muted-foreground" };
+                      const taskStatusMap: Record<string, { label: string; className: string }> = {
+                        not_started: { label: "Not Started", className: "bg-muted text-muted-foreground" },
+                        in_progress: { label: "In Progress", className: "bg-warning/10 text-warning" },
+                        completed: { label: "Completed", className: "bg-success/10 text-success" },
+                        on_hold: { label: "On Hold", className: "bg-info/10 text-info" },
+                        cancelled: { label: "Cancelled", className: "bg-destructive/10 text-destructive" },
+                      };
+                      const taskStatus = taskStatusMap[task.status] || { label: task.status, className: "bg-muted text-muted-foreground" };
+                      return (
+                        <div key={task.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                          <div className="space-y-1">
+                            <p className="font-medium">{task.name}</p>
+                            {task.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-1">{task.description}</p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              {task.planned_start && task.planned_end && (
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(task.planned_start), "MMM d")} - {format(new Date(task.planned_end), "MMM d, yyyy")}
+                                </span>
+                              )}
+                              {task.story_points && (
+                                <Badge variant="outline" className="text-xs">{task.story_points} pts</Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={cn("text-xs", taskPriority.className)}>
+                              {taskPriority.label}
+                            </Badge>
+                            <Badge variant="secondary" className={cn("text-xs", taskStatus.className)}>
+                              {taskStatus.label}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Products Tab */}
+          <TabsContent value="products">
+            <Card>
+              <CardHeader>
+                <CardTitle>Linked Products</CardTitle>
+                <CardDescription>Products associated with this project's program</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {products.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Layers className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No products linked yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {products.map((product) => {
+                      const stage = productStageConfig[product.stage] || { label: product.stage, className: "bg-muted text-muted-foreground" };
+                      return (
+                        <div
+                          key={product.id}
+                          className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/products/details?id=${product.id}`)}
+                        >
+                          <div className="space-y-1">
+                            <p className="font-medium">{product.name}</p>
+                            {product.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-1">{product.description}</p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs capitalize">{product.product_type}</Badge>
+                              {product.launch_date && (
+                                <span className="text-xs text-muted-foreground">
+                                  Launch: {format(new Date(product.launch_date), "MMM d, yyyy")}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className={cn("text-xs", stage.className)}>
+                            {stage.label}
+                          </Badge>
                         </div>
                       );
                     })}
