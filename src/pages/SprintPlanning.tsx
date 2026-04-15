@@ -535,9 +535,12 @@ export default function SprintPlanning({ embedded }: { embedded?: boolean }) {
                         (getBacklogItems(type as EntityType) as Task[]).map(task => (
                           <div
                             key={task.id}
-                            className={`p-3 rounded-lg bg-card border-l-4 ${priorityColors[task.priority]}`}
+                            draggable
+                            onDragStart={() => handleDragStart(task.id, "task")}
+                            className={`p-3 rounded-lg bg-card border-l-4 cursor-move hover:shadow-md transition-shadow ${priorityColors[task.priority]}`}
                           >
                             <div className="flex items-start gap-2">
+                              <GripVertical className="h-4 w-4 mt-0.5 opacity-50 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-sm truncate">{task.name}</p>
                                 <div className="flex gap-1 mt-1 flex-wrap">
