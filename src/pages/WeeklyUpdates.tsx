@@ -53,7 +53,7 @@ export default function WeeklyUpdates() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("weekly_reports")
-        .select(`*, programmes (name)`)
+        .select(`*, programmes (name), projects (name), products (name)`)
         .order("week_ending", { ascending: false });
       if (error) throw error;
       return data;
