@@ -80,6 +80,7 @@ export default function Projects() {
   const { currentOrganization } = useOrganization();
   const { canManage } = usePermissions();
   const { user, userRole } = useAuth();
+  const { hasFullOrgAccess } = useOrgAccessLevel();
   const [stageFilters, setStageFilters] = useState<string[]>([]);
   const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
   const [healthFilters, setHealthFilters] = useState<string[]>([]);
@@ -90,7 +91,7 @@ export default function Projects() {
 
   useEffect(() => {
     fetchProjects();
-  }, [currentOrganization, user, userRole]);
+  }, [currentOrganization, user, userRole, hasFullOrgAccess]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -108,9 +109,8 @@ export default function Projects() {
       if (userRole === "project_manager" && user) {
         query = query.eq("manager_id", user.id);
       }
-
       // Project team members only see projects they have access to
-      if (userRole === "project_team_member" && user) {
+      else if (userRole === "project_team_member" && user) {
         const { data: accessData } = await supabase
           .from("user_project_access")
           .select("project_id")
@@ -118,6 +118,28 @@ export default function Projects() {
         const projectIds = accessData?.map(a => a.project_id) || [];
         if (projectIds.length > 0) {
           query = query.in("id", projectIds);
+        } else {
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+      }
+      // Editors/viewers at org level only see assigned projects
+      else if (!hasFullOrgAccess && user) {
+        const { data: accessData } = await supabase
+          .from("user_project_access")
+          .select("project_id")
+          .eq("user_id", user.id);
+        const projectIds = accessData?.map(a => a.project_id) || [];
+        // Also include projects where user is the manager
+        const { data: managedData } = await supabase
+          .from("projects")
+          .select("id")
+          .eq("manager_id", user.id);
+        const managedIds = managedData?.map(p => p.id) || [];
+        const allIds = [...new Set([...projectIds, ...managedIds])];
+        if (allIds.length > 0) {
+          query = query.in("id", allIds);
         } else {
           setProjects([]);
           setLoading(false);
