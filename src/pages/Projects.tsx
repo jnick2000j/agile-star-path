@@ -79,6 +79,7 @@ export default function Projects() {
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
   const { canManage } = usePermissions();
+  const { user, userRole } = useAuth();
   const [stageFilters, setStageFilters] = useState<string[]>([]);
   const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
   const [healthFilters, setHealthFilters] = useState<string[]>([]);
@@ -89,7 +90,7 @@ export default function Projects() {
 
   useEffect(() => {
     fetchProjects();
-  }, [currentOrganization]);
+  }, [currentOrganization, user, userRole]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -101,6 +102,27 @@ export default function Projects() {
 
       if (currentOrganization) {
         query = query.eq("organization_id", currentOrganization.id);
+      }
+
+      // Project managers only see projects assigned to them
+      if (userRole === "project_manager" && user) {
+        query = query.eq("manager_id", user.id);
+      }
+
+      // Project team members only see projects they have access to
+      if (userRole === "project_team_member" && user) {
+        const { data: accessData } = await supabase
+          .from("user_project_access")
+          .select("project_id")
+          .eq("user_id", user.id);
+        const projectIds = accessData?.map(a => a.project_id) || [];
+        if (projectIds.length > 0) {
+          query = query.in("id", projectIds);
+        } else {
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
       }
 
       const { data, error } = await query;
