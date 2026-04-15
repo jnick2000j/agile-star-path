@@ -26,6 +26,8 @@ import {
   FlaskConical,
   Layers,
   Sunset,
+  Link2,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +69,14 @@ interface Feature {
   confidence_score: number | null;
   effort_score: number | null;
   target_release: string | null;
+}
+
+interface Dependency {
+  id: string;
+  feature_id: string;
+  depends_on_id: string;
+  dependency_type: string;
+  description: string | null;
 }
 
 interface StatusHistoryEntry {
@@ -140,6 +150,7 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [features, setFeatures] = useState<Feature[]>([]);
+  const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -167,6 +178,29 @@ export default function ProductDetails() {
       .order("priority", { ascending: true });
 
     setFeatures(data || []);
+  };
+
+  const fetchDependencies = async () => {
+    if (!productId) return;
+    
+    // Get feature IDs for this product first
+    const { data: featureIds } = await supabase
+      .from("product_features")
+      .select("id")
+      .eq("product_id", productId);
+    
+    if (!featureIds || featureIds.length === 0) {
+      setDependencies([]);
+      return;
+    }
+
+    const ids = featureIds.map(f => f.id);
+    const { data } = await supabase
+      .from("feature_dependencies")
+      .select("*")
+      .or(`feature_id.in.(${ids.join(",")}),depends_on_id.in.(${ids.join(",")})`);
+
+    setDependencies(data || []);
   };
 
   const fetchStatusHistory = async () => {
@@ -208,7 +242,7 @@ export default function ProductDetails() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchProduct(), fetchFeatures(), fetchStatusHistory()]);
+    await Promise.all([fetchProduct(), fetchFeatures(), fetchDependencies(), fetchStatusHistory()]);
     setLoading(false);
   };
 
@@ -419,6 +453,10 @@ export default function ProductDetails() {
             <TabsTrigger value="metrics" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               Metrics
+            </TabsTrigger>
+            <TabsTrigger value="dependencies" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              Dependencies ({dependencies.length})
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
@@ -742,6 +780,62 @@ export default function ProductDetails() {
                       })}
                     </div>
                   </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Dependencies Tab */}
+          <TabsContent value="dependencies">
+            <Card>
+              <CardHeader>
+                <CardTitle>Feature Dependencies</CardTitle>
+                <CardDescription>
+                  Dependency relationships between features in this product
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {dependencies.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Link2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">No dependencies yet</p>
+                    <p className="text-sm">
+                      Feature dependencies can be managed from the feature backlog
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {dependencies.map((dep) => {
+                      const feature = features.find(f => f.id === dep.feature_id);
+                      const dependsOn = features.find(f => f.id === dep.depends_on_id);
+                      const typeConfig: Record<string, { label: string; className: string }> = {
+                        blocks: { label: "Blocks", className: "bg-destructive/10 text-destructive" },
+                        requires: { label: "Requires", className: "bg-warning/10 text-warning" },
+                        related: { label: "Related", className: "bg-info/10 text-info" },
+                      };
+                      const config = typeConfig[dep.dependency_type] || typeConfig.related;
+                      return (
+                        <div key={dep.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {feature?.name || "Unknown feature"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge className={cn("text-xs", config.className)}>
+                              {config.label}
+                            </Badge>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {dependsOn?.name || "External feature"}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </CardContent>
             </Card>
