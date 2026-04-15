@@ -1,0 +1,2 @@
+ALTER TABLE public.product_features DROP CONSTRAINT product_features_status_check;
+ALTER TABLE public.product_features ADD CONSTRAINT product_features_status_check CHECK (status = ANY (ARRAY['backlog'::text, 'planned'::text, 'in_progress'::text, 'review'::text, 'done'::text, 'discovery'::text, 'designing'::text, 'developing'::text, 'testing'::text, 'released'::text, 'deprecated'::text]));
