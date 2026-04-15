@@ -150,6 +150,7 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [features, setFeatures] = useState<Feature[]>([]);
+  const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
