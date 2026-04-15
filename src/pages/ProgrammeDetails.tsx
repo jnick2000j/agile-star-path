@@ -235,6 +235,18 @@ export default function ProgrammeDetails() {
     setBenefits(data || []);
   };
 
+  const fetchTasks = async () => {
+    if (!programmeId) return;
+
+    const { data } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("programme_id", programmeId)
+      .order("created_at", { ascending: false });
+
+    setTasks(data || []);
+  };
+
   const fetchStatusHistory = async () => {
     if (!programmeId) return;
 
@@ -275,7 +287,7 @@ export default function ProgrammeDetails() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchProgramme(), fetchProjects(), fetchProducts(), fetchBenefits(), fetchStatusHistory()]);
+    await Promise.all([fetchProgramme(), fetchProjects(), fetchProducts(), fetchBenefits(), fetchTasks(), fetchStatusHistory()]);
     setLoading(false);
   };
 
