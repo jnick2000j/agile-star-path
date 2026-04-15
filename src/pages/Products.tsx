@@ -38,6 +38,7 @@ import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 
 interface Product {
   id: string;
@@ -88,6 +89,7 @@ export default function Products() {
   const [stageFilter, setStageFilter] = useState<string>("all");
   const { currentOrganization } = useOrganization();
   const { user, userRole } = useAuth();
+  const { hasFullOrgAccess } = useOrgAccessLevel();
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -101,9 +103,8 @@ export default function Products() {
     if (userRole === "product_manager" && user) {
       query = query.eq("product_owner_id", user.id);
     }
-
     // Product team members only see products they have access to
-    if (userRole === "product_team_member" && user) {
+    else if (userRole === "product_team_member" && user) {
       const { data: accessData } = await supabase
         .from("user_product_access")
         .select("product_id")
@@ -111,6 +112,28 @@ export default function Products() {
       const productIds = accessData?.map(a => a.product_id) || [];
       if (productIds.length > 0) {
         query = query.in("id", productIds);
+      } else {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+    }
+    // Editors/viewers at org level only see assigned products
+    else if (!hasFullOrgAccess && user) {
+      const { data: accessData } = await supabase
+        .from("user_product_access")
+        .select("product_id")
+        .eq("user_id", user.id);
+      const productIds = accessData?.map(a => a.product_id) || [];
+      // Also include products where user is the owner
+      const { data: ownedData } = await supabase
+        .from("products")
+        .select("id")
+        .eq("product_owner_id", user.id);
+      const ownedIds = ownedData?.map(p => p.id) || [];
+      const allIds = [...new Set([...productIds, ...ownedIds])];
+      if (allIds.length > 0) {
+        query = query.in("id", allIds);
       } else {
         setProducts([]);
         setLoading(false);
@@ -129,7 +152,7 @@ export default function Products() {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentOrganization, user, userRole]);
+  }, [currentOrganization, user, userRole, hasFullOrgAccess]);
 
   const calculateRICEScore = (product: Product) => {
     const { reach_score, impact_score, confidence_score, effort_score } = product;

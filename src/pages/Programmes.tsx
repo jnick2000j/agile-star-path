@@ -19,6 +19,8 @@ import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
+import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import {
   Popover,
   PopoverContent,
@@ -59,11 +61,13 @@ export default function Programmes() {
   const [programmes, setProgrammes] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
+  const { hasFullOrgAccess } = useOrgAccessLevel();
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProgrammes();
-  }, [currentOrganization]);
+  }, [currentOrganization, user, hasFullOrgAccess]);
 
   const fetchProgrammes = async () => {
     setLoading(true);
@@ -76,6 +80,29 @@ export default function Programmes() {
       // Filter by organization if one is selected
       if (currentOrganization) {
         query = query.eq("organization_id", currentOrganization.id);
+      }
+
+      // Editors/viewers at org level only see assigned programmes
+      if (!hasFullOrgAccess && user) {
+        const { data: accessData } = await supabase
+          .from("user_programme_access")
+          .select("programme_id")
+          .eq("user_id", user.id);
+        const programmeIds = accessData?.map(a => a.programme_id) || [];
+        // Also include programmes where user is the manager
+        const { data: managedData } = await supabase
+          .from("programmes")
+          .select("id")
+          .eq("manager_id", user.id);
+        const managedIds = managedData?.map(p => p.id) || [];
+        const allIds = [...new Set([...programmeIds, ...managedIds])];
+        if (allIds.length > 0) {
+          query = query.in("id", allIds);
+        } else {
+          setProgrammes([]);
+          setLoading(false);
+          return;
+        }
       }
 
       const { data, error } = await query;
