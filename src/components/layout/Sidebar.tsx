@@ -37,15 +37,7 @@ interface NavItem {
 const navigation: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Programs", icon: Layers, href: "/programmes" },
-  {
-    label: "Projects",
-    icon: FolderKanban,
-    children: [
-      { label: "All Projects", href: "/projects" },
-      { label: "Project Briefs", href: "/projects/briefs" },
-      { label: "Work Packages", href: "/projects/work-packages" },
-    ],
-  },
+  { label: "Projects", icon: FolderKanban, href: "/projects" },
   {
     label: "Products",
     icon: Package,
