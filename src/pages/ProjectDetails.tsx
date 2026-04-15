@@ -131,7 +131,16 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
   low: { label: "Low", className: "bg-muted text-muted-foreground" },
 };
 
-const wpStatusConfig: Record<string, { label: string; className: string }> = {
+const productStageConfig: Record<string, { label: string; className: string }> = {
+  ideation: { label: "Ideation", className: "bg-purple-500/10 text-purple-600" },
+  discovery: { label: "Discovery", className: "bg-info/10 text-info" },
+  development: { label: "Development", className: "bg-warning/10 text-warning" },
+  launch: { label: "Launch", className: "bg-success/10 text-success" },
+  growth: { label: "Growth", className: "bg-primary/10 text-primary" },
+  maturity: { label: "Maturity", className: "bg-muted text-muted-foreground" },
+  sunset: { label: "Sunset", className: "bg-orange-500/10 text-orange-600" },
+};
+
   pending: { label: "Pending", className: "bg-muted text-muted-foreground" },
   authorized: { label: "Authorized", className: "bg-info/10 text-info" },
   in_progress: { label: "In Progress", className: "bg-warning/10 text-warning" },
