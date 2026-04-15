@@ -84,6 +84,9 @@ const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; clas
   admin: { label: "Admin", icon: Crown, className: "bg-primary/10 text-primary" },
   programme_owner: { label: "Program Owner", icon: Briefcase, className: "bg-success/10 text-success" },
   project_manager: { label: "Project Manager", icon: UserCog, className: "bg-warning/10 text-warning" },
+  product_manager: { label: "Product Manager", icon: Briefcase, className: "bg-accent/10 text-accent-foreground" },
+  product_team_member: { label: "Product Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
+  project_team_member: { label: "Project Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
   stakeholder: { label: "Stakeholder", icon: Users, className: "bg-muted text-muted-foreground" },
 };
 
