@@ -345,7 +345,7 @@ export default function ProgrammeBlueprint() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold">Programme Brief</h3>
+                      <h3 className="font-semibold">Program Brief</h3>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleEditBrief}>
                       <Edit className="h-4 w-4 mr-1" /> Edit
@@ -533,7 +533,7 @@ export default function ProgrammeBlueprint() {
                       <p className="text-sm text-muted-foreground">Owns the business case, provides strategic direction</p>
                     </div>
                     <div className="p-4 rounded-lg border">
-                      <h4 className="font-medium mb-2">Programme Board</h4>
+                      <h4 className="font-medium mb-2">Program Board</h4>
                       <p className="text-sm text-muted-foreground">Decision-making body for programme-level issues</p>
                     </div>
                     <div className="p-4 rounded-lg border">

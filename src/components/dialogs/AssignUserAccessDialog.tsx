@@ -224,7 +224,7 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
                   <SelectItem value="organization">Organization</SelectItem>
-                  <SelectItem value="program">Programme</SelectItem>
+                  <SelectItem value="program">Program</SelectItem>
                   <SelectItem value="project">Project</SelectItem>
                 </SelectContent>
               </Select>

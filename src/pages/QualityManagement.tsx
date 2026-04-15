@@ -472,7 +472,7 @@ export default function QualityManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="program">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>

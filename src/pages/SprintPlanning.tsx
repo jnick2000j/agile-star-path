@@ -410,7 +410,7 @@ export default function SprintPlanning() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="program">Programme</SelectItem>
+                          <SelectItem value="program">Program</SelectItem>
                           <SelectItem value="project">Project</SelectItem>
                           <SelectItem value="product">Product</SelectItem>
                         </SelectContent>

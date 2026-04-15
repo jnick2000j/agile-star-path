@@ -334,7 +334,7 @@ export default function TechnicalRequirements() {
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>Programme</Label>
+          <Label>Program</Label>
           <Select value={formData.programme_id || "none"} onValueChange={(v) => setFormData({ ...formData, programme_id: v === "none" ? "" : v })}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>

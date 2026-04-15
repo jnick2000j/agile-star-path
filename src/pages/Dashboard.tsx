@@ -10,11 +10,11 @@ import { Layers, FolderKanban, AlertTriangle, Target } from "lucide-react";
 
 export default function Dashboard() {
   return (
-    <AppLayout title="Dashboard" subtitle="Programme portfolio overview">
+    <AppLayout title="Dashboard" subtitle="Program portfolio overview">
       {/* Metrics Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <MetricCard
-          title="Active Programmes"
+          title="Active Programs"
           value={5}
           change={12}
           changeLabel="vs last quarter"

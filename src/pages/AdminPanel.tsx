@@ -294,7 +294,7 @@ export default function AdminPanel() {
                 </div>
                 <div>
                   <p className="text-2xl font-semibold">{roleCounts.programme_owner}</p>
-                  <p className="text-sm text-muted-foreground">Programme Owners</p>
+                  <p className="text-sm text-muted-foreground">Program Owners</p>
                 </div>
               </div>
             </div>

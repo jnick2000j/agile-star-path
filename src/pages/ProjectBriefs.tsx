@@ -350,7 +350,7 @@ export default function ProjectBriefs() {
                     </div>
                     {programme && (
                       <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-                        <span className="text-sm">Programme</span>
+                        <span className="text-sm">Program</span>
                         <Badge variant="outline">{programme.name}</Badge>
                       </div>
                     )}

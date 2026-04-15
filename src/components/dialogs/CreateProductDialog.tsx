@@ -148,7 +148,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="program">Related Programme</Label>
+              <Label htmlFor="program">Related Program</Label>
               <Select value={formData.programme_id} onValueChange={(v) => setFormData({ ...formData, programme_id: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select program" />

@@ -357,7 +357,7 @@ export default function MilestoneTracking() {
             <SelectContent>
               <SelectItem value="all">All Entities</SelectItem>
               <SelectItem value="project">Projects</SelectItem>
-              <SelectItem value="program">Programmes</SelectItem>
+              <SelectItem value="program">Programs</SelectItem>
               <SelectItem value="product">Products</SelectItem>
             </SelectContent>
           </Select>
@@ -416,7 +416,7 @@ export default function MilestoneTracking() {
                     <SelectContent>
                       <SelectItem value="deliverable">Key Deliverable</SelectItem>
                       <SelectItem value="stage_gate">Stage Gate</SelectItem>
-                      <SelectItem value="tranche">Programme Tranche</SelectItem>
+                      <SelectItem value="tranche">Program Tranche</SelectItem>
                       <SelectItem value="review">Review Point</SelectItem>
                     </SelectContent>
                   </Select>
@@ -442,7 +442,7 @@ export default function MilestoneTracking() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="program">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>

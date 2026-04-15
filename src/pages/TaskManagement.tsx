@@ -365,7 +365,7 @@ export default function TaskManagement() {
             <SelectContent>
               <SelectItem value="all">All Entities</SelectItem>
               <SelectItem value="project">Projects</SelectItem>
-              <SelectItem value="program">Programmes</SelectItem>
+              <SelectItem value="program">Programs</SelectItem>
               <SelectItem value="product">Products</SelectItem>
             </SelectContent>
           </Select>
@@ -424,7 +424,7 @@ export default function TaskManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="program">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
                     </SelectContent>
                   </Select>

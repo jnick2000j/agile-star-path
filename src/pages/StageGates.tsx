@@ -364,7 +364,7 @@ export default function StageGates() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="project">Project</SelectItem>
-                      <SelectItem value="program">Programme</SelectItem>
+                      <SelectItem value="program">Program</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

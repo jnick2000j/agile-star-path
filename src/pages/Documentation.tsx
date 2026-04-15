@@ -91,15 +91,15 @@ interface Template {
 
 const templates: Template[] = [
   { 
-    name: "Programme Mandate Template", 
+    name: "Program Mandate Template", 
     category: "MSP", 
     type: "Template",
-    content: `# Programme Mandate
+    content: `# Program Mandate
 
-## 1. Programme Background
+## 1. Program Background
 [Describe the strategic context and drivers for this program]
 
-## 2. Programme Objectives
+## 2. Program Objectives
 - Objective 1: [Description]
 - Objective 2: [Description]
 - Objective 3: [Description]
@@ -139,7 +139,7 @@ const templates: Template[] = [
 | Role | Name | Signature | Date |
 |------|------|-----------|------|
 | Sponsor | | | |
-| Programme Board | | | |`
+| Program Board | | | |`
   },
   { 
     name: "Project Brief Template", 
@@ -549,7 +549,7 @@ RICE Score = (5000 × 2 × 0.8) / 2 = 4000
 
 ## Distribution
 - Project Team
-- Programme Board
+- Program Board
 - PMO
 - Other relevant stakeholders`
   },
@@ -719,7 +719,7 @@ const mspPhases = [
       "Develop initial vision",
       "Create Program Mandate"
     ],
-    outputs: ["Programme Mandate", "Strategic alignment confirmation"]
+    outputs: ["Program Mandate", "Strategic alignment confirmation"]
   },
   {
     name: "Defining a Programme",
@@ -732,7 +732,7 @@ const mspPhases = [
       "Plan the tranches",
       "Develop the Business Case"
     ],
-    outputs: ["Programme Brief", "Vision Statement", "Blueprint", "Benefits Map", "Stakeholder Engagement Strategy"]
+    outputs: ["Program Brief", "Vision Statement", "Blueprint", "Benefits Map", "Stakeholder Engagement Strategy"]
   },
   {
     name: "Managing the Tranches",
@@ -744,7 +744,7 @@ const mspPhases = [
       "Review and update programme governance",
       "Manage stakeholder engagement"
     ],
-    outputs: ["Tranche Reviews", "Updated Programme Plan", "Issue and Risk updates"]
+    outputs: ["Tranche Reviews", "Updated Program Plan", "Issue and Risk updates"]
   },
   {
     name: "Delivering the Capability",
@@ -778,7 +778,7 @@ const mspPhases = [
       "Disband programme organization",
       "Celebrate success"
     ],
-    outputs: ["Programme Closure Report", "Lessons Learned Report", "Benefits handover documentation"]
+    outputs: ["Program Closure Report", "Lessons Learned Report", "Benefits handover documentation"]
   },
 ];
 
@@ -1063,7 +1063,7 @@ export default function Documentation() {
                 </div>
                 <div>
                   <h3 className="font-semibold">MSP Principles</h3>
-                  <p className="text-sm text-muted-foreground">Programme Management</p>
+                  <p className="text-sm text-muted-foreground">Program Management</p>
                 </div>
               </div>
               <Accordion type="single" collapsible className="w-full">

@@ -329,7 +329,7 @@ export default function UnifiedBacklog() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="program">Programmes</SelectItem>
+                <SelectItem value="program">Programs</SelectItem>
                 <SelectItem value="project">Projects</SelectItem>
                 <SelectItem value="product">Products</SelectItem>
               </SelectContent>
