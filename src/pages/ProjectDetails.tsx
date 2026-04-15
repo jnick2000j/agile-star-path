@@ -78,6 +78,28 @@ interface Issue {
   date_raised: string | null;
 }
 
+interface TaskItem {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  assigned_to: string | null;
+  planned_start: string | null;
+  planned_end: string | null;
+  story_points: number | null;
+}
+
+interface ProductItem {
+  id: string;
+  name: string;
+  description: string | null;
+  stage: string;
+  status: string;
+  product_type: string;
+  launch_date: string | null;
+}
+
 interface StatusHistoryEntry {
   id: string;
   old_status: string | null;
