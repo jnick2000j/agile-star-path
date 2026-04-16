@@ -40,6 +40,7 @@ interface LoginBranding {
   login_button_text: string | null;
   login_cta_text: string | null;
   right_panel_bg_color: string | null;
+  show_app_name: boolean | null;
 }
 
 const logoSizeClasses: Record<string, string> = {
@@ -167,6 +168,9 @@ export default function Auth() {
   const layout = branding?.login_layout || "split";
   const bgPattern = branding?.login_bg_pattern || "circles";
   const showFeatures = branding?.show_features !== false;
+  const showAppName = branding?.show_app_name !== false;
+  const hasLogo = branding?.show_logo !== false && !!branding?.logo_url;
+  const logoOnly = hasLogo && !showAppName;
 
   const features = defaultFeatures.map((def, i) => {
     const n = i + 1;
@@ -206,15 +210,19 @@ export default function Auth() {
   const formContent = (
     <div className="w-full max-w-[420px]">
       {/* Mobile logo */}
-      <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-        {branding?.show_logo !== false && branding?.logo_url ? (
-          <img src={branding.logo_url} alt="Logo" className={`${logoSizeClasses[branding?.logo_size || "small"]} object-contain`} />
+      <div className={`mb-10 lg:hidden ${logoOnly ? "flex justify-center" : "flex items-center gap-2.5"}`}>
+        {hasLogo ? (
+          <img
+            src={branding!.logo_url!}
+            alt={appName}
+            className={logoOnly ? "max-h-20 w-auto object-contain" : `${logoSizeClasses[branding?.logo_size || "small"]} object-contain`}
+          />
         ) : (
           <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Layers className="h-4.5 w-4.5 text-primary" />
           </div>
         )}
-        <span className="text-base font-semibold text-foreground">{appName}</span>
+        {showAppName && <span className="text-base font-semibold text-foreground">{appName}</span>}
       </div>
 
       <div className="mb-8">
@@ -310,15 +318,19 @@ export default function Auth() {
       {!branding?.login_bg_image_url && <PatternOverlay pattern={bgPattern} />}
 
       <div className="relative z-10">
-        <div className="mb-16">
-          {branding?.show_logo !== false && branding?.logo_url ? (
-            <img src={branding.logo_url} alt={appName} className="max-h-24 w-auto object-contain" />
+        <div className={`mb-16 ${logoOnly ? "flex justify-center" : ""}`}>
+          {hasLogo ? (
+            <img
+              src={branding!.logo_url!}
+              alt={appName}
+              className={logoOnly ? "max-h-40 w-auto object-contain" : "max-h-24 w-auto object-contain"}
+            />
           ) : (
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center backdrop-blur-sm">
                 <Layers className="h-5 w-5" />
               </div>
-              <span className="text-lg font-semibold tracking-tight">{appName}</span>
+              {showAppName && <span className="text-lg font-semibold tracking-tight">{appName}</span>}
             </div>
           )}
         </div>
@@ -369,13 +381,17 @@ export default function Auth() {
                   <div className="absolute inset-0 bg-black/50" />
                 </>
               )}
-              <div className="relative z-10 flex items-center gap-3 mb-3">
-                {branding?.show_logo !== false && branding?.logo_url ? (
-                  <img src={branding.logo_url} alt="Logo" className="h-8 w-auto object-contain" />
+              <div className={`relative z-10 mb-3 ${logoOnly ? "flex justify-center" : "flex items-center gap-3"}`}>
+                {hasLogo ? (
+                  <img
+                    src={branding!.logo_url!}
+                    alt={appName}
+                    className={logoOnly ? "max-h-20 w-auto object-contain" : "h-8 w-auto object-contain"}
+                  />
                 ) : (
                   <div className="h-8 w-8 rounded-lg bg-primary-foreground/20 flex items-center justify-center"><Layers className="h-4 w-4" /></div>
                 )}
-                <span className="font-semibold">{appName}</span>
+                {showAppName && <span className="font-semibold">{appName}</span>}
               </div>
               <h1 className="relative z-10 text-lg font-bold">{branding?.hero_title || "Manage programmes with confidence"}</h1>
             </div>
@@ -403,13 +419,17 @@ export default function Auth() {
           {branding?.login_bg_image_url && <div className="absolute inset-0 bg-black/50" />}
           {!branding?.login_bg_image_url && <PatternOverlay pattern={bgPattern} />}
           <div className="relative z-10 max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              {branding?.show_logo !== false && branding?.logo_url ? (
-                <img src={branding.logo_url} alt="Logo" className={`${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`} />
+            <div className={`mb-6 ${logoOnly ? "flex justify-center" : "flex items-center gap-3"}`}>
+              {hasLogo ? (
+                <img
+                  src={branding!.logo_url!}
+                  alt={appName}
+                  className={logoOnly ? "max-h-28 w-auto object-contain" : `${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`}
+                />
               ) : (
                 <div className="h-10 w-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center"><Layers className="h-5 w-5" /></div>
               )}
-              <span className="text-lg font-semibold">{appName}</span>
+              {showAppName && <span className="text-lg font-semibold">{appName}</span>}
             </div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">{branding?.hero_title || "Manage programmes with confidence"}</h1>
             <p className="text-primary-foreground/70 max-w-lg">{branding?.hero_description || appTagline}</p>

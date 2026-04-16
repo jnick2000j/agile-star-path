@@ -70,6 +70,7 @@ interface BrandingState {
   login_button_text: string;
   login_cta_text: string;
   right_panel_bg_color: string;
+  show_app_name: boolean;
 }
 
 const defaultBranding: BrandingState = {
@@ -102,6 +103,7 @@ const defaultBranding: BrandingState = {
   login_button_text: "",
   login_cta_text: "",
   right_panel_bg_color: "",
+  show_app_name: true,
 };
 
 export default function BrandingSettings() {
@@ -156,6 +158,7 @@ export default function BrandingSettings() {
         login_button_text: (data as any).login_button_text || "",
         login_cta_text: (data as any).login_cta_text || "",
         right_panel_bg_color: (data as any).right_panel_bg_color || "",
+        show_app_name: (data as any).show_app_name !== false,
       });
     } else {
       setBranding(defaultBranding);
@@ -357,6 +360,13 @@ export default function BrandingSettings() {
                 <div className="space-y-2">
                   <Label>Application Name</Label>
                   <Input value={branding.app_name} onChange={(e) => update("app_name", e.target.value)} placeholder="TaskMaster" />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <Label>Show Application Name</Label>
+                    <p className="text-xs text-muted-foreground">When off, the logo appears larger and centered on the login page.</p>
+                  </div>
+                  <Switch checked={branding.show_app_name} onCheckedChange={(v) => update("show_app_name", v)} />
                 </div>
                 <div className="space-y-2">
                   <Label>Tagline</Label>

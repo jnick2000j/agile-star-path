@@ -140,6 +140,7 @@ export type Database = {
           primary_color: string | null
           right_panel_bg_color: string | null
           secondary_color: string | null
+          show_app_name: boolean
           show_features: boolean | null
           show_logo: boolean | null
           updated_at: string
@@ -175,6 +176,7 @@ export type Database = {
           primary_color?: string | null
           right_panel_bg_color?: string | null
           secondary_color?: string | null
+          show_app_name?: boolean
           show_features?: boolean | null
           show_logo?: boolean | null
           updated_at?: string
@@ -210,6 +212,7 @@ export type Database = {
           primary_color?: string | null
           right_panel_bg_color?: string | null
           secondary_color?: string | null
+          show_app_name?: boolean
           show_features?: boolean | null
           show_logo?: boolean | null
           updated_at?: string
