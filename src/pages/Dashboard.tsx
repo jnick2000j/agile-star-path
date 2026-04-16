@@ -7,6 +7,7 @@ import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { BenefitsTracker } from "@/components/dashboard/BenefitsTracker";
 import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layers, FolderKanban, AlertTriangle, Target, Package } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,27 +78,26 @@ export default function Dashboard() {
         <OrganizationStats />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3 mb-8">
-        <div className="lg:col-span-2">
-          <ProgrammeProgress />
-        </div>
-        <div>
+      <Tabs defaultValue="overview" className="mb-8">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="risks">Risk Overview</TabsTrigger>
+          <TabsTrigger value="milestones">Upcoming Milestones</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview">
+          <div className="grid gap-6 lg:grid-cols-2 mb-8">
+            <ProgrammeProgress />
+            <BenefitsTracker />
+          </div>
+          <RecentActivity />
+        </TabsContent>
+        <TabsContent value="risks">
           <RiskSummary />
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3 mb-8">
-        <div className="lg:col-span-2">
-          <BenefitsTracker />
-        </div>
-        <div>
+        </TabsContent>
+        <TabsContent value="milestones">
           <UpcomingMilestones />
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-1">
-        <RecentActivity />
-      </div>
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 }
