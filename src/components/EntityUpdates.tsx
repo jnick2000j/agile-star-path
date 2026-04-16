@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -32,12 +33,17 @@ const criticialityColors: Record<string, string> = {
 };
 
 export function EntityUpdates({ entityType, entityId, organizationId }: EntityUpdatesProps) {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const { isAdmin } = usePermissions();
   const queryClient = useQueryClient();
   const [newUpdate, setNewUpdate] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [isRiskFlagged, setIsRiskFlagged] = useState(false);
   const [riskCriticality, setRiskCriticality] = useState("medium");
+
+  // Stakeholder roles cannot post updates
+  const isStakeholder = userRole === "org_stakeholder" || userRole === "programme_stakeholder" || userRole === "project_stakeholder" || userRole === "product_stakeholder" || userRole === "stakeholder";
+  const canPostUpdates = !isStakeholder || isAdmin;
 
   const { data: updates = [] } = useQuery({
     queryKey: ["entity-updates", entityType, entityId],
@@ -92,10 +98,12 @@ export function EntityUpdates({ entityType, entityId, organizationId }: EntityUp
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium">Progress Updates</h4>
-        <Button variant="ghost" size="sm" onClick={() => setShowForm(!showForm)} className="gap-1">
-          <MessageSquarePlus className="h-3.5 w-3.5" />
-          Add Update
-        </Button>
+        {canPostUpdates && (
+          <Button variant="ghost" size="sm" onClick={() => setShowForm(!showForm)} className="gap-1">
+            <MessageSquarePlus className="h-3.5 w-3.5" />
+            Add Update
+          </Button>
+        )}
       </div>
 
       {showForm && (

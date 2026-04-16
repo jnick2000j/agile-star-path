@@ -92,7 +92,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
       can_manage_projects: isAdmin || isManager || isProjectTeam,
       can_manage_products: isAdmin || isManager || isProductManager || isProductTeam,
       can_manage_users: isAdmin,
-      can_view_reports: true,
+      can_view_reports: isAdmin || isManager || isProductManager || isStakeholder,
       can_manage_risks: isAdmin || isManager || isProductManager,
       can_manage_issues: isAdmin || isManager || isProductManager,
       can_manage_benefits: isAdmin || isManager || isProductManager,
