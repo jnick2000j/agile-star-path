@@ -133,7 +133,7 @@ export function EntityAssignments({
               </Avatar>
               <span className="text-sm">{a.profiles?.full_name || a.profiles?.email}</span>
               <Badge variant="outline" className="text-xs">{a.role}</Badge>
-              {(isAdmin || user?.id === a.assigned_by) && (
+              {(isAdmin || canManageEntity || user?.id === a.assigned_by) && (
                 <button
                   onClick={() => removeAssignment.mutate(a.id)}
                   className="text-muted-foreground hover:text-destructive"
@@ -148,7 +148,7 @@ export function EntityAssignments({
           )}
         </div>
 
-        {(isAdmin || true) && (
+        {(isAdmin || canManageEntity) && (
           <div className="flex gap-2">
             <Select value={selectedUserId} onValueChange={setSelectedUserId}>
               <SelectTrigger className="flex-1">

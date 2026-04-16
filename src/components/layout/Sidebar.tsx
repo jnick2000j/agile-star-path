@@ -54,8 +54,6 @@ const navigation: NavItem[] = [
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
   { label: "Project Teams", icon: Users, href: "/team" },
   { label: "Wizards", icon: Wand2, href: "/wizards" },
-  { label: "Admin", icon: Settings, href: "/admin", adminOnly: true },
-  { label: "Platform Admin", icon: Globe, href: "/platform-admin", platformAdminOnly: true },
 ];
 
 export function Sidebar() {

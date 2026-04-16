@@ -23,7 +23,8 @@ interface TaskAssignmentsProps {
 
 export function TaskAssignments({ taskId, organizationId }: TaskAssignmentsProps) {
   const { user } = useAuth();
-  const { isAdmin } = usePermissions();
+  const { isAdmin, canManage } = usePermissions();
+  const canManageProjects = canManage("projects");
   const queryClient = useQueryClient();
   const [selectedUserId, setSelectedUserId] = useState("");
 
@@ -109,7 +110,7 @@ export function TaskAssignments({ taskId, organizationId }: TaskAssignmentsProps
               </AvatarFallback>
             </Avatar>
             <span className="text-xs">{a.profiles?.full_name || a.profiles?.email}</span>
-            {(isAdmin || user?.id === a.assigned_by) && (
+            {(isAdmin || canManageProjects || user?.id === a.assigned_by) && (
               <button
                 onClick={() => removeAssignment.mutate(a.id)}
                 className="text-muted-foreground hover:text-destructive"
