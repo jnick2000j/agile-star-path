@@ -44,6 +44,7 @@ interface Program {
   budget: string | null;
   benefits_target: string | null;
   organization_id: string | null;
+  manager_id: string | null;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
