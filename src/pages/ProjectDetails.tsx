@@ -30,6 +30,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { EntityUpdates } from "@/components/EntityUpdates";
+import { EntityAssignments } from "@/components/EntityAssignments";
+import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1017,10 +1019,16 @@ export default function ProjectDetails() {
           </TabsContent>
 
           <TabsContent value="updates">
+            {project && (
+              <div className="grid gap-4 md:grid-cols-3 mb-4">
+                <EntityAssignments entityType="project" entityId={project.id} organizationId={project.organization_id} />
+                <UpdateFrequencySettings entityType="project" entityId={project.id} organizationId={project.organization_id} />
+              </div>
+            )}
             <Card>
               <CardHeader>
                 <CardTitle>Progress Updates</CardTitle>
-                <CardDescription>Timestamped updates for this project — these feed into weekly reports</CardDescription>
+                <CardDescription>Timestamped updates for this project — these feed into reports</CardDescription>
               </CardHeader>
               <CardContent>
                 {project && (

@@ -34,6 +34,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { EntityUpdates } from "@/components/EntityUpdates";
+import { EntityAssignments } from "@/components/EntityAssignments";
+import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { format } from "date-fns";
 
@@ -848,10 +850,16 @@ export default function ProductDetails() {
           </TabsContent>
 
           <TabsContent value="updates">
+            {product && (
+              <div className="grid gap-4 md:grid-cols-3 mb-4">
+                <EntityAssignments entityType="product" entityId={product.id} organizationId={product.organization_id} />
+                <UpdateFrequencySettings entityType="product" entityId={product.id} organizationId={product.organization_id} />
+              </div>
+            )}
             <Card>
               <CardHeader>
                 <CardTitle>Progress Updates</CardTitle>
-                <CardDescription>Timestamped updates for this product — these feed into weekly reports</CardDescription>
+                <CardDescription>Timestamped updates for this product — these feed into reports</CardDescription>
               </CardHeader>
               <CardContent>
                 {product && (

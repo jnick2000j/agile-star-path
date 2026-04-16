@@ -36,6 +36,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { EntityUpdates } from "@/components/EntityUpdates";
+import { EntityAssignments } from "@/components/EntityAssignments";
+import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { format } from "date-fns";
 
@@ -827,10 +829,16 @@ export default function ProgrammeDetails() {
           </TabsContent>
 
           <TabsContent value="updates">
+            {programme && (
+              <div className="grid gap-4 md:grid-cols-3 mb-4">
+                <EntityAssignments entityType="programme" entityId={programme.id} organizationId={programme.organization_id} />
+                <UpdateFrequencySettings entityType="programme" entityId={programme.id} organizationId={programme.organization_id} />
+              </div>
+            )}
             <Card>
               <CardHeader>
                 <CardTitle>Progress Updates</CardTitle>
-                <CardDescription>Timestamped updates for this programme — these feed into weekly reports</CardDescription>
+                <CardDescription>Timestamped updates for this programme — these feed into reports</CardDescription>
               </CardHeader>
               <CardContent>
                 {programme && (
