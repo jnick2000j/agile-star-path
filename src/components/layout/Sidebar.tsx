@@ -93,13 +93,8 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
-        {/* Organization Selector */}
-        <div className="flex h-16 items-center border-b border-sidebar-border px-3">
-          <OrganizationSelector />
-        </div>
-
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 pt-6">
           {navigation.map((item) => (
             <div key={item.label}>
               {item.children ? (
@@ -154,18 +149,31 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* User Section */}
-        <div className="border-t border-sidebar-border p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent text-sm font-medium text-sidebar-foreground">
+        {/* Footer: Organization + User */}
+        <div className="border-t border-sidebar-border bg-sidebar-accent/20 p-3 space-y-3">
+          {/* Organization Selector */}
+          <div className="rounded-lg bg-sidebar-accent/40 px-2 py-1.5 ring-1 ring-sidebar-border/50">
+            <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+              Organization
+            </p>
+            <OrganizationSelector />
+          </div>
+
+          {/* User Section */}
+          <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent/40 transition-colors">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-primary-foreground shadow-sm">
               {getInitials()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{getDisplayName()}</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate leading-tight">{getDisplayName()}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate capitalize">{userRole?.replace("_", " ") || "User"}</p>
             </div>
-            <button onClick={signOut} className="p-2 rounded-lg hover:bg-sidebar-accent transition-colors" title="Sign out">
-              <LogOut className="h-4 w-4 text-sidebar-foreground/60" />
+            <button
+              onClick={signOut}
+              className="p-2 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>
