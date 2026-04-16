@@ -98,10 +98,12 @@ export function EntityUpdates({ entityType, entityId, organizationId }: EntityUp
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium">Progress Updates</h4>
-        <Button variant="ghost" size="sm" onClick={() => setShowForm(!showForm)} className="gap-1">
-          <MessageSquarePlus className="h-3.5 w-3.5" />
-          Add Update
-        </Button>
+        {canPostUpdates && (
+          <Button variant="ghost" size="sm" onClick={() => setShowForm(!showForm)} className="gap-1">
+            <MessageSquarePlus className="h-3.5 w-3.5" />
+            Add Update
+          </Button>
+        )}
       </div>
 
       {showForm && (
