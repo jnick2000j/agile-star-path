@@ -75,8 +75,11 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="mb-8">
-        <OrganizationStats />
+      <div className="grid gap-6 lg:grid-cols-3 mb-8">
+        <div className="lg:col-span-2">
+          <OrganizationStats />
+        </div>
+        <StatusIndicators />
       </div>
 
       <Tabs defaultValue="overview" className="mb-8">
