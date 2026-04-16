@@ -71,6 +71,11 @@ interface BrandingState {
   login_cta_text: string;
   right_panel_bg_color: string;
   show_app_name: boolean;
+  show_hero_title: boolean;
+  show_hero_description: boolean;
+  show_welcome_message: boolean;
+  show_login_cta: boolean;
+  show_footer: boolean;
 }
 
 const defaultBranding: BrandingState = {
@@ -104,6 +109,11 @@ const defaultBranding: BrandingState = {
   login_cta_text: "",
   right_panel_bg_color: "",
   show_app_name: true,
+  show_hero_title: true,
+  show_hero_description: true,
+  show_welcome_message: true,
+  show_login_cta: true,
+  show_footer: true,
 };
 
 export default function BrandingSettings() {
@@ -159,6 +169,11 @@ export default function BrandingSettings() {
         login_cta_text: (data as any).login_cta_text || "",
         right_panel_bg_color: (data as any).right_panel_bg_color || "",
         show_app_name: (data as any).show_app_name !== false,
+        show_hero_title: (data as any).show_hero_title !== false,
+        show_hero_description: (data as any).show_hero_description !== false,
+        show_welcome_message: (data as any).show_welcome_message !== false,
+        show_login_cta: (data as any).show_login_cta !== false,
+        show_footer: (data as any).show_footer !== false,
       });
     } else {
       setBranding(defaultBranding);
