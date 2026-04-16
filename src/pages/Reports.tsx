@@ -119,28 +119,6 @@ export default function Reports() {
   });
 
   // Chart data
-  const programmeData = programmes.map(prog => {
-    const progProjects = projects.filter(p => p.programme_id === prog.id);
-    return {
-      name: prog.name.length > 15 ? prog.name.substring(0, 15) + "..." : prog.name,
-      onTrack: progProjects.filter(p => p.health === "green").length,
-      atRisk: progProjects.filter(p => p.health === "amber").length,
-      delayed: progProjects.filter(p => p.health === "red").length,
-    };
-  }).filter(p => p.onTrack + p.atRisk + p.delayed > 0);
-
-  const benefitsByCategory = benefits.reduce((acc, b) => {
-    const cat = b.category || "Other";
-    if (!acc[cat]) acc[cat] = { target: 0, actual: 0 };
-    acc[cat].target += parseInt(b.target_value || "0") || 0;
-    acc[cat].actual += parseInt(b.current_value || "0") || 0;
-    return acc;
-  }, {} as Record<string, { target: number; actual: number }>);
-
-  const benefitsTrendData = Object.entries(benefitsByCategory).map(([name, v]) => ({
-    month: name, target: v.target, actual: v.actual,
-  }));
-
   const riskCategories = risks.reduce((acc, r) => {
     const s = r.status || "unknown";
     acc[s] = (acc[s] || 0) + 1;
