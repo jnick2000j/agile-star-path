@@ -167,11 +167,11 @@ export default function BrandingSettings() {
     if (!file) return;
     setUploading(true);
     try {
+      if (!user?.id) throw new Error("You must be signed in to upload files");
       const fileExt = file.name.split(".").pop();
-      const timestamp = Date.now();
       const filePath = selectedOrg === "global"
-        ? `branding/global-logo-${timestamp}.${fileExt}`
-        : `branding/${selectedOrg}/logo-${timestamp}.${fileExt}`;
+        ? `${user.id}/global-logo.${fileExt}`
+        : `${selectedOrg}/logo.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from("logos").upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("logos").getPublicUrl(filePath);
@@ -190,11 +190,11 @@ export default function BrandingSettings() {
     if (!file) return;
     setUploading(true);
     try {
+      if (!user?.id) throw new Error("You must be signed in to upload files");
       const fileExt = file.name.split(".").pop();
-      const timestamp = Date.now();
       const filePath = selectedOrg === "global"
-        ? `branding/global-login-bg-${timestamp}.${fileExt}`
-        : `branding/${selectedOrg}/login-bg-${timestamp}.${fileExt}`;
+        ? `${user.id}/global-login-bg.${fileExt}`
+        : `${selectedOrg}/login-bg.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from("logos").upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("logos").getPublicUrl(filePath);
