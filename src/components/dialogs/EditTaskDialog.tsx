@@ -1,0 +1,241 @@
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Save, Trash2 } from "lucide-react";
+
+interface TaskData {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  planned_start: string | null;
+  planned_end: string | null;
+  estimated_hours: number | null;
+  story_points: number | null;
+  sprint_id: string | null;
+  project_id: string | null;
+  programme_id: string | null;
+  product_id: string | null;
+  work_package_id: string | null;
+}
+
+interface EditTaskDialogProps {
+  task: TaskData | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate: () => void;
+}
+
+export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskDialogProps) {
+  const { currentOrganization } = useOrganization();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [status, setStatus] = useState("not_started");
+  const [plannedStart, setPlannedStart] = useState("");
+  const [plannedEnd, setPlannedEnd] = useState("");
+  const [estimatedHours, setEstimatedHours] = useState("");
+  const [storyPoints, setStoryPoints] = useState("");
+  const [sprintId, setSprintId] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const { data: sprints = [] } = useQuery({
+    queryKey: ["sprints-for-task", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data, error } = await supabase
+        .from("sprints")
+        .select("id, name, status")
+        .eq("organization_id", currentOrganization.id)
+        .in("status", ["planning", "active"])
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentOrganization?.id && open,
+  });
+
+  useEffect(() => {
+    if (task) {
+      setName(task.name);
+      setDescription(task.description || "");
+      setPriority(task.priority);
+      setStatus(task.status);
+      setPlannedStart(task.planned_start || "");
+      setPlannedEnd(task.planned_end || "");
+      setEstimatedHours(task.estimated_hours?.toString() || "");
+      setStoryPoints(task.story_points?.toString() || "");
+      setSprintId(task.sprint_id || "");
+    }
+  }, [task]);
+
+  if (!task) return null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updateData: Record<string, unknown> = {
+      name,
+      description: description || null,
+      priority,
+      status,
+      planned_start: plannedStart || null,
+      planned_end: plannedEnd || null,
+      estimated_hours: estimatedHours ? Number(estimatedHours) : null,
+      story_points: storyPoints ? Number(storyPoints) : null,
+      sprint_id: sprintId || null,
+    };
+
+    if (status === "completed") {
+      updateData.completion_percentage = 100;
+      updateData.actual_end = new Date().toISOString().split("T")[0];
+    }
+
+    const { error } = await supabase.from("tasks").update(updateData).eq("id", task.id);
+
+    if (error) {
+      toast.error("Failed to update task");
+      console.error(error);
+    } else {
+      toast.success("Task updated");
+      onOpenChange(false);
+      onUpdate();
+    }
+    setSaving(false);
+  };
+
+  const handleDelete = async () => {
+    const { error } = await supabase.from("tasks").delete().eq("id", task.id);
+    if (error) {
+      toast.error("Failed to delete task");
+    } else {
+      toast.success("Task deleted");
+      onOpenChange(false);
+      onUpdate();
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[550px]">
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label>Name</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="not_started">Not Started</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="on_hold">On Hold</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Story Points</Label>
+              <Input
+                type="number"
+                value={storyPoints}
+                onChange={(e) => setStoryPoints(e.target.value)}
+                placeholder="—"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Sprint</Label>
+            <Select value={sprintId || "none"} onValueChange={(v) => setSprintId(v === "none" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="No sprint" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No Sprint</SelectItem>
+                {sprints.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name} ({s.status})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Planned Start</Label>
+              <Input
+                type="date"
+                value={plannedStart}
+                onChange={(e) => setPlannedStart(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Planned End</Label>
+              <Input
+                type="date"
+                value={plannedEnd}
+                onChange={(e) => setPlannedEnd(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Est. Hours</Label>
+              <Input
+                type="number"
+                value={estimatedHours}
+                onChange={(e) => setEstimatedHours(e.target.value)}
+                placeholder="—"
+              />
+            </div>
+          </div>
+          <div className="flex justify-between pt-2">
+            <Button variant="destructive" size="sm" onClick={handleDelete}>
+              <Trash2 className="h-4 w-4 mr-1" /> Delete
+            </Button>
+            <Button onClick={handleSave} disabled={saving || !name}>
+              <Save className="h-4 w-4 mr-1" /> Save Changes
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
