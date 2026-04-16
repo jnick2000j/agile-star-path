@@ -77,9 +77,9 @@ export default function Programmes() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      // Filter by organization if one is selected
+      // Filter by organization if one is selected (include legacy programmes with no org)
       if (currentOrganization) {
-        query = query.eq("organization_id", currentOrganization.id);
+        query = query.or(`organization_id.eq.${currentOrganization.id},organization_id.is.null`);
       }
 
       // Programme stakeholders only see assigned programmes
@@ -227,8 +227,8 @@ export default function Programmes() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono text-muted-foreground">{programme.id}</span>
-                  <Badge variant="outline" className={cn("text-xs", statusConfig[programme.status].className)}>
-                    {statusConfig[programme.status].label}
+                  <Badge variant="outline" className={cn("text-xs", (statusConfig[programme.status] || statusConfig.active).className)}>
+                    {(statusConfig[programme.status] || { label: programme.status }).label}
                   </Badge>
                 </div>
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
