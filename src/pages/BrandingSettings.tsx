@@ -343,7 +343,7 @@ export default function BrandingSettings() {
                   id="appName"
                   value={branding.app_name}
                   onChange={(e) => setBranding((prev) => ({ ...prev, app_name: e.target.value }))}
-                  placeholder="PIMP"
+                  placeholder="TaskMaster"
                 />
                 <p className="text-sm text-muted-foreground">The main title shown in the header</p>
               </div>
@@ -616,8 +616,8 @@ export default function BrandingSettings() {
                   </div>
                 )}
               </div>
-              <h2 className="text-xl font-bold text-center text-foreground">{branding.app_name || "PIMP"}</h2>
-              <p className="text-sm text-muted-foreground text-center">{branding.app_tagline || "Program Information Management Platform"}</p>
+              <h2 className="text-xl font-bold text-center text-foreground">{branding.app_name || "TaskMaster"}</h2>
+              <p className="text-sm text-muted-foreground text-center">{branding.app_tagline || "Program Information & Management Platform"}</p>
               <div className="flex gap-2 justify-center mt-4">
                 <button
                   className="px-4 py-2 rounded-md text-white text-sm font-medium"

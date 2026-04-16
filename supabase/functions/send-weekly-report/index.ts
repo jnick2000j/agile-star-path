@@ -174,7 +174,7 @@ serve(async (req) => {
         if (stakeholder.email) {
           try {
             await resend.emails.send({
-              from: "PIMP Reports <onboarding@resend.dev>",
+              from: "TaskMaster Reports <onboarding@resend.dev>",
               to: [stakeholder.email],
               subject: `Weekly Programme Report - ${new Date().toLocaleDateString('en-GB')}`,
               html: emailHtml,
