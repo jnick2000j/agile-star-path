@@ -58,6 +58,7 @@ import {
 import { EntityUpdates } from "@/components/EntityUpdates";
 import { TaskAssignments } from "@/components/TaskAssignments";
 import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
+import { EditTaskDialog } from "@/components/dialogs/EditTaskDialog";
 import { format } from "date-fns";
 
 type TaskStatus = "not_started" | "in_progress" | "on_hold" | "completed" | "cancelled";
