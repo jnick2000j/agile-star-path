@@ -35,6 +35,7 @@ interface NavItem {
   href?: string;
   children?: { label: string; href: string }[];
   adminOnly?: boolean;
+  platformAdminOnly?: boolean;
 }
 
 const navigation: NavItem[] = [
@@ -52,7 +53,7 @@ const navigation: NavItem[] = [
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
   { label: "Project Teams", icon: Users, href: "/team" },
   { label: "Admin", icon: Settings, href: "/admin", adminOnly: true },
-  { label: "Platform Admin", icon: Globe, href: "/platform-admin", adminOnly: true },
+  { label: "Platform Admin", icon: Globe, href: "/platform-admin", platformAdminOnly: true },
 ];
 
 export function Sidebar() {
@@ -104,7 +105,11 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {navigation
-            .filter((item) => !item.adminOnly || userRole === "admin" || userRole === "org_admin")
+            .filter((item) => {
+              if (item.platformAdminOnly) return userRole === "admin";
+              if (item.adminOnly) return userRole === "admin" || userRole === "org_admin";
+              return true;
+            })
             .map((item) => (
             <div key={item.label}>
               {item.children ? (
