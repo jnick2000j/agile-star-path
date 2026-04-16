@@ -248,6 +248,60 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
               />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Program</Label>
+              <Select value={programmeId || "none"} onValueChange={(v) => { setProgrammeId(v === "none" ? "" : v); }}>
+                <SelectTrigger><SelectValue placeholder="No program" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Program</SelectItem>
+                  {programmes.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Project</Label>
+              <Select value={projectId || "none"} onValueChange={(v) => { setProjectId(v === "none" ? "" : v); setWorkPackageId(""); }}>
+                <SelectTrigger><SelectValue placeholder="No project" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Project</SelectItem>
+                  {projects
+                    .filter((p: any) => !programmeId || p.programme_id === programmeId || !p.programme_id)
+                    .map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Product</Label>
+              <Select value={productId || "none"} onValueChange={(v) => setProductId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="No product" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Product</SelectItem>
+                  {products
+                    .filter((p: any) => (!programmeId || p.programme_id === programmeId || !p.programme_id) && (!projectId || p.project_id === projectId || !p.project_id))
+                    .map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Work Package</Label>
+              <Select value={workPackageId || "none"} onValueChange={(v) => setWorkPackageId(v === "none" ? "" : v)} disabled={!projectId}>
+                <SelectTrigger><SelectValue placeholder={projectId ? "No work package" : "Select project first"} /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Work Package</SelectItem>
+                  {workPackages.map((w: any) => (
+                    <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label>Sprint</Label>
             <Select value={sprintId || "none"} onValueChange={(v) => setSprintId(v === "none" ? "" : v)}>
