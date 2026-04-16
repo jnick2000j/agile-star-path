@@ -25,8 +25,6 @@ import {
   FileEdit,
   ClipboardCheck,
   Shield,
-  Settings,
-  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,8 +33,6 @@ interface NavItem {
   icon: React.ElementType;
   href?: string;
   children?: { label: string; href: string }[];
-  adminOnly?: boolean;
-  platformAdminOnly?: boolean;
 }
 
 const navigation: NavItem[] = [
