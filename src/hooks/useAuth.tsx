@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, firstName?: string, lastName?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, firstName?: string, lastName?: string, orgName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   userRole: string | null;
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, firstName?: string, lastName?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, firstName?: string, lastName?: string, orgName?: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -100,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             full_name: fullName,
             first_name: firstName || fullName.split(' ')[0] || '',
             last_name: lastName || fullName.split(' ').slice(1).join(' ') || '',
+            org_name: orgName || '',
           },
         },
       });
