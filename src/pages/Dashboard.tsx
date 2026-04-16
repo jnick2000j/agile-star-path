@@ -1,14 +1,10 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { ProgrammeProgress } from "@/components/dashboard/ProgrammeProgress";
-import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { RiskSummary } from "@/components/dashboard/RiskSummary";
 import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
-import { BenefitsTracker } from "@/components/dashboard/BenefitsTracker";
 import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
 import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layers, FolderKanban, AlertTriangle, Target, Package } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,33 +71,17 @@ export default function Dashboard() {
         />
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 mb-8">
+        <RiskSummary />
+        <UpcomingMilestones />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3 mb-8">
         <div className="lg:col-span-2">
           <OrganizationStats />
         </div>
         <StatusIndicators />
       </div>
-
-      <Tabs defaultValue="overview" className="mb-8">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="risks">Risk Overview</TabsTrigger>
-          <TabsTrigger value="milestones">Upcoming Milestones</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview">
-          <div className="grid gap-6 lg:grid-cols-2 mb-8">
-            <ProgrammeProgress />
-            <BenefitsTracker />
-          </div>
-          <RecentActivity />
-        </TabsContent>
-        <TabsContent value="risks">
-          <RiskSummary />
-        </TabsContent>
-        <TabsContent value="milestones">
-          <UpcomingMilestones />
-        </TabsContent>
-      </Tabs>
     </AppLayout>
   );
 }
