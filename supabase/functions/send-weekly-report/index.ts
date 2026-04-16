@@ -13,7 +13,30 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT and require admin role
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     
@@ -159,7 +182,7 @@ serve(async (req) => {
             emailsSent++;
             console.log(`Email sent to ${stakeholder.email}`);
           } catch (emailError) {
-            console.error(`Failed to send email to ${stakeholder.email}:`, emailError);
+            console.error(`Failed to send email to stakeholder:`, emailError);
           }
         }
       }
@@ -179,7 +202,7 @@ serve(async (req) => {
       stakeholdersCount: stakeholders?.length || 0,
     };
 
-    console.log("Weekly report generated:", JSON.stringify(reportContent, null, 2));
+    console.log("Weekly report generated successfully");
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -191,7 +214,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error generating weekly report:", error);
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Unknown error" 
+      error: "An error occurred generating the report" 
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
