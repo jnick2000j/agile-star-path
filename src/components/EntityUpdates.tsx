@@ -33,12 +33,17 @@ const criticialityColors: Record<string, string> = {
 };
 
 export function EntityUpdates({ entityType, entityId, organizationId }: EntityUpdatesProps) {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const { isAdmin } = usePermissions();
   const queryClient = useQueryClient();
   const [newUpdate, setNewUpdate] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [isRiskFlagged, setIsRiskFlagged] = useState(false);
   const [riskCriticality, setRiskCriticality] = useState("medium");
+
+  // Stakeholder roles cannot post updates
+  const isStakeholder = userRole === "org_stakeholder" || userRole === "programme_stakeholder" || userRole === "project_stakeholder" || userRole === "product_stakeholder" || userRole === "stakeholder";
+  const canPostUpdates = !isStakeholder || isAdmin;
 
   const { data: updates = [] } = useQuery({
     queryKey: ["entity-updates", entityType, entityId],
