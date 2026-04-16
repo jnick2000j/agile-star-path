@@ -896,48 +896,7 @@ export default function Documentation() {
               </div>
             </div>
 
-            {/* Branding & Customization */}
-            <div className="metric-card">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                  <FileEdit className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Branding & Customization</h3>
-                  <p className="text-sm text-muted-foreground">Customize your organization's look</p>
-                </div>
-              </div>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <h4 className="font-medium mb-2">Organization Branding</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• Navigate to Settings → Branding</li>
-                    <li>• Upload your organization logo (PNG format recommended for transparency)</li>
-                    <li>• Set primary, secondary, and accent colors</li>
-                    <li>• Organization logo appears in the page header next to the title</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Global Branding (Admin)</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• Admins can set global branding for the login page</li>
-                    <li>• Configure app name, tagline, and welcome message</li>
-                    <li>• Set feature highlights displayed on the login page</li>
-                    <li>• Adjust header font sizing (small to extra large)</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Logo Guidelines</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• Use PNG format for best transparency support</li>
-                    <li>• Logo size can be adjusted: small, medium, large, or extra large</li>
-                    <li>• Logo appears in page headers for easy brand visibility</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Role Management */}
+            {/* Roles & Permissions */}
             <div className="metric-card">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
@@ -945,7 +904,7 @@ export default function Documentation() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Roles & Permissions</h3>
-                  <p className="text-sm text-muted-foreground">Understanding user roles</p>
+                  <p className="text-sm text-muted-foreground">Understanding user roles and stakeholder access</p>
                 </div>
               </div>
               <div className="space-y-4 text-sm">
@@ -960,11 +919,22 @@ export default function Documentation() {
                   </ul>
                 </div>
                 <div>
+                  <h4 className="font-medium mb-2">Stakeholder Roles</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Organization Stakeholder:</strong> View-only access to the entire organization's data</li>
+                    <li>• <strong>Programme Stakeholder:</strong> View-only access to assigned programmes</li>
+                    <li>• <strong>Project Stakeholder:</strong> View-only access to assigned projects</li>
+                    <li>• <strong>Product Stakeholder:</strong> View-only access to assigned products</li>
+                    <li>• Stakeholders cannot submit updates or reports</li>
+                  </ul>
+                </div>
+                <div>
                   <h4 className="font-medium mb-2">Custom Roles</h4>
                   <ul className="space-y-1 text-muted-foreground">
                     <li>• Admins can create custom roles with specific permissions</li>
-                    <li>• Assign granular permissions for each module</li>
+                    <li>• Assign granular permissions for each module (risks, issues, benefits, etc.)</li>
                     <li>• Custom roles can be assigned to users like system roles</li>
+                    <li>• The "Administrator" role is locked and cannot be modified</li>
                   </ul>
                 </div>
               </div>
@@ -978,7 +948,7 @@ export default function Documentation() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Organization Management</h3>
-                  <p className="text-sm text-muted-foreground">Multi-org structure</p>
+                  <p className="text-sm text-muted-foreground">Multi-tenant structure</p>
                 </div>
               </div>
               <div className="space-y-4 text-sm">
@@ -996,50 +966,548 @@ export default function Documentation() {
                   <ul className="space-y-1 text-muted-foreground">
                     <li>• Use the organization selector in the sidebar</li>
                     <li>• Users only see organizations they have access to</li>
-                    <li>• Data is filtered by the selected organization</li>
+                    <li>• All data is siloed by the selected organization (RLS)</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Organization Access Levels</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Admin:</strong> Full control over org settings and users</li>
+                    <li>• <strong>Editor:</strong> Create and modify programmes, projects, products</li>
+                    <li>• <strong>Viewer:</strong> Read-only access to org data</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* Register Management */}
+            {/* Branding & Customization */}
             <div className="metric-card">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                  <FileEdit className="h-5 w-5 text-destructive" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <FileEdit className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Register Management</h3>
-                  <p className="text-sm text-muted-foreground">Edit & delete register items</p>
+                  <h3 className="font-semibold">Branding & Customization</h3>
+                  <p className="text-sm text-muted-foreground">Customize your organization's look</p>
                 </div>
               </div>
               <div className="space-y-4 text-sm">
                 <div>
-                  <h4 className="font-medium mb-2">Editing Register Items</h4>
+                  <h4 className="font-medium mb-2">Organization Branding</h4>
                   <ul className="space-y-1 text-muted-foreground">
-                    <li>• Click on any row in Risks, Issues, Benefits, or Stakeholders</li>
-                    <li>• Update fields and click "Save Changes"</li>
-                    <li>• Edit permissions controlled by RBAC roles</li>
+                    <li>• Navigate to Settings → Branding</li>
+                    <li>• Upload your organization logo (PNG format recommended)</li>
+                    <li>• Set primary, secondary, and accent colors</li>
+                    <li>• Organization logo appears in the page header</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2">Deleting Items (Admin Only)</h4>
+                  <h4 className="font-medium mb-2">Global Branding (Admin)</h4>
                   <ul className="space-y-1 text-muted-foreground">
-                    <li>• Only administrators see the Delete button</li>
-                    <li>• Confirm deletion in the alert dialog</li>
-                    <li>• Deleted items cannot be recovered</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Project Management</h4>
-                  <ul className="space-y-1 text-muted-foreground">
-                    <li>• Click on projects to edit details and team members</li>
-                    <li>• Multi-select assignees from authorized users</li>
-                    <li>• Admin-only deletion with confirmation</li>
+                    <li>• Set global branding for the login page</li>
+                    <li>• Configure app name, tagline, and welcome message</li>
+                    <li>• Set feature highlights displayed on the login page</li>
+                    <li>• Adjust header font sizing (small to extra large)</li>
                   </ul>
                 </div>
               </div>
             </div>
+
+            {/* Programme Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Layers className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Programme Management</h3>
+                  <p className="text-sm text-muted-foreground">MSP-based programme lifecycle</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Creating & Managing Programmes</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Programmes and click "New Programme"</li>
+                    <li>• Set name, description, dates, budget, and benefits target</li>
+                    <li>• Assign a programme manager and sponsor</li>
+                    <li>• Link projects to the programme for traceability</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Programme Tabs</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Blueprint:</strong> Vision, objectives, and programme brief</li>
+                    <li>• <strong>Definition:</strong> Scope, strategic objectives, constraints</li>
+                    <li>• <strong>Tranches:</strong> Manage delivery phases with start/end dates</li>
+                    <li>• <strong>Success Plan:</strong> Track KPIs, targets, and success criteria</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Multi-User Assignments</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Assign multiple users to a programme with roles (Lead, Contributor, Reviewer)</li>
+                    <li>• All assigned users receive update reminders</li>
+                    <li>• Each user is individually responsible for submitting updates</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <FolderKanban className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Project Management</h3>
+                  <p className="text-sm text-muted-foreground">PRINCE2-based project controls</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Creating Projects</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Projects and click "New Project"</li>
+                    <li>• Set methodology (PRINCE2, Agile, Hybrid, Waterfall)</li>
+                    <li>• Link to a programme for cross-entity traceability</li>
+                    <li>• Assign project manager and set priority/health status</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Project Details</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Overview:</strong> Key metrics, budget, timeline</li>
+                    <li>• <strong>Registers:</strong> Linked risks, issues, lessons, benefits</li>
+                    <li>• <strong>Updates:</strong> Progress updates with frequency settings</li>
+                    <li>• <strong>Documents:</strong> Upload and manage supporting files</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Status & Lifecycle</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Projects follow defined stage gates</li>
+                    <li>• Status changes are tracked in an audit trail</li>
+                    <li>• Health indicators: Green, Amber, Red</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+                  <Package className="h-5 w-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Product Management</h3>
+                  <p className="text-sm text-muted-foreground">Roadmap, backlog, and lifecycle</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Creating Products</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Products and click "New Product"</li>
+                    <li>• Set vision, value proposition, target market, and North Star metric</li>
+                    <li>• Choose product type: Digital, Physical, Service, Platform, Hybrid</li>
+                    <li>• Link to a programme and/or project</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Product Features</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Roadmap:</strong> Visual quarterly timeline of features</li>
+                    <li>• <strong>Kanban Board:</strong> Drag-and-drop feature management</li>
+                    <li>• <strong>RICE Scoring:</strong> Reach, Impact, Confidence, Effort prioritization</li>
+                    <li>• <strong>MoSCoW:</strong> Must/Should/Could/Won't categorization</li>
+                    <li>• <strong>Dependencies:</strong> Visualize feature-to-feature dependencies</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Lifecycle Stages</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Discovery → Definition → Development → Launch → Growth → Maturity → Decline → Retired</li>
+                    <li>• Revenue target and launch date tracking</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Updates & Frequency Settings */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+                  <Clock className="h-5 w-5 text-warning" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Updates & Reporting</h3>
+                  <p className="text-sm text-muted-foreground">Configurable update frequencies and status reports</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Submitting Updates</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Navigate to Updates to create status reports</li>
+                    <li>• Select the entity type (Programme, Project, Product) and entity</li>
+                    <li>• Enter highlights, risks/issues, and next week plans</li>
+                    <li>• Set overall health (Green, Amber, Red)</li>
+                    <li>• Updates are automatically synced to the entity's progress feed</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Update Frequency Settings</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Set update frequency per entity: Daily, Weekly, Monthly, or Custom</li>
+                    <li>• Toggle "Mandatory" to require updates from all assigned users</li>
+                    <li>• Configure reminder timing (hours before due)</li>
+                    <li>• Organization-wide defaults can be set with per-entity overrides</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Automated Reminders</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• System checks for due/overdue updates every hour</li>
+                    <li>• In-app notifications sent to all assigned users</li>
+                    <li>• Email reminders sent when email domain is configured</li>
+                    <li>• Each assigned user is individually responsible for their update</li>
+                    <li>• Stakeholder roles are excluded from update requirements</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Multi-User Assignments */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <UserPlus className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Multi-User Assignments</h3>
+                  <p className="text-sm text-muted-foreground">Assign multiple users to entities</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Entity Assignments</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Programmes, Projects, and Products support multi-user assignment</li>
+                    <li>• Navigate to any entity detail page to see the "Assigned Users" panel</li>
+                    <li>• Select a user from the organization and assign a role</li>
+                    <li>• Available roles: Lead, Contributor, Reviewer</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Task Assignments</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Tasks support multiple assignees</li>
+                    <li>• Expand a task row to see and manage assigned users</li>
+                    <li>• Each assignee receives individual update reminders</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Permissions</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Editors and above can assign/remove users</li>
+                    <li>• Users who assigned someone can also remove them</li>
+                    <li>• Admins can manage all assignments</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Task Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <ListChecks className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Task Management</h3>
+                  <p className="text-sm text-muted-foreground">Tasks, work packages, and sprints</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Creating & Managing Tasks</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Create tasks linked to programmes, projects, or products</li>
+                    <li>• Set priority, status, due dates, and story points</li>
+                    <li>• Assign multiple users to each task</li>
+                    <li>• Expand task rows to add progress updates</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Work Packages</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Group related tasks and milestones into work packages</li>
+                    <li>• Track level of effort (LOE) and story points</li>
+                    <li>• Link work packages to projects for traceability</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Sprint Planning</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Create sprints with start/end dates and capacity</li>
+                    <li>• Assign backlog items to sprints</li>
+                    <li>• Track velocity and burndown progress</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Unified Backlog</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• View and manage items across all entities in one place</li>
+                    <li>• Filter by entity, priority, status, and assignee</li>
+                    <li>• Drag items between sprint and backlog</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Registers */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Registers</h3>
+                  <p className="text-sm text-muted-foreground">Risks, Issues, Benefits, Lessons, Stakeholders</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Register Types</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• <strong>Risk Register:</strong> Probability, impact, score matrix, response strategies</li>
+                    <li>• <strong>Issue Register:</strong> Track and resolve issues with priority levels</li>
+                    <li>• <strong>Benefits Register:</strong> Target vs. actual value, realization tracking</li>
+                    <li>• <strong>Lessons Learned:</strong> Capture root causes and recommendations</li>
+                    <li>• <strong>Stakeholder Register:</strong> Influence, interest, engagement strategy</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Cross-Entity Traceability</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• All register items can be linked to Programmes, Projects, and Products</li>
+                    <li>• Filter registers by entity and status using popover filters</li>
+                    <li>• View linked items from entity detail pages</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Editing & Deleting</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Click any register row to edit details</li>
+                    <li>• Only administrators can permanently delete register items</li>
+                    <li>• Deletion requires confirmation and cannot be undone</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Document Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+                  <Upload className="h-5 w-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Document Management</h3>
+                  <p className="text-sm text-muted-foreground">Upload and manage files</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Uploading Documents</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Documents can be attached to any entity (programme, project, product, etc.)</li>
+                    <li>• Navigate to the entity detail page → Documents tab</li>
+                    <li>• Drag and drop or click to upload files</li>
+                    <li>• Files are stored securely with organization-level access control</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Accessing Documents</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Documents use signed URLs for secure, time-limited access</li>
+                    <li>• Only users with access to the organization can view documents</li>
+                    <li>• Download documents directly from the file list</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Management */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+                  <GitBranch className="h-5 w-5 text-warning" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Status Management & Audit Trail</h3>
+                  <p className="text-sm text-muted-foreground">Lifecycle tracking and history</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Status Changes</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Projects, programmes, and products have lifecycle status workflows</li>
+                    <li>• Use the status action buttons on detail pages to transition states</li>
+                    <li>• Each status change requires a reason/notes</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Audit Trail</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• All status changes are logged in the status_history table</li>
+                    <li>• View complete history via the "Status History" button</li>
+                    <li>• Records include who changed it, when, from/to status, and notes</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Milestones & Stage Gates */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <Target className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Milestones & Stage Gates</h3>
+                  <p className="text-sm text-muted-foreground">Delivery checkpoints and governance</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Milestones</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Create milestones linked to programmes, projects, or products</li>
+                    <li>• Set target and actual dates, acceptance criteria, and deliverables</li>
+                    <li>• Mark milestones as stage boundaries for PRINCE2 governance</li>
+                    <li>• Link milestones to work packages for tracking</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Stage Gates</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Define gate criteria for each project stage</li>
+                    <li>• Track gate approvals and decision outcomes</li>
+                    <li>• Use stage gates for go/no-go decisions</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Change Control & Exceptions */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                  <CalendarCheck className="h-5 w-5 text-destructive" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Change Control & Exceptions</h3>
+                  <p className="text-sm text-muted-foreground">Manage changes and tolerance breaches</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Change Requests</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Submit change requests with impact assessment</li>
+                    <li>• Track cost, time, quality, and risk impacts</li>
+                    <li>• Workflow: Submitted → Under Review → Approved/Rejected → Implemented</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Exception Management</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Raise exceptions when tolerances are breached</li>
+                    <li>• Track original tolerance vs. current forecast</li>
+                    <li>• Escalation tracking with resolution workflow</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Notifications & AI */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Bell className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Notifications & AI Assistant</h3>
+                  <p className="text-sm text-muted-foreground">Alerts and intelligent guidance</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Notification Bell</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Bell icon in the header shows unread notification count</li>
+                    <li>• Notifications for due updates, overdue reports, and high-impact risks</li>
+                    <li>• Click notifications to navigate directly to the relevant page</li>
+                    <li>• Mark all as read or dismiss individual notifications</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Ask the Task Master (AI)</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Access via the chat icon in the sidebar or header</li>
+                    <li>• Ask questions about PRINCE2, MSP, Agile, and platform usage</li>
+                    <li>• Get guidance on methodology processes and best practices</li>
+                    <li>• Chat history is saved for reference</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Quality & Requirements */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+                  <BarChart3 className="h-5 w-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Quality & Requirements</h3>
+                  <p className="text-sm text-muted-foreground">Quality management and requirements tracing</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Quality Management</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Create quality records (reviews, inspections, audits, testing)</li>
+                    <li>• Track acceptance criteria, review methods, and defects</li>
+                    <li>• Approval workflow with reviewer assignments</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Business Requirements</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Capture requirements with reference numbers and categories</li>
+                    <li>• Link to programmes, projects, and products</li>
+                    <li>• Track status: Draft → Under Review → Approved → Implemented</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Technical Requirements</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• Define technical specifications and constraints</li>
+                    <li>• Separate from business requirements for clarity</li>
+                    <li>• Full traceability to parent entities</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
           </div>
         </TabsContent>
 
