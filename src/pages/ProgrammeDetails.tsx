@@ -495,7 +495,8 @@ export default function ProgrammeDetails() {
               <History className="h-4 w-4" />
               Timeline
             </TabsTrigger>
-          </TabsList>
+            </TabsList>
+          </ScrollArea>
 
           {/* Linked Projects Tab */}
           <TabsContent value="projects">
