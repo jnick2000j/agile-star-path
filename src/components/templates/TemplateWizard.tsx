@@ -55,7 +55,7 @@ interface Organization {
   name: string;
 }
 
-const getWizardSteps = (templateType: TemplateType, orgs: Organization[], programmes: any[], projects: any[]): WizardStep[] => {
+const getWizardSteps = (templateType: TemplateType, orgs: Organization[], programmes: any[], projects: any[], products: any[]): WizardStep[] => {
   const orgField: WizardField = {
     key: "organization_id",
     label: "Organization",
@@ -63,6 +63,17 @@ const getWizardSteps = (templateType: TemplateType, orgs: Organization[], progra
     placeholder: "Select organization",
     helpText: "Which organization does this belong to?",
     options: orgs.map(o => ({ value: o.id, label: o.name })),
+  };
+
+  const entityParentFields = (includeProduct = false): WizardField[] => {
+    const fields: WizardField[] = [
+      { key: "programme_id", label: "Programme", type: "select", placeholder: "Optional", options: programmes.map(p => ({ value: p.id, label: p.name })) },
+      { key: "project_id", label: "Project", type: "select", placeholder: "Optional", options: projects.map(p => ({ value: p.id, label: p.name })) },
+    ];
+    if (includeProduct) {
+      fields.push({ key: "product_id", label: "Product", type: "select", placeholder: "Optional", options: products.map(p => ({ value: p.id, label: p.name })) });
+    }
+    return fields;
   };
 
   switch (templateType) {
@@ -234,13 +245,223 @@ const getWizardSteps = (templateType: TemplateType, orgs: Organization[], progra
         },
       ];
 
-    default:
+    case "risk_register":
       return [
         {
-          title: "Template Preview",
-          description: "This template is available as a reference guide.",
+          title: "Risk Identification",
+          description: "Describe the risk and its context.",
           fields: [
-            { key: "info", label: "Note", type: "text", placeholder: "This template is for reference only - use Copy or Download to use it" },
+            orgField,
+            { key: "title", label: "Risk Title", type: "text", placeholder: "e.g. Key supplier bankruptcy", required: true, helpText: "A short, clear description of the risk event" },
+            { key: "description", label: "Risk Description", type: "textarea", placeholder: "Describe the risk in detail — what could happen and why...", helpText: "Include the cause, event, and effect", fullWidth: true },
+            { key: "category", label: "Category", type: "select", options: [
+              { value: "strategic", label: "Strategic" },
+              { value: "operational", label: "Operational" },
+              { value: "financial", label: "Financial" },
+              { value: "technical", label: "Technical" },
+              { value: "organizational", label: "Organizational" },
+              { value: "external", label: "External" },
+            ]},
+          ],
+        },
+        {
+          title: "Assessment",
+          description: "Evaluate the probability and impact.",
+          fields: [
+            { key: "probability", label: "Probability", type: "select", required: true, options: [
+              { value: "very_low", label: "Very Low (<10%)" },
+              { value: "low", label: "Low (10-30%)" },
+              { value: "medium", label: "Medium (30-60%)" },
+              { value: "high", label: "High (60-85%)" },
+              { value: "very_high", label: "Very High (>85%)" },
+            ]},
+            { key: "impact", label: "Impact", type: "select", required: true, options: [
+              { value: "very_low", label: "Very Low — Negligible" },
+              { value: "low", label: "Low — Minor disruption" },
+              { value: "medium", label: "Medium — Significant impact" },
+              { value: "high", label: "High — Major impact" },
+              { value: "very_high", label: "Very High — Catastrophic" },
+            ]},
+            { key: "date_identified", label: "Date Identified", type: "date" },
+            { key: "review_date", label: "Next Review Date", type: "date" },
+          ],
+        },
+        {
+          title: "Response & Ownership",
+          description: "Plan how to handle this risk.",
+          fields: [
+            { key: "response", label: "Response Strategy", type: "textarea", placeholder: "Describe the planned response: Avoid, Reduce, Transfer, Accept, or Share...", helpText: "Include specific actions and triggers", fullWidth: true },
+            ...entityParentFields(true),
+          ],
+        },
+      ];
+
+    case "lessons_learned":
+      return [
+        {
+          title: "Lesson Overview",
+          description: "What happened and what did we learn?",
+          fields: [
+            orgField,
+            { key: "title", label: "Lesson Title", type: "text", placeholder: "e.g. Early stakeholder engagement reduced rework", required: true },
+            { key: "lesson_type", label: "Type", type: "select", options: [
+              { value: "recommendation", label: "Recommendation" },
+              { value: "success", label: "Success" },
+              { value: "problem", label: "Problem" },
+              { value: "observation", label: "Observation" },
+            ]},
+            { key: "category", label: "Category", type: "select", options: [
+              { value: "process", label: "Process" },
+              { value: "people", label: "People" },
+              { value: "technology", label: "Technology" },
+              { value: "communication", label: "Communication" },
+              { value: "planning", label: "Planning" },
+              { value: "risk_management", label: "Risk Management" },
+            ]},
+          ],
+        },
+        {
+          title: "What Happened",
+          description: "Describe the event and its context.",
+          fields: [
+            { key: "what_happened", label: "What Happened", type: "textarea", placeholder: "Describe the event or situation...", fullWidth: true },
+            { key: "root_cause", label: "Root Cause", type: "textarea", placeholder: "What was the underlying cause?", fullWidth: true },
+            { key: "outcome", label: "Outcome", type: "textarea", placeholder: "What was the actual result?", fullWidth: true },
+          ],
+        },
+        {
+          title: "Recommendations",
+          description: "How should this lesson be applied in the future?",
+          fields: [
+            { key: "recommendation", label: "Recommendation", type: "textarea", placeholder: "What should be done differently next time?", fullWidth: true },
+            { key: "action_taken", label: "Action Taken", type: "textarea", placeholder: "What actions have already been taken?", fullWidth: true },
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ]},
+            { key: "event_date", label: "Event Date", type: "date" },
+            ...entityParentFields(true),
+          ],
+        },
+      ];
+
+    case "sprint_planning":
+      return [
+        {
+          title: "Sprint Setup",
+          description: "Define the sprint parameters.",
+          fields: [
+            { key: "product_id", label: "Product", type: "select", placeholder: "Select the product", required: true, options: products.map(p => ({ value: p.id, label: p.name })) },
+            { key: "sprint_name", label: "Sprint Name", type: "text", placeholder: "e.g. Sprint 14 — Checkout Flow", required: true },
+            { key: "sprint_goal", label: "Sprint Goal", type: "textarea", placeholder: "One clear sentence describing the sprint objective...", helpText: "What is the single most important outcome for this sprint?", fullWidth: true },
+          ],
+        },
+        {
+          title: "Capacity & Scope",
+          description: "Plan the team's capacity and stories.",
+          fields: [
+            { key: "team_capacity", label: "Team Capacity (story points)", type: "number", placeholder: "e.g. 40", helpText: "Total story points the team can deliver this sprint" },
+            { key: "carry_over", label: "Carry-Over Items", type: "textarea", placeholder: "List unfinished items from last sprint...", fullWidth: true },
+            { key: "planned_stories", label: "Planned Stories", type: "textarea", placeholder: "List the user stories / features planned:\n1. As a user, I want...\n2. As a user, I want...", helpText: "Include acceptance criteria and story points for each", fullWidth: true },
+          ],
+        },
+        {
+          title: "Risks & Dependencies",
+          description: "Identify blockers and dependencies for this sprint.",
+          fields: [
+            { key: "dependencies", label: "Dependencies", type: "textarea", placeholder: "List any cross-team or external dependencies...", fullWidth: true },
+            { key: "risks", label: "Sprint Risks", type: "textarea", placeholder: "List risks that could affect delivery...", fullWidth: true },
+            { key: "definition_of_done", label: "Definition of Done Reminder", type: "textarea", placeholder: "Confirm the team's DoD:\n✓ Code reviewed\n✓ Tests passing\n✓ Deployed to staging", fullWidth: true },
+          ],
+        },
+      ];
+
+    case "user_story":
+      return [
+        {
+          title: "Story Definition",
+          description: "Write the user story using the standard format.",
+          fields: [
+            { key: "product_id", label: "Product", type: "select", placeholder: "Select the product", required: true, options: products.map(p => ({ value: p.id, label: p.name })) },
+            { key: "name", label: "Story Title", type: "text", placeholder: "e.g. Password Reset Flow", required: true },
+            { key: "persona", label: "As a...", type: "text", placeholder: "e.g. registered user", helpText: "Who is the user?" },
+            { key: "want", label: "I want to...", type: "text", placeholder: "e.g. reset my password via email", helpText: "What action do they want to perform?" },
+            { key: "so_that", label: "So that...", type: "text", placeholder: "e.g. I can regain access to my account", helpText: "What value does this provide?" },
+          ],
+        },
+        {
+          title: "Details & Criteria",
+          description: "Add acceptance criteria and sizing.",
+          fields: [
+            { key: "description", label: "Detailed Description", type: "textarea", placeholder: "Additional context, edge cases, and technical notes...", fullWidth: true },
+            { key: "acceptance_criteria", label: "Acceptance Criteria", type: "textarea", placeholder: "Given [context]\nWhen [action]\nThen [expected result]\n\nGiven...\nWhen...\nThen...", helpText: "Use Given/When/Then format", fullWidth: true },
+            { key: "story_points", label: "Story Points", type: "number", placeholder: "e.g. 5" },
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "critical", label: "Critical" },
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ]},
+            { key: "moscow", label: "MoSCoW", type: "select", options: [
+              { value: "must", label: "Must Have" },
+              { value: "should", label: "Should Have" },
+              { value: "could", label: "Could Have" },
+              { value: "wont", label: "Won't Have" },
+            ]},
+          ],
+        },
+      ];
+
+    case "rice_worksheet":
+      return [
+        {
+          title: "Feature to Score",
+          description: "Select the feature you want to prioritize.",
+          fields: [
+            { key: "product_id", label: "Product", type: "select", placeholder: "Select the product", required: true, options: products.map(p => ({ value: p.id, label: p.name })) },
+            { key: "name", label: "Feature Name", type: "text", placeholder: "e.g. One-click checkout", required: true },
+            { key: "description", label: "Feature Description", type: "textarea", placeholder: "What does this feature do and why is it being considered?", fullWidth: true },
+          ],
+        },
+        {
+          title: "RICE Scoring",
+          description: "Score each dimension to calculate priority.",
+          fields: [
+            { key: "reach_score", label: "Reach (users/quarter)", type: "number", placeholder: "e.g. 1000", helpText: "How many users will this impact per quarter?" },
+            { key: "impact_score", label: "Impact (1-3)", type: "select", helpText: "How much will this move the needle?", options: [
+              { value: "1", label: "1 — Low impact" },
+              { value: "2", label: "2 — Medium impact" },
+              { value: "3", label: "3 — High impact" },
+            ]},
+            { key: "confidence_score", label: "Confidence (%)", type: "select", helpText: "How confident are you in these estimates?", options: [
+              { value: "100", label: "100% — High confidence" },
+              { value: "80", label: "80% — Medium confidence" },
+              { value: "50", label: "50% — Low confidence" },
+            ]},
+            { key: "effort_score", label: "Effort (person-weeks)", type: "number", placeholder: "e.g. 4", helpText: "How many person-weeks will this take?" },
+          ],
+        },
+      ];
+
+    case "definition_of_done":
+      return [
+        {
+          title: "Code Quality",
+          description: "Define standards for code and development.",
+          fields: [
+            { key: "product_id", label: "Product", type: "select", placeholder: "Select the product", required: true, options: products.map(p => ({ value: p.id, label: p.name })) },
+            { key: "code_review", label: "Code Review Criteria", type: "textarea", placeholder: "e.g.\n✓ Peer reviewed by at least 1 developer\n✓ No critical code smells\n✓ Follows team coding standards", helpText: "What code quality checks must pass?", fullWidth: true },
+            { key: "testing", label: "Testing Requirements", type: "textarea", placeholder: "e.g.\n✓ Unit tests written and passing\n✓ Integration tests updated\n✓ Manual QA completed\n✓ Edge cases covered", fullWidth: true },
+          ],
+        },
+        {
+          title: "Deployment & Documentation",
+          description: "Define release readiness criteria.",
+          fields: [
+            { key: "deployment", label: "Deployment Criteria", type: "textarea", placeholder: "e.g.\n✓ Deployed to staging successfully\n✓ No regression in smoke tests\n✓ Performance benchmarks met", fullWidth: true },
+            { key: "documentation", label: "Documentation Requirements", type: "textarea", placeholder: "e.g.\n✓ README updated\n✓ API docs updated\n✓ Release notes written\n✓ User-facing help docs updated", fullWidth: true },
+            { key: "acceptance", label: "Acceptance Criteria", type: "textarea", placeholder: "e.g.\n✓ Product owner accepted\n✓ All acceptance criteria from story met\n✓ No open blockers", fullWidth: true },
           ],
         },
       ];
@@ -256,8 +477,30 @@ const getCreatesEntity = (templateType: TemplateType): string | null => {
       return "project";
     case "product_vision":
       return "product";
+    case "risk_register":
+      return "risk";
+    case "lessons_learned":
+      return "lesson";
+    case "user_story":
+    case "rice_worksheet":
+      return "feature";
+    case "sprint_planning":
+    case "definition_of_done":
+      return null; // reference/guide wizards — no entity created
     default:
       return null;
+  }
+};
+
+const getEntityLabel = (entityType: string | null): string => {
+  switch (entityType) {
+    case "programme": return "Programme";
+    case "project": return "Project";
+    case "product": return "Product";
+    case "risk": return "Risk";
+    case "lesson": return "Lesson";
+    case "feature": return "Feature";
+    default: return "";
   }
 };
 
@@ -268,6 +511,7 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [programmes, setProgrammes] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -276,20 +520,22 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
       setCurrentStep(0);
       setFormData({});
       const fetchData = async () => {
-        const [orgsRes, progsRes, projsRes] = await Promise.all([
+        const [orgsRes, progsRes, projsRes, prodsRes] = await Promise.all([
           supabase.from("organizations").select("id, name").order("name"),
           supabase.from("programmes").select("id, name").order("name"),
           supabase.from("projects").select("id, name").order("name"),
+          supabase.from("products").select("id, name").order("name"),
         ]);
         if (orgsRes.data) setOrganizations(orgsRes.data);
         if (progsRes.data) setProgrammes(progsRes.data);
         if (projsRes.data) setProjects(projsRes.data);
+        if (prodsRes.data) setProducts(prodsRes.data);
       };
       fetchData();
     }
   }, [open]);
 
-  const steps = getWizardSteps(templateType, organizations, programmes, projects);
+  const steps = getWizardSteps(templateType, organizations, programmes, projects, products);
   const entityType = getCreatesEntity(templateType);
   const totalSteps = steps.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
@@ -310,8 +556,15 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
     }
   };
 
+  const computeRiskScore = () => {
+    const probMap: Record<string, number> = { very_low: 1, low: 2, medium: 3, high: 4, very_high: 5 };
+    const p = probMap[formData.probability] || 3;
+    const i = probMap[formData.impact] || 3;
+    return p * i;
+  };
+
   const handleSubmit = async () => {
-    if (!user || !entityType) return;
+    if (!user) return;
     setLoading(true);
 
     try {
@@ -333,7 +586,6 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
 
         if (error) throw error;
 
-        // Also create programme definition if we have extra fields
         if (formData.constraints || formData.dependencies || formData.vision || formData.strategic_fit) {
           await supabase.from("programme_definitions").insert({
             programme_id: data.id,
@@ -390,6 +642,81 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
         if (error) throw error;
         toast.success("Product created from template!");
         navigate(`/products/${data.id}`);
+      } else if (entityType === "risk") {
+        const { error } = await supabase.from("risks").insert({
+          title: formData.title,
+          description: formData.description || null,
+          category: formData.category || null,
+          probability: formData.probability || "medium",
+          impact: formData.impact || "medium",
+          score: computeRiskScore(),
+          status: "open",
+          response: formData.response || null,
+          date_identified: formData.date_identified || null,
+          review_date: formData.review_date || null,
+          organization_id: formData.organization_id || null,
+          programme_id: formData.programme_id || null,
+          project_id: formData.project_id || null,
+          product_id: formData.product_id || null,
+          created_by: user.id,
+          owner_id: user.id,
+        });
+
+        if (error) throw error;
+        toast.success("Risk created from template!");
+        navigate("/registers");
+      } else if (entityType === "lesson") {
+        const { error } = await supabase.from("lessons_learned").insert({
+          title: formData.title,
+          lesson_type: formData.lesson_type || "recommendation",
+          category: formData.category || "process",
+          what_happened: formData.what_happened || null,
+          root_cause: formData.root_cause || null,
+          outcome: formData.outcome || null,
+          recommendation: formData.recommendation || null,
+          action_taken: formData.action_taken || null,
+          priority: formData.priority || "medium",
+          status: "identified",
+          event_date: formData.event_date || null,
+          organization_id: formData.organization_id || null,
+          programme_id: formData.programme_id || null,
+          project_id: formData.project_id || null,
+          product_id: formData.product_id || null,
+          created_by: user.id,
+          owner_id: user.id,
+        });
+
+        if (error) throw error;
+        toast.success("Lesson learned created from template!");
+        navigate("/registers");
+      } else if (entityType === "feature") {
+        const desc = templateType === "user_story"
+          ? `As a ${formData.persona || "user"}, I want to ${formData.want || "..."} so that ${formData.so_that || "..."}.\n\n${formData.description || ""}\n\nAcceptance Criteria:\n${formData.acceptance_criteria || ""}`
+          : formData.description || null;
+
+        const { error } = await supabase.from("product_features").insert({
+          name: formData.name,
+          description: desc,
+          product_id: formData.product_id,
+          priority: formData.priority || "medium",
+          status: "backlog",
+          story_points: formData.story_points ? parseInt(formData.story_points) : null,
+          moscow: formData.moscow || null,
+          reach_score: formData.reach_score ? parseInt(formData.reach_score) : null,
+          impact_score: formData.impact_score ? parseInt(formData.impact_score) : null,
+          confidence_score: formData.confidence_score ? parseInt(formData.confidence_score) : null,
+          effort_score: formData.effort_score ? parseInt(formData.effort_score) : null,
+          created_by: user.id,
+        });
+
+        if (error) throw error;
+        toast.success("Feature created from template!");
+        navigate(`/products/${formData.product_id}`);
+      }
+
+      // For non-entity wizards (sprint_planning, definition_of_done), just close and show success
+      if (!entityType) {
+        toast.success("Template completed! Use the guide to run your sprint planning.");
       }
 
       onOpenChange(false);
@@ -420,7 +747,7 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
               <DialogTitle className="text-lg">{templateName}</DialogTitle>
               <DialogDescription className="text-sm">
                 Step {currentStep + 1} of {totalSteps}
-                {entityType && <span className="ml-2 text-primary">• Creates a {entityType}</span>}
+                {entityType && <span className="ml-2 text-primary">• Creates a {getEntityLabel(entityType)}</span>}
               </DialogDescription>
             </div>
           </div>
@@ -529,11 +856,18 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
             ))}
           </div>
 
-          {isLastStep && canCreate ? (
-            <Button onClick={handleSubmit} disabled={loading || !hasRequiredFields}>
-              {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
-              Create {entityType && entityType.charAt(0).toUpperCase() + entityType.slice(1)}
-            </Button>
+          {isLastStep ? (
+            canCreate ? (
+              <Button onClick={handleSubmit} disabled={loading || !hasRequiredFields}>
+                {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
+                Create {getEntityLabel(entityType)}
+              </Button>
+            ) : (
+              <Button onClick={() => { toast.success("Template guide completed!"); onOpenChange(false); }}>
+                <Check className="h-4 w-4 mr-1" />
+                Done
+              </Button>
+            )
           ) : (
             <Button onClick={handleNext} disabled={!hasRequiredFields}>
               Next
