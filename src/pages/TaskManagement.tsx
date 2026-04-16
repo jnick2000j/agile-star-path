@@ -745,7 +745,8 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
         onOpenChange={setEditDialogOpen}
         onUpdate={() => queryClient.invalidateQueries({ queryKey: ["tasks"] })}
       />
-    
+    </>
+  );
 
   if (embedded) return content;
 
