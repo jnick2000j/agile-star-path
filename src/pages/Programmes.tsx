@@ -239,6 +239,15 @@ export default function Programmes() {
                 </h3>
               </div>
               <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => { e.stopPropagation(); setEditingProgramme(programme); }}
+                  title="Edit program"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
                 <DocumentUpload
                   entityType="program"
                   entityId={programme.id}
@@ -304,6 +313,14 @@ export default function Programmes() {
           </div>
         ))}
       </div>
+      {editingProgramme && (
+        <EditProgrammeDialog
+          programme={editingProgramme}
+          open={!!editingProgramme}
+          onOpenChange={(o) => !o && setEditingProgramme(null)}
+          onSuccess={fetchProgrammes}
+        />
+      )}
     </AppLayout>
   );
 }
