@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Layers, FolderKanban, Users } from "lucide-react";
+import { Building2, Layers, FolderKanban, Users, Package } from "lucide-react";
 import { useOrganization } from "@/hooks/useOrganization";
 
 interface OrgStats {
   totalOrganizations: number;
   totalPrograms: number;
   totalProjects: number;
+  totalProducts: number;
   totalUsersWithAccess: number;
   orgBreakdown: {
     id: string;
     name: string;
     programmeCount: number;
     projectCount: number;
+    productCount: number;
     userCount: number;
   }[];
 }
@@ -26,16 +28,18 @@ export function OrganizationStats() {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const [orgsRes, progsRes, projsRes, accessRes] = await Promise.all([
+        const [orgsRes, progsRes, projsRes, prodsRes, accessRes] = await Promise.all([
           supabase.from("organizations").select("id, name"),
           supabase.from("programmes").select("id, organization_id"),
           supabase.from("projects").select("id, organization_id"),
+          supabase.from("products").select("id, organization_id").eq("status", "active"),
           supabase.from("user_organization_access").select("id, organization_id, user_id"),
         ]);
 
         const orgs = orgsRes.data || [];
         const progs = progsRes.data || [];
         const projs = projsRes.data || [];
+        const prods = prodsRes.data || [];
         const access = accessRes.data || [];
 
         const orgBreakdown = orgs.map((org) => ({
@@ -43,6 +47,7 @@ export function OrganizationStats() {
           name: org.name,
           programmeCount: progs.filter((p) => p.organization_id === org.id).length,
           projectCount: projs.filter((p) => p.organization_id === org.id).length,
+          productCount: prods.filter((p) => p.organization_id === org.id).length,
           userCount: new Set(access.filter((a) => a.organization_id === org.id).map((a) => a.user_id)).size,
         }));
 
@@ -50,6 +55,7 @@ export function OrganizationStats() {
           totalOrganizations: orgs.length,
           totalPrograms: progs.length,
           totalProjects: projs.length,
+          totalProducts: prods.length,
           totalUsersWithAccess: new Set(access.map((a) => a.user_id)).size,
           orgBreakdown,
         });
@@ -97,7 +103,7 @@ export function OrganizationStats() {
       </h3>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
         <div className="text-center p-3 rounded-lg bg-primary/10">
           <Building2 className="h-5 w-5 mx-auto mb-1 text-primary" />
           <p className="text-2xl font-bold">{stats.totalOrganizations}</p>
@@ -112,6 +118,11 @@ export function OrganizationStats() {
           <FolderKanban className="h-5 w-5 mx-auto mb-1 text-success" />
           <p className="text-2xl font-bold">{stats.totalProjects}</p>
           <p className="text-xs text-muted-foreground">Projects</p>
+        </div>
+        <div className="text-center p-3 rounded-lg bg-accent">
+          <Package className="h-5 w-5 mx-auto mb-1 text-accent-foreground" />
+          <p className="text-2xl font-bold">{stats.totalProducts}</p>
+          <p className="text-xs text-muted-foreground">Products</p>
         </div>
         <div className="text-center p-3 rounded-lg bg-warning/10">
           <Users className="h-5 w-5 mx-auto mb-1 text-warning" />
@@ -144,6 +155,10 @@ export function OrganizationStats() {
               <span className="flex items-center gap-1">
                 <FolderKanban className="h-3 w-3" />
                 {org.projectCount}
+              </span>
+              <span className="flex items-center gap-1">
+                <Package className="h-3 w-3" />
+                {org.productCount}
               </span>
               <span className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
