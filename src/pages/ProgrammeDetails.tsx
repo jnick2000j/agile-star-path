@@ -458,6 +458,10 @@ export default function ProgrammeDetails() {
               <ListTodo className="h-4 w-4" />
               Tasks ({tasks.length})
             </TabsTrigger>
+            <TabsTrigger value="sprints" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              Sprints
+            </TabsTrigger>
             <TabsTrigger value="benefits" className="gap-2">
               <TrendingUp className="h-4 w-4" />
               Benefits ({benefits.length})
@@ -858,6 +862,14 @@ export default function ProgrammeDetails() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="sprints">
+            <EntitySprintsTab
+              entityType="programme"
+              entityId={programme.id}
+              organizationId={programme.organization_id}
+            />
           </TabsContent>
         </Tabs>
       </div>
