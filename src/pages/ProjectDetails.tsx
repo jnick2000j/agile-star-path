@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { EntitySprintsTab } from "@/components/EntitySprintsTab";
 import { format } from "date-fns";
 
 interface Project {

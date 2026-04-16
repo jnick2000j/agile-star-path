@@ -39,6 +39,7 @@ import { EntityUpdates } from "@/components/EntityUpdates";
 import { EntityAssignments } from "@/components/EntityAssignments";
 import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { DocumentUpload } from "@/components/DocumentUpload";
+import { EntitySprintsTab } from "@/components/EntitySprintsTab";
 import { format } from "date-fns";
 
 interface Program {
