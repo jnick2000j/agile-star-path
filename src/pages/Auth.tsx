@@ -238,7 +238,7 @@ export default function Auth() {
             <Layers className="h-4.5 w-4.5 text-primary" />
           </div>
         )}
-        {showAppName && <span className="text-base font-semibold text-foreground">{appName}</span>}
+        {showAppName && <span className="text-base font-semibold text-foreground" style={{ color: appNameColor }}>{appName}</span>}
       </div>
 
       <div className="mb-8">
