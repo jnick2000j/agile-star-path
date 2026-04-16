@@ -57,7 +57,7 @@ export default function Dashboard() {
           title="Active Products"
           value={metrics?.activeProducts ?? 0}
           icon={<Package className="h-6 w-6" />}
-          iconColor="accent"
+          iconColor="info"
         />
         <MetricCard
           title="Open Risks"
