@@ -27,7 +27,7 @@ export function OrganizationSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2 min-w-[180px] justify-between bg-background">
+        <Button variant="outline" className="gap-2 w-full justify-between bg-background">
           <div className="flex items-center gap-2">
             {currentOrganization?.logo_url ? (
               <img
@@ -43,7 +43,7 @@ export function OrganizationSelector() {
                 <Building2 className="h-3 w-3 text-white" />
               </div>
             )}
-            <span className="truncate max-w-[120px]">
+            <span className="truncate">
               {currentOrganization?.name || "Select Organization"}
             </span>
           </div>
