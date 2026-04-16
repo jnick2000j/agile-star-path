@@ -45,7 +45,8 @@ export default function WeeklyUpdates() {
   const [searchQuery, setSearchQuery] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const isStakeholder = ["stakeholder", "org_stakeholder", "programme_stakeholder", "project_stakeholder", "product_stakeholder"].includes(userRole || "");
   const queryClient = useQueryClient();
 
   const { data: reports = [], isLoading } = useQuery({
@@ -183,10 +184,12 @@ export default function WeeklyUpdates() {
             className="pl-9"
           />
         </div>
-        <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4" />
-          New Report
-        </Button>
+        {!isStakeholder && (
+          <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            New Report
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -195,11 +198,15 @@ export default function WeeklyUpdates() {
         <div className="text-center py-12">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No reports yet</h3>
-          <p className="text-muted-foreground mb-4">Create your first weekly report to get started.</p>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Report
-          </Button>
+          <p className="text-muted-foreground mb-4">
+            {isStakeholder ? "No reports available to view." : "Create your first weekly report to get started."}
+          </p>
+          {!isStakeholder && (
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Report
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
@@ -331,29 +338,31 @@ export default function WeeklyUpdates() {
                         <>Created {format(new Date(report.created_at), "MMM d, yyyy")}</>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                        onClick={() => generateSummary.mutate(report)}
-                        disabled={generateSummary.isPending}
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        {generateSummary.isPending ? "Generating..." : "AI Summary"}
-                      </Button>
-                      {report.status === "draft" && (
+                    {!isStakeholder && (
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
+                          variant="outline"
                           className="gap-1"
-                          onClick={() => submitReport.mutate(report.id)}
-                          disabled={submitReport.isPending}
+                          onClick={() => generateSummary.mutate(report)}
+                          disabled={generateSummary.isPending}
                         >
-                          <Send className="h-3 w-3" />
-                          Submit
+                          <Sparkles className="h-3 w-3" />
+                          {generateSummary.isPending ? "Generating..." : "AI Summary"}
                         </Button>
-                      )}
-                    </div>
+                        {report.status === "draft" && (
+                          <Button
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => submitReport.mutate(report.id)}
+                            disabled={submitReport.isPending}
+                          >
+                            <Send className="h-3 w-3" />
+                            Submit
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
