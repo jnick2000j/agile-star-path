@@ -338,29 +338,31 @@ export default function WeeklyUpdates() {
                         <>Created {format(new Date(report.created_at), "MMM d, yyyy")}</>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                        onClick={() => generateSummary.mutate(report)}
-                        disabled={generateSummary.isPending}
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        {generateSummary.isPending ? "Generating..." : "AI Summary"}
-                      </Button>
-                      {report.status === "draft" && (
+                    {!isStakeholder && (
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
+                          variant="outline"
                           className="gap-1"
-                          onClick={() => submitReport.mutate(report.id)}
-                          disabled={submitReport.isPending}
+                          onClick={() => generateSummary.mutate(report)}
+                          disabled={generateSummary.isPending}
                         >
-                          <Send className="h-3 w-3" />
-                          Submit
+                          <Sparkles className="h-3 w-3" />
+                          {generateSummary.isPending ? "Generating..." : "AI Summary"}
                         </Button>
-                      )}
-                    </div>
+                        {report.status === "draft" && (
+                          <Button
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => submitReport.mutate(report.id)}
+                            disabled={submitReport.isPending}
+                          >
+                            <Send className="h-3 w-3" />
+                            Submit
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
