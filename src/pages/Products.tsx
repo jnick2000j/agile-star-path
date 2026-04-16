@@ -16,6 +16,7 @@ import {
   Rocket,
   ArrowUpRight,
   Filter,
+  Pencil,
 } from "lucide-react";
 import {
   Table,
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateProductDialog } from "@/components/dialogs/CreateProductDialog";
+import { EditProductDialog } from "@/components/dialogs/EditProductDialog";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { useOrganization } from "@/hooks/useOrganization";
