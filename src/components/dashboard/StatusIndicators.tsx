@@ -57,30 +57,32 @@ export function StatusIndicators() {
   const allEmpty = groups.every((g) => g.items.length === 0);
 
   return (
-    <div className="metric-card animate-slide-up">
+    <div>
       <h3 className="text-lg font-semibold text-foreground mb-4">Status Overview</h3>
       {allEmpty ? (
-        <div className="text-center py-8 text-muted-foreground">No entities to display.</div>
+        <div className="metric-card text-center py-8 text-muted-foreground">No entities to display.</div>
       ) : (
-        <div className="space-y-5">
-          {groups.map((group) =>
-            group.items.length > 0 ? (
-              <div key={group.label}>
-                <div className="flex items-center gap-2 mb-2">
-                  {group.icon}
-                  <span className="text-sm font-medium text-foreground">{group.label}</span>
-                </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {groups.map((group) => (
+            <div key={group.label} className="metric-card animate-slide-up">
+              <div className="flex items-center gap-2 mb-3">
+                {group.icon}
+                <span className="text-sm font-medium text-foreground">{group.label}</span>
+              </div>
+              {group.items.length > 0 ? (
                 <div className="space-y-1.5">
                   {group.items.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 pl-6">
+                    <div key={i} className="flex items-center gap-2">
                       <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", healthColor[item.health] || "bg-muted-foreground")} />
                       <span className="text-sm text-foreground truncate">{item.name}</span>
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : null
-          )}
+              ) : (
+                <p className="text-sm text-muted-foreground">None</p>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
