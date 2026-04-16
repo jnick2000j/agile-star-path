@@ -598,6 +598,29 @@ export default function BrandingSettings() {
             </div>
 
             <div className="metric-card">
+              <h3 className="text-lg font-semibold mb-4">Font Colors</h3>
+              <p className="text-xs text-muted-foreground mb-4">Customize text colors for the login page. Leave blank to use defaults.</p>
+              <div className="grid gap-4 md:grid-cols-2">
+                {([
+                  { key: "hero_text_color", label: "Hero Panel Text", help: "Title, description & features on left panel" },
+                  { key: "form_text_color", label: "Form Panel Text", help: "Welcome message & form labels on right panel" },
+                  { key: "app_name_color", label: "App Name Color", help: "Application name text" },
+                  { key: "tagline_color", label: "Tagline Color", help: "Tagline text" },
+                ] as const).map(({ key, label, help }) => (
+                  <div key={key} className="space-y-2">
+                    <Label>{label}</Label>
+                    <div className="flex items-center gap-2">
+                      <input type="color" value={branding[key] || "#ffffff"} onChange={(e) => update(key, e.target.value)} className="h-10 w-14 rounded border border-border cursor-pointer" />
+                      <Input value={branding[key]} onChange={(e) => update(key, e.target.value)} placeholder="Default" className="flex-1" />
+                      {branding[key] && <Button variant="ghost" size="sm" onClick={() => update(key, "")}>Reset</Button>}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{help}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="metric-card">
               <h3 className="text-lg font-semibold mb-4">Typography</h3>
               <div className="space-y-2">
                 <Label>Font Family</Label>
