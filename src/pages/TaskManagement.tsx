@@ -738,8 +738,14 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
           </Table>
         </CardContent>
       </Card>
-    </>
-  );
+
+      <EditTaskDialog
+        task={editingTask}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdate={() => queryClient.invalidateQueries({ queryKey: ["tasks"] })}
+      />
+    
 
   if (embedded) return content;
 
