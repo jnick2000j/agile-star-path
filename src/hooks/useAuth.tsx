@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setUserRole(data?.role || "stakeholder");
+      setUserRole(data?.role || "org_stakeholder");
       setUserProfile({
         first_name: data?.first_name || null,
         last_name: data?.last_name || null,

@@ -91,7 +91,7 @@ const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; clas
   programme_stakeholder: { label: "Program Stakeholder", icon: Briefcase, className: "bg-muted text-muted-foreground" },
   project_stakeholder: { label: "Project Stakeholder", icon: FolderKanban, className: "bg-muted text-muted-foreground" },
   product_stakeholder: { label: "Product Stakeholder", icon: Package, className: "bg-muted text-muted-foreground" },
-  stakeholder: { label: "Stakeholder (Legacy)", icon: Users, className: "bg-muted text-muted-foreground" },
+  
 };
 
 export default function AdminPanel() {
@@ -142,7 +142,7 @@ export default function AdminPanel() {
           location: profile.location,
           department: profile.department,
           archived: profile.archived || false,
-          role: userRole?.role || "stakeholder",
+          role: userRole?.role || "org_stakeholder",
           created_at: profile.created_at,
           org_count: orgCountMap[profile.user_id] || 0,
         };
@@ -251,7 +251,7 @@ export default function AdminPanel() {
     admin: users.filter((u) => u.role === "admin" && !u.archived).length,
     programme_owner: users.filter((u) => u.role === "programme_owner" && !u.archived).length,
     project_manager: users.filter((u) => u.role === "project_manager" && !u.archived).length,
-    stakeholder: users.filter((u) => u.role === "stakeholder" && !u.archived).length,
+    org_stakeholder: users.filter((u) => u.role === "org_stakeholder" && !u.archived).length,
   };
 
   const archivedCount = users.filter((u) => u.archived).length;
@@ -454,7 +454,7 @@ export default function AdminPanel() {
                               <SelectItem value="programme_stakeholder">Program Stakeholder</SelectItem>
                               <SelectItem value="project_stakeholder">Project Stakeholder</SelectItem>
                               <SelectItem value="product_stakeholder">Product Stakeholder</SelectItem>
-                              <SelectItem value="stakeholder">Stakeholder (Legacy)</SelectItem>
+                              
                             </SelectContent>
                           </Select>
                         </TableCell>

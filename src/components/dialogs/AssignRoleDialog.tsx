@@ -39,7 +39,7 @@ export function AssignRoleDialog({ onSuccess }: AssignRoleDialogProps) {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<Profile[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<AppRole>("stakeholder");
+  const [selectedRole, setSelectedRole] = useState<AppRole>("org_stakeholder");
 
   useEffect(() => {
     if (open) {
@@ -103,7 +103,7 @@ export function AssignRoleDialog({ onSuccess }: AssignRoleDialogProps) {
       toast.success("Role assigned successfully");
       setOpen(false);
       setSelectedUserId("");
-      setSelectedRole("stakeholder");
+      setSelectedRole("org_stakeholder");
       onSuccess();
     } catch (error) {
       console.error("Error assigning role:", error);

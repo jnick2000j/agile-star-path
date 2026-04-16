@@ -69,7 +69,7 @@ const roleConfig: Record<string, { label: string; className: string }> = {
   programme_stakeholder: { label: "Program Stakeholder", className: "bg-muted text-muted-foreground" },
   project_stakeholder: { label: "Project Stakeholder", className: "bg-muted text-muted-foreground" },
   product_stakeholder: { label: "Product Stakeholder", className: "bg-muted text-muted-foreground" },
-  stakeholder: { label: "Stakeholder", className: "bg-info/10 text-info" },
+  
 };
 
 export default function Team() {
@@ -86,7 +86,7 @@ export default function Team() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<TeamMember[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [selectedRole, setSelectedRole] = useState("stakeholder");
+  const [selectedRole, setSelectedRole] = useState("org_stakeholder");
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
@@ -217,7 +217,7 @@ export default function Team() {
       toast.success("Team member added successfully");
       setDialogOpen(false);
       setSelectedUserId("");
-      setSelectedRole("stakeholder");
+      setSelectedRole("org_stakeholder");
       fetchTeamMembers();
     } catch (error: any) {
       console.error("Error adding team member:", error);

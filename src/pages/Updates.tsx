@@ -46,7 +46,7 @@ export default function Updates() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
   const { user, userRole } = useAuth();
-  const isStakeholder = ["stakeholder", "org_stakeholder", "programme_stakeholder", "project_stakeholder", "product_stakeholder"].includes(userRole || "");
+  const isStakeholder = ["org_stakeholder", "programme_stakeholder", "project_stakeholder", "product_stakeholder"].includes(userRole || "");
   const queryClient = useQueryClient();
 
   const { data: reports = [], isLoading } = useQuery({
