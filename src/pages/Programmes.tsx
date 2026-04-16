@@ -77,9 +77,9 @@ export default function Programmes() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      // Filter by organization if one is selected
+      // Filter by organization if one is selected (include legacy programmes with no org)
       if (currentOrganization) {
-        query = query.eq("organization_id", currentOrganization.id);
+        query = query.or(`organization_id.eq.${currentOrganization.id},organization_id.is.null`);
       }
 
       // Programme stakeholders only see assigned programmes
