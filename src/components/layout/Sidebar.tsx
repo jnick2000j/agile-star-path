@@ -100,13 +100,7 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {navigation
-            .filter((item) => {
-              if (item.platformAdminOnly) return userRole === "admin";
-              if (item.adminOnly) return userRole === "admin" || userRole === "org_admin";
-              return true;
-            })
-            .map((item) => (
+          {navigation.map((item) => (
             <div key={item.label}>
               {item.children ? (
                 <>
