@@ -358,7 +358,7 @@ export default function Auth() {
             </h1>
           )}
           {showHeroDescription && (
-            <p className="text-primary-foreground/70 text-base leading-relaxed max-w-md">
+            <p className="text-primary-foreground/70 text-base leading-relaxed max-w-md" style={{ color: taglineColor }}>
               {branding?.hero_description || appTagline}
             </p>
           )}
