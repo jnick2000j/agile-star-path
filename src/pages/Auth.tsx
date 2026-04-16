@@ -310,15 +310,17 @@ export default function Auth() {
       {!branding?.login_bg_image_url && <PatternOverlay pattern={bgPattern} />}
 
       <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-16">
+        <div className="mb-16">
           {branding?.show_logo !== false && branding?.logo_url ? (
-            <img src={branding.logo_url} alt="Logo" className={`${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`} />
+            <img src={branding.logo_url} alt={appName} className="max-h-24 w-auto object-contain" />
           ) : (
-            <div className="h-10 w-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center backdrop-blur-sm">
-              <Layers className="h-5 w-5" />
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center backdrop-blur-sm">
+                <Layers className="h-5 w-5" />
+              </div>
+              <span className="text-lg font-semibold tracking-tight">{appName}</span>
             </div>
           )}
-          <span className="text-lg font-semibold tracking-tight">{appName}</span>
         </div>
         <div className="space-y-4">
           <h1 className="text-3xl xl:text-4xl font-bold leading-tight tracking-tight">
