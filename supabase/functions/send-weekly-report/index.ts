@@ -158,7 +158,7 @@ serve(async (req) => {
             </div>
           </div>
           <div class="footer">
-            <p>This is an automated report from the Programme Information Management Platform</p>
+            <p>This is an automated report from TaskMaster</p>
           </div>
         </div>
       </body>
