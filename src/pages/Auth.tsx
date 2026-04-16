@@ -195,7 +195,7 @@ export default function Auth() {
 
   const getTitle = () => {
     switch (mode) {
-      case "login": return branding?.welcome_message || "Welcome back";
+      case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "";
       case "signup": return "Create your account";
       case "forgot-password": return "Reset your password";
     }
@@ -203,7 +203,7 @@ export default function Auth() {
 
   const getSubtitle = () => {
     switch (mode) {
-      case "login": return branding?.login_cta_text || "Enter your credentials to access your dashboard.";
+      case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your credentials to access your dashboard.") : "";
       case "signup": return "Get started with your programme management journey.";
       case "forgot-password": return "Enter your email and we'll send you a reset link.";
     }
@@ -236,8 +236,8 @@ export default function Auth() {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground tracking-tight">{getTitle()}</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{getSubtitle()}</p>
+        {getTitle() && <h2 className="text-2xl font-bold text-foreground tracking-tight">{getTitle()}</h2>}
+        {getSubtitle() && <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{getSubtitle()}</p>}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -345,12 +345,16 @@ export default function Auth() {
           )}
         </div>
         <div className="space-y-4">
-          <h1 className="text-3xl xl:text-4xl font-bold leading-tight tracking-tight">
-            {branding?.hero_title || "Manage programmes with confidence"}
-          </h1>
-          <p className="text-primary-foreground/70 text-base leading-relaxed max-w-md">
-            {branding?.hero_description || appTagline}
-          </p>
+          {showHeroTitle && (
+            <h1 className="text-3xl xl:text-4xl font-bold leading-tight tracking-tight">
+              {branding?.hero_title || "Manage programmes with confidence"}
+            </h1>
+          )}
+          {showHeroDescription && (
+            <p className="text-primary-foreground/70 text-base leading-relaxed max-w-md">
+              {branding?.hero_description || appTagline}
+            </p>
+          )}
         </div>
       </div>
 
@@ -370,9 +374,11 @@ export default function Auth() {
         </div>
       )}
 
-      <p className="relative z-10 text-xs text-primary-foreground/40">
-        {branding?.login_footer_text || `© ${new Date().getFullYear()} ${appName}. All rights reserved.`}
-      </p>
+      {showFooter && (
+        <p className="relative z-10 text-xs text-primary-foreground/40">
+          {branding?.login_footer_text || `© ${new Date().getFullYear()} ${appName}. All rights reserved.`}
+        </p>
+      )}
     </div>
   );
 
@@ -403,7 +409,7 @@ export default function Auth() {
                 )}
                 {showAppName && <span className="font-semibold">{appName}</span>}
               </div>
-              <h1 className="relative z-10 text-lg font-bold">{branding?.hero_title || "Manage programmes with confidence"}</h1>
+              {showHeroTitle && <h1 className="relative z-10 text-lg font-bold">{branding?.hero_title || "Manage programmes with confidence"}</h1>}
             </div>
             <div className="p-6" style={{ backgroundColor: branding?.right_panel_bg_color || undefined }}>
               {formContent}
@@ -441,8 +447,8 @@ export default function Auth() {
               )}
               {showAppName && <span className="text-lg font-semibold">{appName}</span>}
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">{branding?.hero_title || "Manage programmes with confidence"}</h1>
-            <p className="text-primary-foreground/70 max-w-lg">{branding?.hero_description || appTagline}</p>
+            {showHeroTitle && <h1 className="text-2xl md:text-3xl font-bold mb-2">{branding?.hero_title || "Manage programmes with confidence"}</h1>}
+            {showHeroDescription && <p className="text-primary-foreground/70 max-w-lg">{branding?.hero_description || appTagline}</p>}
             {showFeatures && (
               <div className="flex flex-wrap gap-6 mt-6">
                 {features.map((f, i) => (
