@@ -3095,6 +3095,10 @@ export type Database = {
         | "product_manager"
         | "product_team_member"
         | "project_team_member"
+        | "org_stakeholder"
+        | "programme_stakeholder"
+        | "project_stakeholder"
+        | "product_stakeholder"
       change_status:
         | "pending"
         | "under_review"
@@ -3267,6 +3271,10 @@ export const Constants = {
         "product_manager",
         "product_team_member",
         "project_team_member",
+        "org_stakeholder",
+        "programme_stakeholder",
+        "project_stakeholder",
+        "product_stakeholder",
       ],
       change_status: [
         "pending",

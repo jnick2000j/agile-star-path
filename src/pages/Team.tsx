@@ -65,6 +65,10 @@ const roleConfig: Record<string, { label: string; className: string }> = {
   product_manager: { label: "Product Manager", className: "bg-warning/10 text-warning" },
   product_team_member: { label: "Product Team Member", className: "bg-accent/10 text-accent-foreground" },
   project_team_member: { label: "Project Team Member", className: "bg-info/10 text-info" },
+  org_stakeholder: { label: "Org Stakeholder", className: "bg-muted text-muted-foreground" },
+  programme_stakeholder: { label: "Program Stakeholder", className: "bg-muted text-muted-foreground" },
+  project_stakeholder: { label: "Project Stakeholder", className: "bg-muted text-muted-foreground" },
+  product_stakeholder: { label: "Product Stakeholder", className: "bg-muted text-muted-foreground" },
   stakeholder: { label: "Stakeholder", className: "bg-info/10 text-info" },
 };
 

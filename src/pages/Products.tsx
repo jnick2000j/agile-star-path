@@ -103,8 +103,8 @@ export default function Products() {
     if (userRole === "product_manager" && user) {
       query = query.eq("product_owner_id", user.id);
     }
-    // Product team members only see products they have access to
-    else if (userRole === "product_team_member" && user) {
+    // Product team members & product stakeholders only see assigned products
+    else if ((userRole === "product_team_member" || userRole === "product_stakeholder") && user) {
       const { data: accessData } = await supabase
         .from("user_product_access")
         .select("product_id")
@@ -118,14 +118,35 @@ export default function Products() {
         return;
       }
     }
+    // Project stakeholders see nothing on products page
+    else if (userRole === "project_stakeholder" && user) {
+      setProducts([]);
+      setLoading(false);
+      return;
+    }
+    // Programme stakeholders see products under their assigned programmes
+    else if (userRole === "programme_stakeholder" && user) {
+      const { data: progAccess } = await supabase
+        .from("user_programme_access")
+        .select("programme_id")
+        .eq("user_id", user.id);
+      const progIds = progAccess?.map(a => a.programme_id) || [];
+      if (progIds.length > 0) {
+        query = query.in("programme_id", progIds);
+      } else {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+    }
+    // Org stakeholders see everything (no extra filter)
     // Editors/viewers at org level only see assigned products
-    else if (!hasFullOrgAccess && user) {
+    else if (!hasFullOrgAccess && userRole !== "org_stakeholder" && user) {
       const { data: accessData } = await supabase
         .from("user_product_access")
         .select("product_id")
         .eq("user_id", user.id);
       const productIds = accessData?.map(a => a.product_id) || [];
-      // Also include products where user is the owner
       const { data: ownedData } = await supabase
         .from("products")
         .select("id")

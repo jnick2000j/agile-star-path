@@ -110,8 +110,8 @@ export default function Projects() {
       if (userRole === "project_manager" && user) {
         query = query.eq("manager_id", user.id);
       }
-      // Project team members only see projects they have access to
-      else if (userRole === "project_team_member" && user) {
+      // Project team members & project stakeholders only see assigned projects
+      else if ((userRole === "project_team_member" || userRole === "project_stakeholder") && user) {
         const { data: accessData } = await supabase
           .from("user_project_access")
           .select("project_id")
@@ -125,14 +125,35 @@ export default function Projects() {
           return;
         }
       }
+      // Product stakeholders see nothing on projects page (not their scope)
+      else if (userRole === "product_stakeholder" && user) {
+        setProjects([]);
+        setLoading(false);
+        return;
+      }
+      // Programme stakeholders see only projects under their assigned programmes
+      else if (userRole === "programme_stakeholder" && user) {
+        const { data: progAccess } = await supabase
+          .from("user_programme_access")
+          .select("programme_id")
+          .eq("user_id", user.id);
+        const progIds = progAccess?.map(a => a.programme_id) || [];
+        if (progIds.length > 0) {
+          query = query.in("programme_id", progIds);
+        } else {
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+      }
+      // Org stakeholders see everything (no extra filter needed beyond org)
       // Editors/viewers at org level only see assigned projects
-      else if (!hasFullOrgAccess && user) {
+      else if (!hasFullOrgAccess && userRole !== "org_stakeholder" && user) {
         const { data: accessData } = await supabase
           .from("user_project_access")
           .select("project_id")
           .eq("user_id", user.id);
         const projectIds = accessData?.map(a => a.project_id) || [];
-        // Also include projects where user is the manager
         const { data: managedData } = await supabase
           .from("projects")
           .select("id")

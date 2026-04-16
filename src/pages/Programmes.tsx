@@ -61,7 +61,7 @@ export default function Programmes() {
   const [programmes, setProgrammes] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { hasFullOrgAccess } = useOrgAccessLevel();
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
 
@@ -82,14 +82,35 @@ export default function Programmes() {
         query = query.eq("organization_id", currentOrganization.id);
       }
 
-      // Editors/viewers at org level only see assigned programmes
-      if (!hasFullOrgAccess && user) {
+      // Programme stakeholders only see assigned programmes
+      if (userRole === "programme_stakeholder" && user) {
         const { data: accessData } = await supabase
           .from("user_programme_access")
           .select("programme_id")
           .eq("user_id", user.id);
         const programmeIds = accessData?.map(a => a.programme_id) || [];
-        // Also include programmes where user is the manager
+        if (programmeIds.length > 0) {
+          query = query.in("id", programmeIds);
+        } else {
+          setProgrammes([]);
+          setLoading(false);
+          return;
+        }
+      }
+      // Project/product stakeholders see nothing on programmes page
+      else if ((userRole === "project_stakeholder" || userRole === "product_stakeholder") && user) {
+        setProgrammes([]);
+        setLoading(false);
+        return;
+      }
+      // Org stakeholders see everything (no extra filter)
+      // Editors/viewers at org level only see assigned programmes
+      else if (!hasFullOrgAccess && userRole !== "org_stakeholder" && user) {
+        const { data: accessData } = await supabase
+          .from("user_programme_access")
+          .select("programme_id")
+          .eq("user_id", user.id);
+        const programmeIds = accessData?.map(a => a.programme_id) || [];
         const { data: managedData } = await supabase
           .from("programmes")
           .select("id")

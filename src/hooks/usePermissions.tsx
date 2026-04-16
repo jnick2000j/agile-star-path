@@ -83,6 +83,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     const isProductManager = role === "product_manager";
     const isProductTeam = role === "product_team_member";
     const isProjectTeam = role === "project_team_member";
+    const isStakeholder = role === "stakeholder" || role === "org_stakeholder" || role === "programme_stakeholder" || role === "project_stakeholder" || role === "product_stakeholder";
     
     return {
       id: "",
