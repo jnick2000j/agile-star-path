@@ -224,7 +224,7 @@ export default function Auth() {
   };
 
   const formContent = (
-    <div className="w-full max-w-[420px]">
+    <div className="w-full max-w-[420px]" style={{ color: formTextColor }}>
       {/* Mobile logo */}
       <div className={`mb-10 lg:hidden ${logoOnly ? "flex justify-center" : "flex items-center gap-2.5"}`}>
         {hasLogo ? (
