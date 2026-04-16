@@ -184,10 +184,12 @@ export default function WeeklyUpdates() {
             className="pl-9"
           />
         </div>
-        <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4" />
-          New Report
-        </Button>
+        {!isStakeholder && (
+          <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            New Report
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -196,11 +198,15 @@ export default function WeeklyUpdates() {
         <div className="text-center py-12">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No reports yet</h3>
-          <p className="text-muted-foreground mb-4">Create your first weekly report to get started.</p>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Report
-          </Button>
+          <p className="text-muted-foreground mb-4">
+            {isStakeholder ? "No reports available to view." : "Create your first weekly report to get started."}
+          </p>
+          {!isStakeholder && (
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Report
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
