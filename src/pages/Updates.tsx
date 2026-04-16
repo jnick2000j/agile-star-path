@@ -41,7 +41,7 @@ const healthConfig = {
   red: "bg-destructive",
 };
 
-export default function WeeklyUpdates() {
+export default function Updates() {
   const [searchQuery, setSearchQuery] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
@@ -126,7 +126,7 @@ export default function WeeklyUpdates() {
   const approvedCount = reports.filter((r: any) => r.status === "approved").length;
 
   return (
-    <AppLayout title="Weekly Updates" subtitle="Program status reports and communications">
+    <AppLayout title="Updates" subtitle="Status reports and communications for programs, projects, and products">
       <div className="grid gap-4 md:grid-cols-4 mb-6">
         <div className="metric-card">
           <div className="flex items-center gap-3">
