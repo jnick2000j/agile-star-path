@@ -3220,7 +3220,6 @@ export type Database = {
         | "admin"
         | "programme_owner"
         | "project_manager"
-        | "stakeholder"
         | "product_manager"
         | "product_team_member"
         | "project_team_member"
@@ -3396,7 +3395,6 @@ export const Constants = {
         "admin",
         "programme_owner",
         "project_manager",
-        "stakeholder",
         "product_manager",
         "product_team_member",
         "project_team_member",
