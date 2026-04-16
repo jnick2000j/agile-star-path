@@ -185,6 +185,10 @@ export default function BrandingSettings() {
         show_welcome_message: (data as any).show_welcome_message !== false,
         show_login_cta: (data as any).show_login_cta !== false,
         show_footer: (data as any).show_footer !== false,
+        hero_text_color: (data as any).hero_text_color || "",
+        form_text_color: (data as any).form_text_color || "",
+        app_name_color: (data as any).app_name_color || "",
+        tagline_color: (data as any).tagline_color || "",
       });
     } else {
       setBranding(defaultBranding);
