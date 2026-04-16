@@ -147,6 +147,7 @@ export type Database = {
           show_hero_title: boolean
           show_login_cta: boolean
           show_logo: boolean | null
+          show_tagline: boolean
           show_welcome_message: boolean
           updated_at: string
           welcome_message: string | null
@@ -188,6 +189,7 @@ export type Database = {
           show_hero_title?: boolean
           show_login_cta?: boolean
           show_logo?: boolean | null
+          show_tagline?: boolean
           show_welcome_message?: boolean
           updated_at?: string
           welcome_message?: string | null
@@ -229,6 +231,7 @@ export type Database = {
           show_hero_title?: boolean
           show_login_cta?: boolean
           show_logo?: boolean | null
+          show_tagline?: boolean
           show_welcome_message?: boolean
           updated_at?: string
           welcome_message?: string | null
