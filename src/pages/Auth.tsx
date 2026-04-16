@@ -41,6 +41,7 @@ interface LoginBranding {
   login_cta_text: string | null;
   right_panel_bg_color: string | null;
   show_app_name: boolean | null;
+  show_tagline: boolean | null;
   show_hero_title: boolean | null;
   show_hero_description: boolean | null;
   show_welcome_message: boolean | null;

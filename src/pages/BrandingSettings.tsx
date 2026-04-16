@@ -71,6 +71,7 @@ interface BrandingState {
   login_cta_text: string;
   right_panel_bg_color: string;
   show_app_name: boolean;
+  show_tagline: boolean;
   show_hero_title: boolean;
   show_hero_description: boolean;
   show_welcome_message: boolean;
@@ -109,6 +110,7 @@ const defaultBranding: BrandingState = {
   login_cta_text: "",
   right_panel_bg_color: "",
   show_app_name: true,
+  show_tagline: true,
   show_hero_title: true,
   show_hero_description: true,
   show_welcome_message: true,
@@ -169,6 +171,7 @@ export default function BrandingSettings() {
         login_cta_text: (data as any).login_cta_text || "",
         right_panel_bg_color: (data as any).right_panel_bg_color || "",
         show_app_name: (data as any).show_app_name !== false,
+        show_tagline: (data as any).show_tagline !== false,
         show_hero_title: (data as any).show_hero_title !== false,
         show_hero_description: (data as any).show_hero_description !== false,
         show_welcome_message: (data as any).show_welcome_message !== false,
@@ -384,8 +387,11 @@ export default function BrandingSettings() {
                   <Switch checked={branding.show_app_name} onCheckedChange={(v) => update("show_app_name", v)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tagline</Label>
-                  <Input value={branding.app_tagline} onChange={(e) => update("app_tagline", e.target.value)} placeholder="Program Information & Management Platform" />
+                  <div className="flex items-center justify-between">
+                    <Label>Tagline</Label>
+                    <Switch checked={branding.show_tagline} onCheckedChange={(v) => update("show_tagline", v)} />
+                  </div>
+                  <Input value={branding.app_tagline} onChange={(e) => update("app_tagline", e.target.value)} placeholder="Program Information & Management Platform" disabled={!branding.show_tagline} />
                 </div>
                 <div className="space-y-2">
                   <Label>Header Text Size</Label>
