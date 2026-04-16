@@ -3190,6 +3190,7 @@ export type Database = {
         Args: { _org_id: string; _resource_type: string }
         Returns: boolean
       }
+      create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
       has_org_access: {
         Args: { _min_level?: string; _org_id: string; _user_id: string }
         Returns: boolean

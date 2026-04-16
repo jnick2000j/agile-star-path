@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -57,8 +57,9 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; firstName?: string; lastName?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<GlobalBranding | null>(null);
 
   const { signIn, signUp, user } = useAuth();
@@ -66,7 +67,15 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      // Check if user has org_name in metadata and no org yet — create one
+      const orgNameMeta = user.user_metadata?.org_name;
+      if (orgNameMeta) {
+        supabase.rpc('create_org_for_new_user', { _org_name: orgNameMeta }).then(() => {
+          navigate("/");
+        });
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 
@@ -102,6 +111,7 @@ export default function Auth() {
     if (mode === "signup") {
       try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
       try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
+      if (!orgName.trim()) newErrors.orgName = "Organization name is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -117,7 +127,7 @@ export default function Auth() {
       if (!error) navigate("/");
     } else if (mode === "signup") {
       const fullName = `${firstName} ${lastName}`.trim();
-      const { error } = await signUp(email, password, fullName, firstName, lastName);
+      const { error } = await signUp(email, password, fullName, firstName, lastName, orgName.trim());
       if (!error) { setMode("login"); setPassword(""); }
     } else if (mode === "forgot-password") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -250,35 +260,53 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="firstName" className="text-xs font-medium">First Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName" className="text-xs font-medium">First Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="pl-9 h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                      />
+                    </div>
+                    {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName" className="text-xs font-medium">Last Name</Label>
                     <Input
-                      id="firstName"
+                      id="lastName"
                       type="text"
-                      placeholder="John"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Smith"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
+                    />
+                    {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="orgName" className="text-xs font-medium">Organization Name</Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                    <Input
+                      id="orgName"
+                      type="text"
+                      placeholder="Acme Corporation"
+                      value={orgName}
+                      onChange={(e) => setOrgName(e.target.value)}
                       className="pl-9 h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
                     />
                   </div>
-                  {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
+                  {errors.orgName && <p className="text-xs text-destructive">{errors.orgName}</p>}
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="lastName" className="text-xs font-medium">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Smith"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors"
-                  />
-                  {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
-                </div>
-              </div>
+              </>
             )}
 
             <div className="space-y-1.5">
