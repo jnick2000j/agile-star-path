@@ -7,7 +7,7 @@ import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { BenefitsTracker } from "@/components/dashboard/BenefitsTracker";
 import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
-import { Layers, FolderKanban, AlertTriangle, Target } from "lucide-react";
+import { Layers, FolderKanban, AlertTriangle, Target, Package } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,9 +15,10 @@ export default function Dashboard() {
   const { data: metrics } = useQuery({
     queryKey: ["dashboard-metrics"],
     queryFn: async () => {
-      const [programmes, projects, risks, benefits] = await Promise.all([
+      const [programmes, projects, products, risks, benefits] = await Promise.all([
         supabase.from("programmes").select("id", { count: "exact", head: true }).eq("status", "active"),
         supabase.from("projects").select("id", { count: "exact", head: true }),
+        supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "active"),
         supabase.from("risks").select("id", { count: "exact", head: true }).in("status", ["open", "mitigating"]),
         supabase.from("benefits").select("realization"),
       ]);
@@ -29,6 +30,7 @@ export default function Dashboard() {
       return {
         activeProgrammes: programmes.count ?? 0,
         activeProjects: projects.count ?? 0,
+        activeProducts: products.count ?? 0,
         openRisks: risks.count ?? 0,
         avgRealization,
       };
@@ -38,7 +40,7 @@ export default function Dashboard() {
   return (
     <AppLayout title="Dashboard" subtitle="Program portfolio overview">
       <PlanUsageBar />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
         <MetricCard
           title="Active Programs"
           value={metrics?.activeProgrammes ?? 0}
@@ -49,6 +51,12 @@ export default function Dashboard() {
           title="Active Projects"
           value={metrics?.activeProjects ?? 0}
           icon={<FolderKanban className="h-6 w-6" />}
+          iconColor="info"
+        />
+        <MetricCard
+          title="Active Products"
+          value={metrics?.activeProducts ?? 0}
+          icon={<Package className="h-6 w-6" />}
           iconColor="info"
         />
         <MetricCard
