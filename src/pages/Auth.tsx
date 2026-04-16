@@ -111,6 +111,7 @@ export default function Auth() {
     if (mode === "signup") {
       try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
       try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
+      if (!orgName.trim()) newErrors.orgName = "Organization name is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -126,7 +127,7 @@ export default function Auth() {
       if (!error) navigate("/");
     } else if (mode === "signup") {
       const fullName = `${firstName} ${lastName}`.trim();
-      const { error } = await signUp(email, password, fullName, firstName, lastName);
+      const { error } = await signUp(email, password, fullName, firstName, lastName, orgName.trim());
       if (!error) { setMode("login"); setPassword(""); }
     } else if (mode === "forgot-password") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
