@@ -36,7 +36,7 @@ import BusinessRequirements from "./pages/BusinessRequirements";
 import TechnicalRequirements from "./pages/TechnicalRequirements";
 import LessonsLearned from "./pages/LessonsLearned";
 import Documentation from "./pages/Documentation";
-import WeeklyUpdates from "./pages/WeeklyUpdates";
+import Updates from "./pages/Updates";
 import Reports from "./pages/Reports";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
@@ -96,7 +96,7 @@ const App = () => (
             <Route path="/registers/technical-requirements" element={<ProtectedRoute><TechnicalRequirements /></ProtectedRoute>} />
             <Route path="/registers/lessons" element={<ProtectedRoute><LessonsLearned /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-            <Route path="/weekly-updates" element={<ProtectedRoute><WeeklyUpdates /></ProtectedRoute>} />
+            <Route path="/updates" element={<ProtectedRoute><Updates /></ProtectedRoute>} />
             <Route path="/documentation" element={<ProtectedRoute><Documentation /></ProtectedRoute>} />
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

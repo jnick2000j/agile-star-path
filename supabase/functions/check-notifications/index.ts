@@ -62,7 +62,7 @@ serve(async (req) => {
               type: "weekly_report_due",
               title: "Weekly Report Due",
               message: `Your weekly report for ${prog.name} is due on Friday.`,
-              link: "/weekly-updates",
+              link: "/updates",
             });
           }
         }
