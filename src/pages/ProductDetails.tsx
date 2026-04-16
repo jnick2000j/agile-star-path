@@ -29,6 +29,7 @@ import {
   Link2,
   ArrowRight,
   MessageSquarePlus,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
