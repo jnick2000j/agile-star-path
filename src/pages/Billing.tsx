@@ -11,7 +11,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Sparkles, Check, Loader2, CreditCard, ExternalLink } from "lucide-react";
+import { Sparkles, Check, Loader2, CreditCard, ExternalLink, XCircle, RotateCcw } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
@@ -51,8 +62,55 @@ export default function Billing() {
   const [subscription, setSubscription] = useState<any>(null);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [openingPortal, setOpeningPortal] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
   const isAdmin = accessLevel === "admin";
+
+  const handleCancelSubscription = async () => {
+    if (!currentOrganization?.id) return;
+    setCancelling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("cancel-subscription", {
+        body: {
+          organizationId: currentOrganization.id,
+          action: "cancel",
+          environment: getStripeEnvironment(),
+        },
+      });
+      if (error || data?.error) throw new Error(error?.message || data?.error);
+      const endDate = data?.cancel_at ? format(new Date(data.cancel_at), "MMM d, yyyy") : "the end of your billing period";
+      toast.success(`Subscription will end on ${endDate}. You'll keep access until then.`);
+      setCancelOpen(false);
+      await fetchData();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to cancel");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    if (!currentOrganization?.id) return;
+    setReactivating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("cancel-subscription", {
+        body: {
+          organizationId: currentOrganization.id,
+          action: "reactivate",
+          environment: getStripeEnvironment(),
+        },
+      });
+      if (error || data?.error) throw new Error(error?.message || data?.error);
+      toast.success("Subscription reactivated — it will continue to renew.");
+      await fetchData();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reactivate");
+    } finally {
+      setReactivating(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
