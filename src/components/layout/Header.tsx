@@ -81,9 +81,17 @@ export function Header({ title, subtitle }: HeaderProps) {
 
         <NotificationBell />
 
-        <Button variant="outline" size="icon">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate("/support")}
+          title="Help & Support"
+          aria-label="Help & Support"
+        >
           <HelpCircle className="h-4 w-4" />
         </Button>
+
+        {/* Quick link to Support inside menu too */}
 
         {/* User Menu Dropdown */}
         <DropdownMenu>
