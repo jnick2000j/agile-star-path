@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { QuickActionTabs } from "@/components/QuickActionTabs";
 import {
   ArrowLeft,
   Package,
@@ -447,40 +448,18 @@ export default function ProductDetails() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="features" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="features" className="gap-2">
-              <Lightbulb className="h-4 w-4" />
-              Features ({features.length})
-            </TabsTrigger>
-            <TabsTrigger value="roadmap" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Roadmap
-            </TabsTrigger>
-            <TabsTrigger value="metrics" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Metrics
-            </TabsTrigger>
-            <TabsTrigger value="dependencies" className="gap-2">
-              <Link2 className="h-4 w-4" />
-              Dependencies ({dependencies.length})
-            </TabsTrigger>
-            <TabsTrigger value="sprints" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Sprints
-            </TabsTrigger>
-            <TabsTrigger value="team" className="gap-2">
-              <Users className="h-4 w-4" />
-              Team
-            </TabsTrigger>
-            <TabsTrigger value="updates" className="gap-2">
-              <MessageSquarePlus className="h-4 w-4" />
-              Updates
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="h-4 w-4" />
-              Status Timeline
-            </TabsTrigger>
-          </TabsList>
+          <QuickActionTabs
+            items={[
+              { value: "features", label: "Features", icon: Lightbulb, count: features.length },
+              { value: "roadmap", label: "Roadmap", icon: Calendar },
+              { value: "metrics", label: "Metrics", icon: BarChart3 },
+              { value: "dependencies", label: "Dependencies", icon: Link2, count: dependencies.length },
+              { value: "sprints", label: "Sprints", icon: Calendar },
+              { value: "team", label: "Team", icon: Users },
+              { value: "updates", label: "Updates", icon: MessageSquarePlus },
+              { value: "history", label: "Status Timeline", icon: History },
+            ]}
+          />
 
           {/* Features Tab */}
           <TabsContent value="features">

@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { QuickActionTabs } from "@/components/QuickActionTabs";
 import {
   ArrowLeft,
   FolderKanban,
@@ -523,48 +524,20 @@ export default function ProjectDetails() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="workpackages" className="space-y-4">
-          <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="workpackages" className="gap-2">
-              <Package className="h-4 w-4" />
-              Work Packages ({workPackages.length})
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="gap-2">
-              <ListTodo className="h-4 w-4" />
-              Tasks ({tasks.length})
-            </TabsTrigger>
-            <TabsTrigger value="sprints" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Sprints
-            </TabsTrigger>
-            <TabsTrigger value="products" className="gap-2">
-              <Layers className="h-4 w-4" />
-              Products ({products.length})
-            </TabsTrigger>
-            <TabsTrigger value="risks" className="gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Risks ({risks.length})
-            </TabsTrigger>
-            <TabsTrigger value="issues" className="gap-2">
-              <AlertCircle className="h-4 w-4" />
-              Issues ({issues.length})
-            </TabsTrigger>
-            <TabsTrigger value="brief" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Project Brief
-            </TabsTrigger>
-            <TabsTrigger value="team" className="gap-2">
-              <Users className="h-4 w-4" />
-              Team
-            </TabsTrigger>
-            <TabsTrigger value="updates" className="gap-2">
-              <MessageSquarePlus className="h-4 w-4" />
-              Updates
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="h-4 w-4" />
-              Status Timeline
-            </TabsTrigger>
-          </TabsList>
+          <QuickActionTabs
+            items={[
+              { value: "workpackages", label: "Work Packages", icon: Package, count: workPackages.length },
+              { value: "tasks", label: "Tasks", icon: ListTodo, count: tasks.length },
+              { value: "sprints", label: "Sprints", icon: Calendar },
+              { value: "products", label: "Products", icon: Layers, count: products.length },
+              { value: "risks", label: "Risks", icon: AlertTriangle, count: risks.length },
+              { value: "issues", label: "Issues", icon: AlertCircle, count: issues.length },
+              { value: "brief", label: "Project Brief", icon: FileText },
+              { value: "team", label: "Team", icon: Users },
+              { value: "updates", label: "Updates", icon: MessageSquarePlus },
+              { value: "history", label: "Status Timeline", icon: History },
+            ]}
+          />
 
           {/* Work Packages Tab */}
           <TabsContent value="workpackages">

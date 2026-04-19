@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { QuickActionTabs } from "@/components/QuickActionTabs";
 import { BlueprintTabContent } from "@/components/programme-tabs/BlueprintTabContent";
 import { DefinitionTabContent } from "@/components/programme-tabs/DefinitionTabContent";
 import { SuccessPlanTabContent } from "@/components/programme-tabs/SuccessPlanTabContent";
@@ -445,56 +446,22 @@ export default function ProgrammeDetails() {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="projects" className="space-y-4">
-          <TabsList className="flex flex-wrap h-auto gap-1">
-            <TabsTrigger value="projects" className="gap-2">
-              <FolderKanban className="h-4 w-4" />
-              Projects ({projects.length})
-            </TabsTrigger>
-            <TabsTrigger value="products" className="gap-2">
-              <Package className="h-4 w-4" />
-              Products ({products.length})
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="gap-2">
-              <ListTodo className="h-4 w-4" />
-              Tasks ({tasks.length})
-            </TabsTrigger>
-            <TabsTrigger value="sprints" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Sprints
-            </TabsTrigger>
-            <TabsTrigger value="benefits" className="gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Benefits ({benefits.length})
-            </TabsTrigger>
-            <TabsTrigger value="blueprint" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Blueprint
-            </TabsTrigger>
-            <TabsTrigger value="definition" className="gap-2">
-              <Target className="h-4 w-4" />
-              Definition
-            </TabsTrigger>
-            <TabsTrigger value="success-plan" className="gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Success Plan
-            </TabsTrigger>
-            <TabsTrigger value="tranches" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Tranches
-            </TabsTrigger>
-            <TabsTrigger value="team" className="gap-2">
-              <Users className="h-4 w-4" />
-              Team
-            </TabsTrigger>
-            <TabsTrigger value="updates" className="gap-2">
-              <MessageSquarePlus className="h-4 w-4" />
-              Updates
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="h-4 w-4" />
-              Timeline
-            </TabsTrigger>
-          </TabsList>
+          <QuickActionTabs
+            items={[
+              { value: "projects", label: "Projects", icon: FolderKanban, count: projects.length },
+              { value: "products", label: "Products", icon: Package, count: products.length },
+              { value: "tasks", label: "Tasks", icon: ListTodo, count: tasks.length },
+              { value: "sprints", label: "Sprints", icon: Calendar },
+              { value: "benefits", label: "Benefits", icon: TrendingUp, count: benefits.length },
+              { value: "blueprint", label: "Blueprint", icon: FileText },
+              { value: "definition", label: "Definition", icon: Target },
+              { value: "success-plan", label: "Success Plan", icon: CheckCircle2 },
+              { value: "tranches", label: "Tranches", icon: Calendar },
+              { value: "team", label: "Team", icon: Users },
+              { value: "updates", label: "Updates", icon: MessageSquarePlus },
+              { value: "history", label: "Timeline", icon: History },
+            ]}
+          />
 
           {/* Linked Projects Tab */}
           <TabsContent value="projects">
