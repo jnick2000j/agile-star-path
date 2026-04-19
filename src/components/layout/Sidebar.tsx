@@ -29,6 +29,7 @@ import {
   CreditCard,
   Eye,
   Sparkles,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,7 @@ const navigation: NavItem[] = [
   { label: "Projects", icon: FolderKanban, href: "/projects" },
   { label: "Products", icon: Package, href: "/products" },
   { label: "Tasks", icon: ListTodo, href: "/tasks" },
+  { label: "Timesheets", icon: Clock, href: "/timesheets" },
   { label: "Governance", icon: Shield, href: "/prince2" },
   { label: "Registers", icon: ClipboardList, href: "/registers" },
   { label: "Reporting", icon: BarChart3, children: [
