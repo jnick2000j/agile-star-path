@@ -35,7 +35,6 @@ export const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
         >
           <SignatureCanvas
             ref={sigRef}
-            penColor="hsl(var(--foreground))"
             canvasProps={{
               className: "w-full h-full rounded-md",
               style: { width: "100%", height: "100%" },
