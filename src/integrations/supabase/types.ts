@@ -4503,6 +4503,179 @@ export type Database = {
           },
         ]
       }
+      timesheet_entries: {
+        Row: {
+          created_at: string
+          description: string | null
+          hours_fri: number
+          hours_mon: number
+          hours_sat: number
+          hours_sun: number
+          hours_thu: number
+          hours_tue: number
+          hours_wed: number
+          id: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          sort_order: number
+          task_id: string | null
+          timesheet_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hours_fri?: number
+          hours_mon?: number
+          hours_sat?: number
+          hours_sun?: number
+          hours_thu?: number
+          hours_tue?: number
+          hours_wed?: number
+          id?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          sort_order?: number
+          task_id?: string | null
+          timesheet_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hours_fri?: number
+          hours_mon?: number
+          hours_sat?: number
+          hours_sun?: number
+          hours_thu?: number
+          hours_tue?: number
+          hours_wed?: number
+          id?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          sort_order?: number
+          task_id?: string | null
+          timesheet_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheet_entries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_timesheet_id_fkey"
+            columns: ["timesheet_id"]
+            isOneToOne: false
+            referencedRelation: "timesheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheets: {
+        Row: {
+          approver_id: string | null
+          approver_signature_image: string | null
+          approver_signature_ip: string | null
+          approver_signature_name: string | null
+          created_at: string
+          decided_at: string | null
+          decision_notes: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["timesheet_status"]
+          submitted_at: string | null
+          submitter_signature_image: string | null
+          submitter_signature_ip: string | null
+          submitter_signature_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approver_id?: string | null
+          approver_signature_image?: string | null
+          approver_signature_ip?: string | null
+          approver_signature_name?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision_notes?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["timesheet_status"]
+          submitted_at?: string | null
+          submitter_signature_image?: string | null
+          submitter_signature_ip?: string | null
+          submitter_signature_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approver_id?: string | null
+          approver_signature_image?: string | null
+          approver_signature_ip?: string | null
+          approver_signature_name?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision_notes?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["timesheet_status"]
+          submitted_at?: string | null
+          submitter_signature_image?: string | null
+          submitter_signature_ip?: string | null
+          submitter_signature_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tranches: {
         Row: {
           actual_end: string | null
@@ -5361,6 +5534,7 @@ export type Database = {
         | "on_hold"
         | "completed"
         | "cancelled"
+      timesheet_status: "draft" | "submitted" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5544,6 +5718,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      timesheet_status: ["draft", "submitted", "approved", "rejected"],
     },
   },
 } as const
