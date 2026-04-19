@@ -156,7 +156,7 @@ export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) 
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="font-semibold">Ask for Support</p>
+              <p className="font-semibold">Ask for Help</p>
               <p className="text-sm font-normal text-muted-foreground">
                 AI-powered help · Instant answers
               </p>
