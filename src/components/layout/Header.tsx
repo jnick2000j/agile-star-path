@@ -3,7 +3,6 @@ import { HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { AskSupportDialog } from "@/components/AskSupportDialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -98,18 +97,16 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
         
 
-        <NotificationBell />
-
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSupportOpen(true)}
-          title="Ask the Task Master"
-          aria-label="Ask the Task Master"
+          title="Ask the TaskMaster"
+          aria-label="Ask the TaskMaster"
           className="gap-2"
         >
           <Sparkles className="h-4 w-4" />
-          <span className="hidden sm:inline">Ask the Task Master</span>
+          <span className="hidden sm:inline">Ask the TaskMaster</span>
           <HelpCircle className="h-4 w-4 sm:hidden" />
         </Button>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -101,19 +102,8 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
-        {/* Search */}
-        <div className="px-3 pt-4 pb-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sidebar-foreground/50" />
-            <Input
-              placeholder="Search programmes, projects..."
-              className="pl-9 bg-sidebar-accent/40 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus-visible:ring-sidebar-ring"
-            />
-          </div>
-        </div>
-
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 pt-6">
           {visibleNavigation.map((item) => (
             <div key={item.label}>
               {item.children ? (
@@ -167,6 +157,21 @@ export function Sidebar() {
             </div>
           ))}
         </nav>
+
+        {/* Footer: Notifications + Search */}
+        <div className="border-t border-sidebar-border p-3 space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-medium text-sidebar-foreground/70">Notifications</span>
+            <NotificationBell />
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sidebar-foreground/50" />
+            <Input
+              placeholder="Search programmes, projects..."
+              className="pl-9 bg-sidebar-accent/40 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus-visible:ring-sidebar-ring"
+            />
+          </div>
+        </div>
       </div>
     </aside>
   );
