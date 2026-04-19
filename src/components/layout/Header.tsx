@@ -52,18 +52,18 @@ export function Header({ title, subtitle }: HeaderProps) {
   const logoUrl = currentOrganization?.logo_url || globalLogoUrl;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
-      <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+      <div className="flex items-center gap-5">
         {/* Organization Logo in Header - left of title */}
         {logoUrl && (
           <img 
             src={logoUrl} 
             alt="Organization logo"
-            className="h-8 w-auto object-contain"
+            className="h-14 w-auto object-contain drop-shadow-sm"
           />
         )}
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{title}</h1>
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
