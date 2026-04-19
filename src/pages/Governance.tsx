@@ -228,12 +228,14 @@ export default function Governance() {
           scope_type: genForm.scope_type,
           scope_id: genForm.scope_id,
           organization_id: currentOrganization.id,
+          period_start: genForm.period_start || undefined,
+          period_end: genForm.period_end || undefined,
         },
       });
       if (error) throw error;
       toast.success("Draft report generated");
       setGenerateOpen(false);
-      setGenForm({ ...genForm, scope_id: "" });
+      setGenForm({ ...genForm, scope_id: "", period_start: "", period_end: "" });
       fetchAll();
       if (data?.report) {
         setActiveReport(data.report as Report);
@@ -335,6 +337,7 @@ export default function Governance() {
   const getScopeName = (scope_type: string, scope_id: string) => {
     if (scope_type === "programme") return programmes.find((p) => p.id === scope_id)?.name || "Unknown";
     if (scope_type === "project") return projects.find((p) => p.id === scope_id)?.name || "Unknown";
+    if (scope_type === "product") return products.find((p) => p.id === scope_id)?.name || "Unknown";
     return "Unknown";
   };
 
