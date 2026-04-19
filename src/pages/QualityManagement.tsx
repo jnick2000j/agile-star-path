@@ -806,7 +806,7 @@ export default function QualityManagement({ embedded = false }: { embedded?: boo
                   <ApprovalTriadPanel
                     entityType="quality_review"
                     entityId={selectedRecord.id}
-                    entityTitle={selectedRecord.product_name || selectedRecord.quality_type}
+                    entityTitle={selectedRecord.title || selectedRecord.deliverable_name || selectedRecord.quality_type}
                     organizationId={selectedRecord.organization_id}
                     ownerId={selectedRecord.owner_id ?? null}
                     ownerLabel="Quality owner"

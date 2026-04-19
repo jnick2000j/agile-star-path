@@ -67,6 +67,7 @@ interface StageGate {
   planned_date: string | null;
   actual_date: string | null;
   organization_id: string | null;
+  owner_id: string | null;
   created_by: string | null;
   created_at: string;
 }
@@ -626,7 +627,7 @@ export default function StageGates({ embedded }: { embedded?: boolean }) {
                   <ApprovalTriadPanel
                     entityType="stage_gate"
                     entityId={selectedGate.id}
-                    entityTitle={selectedGate.gate_name || `Stage Gate ${selectedGate.stage_number ?? ""}`.trim()}
+                    entityTitle={selectedGate.name || `Stage Gate ${selectedGate.stage_number ?? ""}`.trim()}
                     organizationId={selectedGate.organization_id}
                     ownerId={(selectedGate as any).owner_id ?? null}
                     ownerLabel="Gate owner"
