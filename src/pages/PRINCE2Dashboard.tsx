@@ -491,7 +491,7 @@ export default function PRINCE2Dashboard() {
           </CardContent>
         </Card>
       </div>
-
+        </TabsContent>
 
         <TabsContent value="milestones">
           <MilestoneTracking embedded />
