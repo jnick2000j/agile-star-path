@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import StakeholderAccessSettings from "@/components/admin/StakeholderAccessSettings";
 import { 
   Save, 
   Bell,
@@ -22,6 +23,7 @@ export default function Settings() {
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="email">Email Reports</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="stakeholders">Stakeholder Access</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -201,6 +203,10 @@ export default function Settings() {
               </Button>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="stakeholders">
+          <StakeholderAccessSettings />
         </TabsContent>
       </Tabs>
     </AppLayout>

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   Wand2,
@@ -63,6 +64,29 @@ export function Sidebar() {
   const location = useLocation();
   const { user, signOut, userRole, userProfile } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [hasStakeholderAccess, setHasStakeholderAccess] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setHasStakeholderAccess(false);
+      return;
+    }
+    // Platform admins always see it
+    if (userRole === "admin") {
+      setHasStakeholderAccess(true);
+      return;
+    }
+    supabase
+      .from("stakeholder_portal_access")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .then(({ data }) => setHasStakeholderAccess((data?.length ?? 0) > 0));
+  }, [user, userRole]);
+
+  const visibleNavigation = navigation.filter(
+    (item) => item.label !== "Stakeholder Portal" || hasStakeholderAccess
+  );
 
   const getDisplayName = () => {
     if (userProfile?.first_name && userProfile?.last_name) {
@@ -102,7 +126,7 @@ export function Sidebar() {
       <div className="flex h-full flex-col">
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 pt-6">
-          {navigation.map((item) => (
+          {visibleNavigation.map((item) => (
             <div key={item.label}>
               {item.children ? (
                 <>

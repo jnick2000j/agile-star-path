@@ -28,6 +28,9 @@ import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { PlanManager } from "@/components/admin/PlanManager";
 import { PlatformSupportQueue } from "@/components/admin/PlatformSupportQueue";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Shield as ShieldIcon, ExternalLink } from "lucide-react";
 
 interface PlatformStats {
   totalOrgs: number;
@@ -156,6 +159,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
           <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
+          <TabsTrigger value="governance">Governance</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
@@ -259,6 +263,43 @@ export default function PlatformAdmin() {
 
         <TabsContent value="sso">
           <PlatformSSOQueue />
+        </TabsContent>
+
+        <TabsContent value="governance">
+          <Card className="p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <ShieldIcon className="h-5 w-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold">Governance & Comms</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  AI-drafted highlight reports, end-stage assessments, programme status reviews,
+                  composite compliance scoring, and bundled stakeholder comms packs.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3 pt-2">
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Reports</p>
+                <p className="text-sm mt-1">Generate and approve governance reports per programme or project.</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Compliance</p>
+                <p className="text-sm mt-1">Composite score: 40% controls, 30% cadence, 30% hygiene.</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Comms Packs</p>
+                <p className="text-sm mt-1">Email HTML, Slack markdown, and PDF summaries bundled per period.</p>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button asChild>
+                <Link to="/governance"><ExternalLink className="h-4 w-4 mr-2" />Open Governance & Comms</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/portal">View Stakeholder Portal</Link>
+              </Button>
+            </div>
+          </Card>
         </TabsContent>
 
         <TabsContent value="audit">
