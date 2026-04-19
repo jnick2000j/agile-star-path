@@ -37,6 +37,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { DocumentUpload } from "@/components/DocumentUpload";
+import { ApprovalTriadPanel } from "@/components/workflow/ApprovalTriadPanel";
 import {
   Plus,
   FileEdit,
@@ -677,6 +678,7 @@ export default function ChangeControl({ embedded = false }: { embedded?: boolean
                 <TabsList>
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="impact">Impact</TabsTrigger>
+                  <TabsTrigger value="signoff">Sign-off</TabsTrigger>
                   <TabsTrigger value="decision">Decision</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details" className="space-y-4">
@@ -755,6 +757,15 @@ export default function ChangeControl({ embedded = false }: { embedded?: boolean
                       <p className="bg-muted p-3 rounded">{selectedRequest.impact_summary}</p>
                     </div>
                   )}
+                </TabsContent>
+                <TabsContent value="signoff" className="mt-4">
+                  <ApprovalTriadPanel
+                    entityType="change_request"
+                    entityId={selectedRequest.id}
+                    organizationId={selectedRequest.organization_id}
+                    ownerId={selectedRequest.owner_id}
+                    ownerLabel="Change owner"
+                  />
                 </TabsContent>
                 <TabsContent value="decision" className="space-y-4">
                   <div className="flex items-center gap-2">
