@@ -75,15 +75,6 @@ interface ApprovalRow {
   is_required: boolean;
 }
 
-interface CommentRow {
-  id: string;
-  approval_id: string;
-  author_id: string;
-  comment: string;
-  created_at: string;
-  updated_at: string;
-}
-
 interface NotifierRow {
   id: string;
   user_id: string;
