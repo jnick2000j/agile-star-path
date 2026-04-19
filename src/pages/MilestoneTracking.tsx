@@ -42,6 +42,8 @@ import {
   Milestone,
 } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ApprovalTriadPanel } from "@/components/workflow/ApprovalTriadPanel";
 
 type MilestoneStatus = "planned" | "in_progress" | "achieved" | "missed" | "deferred";
 
