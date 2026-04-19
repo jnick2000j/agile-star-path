@@ -25,11 +25,14 @@ interface AskSupportDialogProps {
 }
 
 const QUICK_ACTIONS = [
-  "How do I reset a user's password?",
-  "Why can't I see a programme I was assigned to?",
+  "How do I create a new programme?",
+  "Walk me through setting up a project",
+  "How do I manage risks?",
+  "Explain PRINCE2 stage gates",
+  "How do I track benefits?",
   "How do I export a governance report?",
-  "What's the difference between a tranche and a stage?",
-  "How do I configure compliance scoring rules?",
+  "Why can't I see a programme I was assigned to?",
+  "How do I reset a user's password?",
 ];
 
 export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) {
@@ -37,7 +40,7 @@ export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) 
     {
       role: "assistant",
       content:
-        "👋 Hi! I'm your **AI Support Assistant**. Ask me anything about how to use the platform — I can walk you through features, troubleshoot issues, and explain methodology.\n\nIf I can't resolve it, you can always [open a support ticket](/support).",
+        "👋 Hello! I'm **the Task Master**, your expert guide for this platform.\n\nI can help you with:\n\n- 🏗️ **Creating & managing** programmes, projects, and products\n- 📋 **Setting up registers** — risks, issues, benefits, stakeholders\n- 🎯 **PRINCE2 & MSP** processes and documentation\n- 🚀 **Agile & Sprint** planning and backlog management\n- 📊 **Reports & dashboards** — weekly updates, AI summaries\n- ⚙️ **Platform navigation** — finding features and settings\n\nIf I can't resolve it, you can always [open a support ticket](/support).",
     },
   ]);
   const [input, setInput] = useState("");
@@ -156,9 +159,9 @@ export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) 
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="font-semibold">Ask for Help</p>
+              <p className="font-semibold">Ask the Task Master</p>
               <p className="text-sm font-normal text-muted-foreground">
-                AI-powered help · Instant answers
+                Platform Guide · PRINCE2 · MSP · Agile
               </p>
             </div>
           </DialogTitle>

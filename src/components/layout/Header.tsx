@@ -112,12 +112,12 @@ export function Header({ title, subtitle }: HeaderProps) {
           variant="outline"
           size="sm"
           onClick={() => setSupportOpen(true)}
-          title="Ask for Help"
-          aria-label="Ask for Help"
+          title="Ask the Task Master"
+          aria-label="Ask the Task Master"
           className="gap-2"
         >
           <Sparkles className="h-4 w-4" />
-          <span className="hidden sm:inline">Ask for Help</span>
+          <span className="hidden sm:inline">Ask the Task Master</span>
           <HelpCircle className="h-4 w-4 sm:hidden" />
         </Button>
 
