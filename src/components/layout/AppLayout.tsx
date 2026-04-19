@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
+import { TrialBanner } from "@/components/TrialBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 
@@ -37,6 +38,7 @@ export function AppLayout({ children, title, subtitle }: AppLayoutProps) {
     <div className="min-h-screen bg-background">
       <Sidebar />
       <div className="pl-64">
+        <TrialBanner />
         <Header title={title} subtitle={subtitle} />
         <main className="p-6">{children}</main>
       </div>
