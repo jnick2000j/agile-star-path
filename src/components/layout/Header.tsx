@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -25,6 +25,7 @@ interface HeaderProps {
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
+  const navigate = useNavigate();
   const isAdmin = userRole === "admin";
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
 
@@ -80,9 +81,17 @@ export function Header({ title, subtitle }: HeaderProps) {
 
         <NotificationBell />
 
-        <Button variant="outline" size="icon">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate("/support")}
+          title="Help & Support"
+          aria-label="Help & Support"
+        >
           <HelpCircle className="h-4 w-4" />
         </Button>
+
+        {/* Quick link to Support inside menu too */}
 
         {/* User Menu Dropdown */}
         <DropdownMenu>
