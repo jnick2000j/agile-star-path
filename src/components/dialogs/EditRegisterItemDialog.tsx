@@ -334,95 +334,95 @@ function EditForm({
   itemName,
 }: EditFormProps) {
   return (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {config.fields.map((field) => (
-              <div key={field.key} className={field.type === "textarea" ? "sm:col-span-2" : ""}>
-                <Label htmlFor={field.key}>{field.label}</Label>
-                {field.type === "text" && (
-                  <Input
-                    id={field.key}
-                    value={formData[field.key] || ""}
-                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                    disabled={!canEdit}
-                  />
-                )}
-                {field.type === "textarea" && (
-                  <Textarea
-                    id={field.key}
-                    value={formData[field.key] || ""}
-                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                    rows={3}
-                    disabled={!canEdit}
-                  />
-                )}
-                {field.type === "date" && (
-                  <Input
-                    id={field.key}
-                    type="date"
-                    value={formData[field.key] || ""}
-                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                    disabled={!canEdit}
-                  />
-                )}
-                {field.type === "select" && field.options && (
-                  <Select
-                    value={formData[field.key] || ""}
-                    onValueChange={(v) => setFormData({ ...formData, [field.key]: v })}
-                    disabled={!canEdit}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {field.options.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between pt-4">
-            {isAdmin && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button type="button" variant="destructive" className="gap-2">
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {config.title}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete "{itemName}"? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} disabled={deleting}>
-                      {deleting ? "Deleting..." : "Delete"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        {config.fields.map((field: any) => (
+          <div key={field.key} className={field.type === "textarea" ? "sm:col-span-2" : ""}>
+            <Label htmlFor={field.key}>{field.label}</Label>
+            {field.type === "text" && (
+              <Input
+                id={field.key}
+                value={formData[field.key] || ""}
+                onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                disabled={!canEdit}
+              />
             )}
-            <div className="flex gap-2 ml-auto">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              {canEdit && (
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Saving..." : "Save Changes"}
-                </Button>
-              )}
-            </div>
+            {field.type === "textarea" && (
+              <Textarea
+                id={field.key}
+                value={formData[field.key] || ""}
+                onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                rows={3}
+                disabled={!canEdit}
+              />
+            )}
+            {field.type === "date" && (
+              <Input
+                id={field.key}
+                type="date"
+                value={formData[field.key] || ""}
+                onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                disabled={!canEdit}
+              />
+            )}
+            {field.type === "select" && field.options && (
+              <Select
+                value={formData[field.key] || ""}
+                onValueChange={(v) => setFormData({ ...formData, [field.key]: v })}
+                disabled={!canEdit}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options.map((opt: any) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        ))}
+      </div>
+      <div className="flex justify-between pt-4">
+        {isAdmin && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button type="button" variant="destructive" className="gap-2">
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete {config.title}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{itemName}"? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} disabled={deleting}>
+                  {deleting ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+        <div className="flex gap-2 ml-auto">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          {canEdit && (
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </form>
   );
+}
 }
