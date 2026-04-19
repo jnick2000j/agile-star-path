@@ -126,6 +126,7 @@ const decisionMeta: Record<
 const approverDecisionOptions = [
   { value: "approve", label: "Approve" },
   { value: "conditional", label: "Conditional" },
+  { value: "modification_required", label: "Modification required" },
   { value: "reject", label: "Reject" },
   { value: "abstain", label: "Abstain" },
 ];
