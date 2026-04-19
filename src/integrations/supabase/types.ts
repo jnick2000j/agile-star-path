@@ -1223,6 +1223,56 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_invitations: {
+        Row: {
+          accepted_at: string | null
+          access_level: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          organization_id: string
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          access_level?: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id: string
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          access_level?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id?: string
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_subscriptions: {
         Row: {
           canceled_at: string | null
@@ -3355,11 +3405,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: Json }
       check_plan_limit: {
         Args: { _org_id: string; _resource_type: string }
         Returns: boolean
       }
       create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
+      get_invitation_by_token: {
+        Args: { _token: string }
+        Returns: {
+          access_level: string
+          email: string
+          expires_at: string
+          organization_id: string
+          organization_name: string
+          status: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

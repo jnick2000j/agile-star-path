@@ -25,6 +25,7 @@ import {
   FileEdit,
   ClipboardCheck,
   Shield,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ const navigation: NavItem[] = [
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
   { label: "Project Teams", icon: Users, href: "/team" },
   { label: "Wizards", icon: Wand2, href: "/wizards" },
+  { label: "Billing", icon: CreditCard, href: "/billing" },
 ];
 
 export function Sidebar() {
