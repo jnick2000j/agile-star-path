@@ -185,6 +185,17 @@ export function PlanEditorDialog({
 
     let planId = plan?.id;
 
+    // Build legacy `features` JSONB array from enabled boolean features
+    // (excluding limit_* numeric features which feed the max_* columns)
+    const legacyFeatures = catalog
+      .filter(
+        (c) =>
+          c.feature_type === "boolean" &&
+          !c.feature_key.startsWith("limit_") &&
+          (values[c.feature_key] === true || values[c.feature_key] === "true"),
+      )
+      .map((c) => c.name);
+
     const payload = {
       name: form.name,
       description: form.description,
@@ -205,6 +216,7 @@ export function PlanEditorDialog({
       max_projects: Number(values["limit_projects"] ?? 0),
       max_products: Number(values["limit_products"] ?? 0),
       max_storage_mb: Number(values["limit_storage_mb"] ?? 0),
+      features: legacyFeatures,
       sync_status: priceChanged ? "pending" : form.sync_status,
     };
 

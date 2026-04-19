@@ -235,14 +235,31 @@ export default function Billing() {
             </p>
           </div>
           {isAdmin && hasStripeSubscription && (
-            <Button onClick={handleOpenPortal} disabled={openingPortal} variant="outline">
-              {openingPortal ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleOpenPortal} disabled={openingPortal} variant="outline">
+                {openingPortal ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                )}
+                Manage billing
+              </Button>
+              {subscription?.cancel_at_period_end ? (
+                <Button onClick={handleReactivate} disabled={reactivating} variant="default">
+                  {reactivating ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                  )}
+                  Reactivate subscription
+                </Button>
               ) : (
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <Button onClick={() => setCancelOpen(true)} variant="outline" className="text-destructive hover:text-destructive">
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Cancel subscription
+                </Button>
               )}
-              Manage billing
-            </Button>
+            </div>
           )}
         </div>
 
@@ -453,6 +470,33 @@ export default function Billing() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your subscription will remain active until the end of your current billing period
+              {subscription?.current_period_end && (
+                <> (<strong>{format(new Date(subscription.current_period_end), "MMMM d, yyyy")}</strong>)</>
+              )}
+              . After that, your organization will be moved to the Free plan and premium features will become unavailable.
+              You can reactivate any time before then.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>Keep subscription</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelSubscription}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Yes, cancel at period end
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
