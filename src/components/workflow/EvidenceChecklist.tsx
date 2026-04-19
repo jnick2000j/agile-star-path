@@ -236,7 +236,7 @@ export function EvidenceChecklist({ approvalType, approvalId, organizationId, ca
           <Paperclip className="h-3.5 w-3.5" />
           Supporting documents
         </Label>
-        <DocumentUpload entityType={approvalType} entityId={approvalId} />
+        <DocumentUpload entityType={approvalType as any} entityId={approvalId} />
       </div>
     </div>
   );

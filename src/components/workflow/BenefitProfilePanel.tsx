@@ -99,9 +99,9 @@ export function BenefitProfilePanel({ benefitId, organizationId }: Props) {
       if (data) {
         const p = {
           ...data,
-          trajectory: Array.isArray(data.trajectory) ? data.trajectory : [],
-          qualitative_rubric: Array.isArray(data.qualitative_rubric) ? data.qualitative_rubric : [],
-        } as Profile;
+          trajectory: Array.isArray(data.trajectory) ? (data.trajectory as unknown as Profile["trajectory"]) : [],
+          qualitative_rubric: Array.isArray(data.qualitative_rubric) ? (data.qualitative_rubric as unknown as Profile["qualitative_rubric"]) : [],
+        } as unknown as Profile;
         setForm(p);
         return p;
       }
