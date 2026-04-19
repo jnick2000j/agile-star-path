@@ -207,16 +207,19 @@ export default function Timesheets() {
             .from("programmes")
             .select("id, name")
             .eq("organization_id", currentOrganization.id)
+            .eq("timesheets_enabled", true)
             .order("name"),
           supabase
             .from("projects")
             .select("id, name")
             .eq("organization_id", currentOrganization.id)
+            .eq("timesheets_enabled", true)
             .order("name"),
           supabase
             .from("products")
             .select("id, name")
             .eq("organization_id", currentOrganization.id)
+            .eq("timesheets_enabled", true)
             .order("name"),
           supabase
             .from("tasks")

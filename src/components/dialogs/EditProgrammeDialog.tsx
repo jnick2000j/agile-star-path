@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ interface Programme {
   organization_id: string | null;
   manager_id: string | null;
   progress: number;
+  timesheets_enabled?: boolean;
 }
 
 interface EditProgrammeDialogProps {
@@ -56,6 +58,7 @@ export function EditProgrammeDialog({ programme, open, onOpenChange, onSuccess }
     organization_id: programme.organization_id || "",
     manager_id: programme.manager_id || "",
     progress: programme.progress ?? 0,
+    timesheets_enabled: programme.timesheets_enabled ?? true,
   });
 
   useEffect(() => {
@@ -73,6 +76,7 @@ export function EditProgrammeDialog({ programme, open, onOpenChange, onSuccess }
         organization_id: programme.organization_id || "",
         manager_id: programme.manager_id || "",
         progress: programme.progress ?? 0,
+        timesheets_enabled: programme.timesheets_enabled ?? true,
       });
       Promise.all([
         supabase.from("organizations").select("id, name").order("name"),
@@ -104,6 +108,7 @@ export function EditProgrammeDialog({ programme, open, onOpenChange, onSuccess }
           organization_id: formData.organization_id || null,
           manager_id: formData.manager_id || null,
           progress: Number(formData.progress) || 0,
+          timesheets_enabled: formData.timesheets_enabled,
         })
         .eq("id", programme.id);
       if (error) throw error;
@@ -228,6 +233,20 @@ export function EditProgrammeDialog({ programme, open, onOpenChange, onSuccess }
             <div>
               <Label>Progress (%)</Label>
               <Input type="number" min={0} max={100} value={formData.progress} onChange={(e) => setFormData({ ...formData, progress: Number(e.target.value) })} disabled={!canEdit} />
+            </div>
+            <div className="sm:col-span-2 flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="prog_timesheets_enabled">Timesheets Enabled</Label>
+                <p className="text-xs text-muted-foreground">
+                  Allow users to log time against this program.
+                </p>
+              </div>
+              <Switch
+                id="prog_timesheets_enabled"
+                checked={formData.timesheets_enabled}
+                onCheckedChange={(v) => setFormData({ ...formData, timesheets_enabled: v })}
+                disabled={!canEdit}
+              />
             </div>
           </div>
           <div className="flex justify-between pt-4">

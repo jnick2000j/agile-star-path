@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,7 @@ interface Project {
   organization_id: string | null;
   programme_id: string | null;
   manager_id: string | null;
+  timesheets_enabled?: boolean;
 }
 
 interface EditProjectDialogProps {
@@ -55,6 +57,7 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
     start_date: project.start_date || "",
     end_date: project.end_date || "",
     manager_id: project.manager_id || "",
+    timesheets_enabled: project.timesheets_enabled ?? true,
   });
 
   useEffect(() => {
@@ -71,6 +74,7 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
         start_date: project.start_date || "",
         end_date: project.end_date || "",
         manager_id: project.manager_id || "",
+        timesheets_enabled: project.timesheets_enabled ?? true,
       });
       fetchData();
     }
@@ -107,6 +111,7 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           manager_id: formData.manager_id || null,
+          timesheets_enabled: formData.timesheets_enabled,
         })
         .eq("id", project.id);
 
@@ -324,6 +329,20 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
                 type="date"
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                disabled={!canEdit}
+              />
+            </div>
+            <div className="sm:col-span-2 flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="timesheets_enabled">Timesheets Enabled</Label>
+                <p className="text-xs text-muted-foreground">
+                  Allow users to log time against this project.
+                </p>
+              </div>
+              <Switch
+                id="timesheets_enabled"
+                checked={formData.timesheets_enabled}
+                onCheckedChange={(v) => setFormData({ ...formData, timesheets_enabled: v })}
                 disabled={!canEdit}
               />
             </div>

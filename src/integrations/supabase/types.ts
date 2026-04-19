@@ -2435,6 +2435,7 @@ export type Database = {
           stage: string
           status: string
           target_market: string | null
+          timesheets_enabled: boolean
           updated_at: string
           value_proposition: string | null
           vision: string | null
@@ -2464,6 +2465,7 @@ export type Database = {
           stage?: string
           status?: string
           target_market?: string | null
+          timesheets_enabled?: boolean
           updated_at?: string
           value_proposition?: string | null
           vision?: string | null
@@ -2493,6 +2495,7 @@ export type Database = {
           stage?: string
           status?: string
           target_market?: string | null
+          timesheets_enabled?: boolean
           updated_at?: string
           value_proposition?: string | null
           vision?: string | null
@@ -2885,6 +2888,7 @@ export type Database = {
           sponsor: string | null
           start_date: string | null
           status: string
+          timesheets_enabled: boolean
           tranche: string | null
           updated_at: string
         }
@@ -2904,6 +2908,7 @@ export type Database = {
           sponsor?: string | null
           start_date?: string | null
           status?: string
+          timesheets_enabled?: boolean
           tranche?: string | null
           updated_at?: string
         }
@@ -2923,6 +2928,7 @@ export type Database = {
           sponsor?: string | null
           start_date?: string | null
           status?: string
+          timesheets_enabled?: boolean
           tranche?: string | null
           updated_at?: string
         }
@@ -2953,6 +2959,7 @@ export type Database = {
           reference_number: string | null
           stage: string
           start_date: string | null
+          timesheets_enabled: boolean
           updated_at: string
         }
         Insert: {
@@ -2971,6 +2978,7 @@ export type Database = {
           reference_number?: string | null
           stage?: string
           start_date?: string | null
+          timesheets_enabled?: boolean
           updated_at?: string
         }
         Update: {
@@ -2989,6 +2997,7 @@ export type Database = {
           reference_number?: string | null
           stage?: string
           start_date?: string | null
+          timesheets_enabled?: boolean
           updated_at?: string
         }
         Relationships: [

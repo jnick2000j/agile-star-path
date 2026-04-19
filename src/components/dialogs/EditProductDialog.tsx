@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +30,7 @@ interface Product {
   programme_id?: string | null;
   project_id?: string | null;
   product_owner_id?: string | null;
+  timesheets_enabled?: boolean;
 }
 
 interface EditProductDialogProps {
@@ -64,6 +66,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
     revenue_target: product.revenue_target || "",
     launch_date: product.launch_date || "",
     product_owner_id: product.product_owner_id || "",
+    timesheets_enabled: product.timesheets_enabled ?? true,
   });
 
   useEffect(() => {
@@ -84,6 +87,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
         revenue_target: product.revenue_target || "",
         launch_date: product.launch_date || "",
         product_owner_id: product.product_owner_id || "",
+        timesheets_enabled: product.timesheets_enabled ?? true,
       });
       Promise.all([
         supabase.from("organizations").select("id, name").order("name"),
@@ -122,6 +126,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
           revenue_target: formData.revenue_target || null,
           launch_date: formData.launch_date || null,
           product_owner_id: formData.product_owner_id || null,
+          timesheets_enabled: formData.timesheets_enabled,
         })
         .eq("id", product.id);
       if (error) throw error;
@@ -284,6 +289,20 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
             <div>
               <Label>Revenue Target</Label>
               <Input value={formData.revenue_target} onChange={(e) => setFormData({ ...formData, revenue_target: e.target.value })} disabled={!canEdit} />
+            </div>
+            <div className="sm:col-span-2 flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="prod_timesheets_enabled">Timesheets Enabled</Label>
+                <p className="text-xs text-muted-foreground">
+                  Allow users to log time against this product.
+                </p>
+              </div>
+              <Switch
+                id="prod_timesheets_enabled"
+                checked={formData.timesheets_enabled}
+                onCheckedChange={(v) => setFormData({ ...formData, timesheets_enabled: v })}
+                disabled={!canEdit}
+              />
             </div>
           </div>
           <div className="flex justify-between pt-4">
