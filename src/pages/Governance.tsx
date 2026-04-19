@@ -128,6 +128,8 @@ export default function Governance() {
   const [activeReport, setActiveReport] = useState<Report | null>(null);
   const [activePack, setActivePack] = useState<CommsPack | null>(null);
   const [packTab, setPackTab] = useState("email");
+  const [packDialogOpen, setPackDialogOpen] = useState(false);
+  const [selectedReportForPack, setSelectedReportForPack] = useState<string>("");
 
   const [genForm, setGenForm] = useState({
     report_type: "highlight" as Report["report_type"],
@@ -242,15 +244,18 @@ export default function Governance() {
     fetchAll();
   };
 
-  const generateCommsPack = async () => {
-    if (!activeReport) return;
+  const generateCommsPack = async (reportId?: string) => {
+    const targetReportId = reportId || activeReport?.id;
+    if (!targetReportId) return;
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-comms-pack", {
-        body: { governance_report_id: activeReport.id },
+        body: { governance_report_id: targetReportId },
       });
       if (error) throw error;
       toast.success("Comms pack generated");
+      setPackDialogOpen(false);
+      setSelectedReportForPack("");
       fetchAll();
       if (data?.comms_pack) {
         setActivePack(data.comms_pack as CommsPack);
@@ -262,6 +267,11 @@ export default function Governance() {
       setGenerating(false);
     }
   };
+
+  const eligibleReportsForPack = useMemo(
+    () => reports.filter((r) => r.status === "approved" || r.status === "published"),
+    [reports],
+  );
 
   const recomputeScore = async (scope_type: "programme" | "project", scope_id: string) => {
     if (!currentOrganization) return;
