@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
 
 interface CreateProgrammeDialogProps {
@@ -21,9 +23,19 @@ interface Organization {
 
 export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps) {
   const [open, setOpen] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const { user } = useAuth();
+  const { canCreate, limits } = usePlanLimits();
+
+  const handleOpen = (newOpen: boolean) => {
+    if (newOpen && !canCreate("programmes")) {
+      setShowUpgrade(true);
+      return;
+    }
+    setOpen(newOpen);
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -94,7 +106,8 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
+    <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
@@ -217,5 +230,13 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
         </form>
       </DialogContent>
     </Dialog>
+    <UpgradePrompt
+      open={showUpgrade}
+      onOpenChange={setShowUpgrade}
+      resource="program"
+      currentPlan={limits?.planName}
+      limit={limits?.maxProgrammes}
+    />
+    </>
   );
 }

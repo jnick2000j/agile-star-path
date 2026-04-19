@@ -132,7 +132,7 @@ export default function AcceptInvite() {
           </Button>
         </div>
         {user.email?.toLowerCase() !== invite.email.toLowerCase() && (
-          <p className="text-xs text-amber-600 mt-4">
+          <p className="text-xs text-warning mt-4">
             Heads up: your account email ({user.email}) doesn't match the invite ({invite.email}).
             Acceptance will fail.
           </p>

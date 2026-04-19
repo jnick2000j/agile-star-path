@@ -105,7 +105,7 @@ export default function Billing() {
 
   if (loading || limitsLoading) {
     return (
-      <AppLayout>
+      <AppLayout title="Billing">
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -129,7 +129,7 @@ export default function Billing() {
     : [];
 
   return (
-    <AppLayout>
+    <AppLayout title="Billing & Plans" subtitle="Manage your subscription and view usage.">
       <div className="space-y-6 max-w-6xl mx-auto">
         <div>
           <h1 className="text-3xl font-bold">Billing & Plans</h1>
@@ -139,7 +139,7 @@ export default function Billing() {
         </div>
 
         {!isAdmin && (
-          <Card className="p-4 border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+          <Card className="p-4 border-warning/30 bg-warning/5">
             <p className="text-sm">
               Only organization admins can change the billing plan. You can view
               current usage below.
