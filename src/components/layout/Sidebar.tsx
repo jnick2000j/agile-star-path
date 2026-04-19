@@ -72,7 +72,7 @@ export function Sidebar() {
   const navigation: NavItem[] = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/" },
     { label: "Ask the TaskMaster", icon: Search, href: "/search" },
-    { label: "Notifications", icon: Bell, href: "/updates", badge: unreadCount },
+    { label: "Notifications", icon: Bell, href: "/notifications", badge: unreadCount },
     { label: "Programs", icon: Layers, href: "/programmes" },
     { label: "Projects", icon: FolderKanban, href: "/projects" },
     { label: "Products", icon: Package, href: "/products" },

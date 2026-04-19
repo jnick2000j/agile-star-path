@@ -63,6 +63,7 @@ import CheckoutReturn from "./pages/CheckoutReturn";
 import Support from "./pages/Support";
 import Governance from "./pages/Governance";
 import Search from "./pages/Search";
+import Notifications from "./pages/Notifications";
 import StakeholderPortal from "./pages/StakeholderPortal";
 import NotFound from "./pages/NotFound";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -135,6 +136,7 @@ const App = () => (
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/governance" element={<ProtectedRoute><Governance /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/portal" element={<ProtectedRoute><StakeholderPortal /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
