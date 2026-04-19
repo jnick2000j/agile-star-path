@@ -73,10 +73,12 @@ const App = () => (
         <AuthProvider>
           <OrganizationProvider>
           <PermissionsProvider>
+          <PaymentTestModeBanner />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/accept-invite" element={<AcceptInvite />} />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
