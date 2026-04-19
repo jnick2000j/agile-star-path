@@ -133,6 +133,7 @@ const approverDecisionOptions = [
 
 const verifierDecisionOptions = [
   { value: "verified", label: "Verified" },
+  { value: "modification_required", label: "Modification required" },
   { value: "rejected_verification", label: "Verification failed" },
   { value: "abstain", label: "Abstain" },
 ];
