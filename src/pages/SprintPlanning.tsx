@@ -17,6 +17,7 @@ import {
   Layers,
   FolderKanban,
   Package,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Dialog,
