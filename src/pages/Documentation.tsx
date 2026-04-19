@@ -803,13 +803,13 @@ export default function Documentation() {
   const [selectedPhase, setSelectedPhase] = useState<typeof mspPhases[0] | null>(null);
 
   return (
-    <AppLayout title="Documentation" subtitle="PRINCE2, MSP, Agile & Product Management resources">
+    <AppLayout title="Principles" subtitle="PRINCE2, MSP, Agile & Product Management resources">
       {/* Search */}
       <div className="flex gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search documentation..."
+            placeholder="Search principles..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"

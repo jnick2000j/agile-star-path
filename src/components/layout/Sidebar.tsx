@@ -53,7 +53,7 @@ const navigation: NavItem[] = [
     { label: "Governance & Comms", href: "/governance" },
   ]},
   // Stakeholder Portal moved to Dashboard quick action
-  { label: "Documentation", icon: BookOpen, href: "/documentation" },
+  { label: "Principles", icon: BookOpen, href: "/documentation" },
   { label: "Project Teams", icon: Users, href: "/team" },
   { label: "Wizards", icon: Wand2, href: "/wizards" },
   { label: "Security", icon: Shield, href: "/security" },
