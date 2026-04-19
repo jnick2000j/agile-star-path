@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe } from "lucide-react";
+import { Search, HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { AskSupportDialog } from "@/components/AskSupportDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const navigate = useNavigate();
   const isAdmin = userRole === "admin";
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   // Fetch global branding logo for unassigned/global admins
   useEffect(() => {
@@ -83,13 +85,18 @@ export function Header({ title, subtitle }: HeaderProps) {
 
         <Button
           variant="outline"
-          size="icon"
-          onClick={() => navigate("/support")}
-          title="Help & Support"
-          aria-label="Help & Support"
+          size="sm"
+          onClick={() => setSupportOpen(true)}
+          title="Ask for Support"
+          aria-label="Ask for Support"
+          className="gap-2"
         >
-          <HelpCircle className="h-4 w-4" />
+          <Sparkles className="h-4 w-4" />
+          <span className="hidden sm:inline">Ask for Support</span>
+          <HelpCircle className="h-4 w-4 sm:hidden" />
         </Button>
+
+        <AskSupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
 
         {/* Quick link to Support inside menu too */}
 
