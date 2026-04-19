@@ -57,6 +57,7 @@ import {
 } from "lucide-react";
 import { ComplianceRuleEditor } from "@/components/governance/ComplianceRuleEditor";
 import { ComplianceReportDialog, type ScoreData } from "@/components/governance/ComplianceReportDialog";
+import { QuickActionTabs } from "@/components/QuickActionTabs";
 
 type Report = {
   id: string;
