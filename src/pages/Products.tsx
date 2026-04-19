@@ -213,7 +213,6 @@ export default function Products() {
             ]}
             className="flex-1 grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3"
           />
-          <CreateProductDialog onSuccess={fetchProducts} />
         </div>
 
         {/* Lifecycle Stage Summary */}
@@ -259,6 +258,7 @@ export default function Products() {
                 ))}
               </SelectContent>
             </Select>
+            <CreateProductDialog onSuccess={fetchProducts} />
           </div>
 
           {/* Products Table */}
