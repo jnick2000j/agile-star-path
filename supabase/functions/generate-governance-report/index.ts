@@ -11,14 +11,26 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 interface RequestBody {
-  report_type: "highlight" | "end_stage" | "programme_status";
-  scope_type: "programme" | "project";
+  report_type: "highlight" | "end_stage" | "programme_status" | "product_status";
+  scope_type: "programme" | "project" | "product";
   scope_id: string;
   organization_id: string;
   period_start?: string;
   period_end?: string;
   title?: string;
 }
+
+const SCOPE_TABLE: Record<string, string> = {
+  programme: "programmes",
+  project: "projects",
+  product: "products",
+};
+
+const SCOPE_FILTER_COL: Record<string, string> = {
+  programme: "programme_id",
+  project: "project_id",
+  product: "product_id",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -54,7 +66,13 @@ Deno.serve(async (req) => {
     const adminDb = createClient(SUPABASE_URL, SERVICE_KEY);
 
     // Fetch scope entity
-    const scopeTable = scope_type === "programme" ? "programmes" : "projects";
+    const scopeTable = SCOPE_TABLE[scope_type];
+    if (!scopeTable) {
+      return new Response(JSON.stringify({ error: "Unsupported scope_type" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { data: scope } = await adminDb.from(scopeTable).select("*").eq("id", scope_id).maybeSingle();
 
     if (!scope) {
@@ -65,7 +83,7 @@ Deno.serve(async (req) => {
     }
 
     // Aggregate context
-    const filterCol = scope_type === "programme" ? "programme_id" : "project_id";
+    const filterCol = SCOPE_FILTER_COL[scope_type];
     const [risksRes, issuesRes, milestonesRes, benefitsRes, updatesRes, exceptionsRes] = await Promise.all([
       adminDb.from("risks").select("title, severity, status, owner_id, mitigation_plan").eq(filterCol, scope_id).limit(20),
       adminDb.from("issues").select("title, priority, status, type").eq(filterCol, scope_id).limit(20),
@@ -81,10 +99,11 @@ Deno.serve(async (req) => {
       _scope_id: scope_id,
     });
 
-    const reportTypeLabels = {
+    const reportTypeLabels: Record<string, string> = {
       highlight: "PRINCE2 Highlight Report",
       end_stage: "PRINCE2 End Stage Report",
       programme_status: "MSP Programme Status Report",
+      product_status: "Product Status Report",
     };
 
     const systemPrompt = `You are a senior PMO governance writer. Produce a ${reportTypeLabels[report_type]} in the exact JSON structure requested. Be concise, factual, and PRINCE2/MSP-aligned. Never invent facts; if data is missing, say "No data available".`;

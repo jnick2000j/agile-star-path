@@ -58,8 +58,8 @@ import {
 type Report = {
   id: string;
   organization_id: string;
-  report_type: "highlight" | "end_stage" | "programme_status";
-  scope_type: "programme" | "project";
+  report_type: "highlight" | "end_stage" | "programme_status" | "product_status";
+  scope_type: "programme" | "project" | "product";
   scope_id: string;
   title: string;
   period_start: string | null;
@@ -98,10 +98,26 @@ type ScoreRow = {
 
 type EntityOption = { id: string; name: string };
 
-const REPORT_LABELS = {
+const REPORT_LABELS: Record<Report["report_type"], string> = {
   highlight: "PRINCE2 Highlight Report",
   end_stage: "PRINCE2 End Stage Report",
   programme_status: "MSP Programme Status Report",
+  product_status: "Product Status Report",
+};
+
+const REPORT_TYPES_BY_SCOPE: Record<Report["scope_type"], { value: Report["report_type"]; label: string }[]> = {
+  programme: [
+    { value: "programme_status", label: "MSP Programme Status Report" },
+    { value: "highlight", label: "PRINCE2 Highlight Report" },
+    { value: "end_stage", label: "PRINCE2 End Stage Report" },
+  ],
+  project: [
+    { value: "highlight", label: "PRINCE2 Highlight Report" },
+    { value: "end_stage", label: "PRINCE2 End Stage Report" },
+  ],
+  product: [
+    { value: "product_status", label: "Product Status Report" },
+  ],
 };
 
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
@@ -122,6 +138,7 @@ export default function Governance() {
   const [scores, setScores] = useState<ScoreRow[]>([]);
   const [programmes, setProgrammes] = useState<EntityOption[]>([]);
   const [projects, setProjects] = useState<EntityOption[]>([]);
+  const [products, setProducts] = useState<EntityOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
