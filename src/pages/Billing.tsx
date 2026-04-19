@@ -470,6 +470,33 @@ export default function Billing() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your subscription will remain active until the end of your current billing period
+              {subscription?.current_period_end && (
+                <> (<strong>{format(new Date(subscription.current_period_end), "MMMM d, yyyy")}</strong>)</>
+              )}
+              . After that, your organization will be moved to the Free plan and premium features will become unavailable.
+              You can reactivate any time before then.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>Keep subscription</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelSubscription}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Yes, cancel at period end
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
