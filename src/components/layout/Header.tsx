@@ -24,12 +24,33 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle }: HeaderProps) {
-  const { user, signOut, userRole } = useAuth();
+  const { user, signOut, userRole, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
   const isAdmin = userRole === "admin";
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
+
+  const getDisplayName = () => {
+    if (userProfile?.first_name && userProfile?.last_name) {
+      return `${userProfile.first_name} ${userProfile.last_name}`;
+    }
+    if (userProfile?.full_name) return userProfile.full_name;
+    return user?.email?.split("@")[0] || "User";
+  };
+
+  const getInitials = () => {
+    if (userProfile?.first_name && userProfile?.last_name) {
+      return `${userProfile.first_name[0]}${userProfile.last_name[0]}`.toUpperCase();
+    }
+    if (userProfile?.full_name) {
+      const parts = userProfile.full_name.split(" ");
+      return parts.length >= 2
+        ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+        : userProfile.full_name.substring(0, 2).toUpperCase();
+    }
+    return user?.email?.substring(0, 2).toUpperCase() || "U";
+  };
 
   // Fetch global branding logo for unassigned/global admins
   useEffect(() => {
