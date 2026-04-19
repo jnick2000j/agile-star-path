@@ -5060,6 +5060,47 @@ export type Database = {
           },
         ]
       }
+      workflow_notifiers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          notify_role: string | null
+          organization_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          notify_role?: string | null
+          organization_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          notify_role?: string | null
+          organization_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_notifiers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
