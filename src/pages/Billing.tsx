@@ -4,13 +4,23 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Check, Loader2, CreditCard } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Sparkles, Check, Loader2, CreditCard, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 interface Plan {
   id: string;
@@ -25,41 +35,47 @@ interface Plan {
   max_storage_mb: number;
   features: any;
   sort_order: number | null;
+  stripe_lookup_key_monthly: string | null;
+  stripe_lookup_key_yearly: string | null;
 }
 
 export default function Billing() {
   const { currentOrganization } = useOrganization();
   const { accessLevel } = useOrgAccessLevel();
   const { limits, usage, loading: limitsLoading } = usePlanLimits();
+  const { user } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [subscription, setSubscription] = useState<any>(null);
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+  const [openingPortal, setOpeningPortal] = useState(false);
 
   const isAdmin = accessLevel === "admin";
 
+  const fetchData = async () => {
+    setLoading(true);
+    const [plansRes, subRes] = await Promise.all([
+      supabase
+        .from("subscription_plans")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order"),
+      currentOrganization?.id
+        ? supabase
+            .from("organization_subscriptions")
+            .select("*")
+            .eq("organization_id", currentOrganization.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+    if (plansRes.data) setPlans(plansRes.data as any);
+    setSubscription(subRes.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const [plansRes, subRes] = await Promise.all([
-        supabase
-          .from("subscription_plans")
-          .select("*")
-          .eq("is_active", true)
-          .order("sort_order"),
-        currentOrganization?.id
-          ? supabase
-              .from("organization_subscriptions")
-              .select("*")
-              .eq("organization_id", currentOrganization.id)
-              .maybeSingle()
-          : Promise.resolve({ data: null }),
-      ]);
-      if (plansRes.data) setPlans(plansRes.data as any);
-      setSubscription(subRes.data);
-      setLoading(false);
-    };
     fetchData();
   }, [currentOrganization?.id]);
 
@@ -68,38 +84,61 @@ export default function Billing() {
     const plan = plans.find((p) => p.id === planId);
     if (!plan) return;
 
-    // Free plan = instant switch. Paid plans = show "payments coming soon".
-    if (plan.price_monthly > 0) {
-      toast.info(
-        "Paid plan checkout is being set up. For now, contact support to upgrade.",
-      );
+    // Free plan = direct switch
+    if (plan.price_monthly === 0 && plan.price_yearly === 0) {
+      setSwitching(planId);
+      try {
+        if (subscription?.id) {
+          await supabase
+            .from("organization_subscriptions")
+            .update({ plan_id: planId, status: "active", trial_ends_at: null })
+            .eq("id", subscription.id);
+        } else {
+          await supabase.from("organization_subscriptions").insert({
+            organization_id: currentOrganization.id,
+            plan_id: planId,
+            status: "active",
+          });
+        }
+        toast.success(`Switched to ${plan.name}`);
+        await fetchData();
+      } catch (err: any) {
+        toast.error(err.message || "Failed to switch plan");
+      } finally {
+        setSwitching(null);
+      }
       return;
     }
 
-    setSwitching(planId);
+    // Paid plan: open Stripe checkout
+    const lookupKey =
+      billingCycle === "monthly"
+        ? plan.stripe_lookup_key_monthly
+        : plan.stripe_lookup_key_yearly;
+    if (!lookupKey) {
+      toast.error("This plan isn't connected to Stripe yet. Ask a platform admin to sync it.");
+      return;
+    }
+    setCheckoutPriceId(lookupKey);
+  };
+
+  const handleOpenPortal = async () => {
+    if (!currentOrganization?.id) return;
+    setOpeningPortal(true);
     try {
-      if (subscription?.id) {
-        await supabase
-          .from("organization_subscriptions")
-          .update({
-            plan_id: planId,
-            status: "active",
-            trial_ends_at: null,
-          })
-          .eq("id", subscription.id);
-      } else {
-        await supabase.from("organization_subscriptions").insert({
-          organization_id: currentOrganization.id,
-          plan_id: planId,
-          status: "active",
-        });
-      }
-      toast.success(`Switched to ${plan.name}`);
-      window.location.reload();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to switch plan");
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: {
+          organizationId: currentOrganization.id,
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/billing`,
+        },
+      });
+      if (error || !data?.url) throw new Error(error?.message || "Could not open portal");
+      window.open(data.url, "_blank");
+    } catch (e: any) {
+      toast.error(e.message);
     } finally {
-      setSwitching(null);
+      setOpeningPortal(false);
     }
   };
 
@@ -114,10 +153,9 @@ export default function Billing() {
   }
 
   const isTrial = subscription?.status === "trialing";
-  const trialEndsAt = subscription?.trial_ends_at
-    ? new Date(subscription.trial_ends_at)
-    : null;
+  const trialEndsAt = subscription?.trial_ends_at ? new Date(subscription.trial_ends_at) : null;
   const trialExpired = trialEndsAt && trialEndsAt < new Date();
+  const hasStripeSubscription = !!subscription?.stripe_subscription_id;
 
   const usageItems = limits
     ? [
@@ -131,23 +169,33 @@ export default function Billing() {
   return (
     <AppLayout title="Billing & Plans" subtitle="Manage your subscription and view usage.">
       <div className="space-y-6 max-w-6xl mx-auto">
-        <div>
-          <h1 className="text-3xl font-bold">Billing & Plans</h1>
-          <p className="text-muted-foreground">
-            Manage your subscription and view usage for {currentOrganization?.name}.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Billing & Plans</h1>
+            <p className="text-muted-foreground">
+              Manage your subscription and view usage for {currentOrganization?.name}.
+            </p>
+          </div>
+          {isAdmin && hasStripeSubscription && (
+            <Button onClick={handleOpenPortal} disabled={openingPortal} variant="outline">
+              {openingPortal ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <ExternalLink className="h-4 w-4 mr-2" />
+              )}
+              Manage billing
+            </Button>
+          )}
         </div>
 
         {!isAdmin && (
           <Card className="p-4 border-warning/30 bg-warning/5">
             <p className="text-sm">
-              Only organization admins can change the billing plan. You can view
-              current usage below.
+              Only organization admins can change the billing plan. You can view current usage below.
             </p>
           </Card>
         )}
 
-        {/* Current Plan + Usage */}
         {limits && (
           <Card className="p-6">
             <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
@@ -160,8 +208,9 @@ export default function Billing() {
                       {trialExpired ? "Trial expired" : "Trial"}
                     </Badge>
                   )}
-                  {subscription?.status === "active" && (
-                    <Badge variant="default">Active</Badge>
+                  {subscription?.status === "active" && <Badge variant="default">Active</Badge>}
+                  {subscription?.cancel_at_period_end && (
+                    <Badge variant="outline">Cancels at period end</Badge>
                   )}
                 </h2>
                 {trialEndsAt && !trialExpired && (
@@ -169,9 +218,9 @@ export default function Billing() {
                     Trial ends {formatDistanceToNow(trialEndsAt, { addSuffix: true })}
                   </p>
                 )}
-                {trialExpired && (
-                  <p className="text-sm text-destructive mt-1">
-                    Your trial has expired. Upgrade to continue creating new resources.
+                {subscription?.current_period_end && !isTrial && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Renews {formatDistanceToNow(new Date(subscription.current_period_end), { addSuffix: true })}
                   </p>
                 )}
               </div>
@@ -201,7 +250,6 @@ export default function Billing() {
           </Card>
         )}
 
-        {/* Plan Picker */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Choose your plan</h2>
@@ -298,7 +346,7 @@ export default function Billing() {
                     ) : isPaid ? (
                       <>
                         <CreditCard className="h-4 w-4" />
-                        Upgrade
+                        {hasStripeSubscription ? "Switch plan" : "Subscribe"}
                       </>
                     ) : (
                       "Select"
@@ -314,16 +362,39 @@ export default function Billing() {
           <div className="flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div>
-              <h3 className="font-semibold">Payment processing coming soon</h3>
+              <h3 className="font-semibold">Secure checkout by Stripe</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Self-serve checkout with Stripe is being wired up. To upgrade
-                today, contact your account manager and we'll switch your plan
-                manually.
+                Card details are handled directly by Stripe. After payment your plan
+                activates instantly. Use the "Manage billing" button above to update
+                payment methods, download invoices, or cancel.
               </p>
             </div>
           </div>
         </Card>
       </div>
+
+      <Dialog
+        open={!!checkoutPriceId}
+        onOpenChange={(o) => !o && setCheckoutPriceId(null)}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Complete your subscription</DialogTitle>
+            <DialogDescription>
+              Enter your payment details below. Your plan activates as soon as the
+              payment succeeds.
+            </DialogDescription>
+          </DialogHeader>
+          {checkoutPriceId && (
+            <StripeEmbeddedCheckout
+              priceId={checkoutPriceId}
+              customerEmail={user?.email || undefined}
+              organizationId={currentOrganization?.id}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

@@ -58,7 +58,9 @@ import Billing from "./pages/Billing";
 import SecurityCenter from "./pages/SecurityCenter";
 import Pricing from "./pages/Pricing";
 import AcceptInvite from "./pages/AcceptInvite";
+import CheckoutReturn from "./pages/CheckoutReturn";
 import NotFound from "./pages/NotFound";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
 
@@ -71,10 +73,12 @@ const App = () => (
         <AuthProvider>
           <OrganizationProvider>
           <PermissionsProvider>
+          <PaymentTestModeBanner />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/accept-invite" element={<AcceptInvite />} />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

@@ -5,3 +5,18 @@ verify_jwt = false
 
 [functions.send-weekly-report]
 verify_jwt = true
+
+[functions.get-stripe-price]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.create-portal-session]
+verify_jwt = false
+
+[functions.payments-webhook]
+verify_jwt = false
+
+[functions.sync-plan-to-stripe]
+verify_jwt = false
