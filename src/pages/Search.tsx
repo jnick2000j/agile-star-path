@@ -102,12 +102,12 @@ export default function Search() {
   };
 
   return (
-    <AppLayout title="Search the TaskMaster">
+    <AppLayout title="Ask the TaskMaster">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            <h1 className="text-3xl font-bold">Search the TaskMaster</h1>
+            <h1 className="text-3xl font-bold">Ask the TaskMaster</h1>
           </div>
           <p className="text-muted-foreground">
             Ask in natural language to find programmes, projects, products, tasks, risks, issues, benefits, and milestones.
