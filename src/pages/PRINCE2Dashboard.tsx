@@ -202,7 +202,7 @@ export default function PRINCE2Dashboard() {
   const qualityPassRate = qualityStats.total > 0 ? Math.round((qualityStats.passed / (qualityStats.passed + qualityStats.failed || 1)) * 100) : 0;
 
   return (
-    <AppLayout title="PRINCE2" subtitle="Project management aligned with PRINCE2 methodology">
+    <AppLayout title="Governance" subtitle="Project governance and controls aligned with PRINCE2 methodology">
       <Tabs defaultValue="dashboard" className="space-y-6">
         <QuickActionTabs
           items={[

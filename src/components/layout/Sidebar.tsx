@@ -42,7 +42,7 @@ const navigation: NavItem[] = [
   { label: "Projects", icon: FolderKanban, href: "/projects" },
   { label: "Products", icon: Package, href: "/products" },
   { label: "Tasks", icon: ListTodo, href: "/tasks" },
-  { label: "PRINCE2", icon: Shield, href: "/prince2" },
+  { label: "Governance", icon: Shield, href: "/prince2" },
   { label: "Registers", icon: ClipboardList, href: "/registers" },
   { label: "Reporting", icon: BarChart3, children: [
     { label: "Reports", href: "/reports" },
