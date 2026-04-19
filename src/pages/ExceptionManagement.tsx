@@ -808,6 +808,15 @@ export default function ExceptionManagement({ embedded = false }: { embedded?: b
                     organizationId={selectedException.organization_id}
                   />
                 </TabsContent>
+                <TabsContent value="signoff" className="mt-4">
+                  <ApprovalTriadPanel
+                    entityType="exception"
+                    entityId={selectedException.id}
+                    organizationId={selectedException.organization_id}
+                    ownerId={selectedException.owner_id}
+                    ownerLabel="Exception owner"
+                  />
+                </TabsContent>
                 <TabsContent value="evidence" className="mt-4">
                   <EvidenceChecklist
                     approvalType="exception"

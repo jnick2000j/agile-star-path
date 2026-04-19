@@ -802,6 +802,15 @@ export default function QualityManagement({ embedded = false }: { embedded?: boo
                     organizationId={selectedRecord.organization_id}
                   />
                 </TabsContent>
+                <TabsContent value="signoff" className="mt-4">
+                  <ApprovalTriadPanel
+                    entityType="quality_review"
+                    entityId={selectedRecord.id}
+                    organizationId={selectedRecord.organization_id}
+                    ownerId={selectedRecord.owner_id ?? null}
+                    ownerLabel="Quality owner"
+                  />
+                </TabsContent>
                 <TabsContent value="evidence" className="mt-4">
                   <EvidenceChecklist
                     approvalType="quality_review"
