@@ -54,6 +54,9 @@ import PRINCE2Dashboard from "./pages/PRINCE2Dashboard";
 import Registers from "./pages/Registers";
 import PlatformAdmin from "./pages/PlatformAdmin";
 import Onboarding from "./pages/Onboarding";
+import Billing from "./pages/Billing";
+import Pricing from "./pages/Pricing";
+import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +72,9 @@ const App = () => (
           <PermissionsProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/accept-invite" element={<AcceptInvite />} />
+            <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/programmes" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
