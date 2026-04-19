@@ -103,13 +103,10 @@ export function PlatformSupportQueue() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [ticketsRes, orgsRes, adminsRes] = await Promise.all([
+    const [ticketsRes, orgsRes, adminRolesRes] = await Promise.all([
       supabase.from("support_tickets").select("*").order("updated_at", { ascending: false }),
       supabase.from("organizations").select("id, name"),
-      supabase
-        .from("user_roles")
-        .select("user_id, profiles!inner(user_id, full_name, email)")
-        .eq("role", "admin"),
+      supabase.from("user_roles").select("user_id").eq("role", "admin"),
     ]);
 
     const ticketRows = (ticketsRes.data || []) as Ticket[];
@@ -119,28 +116,28 @@ export function PlatformSupportQueue() {
     (orgsRes.data || []).forEach((o: OrgLite) => (orgMap[o.id] = o));
     setOrgs(orgMap);
 
-    // Fetch profiles for ticket creators + assignees
+    const adminIds = (adminRolesRes.data || []).map((r: { user_id: string }) => r.user_id);
+
+    // Fetch profiles for ticket creators, assignees, AND admins (for assignee dropdown)
     const userIds = Array.from(
       new Set(
-        ticketRows
-          .flatMap((t) => [t.created_by, t.assigned_to])
-          .filter((v): v is string => !!v),
+        [
+          ...ticketRows.flatMap((t) => [t.created_by, t.assigned_to]),
+          ...adminIds,
+        ].filter((v): v is string => !!v),
       ),
     );
+    const profMap: Record<string, ProfileLite> = {};
     if (userIds.length > 0) {
       const { data: profs } = await supabase
         .from("profiles")
         .select("user_id, full_name, email")
         .in("user_id", userIds);
-      const profMap: Record<string, ProfileLite> = {};
       (profs || []).forEach((p: ProfileLite) => (profMap[p.user_id] = p));
       setProfiles(profMap);
     }
 
-    const adminList: ProfileLite[] = ((adminsRes.data || []) as Array<{ profiles: ProfileLite }>)
-      .map((r) => r.profiles)
-      .filter(Boolean);
-    setAdmins(adminList);
+    setAdmins(adminIds.map((id) => profMap[id]).filter(Boolean));
 
     setLoading(false);
   };
