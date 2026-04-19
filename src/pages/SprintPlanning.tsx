@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuickActionTabs } from "@/components/QuickActionTabs";
 import { 
   Plus, 
   Calendar,
@@ -16,6 +17,7 @@ import {
   Layers,
   FolderKanban,
   Package,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -350,17 +352,14 @@ export default function SprintPlanning({ embedded }: { embedded?: boolean }) {
     <>
       <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as EntityType); setEntityFilter("all"); }}>
         <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-          <TabsList>
-            {Object.entries(entityTypeConfig).map(([key, config]) => {
-              const Icon = config.icon;
-              return (
-                <TabsTrigger key={key} value={key} className="gap-2">
-                  <Icon className="h-4 w-4" />
-                  {config.label}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+          <QuickActionTabs
+            items={Object.entries(entityTypeConfig).map(([key, config]) => ({
+              value: key,
+              label: config.label,
+              icon: config.icon as LucideIcon,
+            }))}
+            className="flex-1 grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3"
+          />
 
           <div className="flex gap-2">
             <Select value={entityFilter} onValueChange={setEntityFilter}>
