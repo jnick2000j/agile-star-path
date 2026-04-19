@@ -159,7 +159,6 @@ export default function PlatformAdmin() {
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
           <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
-          <TabsTrigger value="governance">Governance</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
