@@ -406,7 +406,7 @@ export default function Governance() {
 
   if (accessLoading) {
     return (
-      <AppLayout title="Governance">
+      <AppLayout title="Governance & Comms">
         <div className="p-6 text-muted-foreground">Loading…</div>
       </AppLayout>
     );
@@ -414,7 +414,7 @@ export default function Governance() {
 
   if (!isManager) {
     return (
-      <AppLayout title="Governance" subtitle="AI-drafted governance reports & compliance">
+      <AppLayout title="Governance & Comms" subtitle="AI-drafted governance reports & compliance">
         <div className="p-6">
           <Card>
             <CardHeader>
@@ -434,7 +434,7 @@ export default function Governance() {
 
   return (
     <AppLayout
-      title="Governance"
+      title="Governance & Comms"
       subtitle="AI-drafted reports, compliance scores, and stakeholder comms packs"
     >
       <div className="p-6 space-y-6">
