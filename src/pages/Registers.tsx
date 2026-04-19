@@ -32,7 +32,10 @@ export default function Registers() {
   return (
     <AppLayout title="Registers" subtitle="PRINCE2 MSP registers and requirements management">
       <Tabs defaultValue="risks" className="space-y-6">
-        <QuickActionTabs items={REGISTER_TABS} />
+        <QuickActionTabs
+          items={REGISTER_TABS}
+          className="grid-cols-7 sm:grid-cols-7 md:grid-cols-7 lg:grid-cols-7"
+        />
 
         <TabsContent value="risks">
           <RiskRegister embedded />
