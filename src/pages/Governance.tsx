@@ -984,6 +984,14 @@ export default function Governance() {
             )}
           </SheetContent>
         </Sheet>
+
+        {/* Compliance report dialog */}
+        <ComplianceReportDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          data={reportData}
+          organizationName={currentOrganization?.name}
+        />
       </div>
     </AppLayout>
   );

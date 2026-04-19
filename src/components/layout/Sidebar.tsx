@@ -52,7 +52,7 @@ const navigation: NavItem[] = [
     { label: "Updates", href: "/updates" },
     { label: "Governance & Comms", href: "/governance" },
   ]},
-  { label: "Stakeholder Portal", icon: Eye, href: "/portal" },
+  // Stakeholder Portal moved to Dashboard quick action
   { label: "Documentation", icon: BookOpen, href: "/documentation" },
   { label: "Project Teams", icon: Users, href: "/team" },
   { label: "Wizards", icon: Wand2, href: "/wizards" },
@@ -84,9 +84,7 @@ export function Sidebar() {
       .then(({ data }) => setHasStakeholderAccess((data?.length ?? 0) > 0));
   }, [user, userRole]);
 
-  const visibleNavigation = navigation.filter(
-    (item) => item.label !== "Stakeholder Portal" || hasStakeholderAccess
-  );
+  const visibleNavigation = navigation;
 
   const getDisplayName = () => {
     if (userProfile?.first_name && userProfile?.last_name) {
