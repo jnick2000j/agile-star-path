@@ -136,6 +136,12 @@ export function Header({ title, subtitle }: HeaderProps) {
                 Branding
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/security" className="flex items-center gap-2 cursor-pointer">
+                <Shield className="h-4 w-4" />
+                Security
+              </Link>
+            </DropdownMenuItem>
             {(isAdmin || userRole === "org_admin") && (
               <DropdownMenuItem asChild>
                 <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
