@@ -205,11 +205,14 @@ export default function Products() {
     <AppLayout title="Products" subtitle="Product portfolio and lifecycle management">
       <Tabs defaultValue="portfolio" className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <TabsList className="bg-secondary">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="lifecycle">Lifecycle View</TabsTrigger>
-            <TabsTrigger value="metrics">Metrics & KPIs</TabsTrigger>
-          </TabsList>
+          <QuickActionTabs
+            items={[
+              { value: "portfolio", label: "Portfolio", icon: Package },
+              { value: "lifecycle", label: "Lifecycle View", icon: TrendingUp },
+              { value: "metrics", label: "Metrics & KPIs", icon: BarChart3 },
+            ]}
+            className="flex-1 grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3"
+          />
           <CreateProductDialog onSuccess={fetchProducts} />
         </div>
 
