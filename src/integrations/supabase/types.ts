@@ -4941,6 +4941,51 @@ export type Database = {
           },
         ]
       }
+      workflow_approval_comments: {
+        Row: {
+          approval_id: string
+          author_id: string
+          comment: string
+          created_at: string
+          id: string
+          organization_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_id: string
+          author_id: string
+          comment: string
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_id?: string
+          author_id?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_approval_comments_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_approvals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_approval_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_approvals: {
         Row: {
           approval_role: string

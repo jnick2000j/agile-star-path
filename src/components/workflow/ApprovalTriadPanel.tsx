@@ -29,9 +29,11 @@ import {
   Bell,
   Pencil,
   X,
+  Edit3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { DecisionComments } from "./DecisionComments";
 
 export type WorkflowEntityType =
   | "stage_gate"
@@ -64,6 +66,7 @@ interface ApprovalRow {
     | "reject"
     | "abstain"
     | "conditional"
+    | "modification_required"
     | "verified"
     | "rejected_verification";
   comments: string | null;
@@ -103,17 +106,24 @@ const decisionMeta: Record<
     icon: AlertTriangle,
     cls: "bg-warning/20 text-warning",
   },
+  modification_required: {
+    label: "Modification required",
+    icon: Edit3,
+    cls: "bg-warning/20 text-warning",
+  },
 };
 
 const approverDecisionOptions = [
   { value: "approve", label: "Approve" },
   { value: "conditional", label: "Conditional" },
+  { value: "modification_required", label: "Modification required" },
   { value: "reject", label: "Reject" },
   { value: "abstain", label: "Abstain" },
 ];
 
 const verifierDecisionOptions = [
   { value: "verified", label: "Verified" },
+  { value: "modification_required", label: "Modification required" },
   { value: "rejected_verification", label: "Verification failed" },
   { value: "abstain", label: "Abstain" },
 ];
@@ -496,6 +506,12 @@ export function ApprovalTriadPanel({
             )}
           </div>
         )}
+
+        <DecisionComments
+          approvalId={a.id}
+          organizationId={organizationId}
+          orgUsers={orgUsers}
+        />
       </div>
     );
   };
