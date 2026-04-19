@@ -270,6 +270,7 @@ export type Database = {
           programme_id: string | null
           project_id: string | null
           realization: number
+          reference_number: string | null
           start_date: string | null
           status: string
           target_value: string | null
@@ -291,6 +292,7 @@ export type Database = {
           programme_id?: string | null
           project_id?: string | null
           realization?: number
+          reference_number?: string | null
           start_date?: string | null
           status?: string
           target_value?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           programme_id?: string | null
           project_id?: string | null
           realization?: number
+          reference_number?: string | null
           start_date?: string | null
           status?: string
           target_value?: string | null
@@ -1521,6 +1524,7 @@ export type Database = {
           product_id: string | null
           programme_id: string | null
           project_id: string | null
+          reference_number: string | null
           resolution: string | null
           status: string
           target_date: string | null
@@ -1540,6 +1544,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           resolution?: string | null
           status?: string
           target_date?: string | null
@@ -1559,6 +1564,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           resolution?: string | null
           status?: string
           target_date?: string | null
@@ -1731,6 +1737,7 @@ export type Database = {
           project_id: string | null
           project_stage: string | null
           recommendation: string | null
+          reference_number: string | null
           root_cause: string | null
           status: string
           title: string
@@ -1757,6 +1764,7 @@ export type Database = {
           project_id?: string | null
           project_stage?: string | null
           recommendation?: string | null
+          reference_number?: string | null
           root_cause?: string | null
           status?: string
           title: string
@@ -1783,6 +1791,7 @@ export type Database = {
           project_id?: string | null
           project_stage?: string | null
           recommendation?: string | null
+          reference_number?: string | null
           root_cause?: string | null
           status?: string
           title?: string
@@ -1839,6 +1848,7 @@ export type Database = {
           product_id: string | null
           programme_id: string | null
           project_id: string | null
+          reference_number: string | null
           status: Database["public"]["Enums"]["milestone_status"]
           target_date: string
           updated_at: string
@@ -1863,6 +1873,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date: string
           updated_at?: string
@@ -1887,6 +1898,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string
           updated_at?: string
@@ -2417,6 +2429,7 @@ export type Database = {
           programme_id: string | null
           project_id: string | null
           reach_score: number | null
+          reference_number: string | null
           revenue_target: string | null
           secondary_metrics: string[] | null
           stage: string
@@ -2445,6 +2458,7 @@ export type Database = {
           programme_id?: string | null
           project_id?: string | null
           reach_score?: number | null
+          reference_number?: string | null
           revenue_target?: string | null
           secondary_metrics?: string[] | null
           stage?: string
@@ -2473,6 +2487,7 @@ export type Database = {
           programme_id?: string | null
           project_id?: string | null
           reach_score?: number | null
+          reference_number?: string | null
           revenue_target?: string | null
           secondary_metrics?: string[] | null
           stage?: string
@@ -2866,6 +2881,7 @@ export type Database = {
           name: string
           organization_id: string | null
           progress: number
+          reference_number: string | null
           sponsor: string | null
           start_date: string | null
           status: string
@@ -2884,6 +2900,7 @@ export type Database = {
           name: string
           organization_id?: string | null
           progress?: number
+          reference_number?: string | null
           sponsor?: string | null
           start_date?: string | null
           status?: string
@@ -2902,6 +2919,7 @@ export type Database = {
           name?: string
           organization_id?: string | null
           progress?: number
+          reference_number?: string | null
           sponsor?: string | null
           start_date?: string | null
           status?: string
@@ -2932,6 +2950,7 @@ export type Database = {
           organization_id: string | null
           priority: string
           programme_id: string | null
+          reference_number: string | null
           stage: string
           start_date: string | null
           updated_at: string
@@ -2949,6 +2968,7 @@ export type Database = {
           organization_id?: string | null
           priority?: string
           programme_id?: string | null
+          reference_number?: string | null
           stage?: string
           start_date?: string | null
           updated_at?: string
@@ -2966,6 +2986,7 @@ export type Database = {
           organization_id?: string | null
           priority?: string
           programme_id?: string | null
+          reference_number?: string | null
           stage?: string
           start_date?: string | null
           updated_at?: string
@@ -3249,6 +3270,38 @@ export type Database = {
           },
         ]
       }
+      reference_sequences: {
+        Row: {
+          entity_type: string
+          next_value: number
+          organization_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          entity_type: string
+          next_value?: number
+          organization_id: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          entity_type?: string
+          next_value?: number
+          organization_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reference_sequences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risks: {
         Row: {
           category: string | null
@@ -3264,6 +3317,7 @@ export type Database = {
           product_id: string | null
           programme_id: string | null
           project_id: string | null
+          reference_number: string | null
           response: string | null
           review_date: string | null
           score: number
@@ -3285,6 +3339,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           response?: string | null
           review_date?: string | null
           score?: number
@@ -3306,6 +3361,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           response?: string | null
           review_date?: string | null
           score?: number
@@ -3665,6 +3721,7 @@ export type Database = {
           planned_date: string | null
           programme_id: string | null
           project_id: string | null
+          reference_number: string | null
           review_date: string | null
           reviewed_by: string | null
           stage_number: number
@@ -3689,6 +3746,7 @@ export type Database = {
           planned_date?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           review_date?: string | null
           reviewed_by?: string | null
           stage_number: number
@@ -3713,6 +3771,7 @@ export type Database = {
           planned_date?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           review_date?: string | null
           reviewed_by?: string | null
           stage_number?: number
@@ -4225,6 +4284,7 @@ export type Database = {
           product_id: string | null
           programme_id: string | null
           project_id: string | null
+          reference_number: string | null
           sprint_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           story_points: number | null
@@ -4253,6 +4313,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
@@ -4281,6 +4342,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          reference_number?: string | null
           sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
@@ -5164,6 +5226,10 @@ export type Database = {
         Returns: Json
       }
       create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
+      generate_reference_number: {
+        Args: { _entity_type: string; _organization_id: string }
+        Returns: string
+      }
       get_invitation_by_token: {
         Args: { _token: string }
         Returns: {
