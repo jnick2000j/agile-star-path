@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_audit_log: {
+        Row: {
+          created_at: string
+          event_category: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          organization_id: string | null
+          status: string
+          target_entity_id: string | null
+          target_entity_type: string | null
+          target_user_id: string | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_category?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          organization_id?: string | null
+          status?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_category?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          organization_id?: string | null
+          status?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       benefits: {
         Row: {
           category: string
@@ -2275,6 +2334,71 @@ export type Database = {
           },
         ]
       }
+      sso_configurations: {
+        Row: {
+          acs_url: string | null
+          activated_at: string | null
+          allowed_domains: string[]
+          created_at: string
+          default_access_level: string
+          entity_id: string | null
+          id: string
+          metadata_url: string | null
+          notes: string | null
+          organization_id: string
+          provisioning_notes: string | null
+          requested_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          acs_url?: string | null
+          activated_at?: string | null
+          allowed_domains?: string[]
+          created_at?: string
+          default_access_level?: string
+          entity_id?: string | null
+          id?: string
+          metadata_url?: string | null
+          notes?: string | null
+          organization_id: string
+          provisioning_notes?: string | null
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          acs_url?: string | null
+          activated_at?: string | null
+          allowed_domains?: string[]
+          created_at?: string
+          default_access_level?: string
+          entity_id?: string | null
+          id?: string
+          metadata_url?: string | null
+          notes?: string | null
+          organization_id?: string
+          provisioning_notes?: string | null
+          requested_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_configurations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stage_gates: {
         Row: {
           actual_date: string | null
@@ -3422,6 +3546,15 @@ export type Database = {
           status: string
         }[]
       }
+      get_org_sso_config_by_domain: {
+        Args: { _email: string }
+        Returns: {
+          default_access_level: string
+          organization_id: string
+          organization_name: string
+          sso_config_id: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -3430,6 +3563,7 @@ export type Database = {
         Args: { _min_level?: string; _org_id: string; _user_id: string }
         Returns: boolean
       }
+      has_paid_plan: { Args: { _org_id: string }; Returns: boolean }
       has_product_access: {
         Args: { _product_id: string; _user_id: string }
         Returns: boolean
@@ -3450,6 +3584,21 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_audit_event: {
+        Args: {
+          _event_category?: string
+          _event_type: string
+          _ip_address?: string
+          _metadata?: Json
+          _organization_id?: string
+          _status?: string
+          _target_entity_id?: string
+          _target_entity_type?: string
+          _target_user_id?: string
+          _user_agent?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
