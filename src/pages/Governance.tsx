@@ -419,7 +419,7 @@ export default function Governance() {
               <div>
                 <h2 className="text-lg font-semibold">Governance reports</h2>
                 <p className="text-sm text-muted-foreground">
-                  AI-drafted Highlight, End Stage, and Programme Status reports
+                  AI-drafted reports for programmes, projects, and products — grounded in your live registers
                 </p>
               </div>
               <Dialog open={generateOpen} onOpenChange={setGenerateOpen}>
@@ -433,10 +433,60 @@ export default function Governance() {
                   <DialogHeader>
                     <DialogTitle>Generate governance report</DialogTitle>
                     <DialogDescription>
-                      AI drafts a structured report from your live programme/project data.
+                      AI drafts a structured report from your live programme, project, or product data.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label>Scope</Label>
+                        <Select
+                          value={genForm.scope_type}
+                          onValueChange={(v) => {
+                            const newScope = v as Report["scope_type"];
+                            const firstReportType = REPORT_TYPES_BY_SCOPE[newScope][0].value;
+                            setGenForm({
+                              ...genForm,
+                              scope_type: newScope,
+                              scope_id: "",
+                              report_type: firstReportType,
+                            });
+                          }}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="programme">Programme</SelectItem>
+                            <SelectItem value="project">Project</SelectItem>
+                            <SelectItem value="product">Product</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>
+                          {genForm.scope_type === "programme"
+                            ? "Programme"
+                            : genForm.scope_type === "project"
+                              ? "Project"
+                              : "Product"}
+                        </Label>
+                        <Select
+                          value={genForm.scope_id}
+                          onValueChange={(v) => setGenForm({ ...genForm, scope_id: v })}
+                        >
+                          <SelectTrigger><SelectValue placeholder="Choose…" /></SelectTrigger>
+                          <SelectContent>
+                            {(genForm.scope_type === "programme"
+                              ? programmes
+                              : genForm.scope_type === "project"
+                                ? projects
+                                : products
+                            ).map((e) => (
+                              <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <Label>Report type</Label>
                       <Select
@@ -445,41 +495,33 @@ export default function Governance() {
                       >
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="highlight">PRINCE2 Highlight Report</SelectItem>
-                          <SelectItem value="end_stage">PRINCE2 End Stage Report</SelectItem>
-                          <SelectItem value="programme_status">MSP Programme Status Report</SelectItem>
+                          {REPORT_TYPES_BY_SCOPE[genForm.scope_type].map((rt) => (
+                            <SelectItem key={rt.value} value={rt.value}>{rt.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label>Scope</Label>
-                        <Select
-                          value={genForm.scope_type}
-                          onValueChange={(v) => setGenForm({ ...genForm, scope_type: v as Report["scope_type"], scope_id: "" })}
-                        >
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="programme">Programme</SelectItem>
-                            <SelectItem value="project">Project</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label>Period start</Label>
+                        <Input
+                          type="date"
+                          value={genForm.period_start}
+                          onChange={(e) => setGenForm({ ...genForm, period_start: e.target.value })}
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label>{genForm.scope_type === "programme" ? "Programme" : "Project"}</Label>
-                        <Select
-                          value={genForm.scope_id}
-                          onValueChange={(v) => setGenForm({ ...genForm, scope_id: v })}
-                        >
-                          <SelectTrigger><SelectValue placeholder="Choose…" /></SelectTrigger>
-                          <SelectContent>
-                            {(genForm.scope_type === "programme" ? programmes : projects).map((e) => (
-                              <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label>Period end</Label>
+                        <Input
+                          type="date"
+                          value={genForm.period_end}
+                          onChange={(e) => setGenForm({ ...genForm, period_end: e.target.value })}
+                        />
                       </div>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Leave dates blank to default to the last 14 days.
+                    </p>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setGenerateOpen(false)} disabled={generating}>
