@@ -14,6 +14,7 @@ import ExceptionManagement from "./ExceptionManagement";
 import QualityManagement from "./QualityManagement";
 import MilestoneTracking from "./MilestoneTracking";
 import StageGates from "./StageGates";
+import { QuickActionTabs } from "@/components/QuickActionTabs";
 import {
   ListTodo,
   Target,
@@ -203,32 +204,16 @@ export default function PRINCE2Dashboard() {
   return (
     <AppLayout title="PRINCE2" subtitle="Project management aligned with PRINCE2 methodology">
       <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="dashboard" className="gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="milestones" className="gap-2">
-            <Target className="h-4 w-4" />
-            Milestones
-          </TabsTrigger>
-          <TabsTrigger value="stage-gates" className="gap-2">
-            <Flag className="h-4 w-4" />
-            Stage Gates
-          </TabsTrigger>
-          <TabsTrigger value="change-control" className="gap-2">
-            <FileEdit className="h-4 w-4" />
-            Change Control
-          </TabsTrigger>
-          <TabsTrigger value="exceptions" className="gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            Exceptions
-          </TabsTrigger>
-          <TabsTrigger value="quality" className="gap-2">
-            <ClipboardCheck className="h-4 w-4" />
-            Quality
-          </TabsTrigger>
-        </TabsList>
+        <QuickActionTabs
+          items={[
+            { value: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+            { value: "milestones", label: "Milestones", icon: Target },
+            { value: "stage-gates", label: "Stage Gates", icon: Flag },
+            { value: "change-control", label: "Change Control", icon: FileEdit },
+            { value: "exceptions", label: "Exceptions", icon: AlertTriangle },
+            { value: "quality", label: "Quality", icon: ClipboardCheck },
+          ]}
+        />
 
         <TabsContent value="dashboard">
       {/* Overview Cards */}
