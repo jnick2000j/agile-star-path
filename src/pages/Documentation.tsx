@@ -817,9 +817,8 @@ export default function Documentation() {
         </div>
       </div>
 
-      <Tabs defaultValue="app-guide" className="space-y-6">
+      <Tabs defaultValue="principles" className="space-y-6">
         <TabsList className="bg-secondary">
-          <TabsTrigger value="app-guide">Application Guide</TabsTrigger>
           <TabsTrigger value="principles">Principles</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
         </TabsList>
