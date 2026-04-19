@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { AskSupportDialog } from "@/components/AskSupportDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -93,6 +94,9 @@ export function Header({ title, subtitle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
+        <div className="hidden md:block w-56">
+          <OrganizationSelector />
+        </div>
         
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { OrganizationSelector } from "@/components/OrganizationSelector";
+
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
@@ -154,16 +154,6 @@ export function Sidebar() {
             </div>
           ))}
         </nav>
-
-        {/* Footer: Organization */}
-        <div className="border-t border-sidebar-border bg-sidebar-accent/20 p-3">
-          <div className="rounded-lg bg-sidebar-accent/40 px-2 py-1.5 ring-1 ring-sidebar-border/50">
-            <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-              Organization
-            </p>
-            <OrganizationSelector />
-          </div>
-        </div>
       </div>
     </aside>
   );
