@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { PlanManager } from "@/components/admin/PlanManager";
+import { PlatformSupportQueue } from "@/components/admin/PlatformSupportQueue";
 
 interface PlatformStats {
   totalOrgs: number;
@@ -153,6 +154,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tenants">Tenant Management</TabsTrigger>
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+          <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
@@ -249,6 +251,10 @@ export default function PlatformAdmin() {
 
         <TabsContent value="plans">
           <PlanManager />
+        </TabsContent>
+
+        <TabsContent value="support">
+          <PlatformSupportQueue />
         </TabsContent>
 
         <TabsContent value="sso">
