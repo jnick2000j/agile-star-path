@@ -672,7 +672,7 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
               <Tabs defaultValue="overview" className="mt-4">
                 <TabsList>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="signoff">Sign-off</TabsTrigger>
+                  <TabsTrigger value="signoff">Sign Off & Notify</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview" className="space-y-4 mt-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -718,9 +718,19 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
                   <ApprovalTriadPanel
                     entityType="milestone"
                     entityId={selectedMilestone.id}
+                    entityTitle={selectedMilestone.name}
                     organizationId={selectedMilestone.organization_id}
                     ownerId={selectedMilestone.owner_id}
                     ownerLabel="Milestone owner"
+                    onOwnerChange={async (newOwnerId) => {
+                      const { error } = await supabase
+                        .from("milestones")
+                        .update({ owner_id: newOwnerId })
+                        .eq("id", selectedMilestone.id);
+                      if (error) throw error;
+                      setSelectedMilestone({ ...selectedMilestone, owner_id: newOwnerId } as any);
+                      queryClient.invalidateQueries({ queryKey: ["milestones"] });
+                    }}
                   />
                 </TabsContent>
               </Tabs>

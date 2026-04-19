@@ -678,7 +678,7 @@ export default function ChangeControl({ embedded = false }: { embedded?: boolean
                 <TabsList>
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="impact">Impact</TabsTrigger>
-                  <TabsTrigger value="signoff">Sign-off</TabsTrigger>
+                  <TabsTrigger value="signoff">Sign Off & Notify</TabsTrigger>
                   <TabsTrigger value="decision">Decision</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details" className="space-y-4">
@@ -762,9 +762,19 @@ export default function ChangeControl({ embedded = false }: { embedded?: boolean
                   <ApprovalTriadPanel
                     entityType="change_request"
                     entityId={selectedRequest.id}
+                    entityTitle={selectedRequest.title}
                     organizationId={selectedRequest.organization_id}
                     ownerId={selectedRequest.owner_id}
                     ownerLabel="Change owner"
+                    onOwnerChange={async (newOwnerId) => {
+                      const { error } = await supabase
+                        .from("change_requests")
+                        .update({ owner_id: newOwnerId })
+                        .eq("id", selectedRequest.id);
+                      if (error) throw error;
+                      setSelectedRequest({ ...selectedRequest, owner_id: newOwnerId } as any);
+                      queryClient.invalidateQueries({ queryKey: ["change-requests"] });
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="decision" className="space-y-4">

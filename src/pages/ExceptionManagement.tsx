@@ -679,7 +679,7 @@ export default function ExceptionManagement({ embedded = false }: { embedded?: b
                 <TabsList>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
-                  <TabsTrigger value="signoff">Sign-off</TabsTrigger>
+                  <TabsTrigger value="signoff">Sign Off & Notify</TabsTrigger>
                   <TabsTrigger value="evidence">Evidence</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview" className="space-y-4 mt-4">
@@ -812,9 +812,19 @@ export default function ExceptionManagement({ embedded = false }: { embedded?: b
                   <ApprovalTriadPanel
                     entityType="exception"
                     entityId={selectedException.id}
+                    entityTitle={selectedException.title}
                     organizationId={selectedException.organization_id}
                     ownerId={selectedException.owner_id}
                     ownerLabel="Exception owner"
+                    onOwnerChange={async (newOwnerId) => {
+                      const { error } = await supabase
+                        .from("exceptions")
+                        .update({ owner_id: newOwnerId })
+                        .eq("id", selectedException.id);
+                      if (error) throw error;
+                      setSelectedException({ ...selectedException, owner_id: newOwnerId } as any);
+                      queryClient.invalidateQueries({ queryKey: ["exceptions"] });
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="evidence" className="mt-4">

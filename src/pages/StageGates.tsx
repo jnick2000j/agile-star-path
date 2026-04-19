@@ -526,7 +526,7 @@ export default function StageGates({ embedded }: { embedded?: boolean }) {
               <Tabs defaultValue="overview" className="mt-4">
                 <TabsList>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="signoff">Sign-off</TabsTrigger>
+                  <TabsTrigger value="signoff">Sign Off & Notify</TabsTrigger>
                   <TabsTrigger value="evidence">Evidence</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview" className="space-y-4 mt-4">
@@ -626,9 +626,19 @@ export default function StageGates({ embedded }: { embedded?: boolean }) {
                   <ApprovalTriadPanel
                     entityType="stage_gate"
                     entityId={selectedGate.id}
+                    entityTitle={selectedGate.gate_name || `Stage Gate ${selectedGate.stage_number ?? ""}`.trim()}
                     organizationId={selectedGate.organization_id}
                     ownerId={(selectedGate as any).owner_id ?? null}
                     ownerLabel="Gate owner"
+                    onOwnerChange={async (newOwnerId) => {
+                      const { error } = await supabase
+                        .from("stage_gates")
+                        .update({ owner_id: newOwnerId })
+                        .eq("id", selectedGate.id);
+                      if (error) throw error;
+                      setSelectedGate({ ...selectedGate, owner_id: newOwnerId } as any);
+                      queryClient.invalidateQueries({ queryKey: ["stage-gates"] });
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="evidence" className="mt-4">

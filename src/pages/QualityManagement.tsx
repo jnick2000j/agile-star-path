@@ -677,7 +677,7 @@ export default function QualityManagement({ embedded = false }: { embedded?: boo
                 <TabsList>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="criteria">Criteria</TabsTrigger>
-                  <TabsTrigger value="signoff">Sign-off</TabsTrigger>
+                  <TabsTrigger value="signoff">Sign Off & Notify</TabsTrigger>
                   <TabsTrigger value="evidence">Evidence</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview" className="space-y-4 mt-4">
@@ -806,9 +806,19 @@ export default function QualityManagement({ embedded = false }: { embedded?: boo
                   <ApprovalTriadPanel
                     entityType="quality_review"
                     entityId={selectedRecord.id}
+                    entityTitle={selectedRecord.product_name || selectedRecord.quality_type}
                     organizationId={selectedRecord.organization_id}
                     ownerId={selectedRecord.owner_id ?? null}
                     ownerLabel="Quality owner"
+                    onOwnerChange={async (newOwnerId) => {
+                      const { error } = await supabase
+                        .from("quality_records")
+                        .update({ owner_id: newOwnerId })
+                        .eq("id", selectedRecord.id);
+                      if (error) throw error;
+                      setSelectedRecord({ ...selectedRecord, owner_id: newOwnerId } as any);
+                      queryClient.invalidateQueries({ queryKey: ["quality-records"] });
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="evidence" className="mt-4">
