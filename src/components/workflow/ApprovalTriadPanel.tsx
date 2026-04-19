@@ -506,6 +506,12 @@ export function ApprovalTriadPanel({
             )}
           </div>
         )}
+
+        <DecisionComments
+          approvalId={a.id}
+          organizationId={organizationId}
+          orgUsers={orgUsers}
+        />
       </div>
     );
   };
