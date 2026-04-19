@@ -1385,43 +1385,55 @@ export type Database = {
       }
       organization_subscriptions: {
         Row: {
+          billing_interval: string | null
+          cancel_at_period_end: boolean | null
           canceled_at: string | null
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
+          environment: string
           id: string
           organization_id: string
           plan_id: string
           status: string
           stripe_customer_id: string | null
+          stripe_price_id: string | null
           stripe_subscription_id: string | null
           trial_ends_at: string | null
           updated_at: string
         }
         Insert: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean | null
           canceled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          environment?: string
           id?: string
           organization_id: string
           plan_id: string
           status?: string
           stripe_customer_id?: string | null
+          stripe_price_id?: string | null
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
           updated_at?: string
         }
         Update: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean | null
           canceled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          environment?: string
           id?: string
           organization_id?: string
           plan_id?: string
           status?: string
           stripe_customer_id?: string | null
+          stripe_price_id?: string | null
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
           updated_at?: string
@@ -1562,6 +1574,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      plan_price_sync_history: {
+        Row: {
+          affected_subscribers: number | null
+          created_at: string
+          currency: string
+          id: string
+          interval: string
+          lookup_key: string | null
+          migration_strategy: string
+          new_amount: number
+          new_stripe_price_id: string | null
+          notes: string | null
+          old_amount: number | null
+          old_stripe_price_id: string | null
+          performed_by: string | null
+          plan_id: string
+        }
+        Insert: {
+          affected_subscribers?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          interval: string
+          lookup_key?: string | null
+          migration_strategy?: string
+          new_amount: number
+          new_stripe_price_id?: string | null
+          notes?: string | null
+          old_amount?: number | null
+          old_stripe_price_id?: string | null
+          performed_by?: string | null
+          plan_id: string
+        }
+        Update: {
+          affected_subscribers?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          interval?: string
+          lookup_key?: string | null
+          migration_strategy?: string
+          new_amount?: number
+          new_stripe_price_id?: string | null
+          notes?: string | null
+          old_amount?: number | null
+          old_stripe_price_id?: string | null
+          performed_by?: string | null
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_price_sync_history_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_features: {
         Row: {
@@ -2769,6 +2840,7 @@ export type Database = {
           is_active: boolean | null
           is_archived: boolean
           is_public: boolean
+          last_synced_at: string | null
           max_products: number | null
           max_programmes: number | null
           max_projects: number | null
@@ -2778,8 +2850,12 @@ export type Database = {
           price_monthly: number | null
           price_yearly: number | null
           sort_order: number | null
+          stripe_lookup_key_monthly: string | null
+          stripe_lookup_key_yearly: string | null
           stripe_price_id_monthly: string | null
           stripe_price_id_yearly: string | null
+          stripe_product_id: string | null
+          sync_status: string | null
           trial_days: number
           updated_at: string
         }
@@ -2795,6 +2871,7 @@ export type Database = {
           is_active?: boolean | null
           is_archived?: boolean
           is_public?: boolean
+          last_synced_at?: string | null
           max_products?: number | null
           max_programmes?: number | null
           max_projects?: number | null
@@ -2804,8 +2881,12 @@ export type Database = {
           price_monthly?: number | null
           price_yearly?: number | null
           sort_order?: number | null
+          stripe_lookup_key_monthly?: string | null
+          stripe_lookup_key_yearly?: string | null
           stripe_price_id_monthly?: string | null
           stripe_price_id_yearly?: string | null
+          stripe_product_id?: string | null
+          sync_status?: string | null
           trial_days?: number
           updated_at?: string
         }
@@ -2821,6 +2902,7 @@ export type Database = {
           is_active?: boolean | null
           is_archived?: boolean
           is_public?: boolean
+          last_synced_at?: string | null
           max_products?: number | null
           max_programmes?: number | null
           max_projects?: number | null
@@ -2830,8 +2912,12 @@ export type Database = {
           price_monthly?: number | null
           price_yearly?: number | null
           sort_order?: number | null
+          stripe_lookup_key_monthly?: string | null
+          stripe_lookup_key_yearly?: string | null
           stripe_price_id_monthly?: string | null
           stripe_price_id_yearly?: string | null
+          stripe_product_id?: string | null
+          sync_status?: string | null
           trial_days?: number
           updated_at?: string
         }
