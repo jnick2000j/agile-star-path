@@ -461,6 +461,7 @@ export default function ProgrammeDetails() {
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "history", label: "Timeline", icon: History },
             ]}
+            className="grid-cols-12 sm:grid-cols-12 md:grid-cols-12 lg:grid-cols-12"
           />
 
           {/* Linked Projects Tab */}

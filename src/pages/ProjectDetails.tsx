@@ -537,6 +537,7 @@ export default function ProjectDetails() {
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
+            className="grid-cols-10 sm:grid-cols-10 md:grid-cols-10 lg:grid-cols-10"
           />
 
           {/* Work Packages Tab */}

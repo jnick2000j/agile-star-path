@@ -459,6 +459,7 @@ export default function ProductDetails() {
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
+            className="grid-cols-8 sm:grid-cols-8 md:grid-cols-8 lg:grid-cols-8"
           />
 
           {/* Features Tab */}
