@@ -26,6 +26,9 @@ import {
   ShieldCheck,
   UserCheck,
   Crown,
+  Bell,
+  Pencil,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -40,11 +43,14 @@ export type WorkflowEntityType =
 interface Props {
   entityType: WorkflowEntityType;
   entityId: string;
+  entityTitle?: string;
   organizationId: string | null;
   ownerId?: string | null;
   ownerLabel?: string;
   /** Hide the inline Owner row (e.g. when the parent already shows it) */
   hideOwner?: boolean;
+  /** Called when user changes the owner. Parent must persist to its own table. */
+  onOwnerChange?: (newOwnerId: string | null) => Promise<void> | void;
 }
 
 interface ApprovalRow {
@@ -64,6 +70,12 @@ interface ApprovalRow {
   conditions: string | null;
   signed_at: string | null;
   is_required: boolean;
+}
+
+interface NotifierRow {
+  id: string;
+  user_id: string;
+  notify_role: string | null;
 }
 
 interface OrgUser {
@@ -122,22 +134,30 @@ function getInitials(name: string | null | undefined, email?: string | null) {
 export function ApprovalTriadPanel({
   entityType,
   entityId,
+  entityTitle,
   organizationId,
   ownerId,
   ownerLabel = "Owner",
   hideOwner = false,
+  onOwnerChange,
 }: Props) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [addRole, setAddRole] = useState<"approver" | "verifier" | null>(null);
+  const [addingNotifier, setAddingNotifier] = useState(false);
+  const [editingOwner, setEditingOwner] = useState(false);
   const [newReviewer, setNewReviewer] = useState("");
   const [newRoleLabel, setNewRoleLabel] = useState("");
   const [newRequired, setNewRequired] = useState(true);
+  const [newNotifier, setNewNotifier] = useState("");
+  const [newNotifierRole, setNewNotifierRole] = useState("");
+  const [pendingOwner, setPendingOwner] = useState<string>("");
   const [decisionForms, setDecisionForms] = useState<
     Record<string, { decision: string; comments: string; conditions: string }>
   >({});
 
   const queryKey = ["workflow-approvals", entityType, entityId];
+  const notifiersKey = ["workflow-notifiers", entityType, entityId];
 
   const { data: approvals = [] } = useQuery({
     queryKey,
@@ -150,6 +170,21 @@ export function ApprovalTriadPanel({
         .order("created_at");
       if (error) throw error;
       return (data ?? []) as ApprovalRow[];
+    },
+    enabled: !!entityId,
+  });
+
+  const { data: notifiers = [] } = useQuery({
+    queryKey: notifiersKey,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("workflow_notifiers")
+        .select("id, user_id, notify_role")
+        .eq("entity_type", entityType)
+        .eq("entity_id", entityId)
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as NotifierRow[];
     },
     enabled: !!entityId,
   });
@@ -174,6 +209,28 @@ export function ApprovalTriadPanel({
 
   const owner = ownerId ? orgUsers.find((u) => u.user_id === ownerId) : null;
 
+  // Fire-and-forget notify
+  const notifyAssignment = async (
+    recipient_user_id: string,
+    role: "owner" | "approver" | "verifier" | "notifier",
+  ) => {
+    try {
+      await supabase.functions.invoke("notify-workflow-assignment", {
+        body: {
+          entity_type: entityType,
+          entity_id: entityId,
+          entity_title: entityTitle,
+          assignment_role: role,
+          recipient_user_id,
+          organization_id: organizationId,
+          action_url: window.location.href,
+        },
+      });
+    } catch (e) {
+      console.error("notify failed", e);
+    }
+  };
+
   const addReviewer = useMutation({
     mutationFn: async () => {
       if (!newReviewer || !addRole) throw new Error("Pick a reviewer");
@@ -188,6 +245,7 @@ export function ApprovalTriadPanel({
         created_by: user?.id,
       });
       if (error) throw error;
+      await notifyAssignment(newReviewer, addRole);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey });
@@ -195,7 +253,7 @@ export function ApprovalTriadPanel({
       setNewReviewer("");
       setNewRoleLabel("");
       setNewRequired(true);
-      toast.success("Reviewer added");
+      toast.success("Reviewer added and notified");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -234,6 +292,52 @@ export function ApprovalTriadPanel({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey });
       toast.success("Decision recorded");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const addNotifier = useMutation({
+    mutationFn: async () => {
+      if (!newNotifier) throw new Error("Pick a user");
+      const { error } = await supabase.from("workflow_notifiers").insert({
+        entity_type: entityType,
+        entity_id: entityId,
+        user_id: newNotifier,
+        notify_role: newNotifierRole || null,
+        organization_id: organizationId,
+        created_by: user?.id,
+      });
+      if (error) throw error;
+      await notifyAssignment(newNotifier, "notifier");
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: notifiersKey });
+      setAddingNotifier(false);
+      setNewNotifier("");
+      setNewNotifierRole("");
+      toast.success("Notifier added and notified");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeNotifier = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("workflow_notifiers").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: notifiersKey }),
+  });
+
+  const saveOwner = useMutation({
+    mutationFn: async (newOwnerId: string | null) => {
+      if (!onOwnerChange) throw new Error("Owner editing is not supported here");
+      await onOwnerChange(newOwnerId);
+      if (newOwnerId) await notifyAssignment(newOwnerId, "owner");
+    },
+    onSuccess: () => {
+      setEditingOwner(false);
+      setPendingOwner("");
+      toast.success("Owner updated");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -434,7 +538,7 @@ export function ApprovalTriadPanel({
       </label>
       <div className="flex gap-2">
         <Button size="sm" onClick={() => addReviewer.mutate()}>
-          Add
+          Add & notify
         </Button>
         <Button size="sm" variant="ghost" onClick={() => setAddRole(null)}>
           Cancel
@@ -448,10 +552,11 @@ export function ApprovalTriadPanel({
       {/* Status header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h4 className="text-sm font-semibold">Approval workflow</h4>
+          <h4 className="text-sm font-semibold">Sign-off & notifications</h4>
           <p className="text-xs text-muted-foreground">
             Approvers: {signedApprovers.length}/{requiredApprovers.length || 0} ·
-            Verifiers: {signedVerifiers.length}/{requiredVerifiers.length || 0}
+            Verifiers: {signedVerifiers.length}/{requiredVerifiers.length || 0} ·
+            Notifiers: {notifiers.length}
           </p>
         </div>
         {fullySignedOff && (
@@ -471,13 +576,67 @@ export function ApprovalTriadPanel({
       {/* Owner */}
       {!hideOwner && (
         <div className="rounded-md border border-border bg-muted/30 p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Crown className="h-4 w-4 text-primary" />
-            <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {ownerLabel}
-            </h5>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-primary" />
+              <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {ownerLabel}
+              </h5>
+            </div>
+            {onOwnerChange && !editingOwner && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setEditingOwner(true);
+                  setPendingOwner(ownerId ?? "");
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1" />
+                {owner ? "Change" : "Add owner"}
+              </Button>
+            )}
           </div>
-          {owner ? (
+          {editingOwner ? (
+            <div className="space-y-2">
+              <Select value={pendingOwner} onValueChange={setPendingOwner}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select owner" />
+                </SelectTrigger>
+                <SelectContent>
+                  {orgUsers.map((u) => (
+                    <SelectItem key={u.user_id} value={u.user_id}>
+                      {u.full_name || u.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => saveOwner.mutate(pendingOwner || null)}>
+                  Save & notify
+                </Button>
+                {ownerId && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => saveOwner.mutate(null)}
+                  >
+                    Remove owner
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setEditingOwner(false);
+                    setPendingOwner("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : owner ? (
             <div className="flex items-center gap-2">
               <Avatar className="h-7 w-7">
                 <AvatarFallback className="text-xs">
@@ -553,6 +712,112 @@ export function ApprovalTriadPanel({
             }}
           >
             <Plus className="h-3.5 w-3.5 mr-1" /> Add verifier
+          </Button>
+        )}
+      </div>
+
+      {/* Notifiers */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Bell className="h-4 w-4 text-primary" />
+          <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Notifiers
+          </h5>
+        </div>
+        <p className="text-xs text-muted-foreground px-1">
+          Kept informed of activity — no decision authority.
+        </p>
+        {notifiers.map((n) => {
+          const u = orgUsers.find((o) => o.user_id === n.user_id);
+          return (
+            <div
+              key={n.id}
+              className="flex items-center justify-between gap-2 rounded-md border border-border bg-card p-2"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-xs">
+                    {getInitials(u?.full_name, u?.email)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="text-sm truncate">{userName(n.user_id)}</p>
+                  {n.notify_role && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {n.notify_role}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => removeNotifier.mutate(n.id)}
+                aria-label="Remove notifier"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </div>
+          );
+        })}
+        {notifiers.length === 0 && (
+          <p className="text-xs text-muted-foreground italic px-1">No notifiers added.</p>
+        )}
+        {addingNotifier ? (
+          <div className="space-y-2 rounded-md border border-dashed border-border p-3">
+            <div>
+              <Label className="text-xs">User</Label>
+              <Select value={newNotifier} onValueChange={setNewNotifier}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user" />
+                </SelectTrigger>
+                <SelectContent>
+                  {orgUsers
+                    .filter((u) => !notifiers.some((n) => n.user_id === u.user_id))
+                    .map((u) => (
+                      <SelectItem key={u.user_id} value={u.user_id}>
+                        {u.full_name || u.email}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Role / interest (optional)</Label>
+              <Input
+                value={newNotifierRole}
+                onChange={(e) => setNewNotifierRole(e.target.value)}
+                placeholder="e.g. PMO, Sponsor's office"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => addNotifier.mutate()}>
+                Add & notify
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setAddingNotifier(false);
+                  setNewNotifier("");
+                  setNewNotifierRole("");
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setAddingNotifier(true);
+              setNewNotifier("");
+              setNewNotifierRole("");
+            }}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1" /> Add notifier
           </Button>
         )}
       </div>
