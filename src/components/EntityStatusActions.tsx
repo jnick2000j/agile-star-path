@@ -7,10 +7,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CheckCircle, XCircle, Clock, RefreshCw, Archive, History, MoreHorizontal } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { CheckCircle, XCircle, Clock, RefreshCw, Archive, History, MoreHorizontal, Trash2 } from "lucide-react";
 import { StatusChangeDialog, StatusAction } from "@/components/dialogs/StatusChangeDialog";
 import { StatusHistoryDialog } from "@/components/dialogs/StatusHistoryDialog";
 import { useStatusChange } from "@/hooks/useStatusChange";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface EntityStatusActionsProps {
   entityType: "project" | "program" | "product" | "work_package";
@@ -20,6 +32,13 @@ interface EntityStatusActionsProps {
   onStatusChange?: () => void;
   compact?: boolean;
 }
+
+const tableByEntity: Record<EntityStatusActionsProps["entityType"], string> = {
+  project: "projects",
+  program: "programmes",
+  product: "products",
+  work_package: "work_packages",
+};
 
 export const EntityStatusActions = forwardRef<HTMLDivElement, EntityStatusActionsProps>(
   function EntityStatusActions({
@@ -32,6 +51,8 @@ export const EntityStatusActions = forwardRef<HTMLDivElement, EntityStatusAction
   }, ref) {
   const [action, setAction] = useState<StatusAction | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { changeStatus } = useStatusChange();
 
   const normalizedStatus = currentStatus?.toLowerCase().replace(/[^a-z]/g, "") || "";
@@ -51,9 +72,29 @@ export const EntityStatusActions = forwardRef<HTMLDivElement, EntityStatusAction
     }
   };
 
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const table = tableByEntity[entityType];
+      const { error } = await supabase.from(table as any).delete().eq("id", entityId);
+      if (error) throw error;
+      toast.success(`${entityName} deleted`);
+      setShowDeleteConfirm(false);
+      onStatusChange?.();
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error(err?.message || "Failed to delete");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const openDialog = (newAction: StatusAction) => {
     setAction(newAction);
   };
+
+  const entityLabel =
+    entityType === "work_package" ? "work package" : entityType === "program" ? "programme" : entityType;
 
   return (
     <>
@@ -151,6 +192,17 @@ export const EntityStatusActions = forwardRef<HTMLDivElement, EntityStatusAction
             <History className="h-4 w-4" />
             View History
           </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          {/* Delete - always available */}
+          <DropdownMenuItem
+            onClick={() => setShowDeleteConfirm(true)}
+            className="gap-2 text-destructive focus:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
         </DropdownMenu>
 
@@ -175,6 +227,32 @@ export const EntityStatusActions = forwardRef<HTMLDivElement, EntityStatusAction
           entityId={entityId}
           entityName={entityName}
         />
+
+        {/* Delete confirmation */}
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this {entityLabel}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete <strong>{entityName}</strong>. This action cannot be
+                undone. Any related records that depend on it may also be removed or orphaned.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDelete();
+                }}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </>
     );
   }
