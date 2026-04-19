@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
+import { PlanManager } from "@/components/admin/PlanManager";
 
 interface PlatformStats {
   totalOrgs: number;
@@ -262,79 +263,3 @@ export default function PlatformAdmin() {
   );
 }
 
-function PlanManager() {
-  const [plans, setPlans] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase
-      .from("subscription_plans")
-      .select("*")
-      .order("sort_order")
-      .then(({ data }) => {
-        setPlans(data || []);
-        setLoading(false);
-      });
-  }, []);
-
-  return (
-    <div className="grid gap-6 md:grid-cols-3">
-      {loading
-        ? Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="p-6 animate-pulse h-64" />
-          ))
-        : plans.map((plan) => (
-            <Card key={plan.id} className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold">{plan.name}</h3>
-                <Badge variant={plan.is_active ? "default" : "secondary"}>
-                  {plan.is_active ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
-
-              <div className="text-3xl font-bold mb-1">
-                ${plan.price_monthly}<span className="text-sm font-normal text-muted-foreground">/mo</span>
-              </div>
-              <p className="text-xs text-muted-foreground mb-4">
-                or ${plan.price_yearly}/year
-              </p>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Users</span>
-                  <span className="font-medium">{plan.max_users === -1 ? "Unlimited" : plan.max_users}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Programmes</span>
-                  <span className="font-medium">{plan.max_programmes === -1 ? "Unlimited" : plan.max_programmes}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Projects</span>
-                  <span className="font-medium">{plan.max_projects === -1 ? "Unlimited" : plan.max_projects}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Products</span>
-                  <span className="font-medium">{plan.max_products === -1 ? "Unlimited" : plan.max_products}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Storage</span>
-                  <span className="font-medium">{plan.max_storage_mb === -1 ? "Unlimited" : `${plan.max_storage_mb} MB`}</span>
-                </div>
-              </div>
-
-              {Array.isArray(plan.features) && plan.features.length > 0 && (
-                <div className="mt-4 pt-4 border-t">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Features</p>
-                  <div className="flex flex-wrap gap-1">
-                    {plan.features.map((f: string, i: number) => (
-                      <Badge key={i} variant="outline" className="text-xs">{f}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </Card>
-          ))}
-    </div>
-  );
-}

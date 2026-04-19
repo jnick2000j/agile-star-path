@@ -1332,6 +1332,57 @@ export type Database = {
           },
         ]
       }
+      organization_plan_overrides: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          feature_key: string
+          id: string
+          organization_id: string
+          override_value: Json
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          feature_key: string
+          id?: string
+          organization_id: string
+          override_value: Json
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          feature_key?: string
+          id?: string
+          organization_id?: string
+          override_value?: Json
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_plan_overrides_feature_key_fkey"
+            columns: ["feature_key"]
+            isOneToOne: false
+            referencedRelation: "plan_features"
+            referencedColumns: ["feature_key"]
+          },
+          {
+            foreignKeyName: "organization_plan_overrides_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_subscriptions: {
         Row: {
           canceled_at: string | null
@@ -1424,6 +1475,90 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      plan_feature_values: {
+        Row: {
+          created_at: string
+          feature_key: string
+          id: string
+          plan_id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          feature_key: string
+          id?: string
+          plan_id: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          feature_key?: string
+          id?: string
+          plan_id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_feature_values_feature_key_fkey"
+            columns: ["feature_key"]
+            isOneToOne: false
+            referencedRelation: "plan_features"
+            referencedColumns: ["feature_key"]
+          },
+          {
+            foreignKeyName: "plan_feature_values_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_features: {
+        Row: {
+          category: string
+          created_at: string
+          default_value: Json
+          description: string | null
+          display_order: number
+          feature_key: string
+          feature_type: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          default_value?: Json
+          description?: string | null
+          display_order?: number
+          feature_key: string
+          feature_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          default_value?: Json
+          description?: string | null
+          display_order?: number
+          feature_key?: string
+          feature_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
           updated_at?: string
         }
         Relationships: []
@@ -2623,11 +2758,17 @@ export type Database = {
       }
       subscription_plans: {
         Row: {
+          billing_interval: string
           created_at: string
+          cta_label: string | null
+          currency: string
           description: string | null
           features: Json | null
+          highlight: boolean
           id: string
           is_active: boolean | null
+          is_archived: boolean
+          is_public: boolean
           max_products: number | null
           max_programmes: number | null
           max_projects: number | null
@@ -2639,14 +2780,21 @@ export type Database = {
           sort_order: number | null
           stripe_price_id_monthly: string | null
           stripe_price_id_yearly: string | null
+          trial_days: number
           updated_at: string
         }
         Insert: {
+          billing_interval?: string
           created_at?: string
+          cta_label?: string | null
+          currency?: string
           description?: string | null
           features?: Json | null
+          highlight?: boolean
           id?: string
           is_active?: boolean | null
+          is_archived?: boolean
+          is_public?: boolean
           max_products?: number | null
           max_programmes?: number | null
           max_projects?: number | null
@@ -2658,14 +2806,21 @@ export type Database = {
           sort_order?: number | null
           stripe_price_id_monthly?: string | null
           stripe_price_id_yearly?: string | null
+          trial_days?: number
           updated_at?: string
         }
         Update: {
+          billing_interval?: string
           created_at?: string
+          cta_label?: string | null
+          currency?: string
           description?: string | null
           features?: Json | null
+          highlight?: boolean
           id?: string
           is_active?: boolean | null
+          is_archived?: boolean
+          is_public?: boolean
           max_products?: number | null
           max_programmes?: number | null
           max_projects?: number | null
@@ -2677,6 +2832,7 @@ export type Database = {
           sort_order?: number | null
           stripe_price_id_monthly?: string | null
           stripe_price_id_yearly?: string | null
+          trial_days?: number
           updated_at?: string
         }
         Relationships: []
@@ -3546,6 +3702,14 @@ export type Database = {
           status: string
         }[]
       }
+      get_org_feature_value: {
+        Args: { _feature_key: string; _org_id: string }
+        Returns: Json
+      }
+      get_org_limit: {
+        Args: { _feature_key: string; _org_id: string }
+        Returns: number
+      }
       get_org_sso_config_by_domain: {
         Args: { _email: string }
         Returns: {
@@ -3558,6 +3722,10 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_feature: {
+        Args: { _feature_key: string; _org_id: string }
+        Returns: boolean
       }
       has_org_access: {
         Args: { _min_level?: string; _org_id: string; _user_id: string }

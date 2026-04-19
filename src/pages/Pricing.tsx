@@ -7,91 +7,135 @@ import { Check, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  trial_days: number;
+  highlight: boolean;
+  cta_label: string | null;
+  sort_order: number;
+}
+
+interface FeatureMeta {
+  feature_key: string;
+  name: string;
+  category: string;
+  feature_type: string;
+  display_order: number;
+}
+
+interface PlanFeatureValue {
+  plan_id: string;
+  feature_key: string;
+  value: any;
+}
+
+const formatLimit = (key: string, val: any) => {
+  const n = Number(val);
+  if (n === -1) return "Unlimited";
+  if (key.includes("storage_mb")) return n >= 1024 ? `${(n / 1024).toFixed(0)} GB storage` : `${n} MB storage`;
+  return n.toString();
+};
+
 export default function Pricing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [featureMeta, setFeatureMeta] = useState<FeatureMeta[]>([]);
+  const [planValues, setPlanValues] = useState<PlanFeatureValue[]>([]);
   const [loading, setLoading] = useState(true);
   const [cycle, setCycle] = useState<"monthly" | "yearly">("monthly");
 
   useEffect(() => {
-    supabase
-      .from("subscription_plans")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order")
-      .then(({ data }) => {
-        setPlans(data || []);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("subscription_plans")
+        .select("*")
+        .eq("is_active", true)
+        .eq("is_public", true)
+        .eq("is_archived", false)
+        .order("sort_order"),
+      supabase.from("plan_features").select("*").eq("is_active", true).order("display_order"),
+      supabase.from("plan_feature_values").select("*"),
+    ]).then(([p, f, v]) => {
+      setPlans((p.data || []) as Plan[]);
+      setFeatureMeta((f.data || []) as FeatureMeta[]);
+      setPlanValues((v.data || []) as PlanFeatureValue[]);
+      setLoading(false);
+    });
   }, []);
 
   const handleStart = (planId?: string) => {
-    if (user) {
-      navigate(planId ? `/billing` : "/");
-    } else {
-      navigate(`/auth?mode=signup${planId ? `&plan=${planId}` : ""}`);
-    }
+    if (user) navigate(planId ? `/billing` : "/");
+    else navigate(`/auth?mode=signup${planId ? `&plan=${planId}` : ""}`);
+  };
+
+  const planFeatureLines = (planId: string): { label: string; included: boolean }[] => {
+    const lines: { label: string; included: boolean }[] = [];
+    featureMeta.forEach((f) => {
+      const pv = planValues.find((v) => v.plan_id === planId && v.feature_key === f.feature_key);
+      const val = pv?.value;
+      if (f.feature_type === "numeric") {
+        if (val !== undefined && val !== null) {
+          const formatted = formatLimit(f.feature_key, val);
+          const niceName = f.name.toLowerCase().replace(/^maximum\s+/, "");
+          lines.push({
+            label: f.feature_key.includes("storage") || f.feature_key.includes("ai_credits") || f.feature_key.includes("custom_roles")
+              ? `${formatted}${f.feature_key.includes("ai_credits") ? " AI credits/mo" : f.feature_key.includes("custom_roles") ? " custom roles" : ""}`
+              : `${formatted} ${niceName}`,
+            included: true,
+          });
+        }
+      } else if (f.feature_type === "boolean") {
+        const isOn = val === true || val === "true";
+        if (isOn) lines.push({ label: f.name, included: true });
+      }
+    });
+    return lines;
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-bold text-lg">
-            PIMP
-          </Link>
+          <Link to="/" className="font-bold text-lg">TaskMaster</Link>
           <div className="flex gap-2">
             {user ? (
-              <Button onClick={() => navigate("/")} variant="outline">
-                Go to Dashboard
-              </Button>
+              <Button onClick={() => navigate("/")} variant="outline">Go to Dashboard</Button>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate("/auth")}>
-                  Sign in
-                </Button>
-                <Button onClick={() => navigate("/auth?mode=signup")}>
-                  Get started
-                </Button>
+                <Button variant="ghost" onClick={() => navigate("/auth")}>Sign in</Button>
+                <Button onClick={() => navigate("/auth?mode=signup")}>Get started</Button>
               </>
             )}
           </div>
         </div>
       </header>
 
-      {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 py-16 text-center">
-        <Badge variant="secondary" className="mb-4">30-day free trial • No card required</Badge>
+        <Badge variant="secondary" className="mb-4">Free trial • No card required</Badge>
         <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
           Pricing that scales with your portfolio
         </h1>
         <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-          PRINCE2 governance, MSP programmes, agile products — one platform for your
-          entire delivery organization.
+          PRINCE2 governance, MSP programmes, agile products — one platform for your entire delivery organization.
         </p>
         <div className="inline-flex gap-1 p-1 bg-muted rounded-lg">
           <button
-            className={`px-4 py-2 text-sm rounded-md transition-colors ${
-              cycle === "monthly" ? "bg-background shadow-sm" : "text-muted-foreground"
-            }`}
+            className={`px-4 py-2 text-sm rounded-md transition-colors ${cycle === "monthly" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
             onClick={() => setCycle("monthly")}
-          >
-            Monthly
-          </button>
+          >Monthly</button>
           <button
-            className={`px-4 py-2 text-sm rounded-md transition-colors ${
-              cycle === "yearly" ? "bg-background shadow-sm" : "text-muted-foreground"
-            }`}
+            className={`px-4 py-2 text-sm rounded-md transition-colors ${cycle === "yearly" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
             onClick={() => setCycle("yearly")}
-          >
-            Yearly <span className="text-xs text-primary ml-1">Save ~17%</span>
-          </button>
+          >Yearly <span className="text-xs text-primary ml-1">Save ~17%</span></button>
         </div>
       </section>
 
-      {/* Plans */}
       <section className="max-w-6xl mx-auto px-6 pb-16">
         {loading ? (
           <div className="flex justify-center py-12">
@@ -100,15 +144,14 @@ export default function Pricing() {
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
             {plans.map((plan) => {
-              const isMid = plan.sort_order === 2;
               const price = cycle === "monthly" ? plan.price_monthly : plan.price_yearly;
-              const features: string[] = Array.isArray(plan.features) ? plan.features : [];
+              const lines = planFeatureLines(plan.id);
               return (
                 <Card
                   key={plan.id}
-                  className={`p-6 relative ${isMid ? "border-primary ring-2 ring-primary/20 shadow-lg" : ""}`}
+                  className={`p-6 relative ${plan.highlight ? "border-primary ring-2 ring-primary/20 shadow-lg" : ""}`}
                 >
-                  {isMid && (
+                  {plan.highlight && (
                     <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary">
                       Most popular
                     </Badge>
@@ -116,38 +159,22 @@ export default function Pricing() {
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <p className="text-sm text-muted-foreground mb-4 min-h-[40px]">{plan.description}</p>
                   <div className="mb-6">
-                    <span className="text-4xl font-bold">${price}</span>
+                    <span className="text-4xl font-bold">{plan.currency} {price}</span>
                     <span className="text-muted-foreground">/{cycle === "monthly" ? "mo" : "yr"}</span>
                   </div>
                   <Button
                     className="w-full gap-2 mb-6"
-                    variant={isMid ? "default" : "outline"}
+                    variant={plan.highlight ? "default" : "outline"}
                     onClick={() => handleStart(plan.id)}
                   >
-                    {plan.price_monthly === 0 ? "Start free" : "Start free trial"}
+                    {plan.cta_label || (plan.price_monthly === 0 ? "Start free" : "Start free trial")}
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{plan.max_users === -1 ? "Unlimited" : plan.max_users} users</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{plan.max_programmes === -1 ? "Unlimited" : plan.max_programmes} programs</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{plan.max_projects === -1 ? "Unlimited" : plan.max_projects} projects</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{plan.max_products === -1 ? "Unlimited" : plan.max_products} products</span>
-                    </li>
-                    {features.map((f, i) => (
+                    {lines.map((l, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        <span>{f}</span>
+                        <span>{l.label}</span>
                       </li>
                     ))}
                   </ul>
@@ -158,15 +185,13 @@ export default function Pricing() {
         )}
       </section>
 
-      {/* FAQ teaser */}
       <section className="max-w-3xl mx-auto px-6 pb-16 text-center">
         <h2 className="text-2xl font-bold mb-3">Need something custom?</h2>
         <p className="text-muted-foreground mb-6">
-          Enterprise plans with SSO, dedicated support, and custom integrations are
-          available on request.
+          Enterprise plans with SSO, dedicated support, and custom integrations are available on request.
         </p>
         <Button variant="outline" onClick={() => navigate("/auth?mode=signup")}>
-          Get started — it's free for 30 days
+          Get started — it's free to try
         </Button>
       </section>
     </div>
