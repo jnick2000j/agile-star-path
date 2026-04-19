@@ -5,11 +5,29 @@ import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
 import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
-import { Layers, FolderKanban, AlertTriangle, Target, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
+  const { user, userRole } = useAuth();
+  const [hasStakeholderAccess, setHasStakeholderAccess] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    if (userRole === "admin") { setHasStakeholderAccess(true); return; }
+    supabase
+      .from("stakeholder_portal_access")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .then(({ data }) => setHasStakeholderAccess((data?.length ?? 0) > 0));
+  }, [user, userRole]);
+
   const { data: metrics } = useQuery({
     queryKey: ["dashboard-metrics"],
     queryFn: async () => {
@@ -38,6 +56,16 @@ export default function Dashboard() {
   return (
     <AppLayout title="Dashboard" subtitle="Program portfolio overview">
       <PlanUsageBar />
+      {hasStakeholderAccess && (
+        <div className="mb-6 flex justify-end">
+          <Button asChild>
+            <Link to="/portal">
+              <Eye className="h-4 w-4 mr-2" />
+              Open Stakeholder Portal
+            </Link>
+          </Button>
+        </div>
+      )}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
         <MetricCard
           title="Active Programs"

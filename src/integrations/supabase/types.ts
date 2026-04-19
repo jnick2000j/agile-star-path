@@ -633,6 +633,86 @@ export type Database = {
           },
         ]
       }
+      compliance_rule_configs: {
+        Row: {
+          cadence_window_days: number
+          check_has_benefits: boolean
+          check_has_issues: boolean
+          check_has_milestones: boolean
+          check_has_risks: boolean
+          check_has_stakeholders: boolean
+          check_orphan_issues: boolean
+          check_orphan_risks: boolean
+          check_recent_updates: boolean
+          check_stale_issues: boolean
+          check_stale_risks: boolean
+          created_at: string
+          id: string
+          organization_id: string
+          stale_window_days: number
+          threshold_pass: number
+          threshold_warn: number
+          updated_at: string
+          weight_cadence: number
+          weight_controls: number
+          weight_hygiene: number
+        }
+        Insert: {
+          cadence_window_days?: number
+          check_has_benefits?: boolean
+          check_has_issues?: boolean
+          check_has_milestones?: boolean
+          check_has_risks?: boolean
+          check_has_stakeholders?: boolean
+          check_orphan_issues?: boolean
+          check_orphan_risks?: boolean
+          check_recent_updates?: boolean
+          check_stale_issues?: boolean
+          check_stale_risks?: boolean
+          created_at?: string
+          id?: string
+          organization_id: string
+          stale_window_days?: number
+          threshold_pass?: number
+          threshold_warn?: number
+          updated_at?: string
+          weight_cadence?: number
+          weight_controls?: number
+          weight_hygiene?: number
+        }
+        Update: {
+          cadence_window_days?: number
+          check_has_benefits?: boolean
+          check_has_issues?: boolean
+          check_has_milestones?: boolean
+          check_has_risks?: boolean
+          check_has_stakeholders?: boolean
+          check_orphan_issues?: boolean
+          check_orphan_risks?: boolean
+          check_recent_updates?: boolean
+          check_stale_issues?: boolean
+          check_stale_risks?: boolean
+          created_at?: string
+          id?: string
+          organization_id?: string
+          stale_window_days?: number
+          threshold_pass?: number
+          threshold_warn?: number
+          updated_at?: string
+          weight_cadence?: number
+          weight_controls?: number
+          weight_hygiene?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_rule_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_scores: {
         Row: {
           cadence_score: number

@@ -53,7 +53,10 @@ import {
   ShieldAlert,
   Loader2,
   RefreshCw,
+  BarChart3,
 } from "lucide-react";
+import { ComplianceRuleEditor } from "@/components/governance/ComplianceRuleEditor";
+import { ComplianceReportDialog, type ScoreData } from "@/components/governance/ComplianceReportDialog";
 
 type Report = {
   id: string;
@@ -147,6 +150,8 @@ export default function Governance() {
   const [packTab, setPackTab] = useState("email");
   const [packDialogOpen, setPackDialogOpen] = useState(false);
   const [selectedReportForPack, setSelectedReportForPack] = useState<string>("");
+  const [reportData, setReportData] = useState<ScoreData | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const [genForm, setGenForm] = useState({
     report_type: "programme_status" as Report["report_type"],
@@ -300,7 +305,11 @@ export default function Governance() {
     [reports],
   );
 
-  const recomputeScore = async (scope_type: "programme" | "project" | "product", scope_id: string) => {
+  const recomputeScore = async (
+    scope_type: "programme" | "project" | "product",
+    scope_id: string,
+    openReport = false,
+  ) => {
     if (!currentOrganization) return;
     const { data, error } = await supabase.rpc("compute_compliance_score", {
       _scope_type: scope_type,
@@ -310,7 +319,13 @@ export default function Governance() {
       toast.error("Failed to compute score");
       return;
     }
-    const result = data as { score: number; controls_score: number; cadence_score: number; hygiene_score: number; details: Record<string, unknown> };
+    const result = data as {
+      score: number;
+      controls_score: number;
+      cadence_score: number;
+      hygiene_score: number;
+      details: Record<string, unknown>;
+    };
     await (supabase.from("compliance_scores") as any).insert({
       organization_id: currentOrganization.id,
       scope_type,
@@ -323,6 +338,32 @@ export default function Governance() {
     });
     toast.success("Score updated");
     fetchAll();
+    if (openReport) {
+      setReportData({
+        ...result,
+        details: result.details as ScoreData["details"],
+        computed_at: new Date().toISOString(),
+        scope_name: getScopeName(scope_type, scope_id),
+        scope_type,
+      });
+      setReportOpen(true);
+    }
+  };
+
+  const viewStoredReport = (
+    score: ScoreRow,
+  ) => {
+    setReportData({
+      score: score.score,
+      controls_score: score.controls_score,
+      cadence_score: score.cadence_score,
+      hygiene_score: score.hygiene_score,
+      details: score.details as ScoreData["details"],
+      computed_at: score.computed_at,
+      scope_name: getScopeName(score.scope_type, score.scope_id),
+      scope_type: score.scope_type,
+    });
+    setReportOpen(true);
   };
 
   const copyText = async (text: string, label: string) => {
@@ -584,77 +625,135 @@ export default function Governance() {
 
           {/* Compliance tab */}
           <TabsContent value="compliance" className="mt-4 space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold">Compliance scores</h2>
-              <p className="text-sm text-muted-foreground">
-                Composite 0–100 score: <strong>40%</strong> controls completeness · <strong>30%</strong> update cadence · <strong>30%</strong> risk/issue hygiene
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[...programmes.map((p) => ({ ...p, type: "programme" as const })),
+            {(() => {
+              const allEntities = [
+                ...programmes.map((p) => ({ ...p, type: "programme" as const })),
                 ...projects.map((p) => ({ ...p, type: "project" as const })),
-                ...products.map((p) => ({ ...p, type: "product" as const }))].map((entity) => {
-                const score = latestScoresByScope.find((s) => s.scope_type === entity.type && s.scope_id === entity.id);
-                return (
-                  <Card key={`${entity.type}:${entity.id}`}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-base">{entity.name}</CardTitle>
-                          <CardDescription className="capitalize">{entity.type}</CardDescription>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => recomputeScore(entity.type, entity.id)}
-                          title="Recompute score"
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {score ? (
-                        <div className="space-y-3">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">{score.score}</span>
-                            <span className="text-sm text-muted-foreground">/ 100</span>
-                          </div>
-                          <Progress value={score.score} />
-                          <div className="grid grid-cols-3 gap-2 text-xs">
-                            <div>
-                              <p className="text-muted-foreground">Controls</p>
-                              <p className="font-semibold">{score.controls_score}</p>
+                ...products.map((p) => ({ ...p, type: "product" as const })),
+              ];
+              const scored = allEntities
+                .map((e) => ({ entity: e, score: latestScoresByScope.find((s) => s.scope_type === e.type && s.scope_id === e.id) }))
+                .filter((x) => x.score);
+              const portfolioAvg = scored.length
+                ? Math.round(scored.reduce((a, x) => a + (x.score?.score ?? 0), 0) / scored.length)
+                : 0;
+              const passing = scored.filter((x) => (x.score?.score ?? 0) >= 80).length;
+              const warning = scored.filter((x) => (x.score?.score ?? 0) >= 60 && (x.score?.score ?? 0) < 80).length;
+              const failing = scored.filter((x) => (x.score?.score ?? 0) < 60).length;
+              return (
+                <>
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                      <h2 className="text-lg font-semibold">Compliance dashboard</h2>
+                      <p className="text-sm text-muted-foreground max-w-2xl">
+                        Each entity is scored 0–100 across three pillars — <strong>Controls</strong> (registers in place),
+                        <strong> Cadence</strong> (recent updates) and <strong>Hygiene</strong> (orphaned/stale items).
+                        Default weights are 40/30/30; configure your own below.
+                      </p>
+                    </div>
+                    <ComplianceRuleEditor organizationId={currentOrganization?.id ?? ""} onSaved={fetchAll} />
+                  </div>
+
+                  {/* Portfolio summary */}
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Portfolio average</p>
+                        <p className="text-3xl font-bold">{portfolioAvg}<span className="text-sm text-muted-foreground font-normal">/100</span></p>
+                        <Progress value={portfolioAvg} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Passing (≥80)</p>
+                        <p className="text-3xl font-bold text-success">{passing}</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Warning (60–79)</p>
+                        <p className="text-3xl font-bold text-warning">{warning}</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Failing (&lt;60)</p>
+                        <p className="text-3xl font-bold text-destructive">{failing}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {allEntities.map((entity) => {
+                      const score = latestScoresByScope.find((s) => s.scope_type === entity.type && s.scope_id === entity.id);
+                      const status = score ? (score.score >= 80 ? "pass" : score.score >= 60 ? "warn" : "fail") : null;
+                      const statusColor = status === "pass" ? "border-l-success" : status === "warn" ? "border-l-warning" : status === "fail" ? "border-l-destructive" : "border-l-muted";
+                      return (
+                        <Card key={`${entity.type}:${entity.id}`} className={`border-l-4 ${statusColor}`}>
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-base">{entity.name}</CardTitle>
+                                <CardDescription className="capitalize">{entity.type}</CardDescription>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => recomputeScore(entity.type, entity.id)}
+                                title="Recompute score"
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <div>
-                              <p className="text-muted-foreground">Cadence</p>
-                              <p className="font-semibold">{score.cadence_score}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Hygiene</p>
-                              <p className="font-semibold">{score.hygiene_score}</p>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Computed {format(new Date(score.computed_at), "PPp")}
-                          </p>
-                        </div>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => recomputeScore(entity.type, entity.id)}>
-                          Compute score
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-              {programmes.length === 0 && projects.length === 0 && products.length === 0 && (
-                <p className="text-muted-foreground col-span-full text-center py-8">
-                  Create a programme, project, or product to start scoring compliance.
-                </p>
-              )}
-            </div>
+                          </CardHeader>
+                          <CardContent>
+                            {score ? (
+                              <div className="space-y-3">
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-3xl font-bold">{score.score}</span>
+                                  <span className="text-sm text-muted-foreground">/ 100</span>
+                                </div>
+                                <Progress value={score.score} />
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                  <div>
+                                    <p className="text-muted-foreground">Controls</p>
+                                    <p className="font-semibold">{score.controls_score}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Cadence</p>
+                                    <p className="font-semibold">{score.cadence_score}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Hygiene</p>
+                                    <p className="font-semibold">{score.hygiene_score}</p>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  Computed {format(new Date(score.computed_at), "PPp")}
+                                </p>
+                                <Button variant="outline" size="sm" className="w-full" onClick={() => viewStoredReport(score)}>
+                                  <BarChart3 className="h-4 w-4 mr-2" />
+                                  View report
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button variant="outline" size="sm" onClick={() => recomputeScore(entity.type, entity.id, true)}>
+                                Compute score
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                    {allEntities.length === 0 && (
+                      <p className="text-muted-foreground col-span-full text-center py-8">
+                        Create a programme, project, or product to start scoring compliance.
+                      </p>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
           </TabsContent>
 
           {/* Comms packs tab */}
@@ -885,6 +984,14 @@ export default function Governance() {
             )}
           </SheetContent>
         </Sheet>
+
+        {/* Compliance report dialog */}
+        <ComplianceReportDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          data={reportData}
+          organizationName={currentOrganization?.name}
+        />
       </div>
     </AppLayout>
   );
