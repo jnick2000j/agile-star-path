@@ -27,12 +27,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { FeatureDetailDialog } from "@/components/dialogs/FeatureDetailDialog";
 
 interface Feature {
   id: string;
   name: string;
+  reference_number: string | null;
   description: string | null;
   status: string;
   priority: string;
@@ -84,6 +86,7 @@ export default function FeatureBacklog() {
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [featureDialogOpen, setFeatureDialogOpen] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
 
   const [newFeature, setNewFeature] = useState({
     name: "",
@@ -159,6 +162,7 @@ export default function FeatureBacklog() {
       target_release: newFeature.target_release || null,
       status: "backlog",
       created_by: user?.id,
+      organization_id: currentOrganization?.id ?? null,
     });
 
     if (error) {
@@ -376,6 +380,11 @@ export default function FeatureBacklog() {
                         <div className="flex items-start gap-2">
                           <GripVertical className="h-4 w-4 mt-0.5 opacity-50 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
+                            {feature.reference_number && (
+                              <p className="font-mono text-[10px] text-muted-foreground mb-0.5">
+                                {feature.reference_number}
+                              </p>
+                            )}
                             <p className="font-medium text-sm">{feature.name}</p>
                             <p className="text-xs text-muted-foreground mt-1 truncate">
                               {getProductName(feature.product_id)}

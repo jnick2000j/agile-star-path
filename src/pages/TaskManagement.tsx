@@ -77,6 +77,7 @@ type TaskStatus = "not_started" | "in_progress" | "on_hold" | "completed" | "can
 interface Task {
   id: string;
   name: string;
+  reference_number: string | null;
   description: string | null;
   status: TaskStatus;
   priority: string;
@@ -594,6 +595,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[120px]">Ref</TableHead>
                 <TableHead>Task</TableHead>
                 <TableHead>Entity</TableHead>
                 <TableHead>Priority</TableHead>
@@ -607,13 +609,13 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     Loading tasks...
                   </TableCell>
                 </TableRow>
               ) : filteredTasks.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No tasks found. Create your first task to get started.
                   </TableCell>
                 </TableRow>
@@ -624,6 +626,9 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                   return (
                     <React.Fragment key={task.id}>
                     <TableRow>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {task.reference_number || "—"}
+                      </TableCell>
                       <TableCell>
                         <div
                           className="cursor-pointer hover:text-primary"
@@ -749,7 +754,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                     </TableRow>
                     {expandedTaskId === task.id && (
                       <TableRow>
-                        <TableCell colSpan={8} className="bg-muted/30 p-4 space-y-4">
+                        <TableCell colSpan={9} className="bg-muted/30 p-4 space-y-4">
                           <div className="grid gap-4 md:grid-cols-2">
                             <div>
                               <h4 className="text-sm font-medium mb-2">Assigned Users</h4>

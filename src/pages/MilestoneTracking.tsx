@@ -66,6 +66,7 @@ interface MilestoneData {
   owner_id: string | null;
   created_by: string | null;
   created_at: string;
+  reference_number: string | null;
 }
 
 interface WorkPackage {
@@ -573,7 +574,12 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
                       <CardContent className="pt-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {milestone.reference_number && (
+                                <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                  {milestone.reference_number}
+                                </span>
+                              )}
                               <h4 className="font-semibold">{milestone.name}</h4>
                               {milestone.is_stage_boundary && (
                                 <Badge variant="outline" className="border-warning text-warning">

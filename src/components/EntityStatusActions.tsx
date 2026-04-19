@@ -56,13 +56,20 @@ export const EntityStatusActions = forwardRef<HTMLDivElement, EntityStatusAction
   const { changeStatus } = useStatusChange();
 
   const normalizedStatus = currentStatus?.toLowerCase().replace(/[^a-z]/g, "") || "";
-  
-  const isActive = normalizedStatus === "active";
-  const isClosed = normalizedStatus === "closed" || normalizedStatus === "completed";
+
+  const isClosed =
+    normalizedStatus === "closed" ||
+    normalizedStatus === "completed" ||
+    normalizedStatus === "retired" ||
+    normalizedStatus === "deprecated";
   const isRejected = normalizedStatus === "rejected";
   const isDeferred = normalizedStatus === "deferred";
   const isOnHold = normalizedStatus === "onhold";
   const isPending = normalizedStatus === "pending" || normalizedStatus === "draft";
+  // Treat any non-terminal/non-on-hold status as "active-like" so Close / On Hold
+  // are always available for live work (e.g. project stage = "executing", product
+  // status = "in_development", etc.).
+  const isActive = !isClosed && !isOnHold && !isRejected && !isDeferred && !isPending;
 
   const handleConfirm = async (reason: string) => {
     if (!action) return;

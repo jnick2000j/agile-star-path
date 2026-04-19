@@ -2343,9 +2343,11 @@ export type Database = {
           impact_score: number | null
           moscow: string | null
           name: string
+          organization_id: string | null
           priority: string
           product_id: string
           reach_score: number | null
+          reference_number: string | null
           sprint_id: string | null
           status: string
           story_points: number | null
@@ -2363,9 +2365,11 @@ export type Database = {
           impact_score?: number | null
           moscow?: string | null
           name: string
+          organization_id?: string | null
           priority?: string
           product_id: string
           reach_score?: number | null
+          reference_number?: string | null
           sprint_id?: string | null
           status?: string
           story_points?: number | null
@@ -2383,9 +2387,11 @@ export type Database = {
           impact_score?: number | null
           moscow?: string | null
           name?: string
+          organization_id?: string | null
           priority?: string
           product_id?: string
           reach_score?: number | null
+          reference_number?: string | null
           sprint_id?: string | null
           status?: string
           story_points?: number | null
@@ -2393,6 +2399,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "product_features_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "product_features_product_id_fkey"
             columns: ["product_id"]
