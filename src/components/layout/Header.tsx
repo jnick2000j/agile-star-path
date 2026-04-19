@@ -25,6 +25,7 @@ interface HeaderProps {
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
+  const navigate = useNavigate();
   const isAdmin = userRole === "admin";
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
 
