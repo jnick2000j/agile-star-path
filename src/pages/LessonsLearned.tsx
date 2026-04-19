@@ -46,6 +46,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { DocumentUpload } from "@/components/DocumentUpload";
+import { LessonTagsPanel } from "@/components/workflow/LessonTagsPanel";
 
 interface Lesson {
   id: string;
@@ -511,6 +512,15 @@ export default function LessonsLearned({ embedded = false }: { embedded?: boolea
                     />
                   </div>
                 </div>
+                {editingLesson && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <Label>Tags</Label>
+                    <LessonTagsPanel
+                      lessonId={editingLesson.id}
+                      organizationId={currentOrganization?.id ?? null}
+                    />
+                  </div>
+                )}
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                     Cancel
