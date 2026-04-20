@@ -92,6 +92,87 @@ export type Database = {
           },
         ]
       }
+      ai_summaries: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          change_count_at_generation: number
+          created_at: string
+          draft_content: Json | null
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          is_stale: boolean
+          last_audit_id: string | null
+          model: string | null
+          organization_id: string | null
+          prompt_version: string | null
+          published_content: Json | null
+          scope_id: string
+          scope_type: string
+          status: string
+          summary_kind: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_count_at_generation?: number
+          created_at?: string
+          draft_content?: Json | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          is_stale?: boolean
+          last_audit_id?: string | null
+          model?: string | null
+          organization_id?: string | null
+          prompt_version?: string | null
+          published_content?: Json | null
+          scope_id: string
+          scope_type: string
+          status?: string
+          summary_kind: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_count_at_generation?: number
+          created_at?: string
+          draft_content?: Json | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          is_stale?: boolean
+          last_audit_id?: string | null
+          model?: string | null
+          organization_id?: string | null
+          prompt_version?: string | null
+          published_content?: Json | null
+          scope_id?: string
+          scope_type?: string
+          status?: string
+          summary_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_summaries_last_audit_id_fkey"
+            columns: ["last_audit_id"]
+            isOneToOne: false
+            referencedRelation: "ai_audit_log"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_summaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_evidence: {
         Row: {
           approval_id: string
@@ -5727,6 +5808,10 @@ export type Database = {
           _user_agent?: string
         }
         Returns: string
+      }
+      mark_summaries_stale_for_scope: {
+        Args: { _scope_id: string; _scope_type: string }
+        Returns: undefined
       }
     }
     Enums: {
