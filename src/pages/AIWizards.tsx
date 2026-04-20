@@ -13,6 +13,14 @@ import {
   Sparkles,
   MessageSquare,
   ListChecks,
+  Megaphone,
+  ShieldCheck,
+  Flame,
+  Users,
+  ScrollText,
+  RotateCcw,
+  CheckCircle2,
+  Eye,
 } from "lucide-react";
 
 interface WizardSpec {
