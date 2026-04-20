@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Plus, Pencil, Copy, Archive, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/currency";
 import { toast } from "sonner";
 import { PlanEditorDialog } from "./PlanEditorDialog";
 import { FeatureCatalogManager } from "./FeatureCatalogManager";
@@ -189,8 +190,8 @@ export function PlanManager() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <p className="font-medium">{p.currency} {p.price_monthly}/mo</p>
-                        <p className="text-xs text-muted-foreground">{p.currency} {p.price_yearly}/yr</p>
+                        <p className="font-medium">{formatPrice(p.currency, p.price_monthly)}/mo</p>
+                        <p className="text-xs text-muted-foreground">{formatPrice(p.currency, p.price_yearly)}/yr</p>
                       </TableCell>
                       <TableCell>{p.trial_days} days</TableCell>
                       <TableCell>{p.active_subscriptions}</TableCell>
