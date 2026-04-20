@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { RegionBadge } from "@/components/RegionBadge";
+import { AICreditsMeter } from "@/components/billing/AICreditsMeter";
 import { AskSupportDialog } from "@/components/AskSupportDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -97,6 +98,7 @@ export function Header({ title, subtitle }: HeaderProps) {
           <OrganizationSelector />
         </div>
         <RegionBadge />
+        <AICreditsMeter variant="compact" hideWhenEmpty />
         
 
         <Button
