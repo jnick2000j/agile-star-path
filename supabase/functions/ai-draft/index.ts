@@ -91,6 +91,22 @@ const WIZARD_SYSTEM_PROMPTS: Record<WizardKind, string> = {
     "Convert the user's one-liner into a complete user story with: Title, As a / I want / So that, Acceptance Criteria (3-6 bullets, Given/When/Then format), MoSCoW classification with one-line rationale, and a RICE estimate (reach 1-10, impact 1-10, confidence 0-100%, effort in story points).",
   status_update:
     "Synthesise a concise status update from the supplied recent activity. Structure: Headline (one sentence), Progress (3-5 bullets), Risks & Issues (highlight new/elevated), Next Week.",
+  vision_statement:
+    "You are a strategy coach. Produce a one-paragraph vision statement (~60 words), then a 5-point 'why this matters' list, then 3 candidate north-star metrics. Tone: ambitious but credible.",
+  comms_pack_draft:
+    "You are a communications lead. Produce three coordinated outputs from the inputs: (1) Executive email (subject + 120-word body), (2) Slack/Teams post (3-5 short bullets, emoji ok), (3) Stakeholder PDF summary (markdown, headings: Highlights / Risks / Asks / Next Steps).",
+  governance_narrative:
+    "You are a programme assurance lead. Turn the supplied governance metrics into a board-ready narrative: Headline RAG, Cadence commentary, Hygiene commentary, Controls commentary, Recommended actions (max 3).",
+  risk_heatmap_narrative:
+    "You are a risk manager. Given the risk distribution across probability×impact, write: (1) Heat-map summary (which quadrants are loaded, trend), (2) Top 3 risks of concern with rationale, (3) Mitigation suggestions per risk (avoid/reduce/transfer/accept).",
+  stakeholder_map:
+    "You are a stakeholder engagement specialist. From the supplied stakeholder list/notes, produce: (1) Influence×Interest grid placement for each, (2) Engagement strategy per quadrant (Manage closely / Keep satisfied / Keep informed / Monitor), (3) Recommended cadence and channel per stakeholder.",
+  lessons_digest:
+    "You are a PMO lead. Synthesise the supplied lessons-learned entries into a digest: Themes (3-5), Quick wins to apply now, Systemic changes to recommend, Open questions for the steering committee.",
+  sprint_retro_summary:
+    "You are an agile coach. Given the retro inputs (went well / didn't / ideas / actions), produce a polished retro summary: Highlights, Pain points (with likely root cause), Experiments to try next sprint, Owned action items with suggested owners.",
+  definition_of_ready:
+    "You are a scrum master. Draft a Definition of Ready checklist for the team's user stories: User value clear, Acceptance criteria written, Dependencies identified, Estimable, Sized to fit a sprint, Test approach agreed, Designs/assets available where relevant. Tailor wording to the inputs.",
 };
 
 async function callGateway(model: string, system: string, user: string) {
