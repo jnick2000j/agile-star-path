@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateRiskDialog } from "@/components/dialogs/CreateRiskDialog";
+import { RiskInsightsPanel } from "@/components/risks/RiskInsightsPanel";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import {
@@ -196,6 +197,9 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
           </div>
         </div>
       </div>
+
+      {/* AI Risk Insights */}
+      <RiskInsightsPanel risks={risks} />
 
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
