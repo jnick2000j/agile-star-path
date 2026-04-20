@@ -7,16 +7,29 @@ import { Search } from "lucide-react";
 import { TemplateWizard, TemplateType } from "@/components/templates/TemplateWizard";
 
 const wizardTemplates = [
+  // Programme & Project setup
   { type: "programme_mandate" as TemplateType, name: "Programme Mandate", category: "MSP", icon: "🏗️", description: "Define a new programme with strategic objectives, scope, timeline, and initial risk assessment.", creates: "Programme" },
   { type: "business_case" as TemplateType, name: "Business Case", category: "PRINCE2", icon: "💼", description: "Build a compelling business case with options analysis, benefits quantification, and ROI.", creates: "Programme" },
   { type: "project_brief" as TemplateType, name: "Project Brief", category: "PRINCE2", icon: "📋", description: "Set up a project with SMART objectives, methodology selection, and key parameters.", creates: "Project" },
   { type: "product_vision" as TemplateType, name: "Product Vision Canvas", category: "Product", icon: "🎯", description: "Articulate product vision, value proposition, target market, and success metrics.", creates: "Product" },
+
+  // Registers
   { type: "risk_register" as TemplateType, name: "Risk Register Entry", category: "PRINCE2", icon: "⚠️", description: "Identify and assess a risk with probability, impact scoring, and response planning.", creates: "Risk" },
+  { type: "issue_register" as TemplateType, name: "Issue Log Entry", category: "PRINCE2", icon: "🚨", description: "Raise an issue with type, priority and target resolution date — linked to its parent.", creates: "Issue" },
+  { type: "benefit_definition" as TemplateType, name: "Benefit Profile", category: "MSP", icon: "💎", description: "Define a benefit with category, baseline, target and realisation timeline.", creates: "Benefit" },
+  { type: "stakeholder_engagement" as TemplateType, name: "Stakeholder Engagement", category: "MSP", icon: "🤝", description: "Add a stakeholder with influence/interest scoring and engagement strategy.", creates: "Stakeholder" },
+  { type: "change_request_form" as TemplateType, name: "Change Request", category: "PRINCE2", icon: "🔄", description: "Raise a structured change request with full impact analysis for the change board.", creates: "Change Request" },
   { type: "lessons_learned" as TemplateType, name: "Lessons Learned", category: "PRINCE2", icon: "📝", description: "Capture lessons with root cause analysis, outcomes, and actionable recommendations.", creates: "Lesson" },
+
+  // Agile / Product
   { type: "user_story" as TemplateType, name: "User Story", category: "Agile", icon: "📖", description: "Write a user story with persona, acceptance criteria, story points, and MoSCoW priority.", creates: "Feature" },
   { type: "rice_worksheet" as TemplateType, name: "RICE Prioritization", category: "Product", icon: "📊", description: "Score a feature using Reach, Impact, Confidence, and Effort to calculate priority.", creates: "Feature" },
   { type: "sprint_planning" as TemplateType, name: "Sprint Planning Guide", category: "Agile", icon: "🏃", description: "Plan a sprint with goals, capacity, carry-over items, and risk identification.", creates: null },
+  { type: "sprint_retro" as TemplateType, name: "Sprint Retrospective", category: "Agile", icon: "🔁", description: "Capture went-well / didn't-go-well / ideas and commit to 1-3 concrete actions.", creates: null },
   { type: "definition_of_done" as TemplateType, name: "Definition of Done", category: "Agile", icon: "✅", description: "Define code quality, testing, deployment, and acceptance criteria for your team.", creates: null },
+
+  // Governance
+  { type: "compliance_health_check" as TemplateType, name: "Compliance Health Check", category: "Governance", icon: "🛡️", description: "Walk through cadence, hygiene and linkage signals to gauge governance health for any scope.", creates: null },
 ];
 
 export default function Wizards() {
@@ -44,7 +57,7 @@ export default function Wizards() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          {["all", "MSP", "PRINCE2", "Agile", "Product"].map((cat) => (
+          {["all", "MSP", "PRINCE2", "Agile", "Product", "Governance"].map((cat) => (
             <Button
               key={cat}
               variant={categoryFilter === cat ? "default" : "outline"}

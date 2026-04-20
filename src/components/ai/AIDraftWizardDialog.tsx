@@ -22,7 +22,16 @@ export type WizardKind =
   | "user_story"
   | "status_update"
   | "risk_suggestions"
-  | "issue_suggestions";
+  | "issue_suggestions"
+  // New (Phase 6) wizards
+  | "vision_statement"
+  | "comms_pack_draft"
+  | "governance_narrative"
+  | "risk_heatmap_narrative"
+  | "stakeholder_map"
+  | "lessons_digest"
+  | "sprint_retro_summary"
+  | "definition_of_ready";
 
 export interface WizardField {
   key: string;

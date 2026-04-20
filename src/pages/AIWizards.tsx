@@ -13,6 +13,14 @@ import {
   Sparkles,
   MessageSquare,
   ListChecks,
+  Megaphone,
+  ShieldCheck,
+  Flame,
+  Users,
+  ScrollText,
+  RotateCcw,
+  CheckCircle2,
+  Eye,
 } from "lucide-react";
 
 interface WizardSpec {
@@ -20,7 +28,7 @@ interface WizardSpec {
   title: string;
   description: string;
   icon: React.ElementType;
-  category: "Document" | "Helper";
+  category: "Document" | "Helper" | "Governance" | "Strategy";
   fields: WizardField[];
 }
 
@@ -132,10 +140,107 @@ const WIZARDS: WizardSpec[] = [
       { key: "audience", label: "Audience tone", placeholder: "exec / sponsor / team" },
     ],
   },
+  {
+    kind: "vision_statement",
+    title: "Vision Statement",
+    description: "One-paragraph vision + why-it-matters + candidate north-star metrics.",
+    icon: Eye,
+    category: "Strategy",
+    fields: [
+      { key: "scope", label: "Programme / Product name", required: true },
+      { key: "context", label: "Context (one paragraph)", type: "textarea", required: true, placeholder: "Strategic driver, audience, ambition" },
+      { key: "horizon", label: "Time horizon", placeholder: "e.g. 3 years" },
+    ],
+  },
+  {
+    kind: "comms_pack_draft",
+    title: "Comms Pack Draft",
+    description: "Coordinated exec email + Slack post + stakeholder PDF summary.",
+    icon: Megaphone,
+    category: "Governance",
+    fields: [
+      { key: "scope", label: "Scope", required: true, placeholder: "Programme / project / sprint" },
+      { key: "headline", label: "Headline message", type: "textarea", required: true },
+      { key: "highlights", label: "Highlights (bullets)", type: "textarea" },
+      { key: "risks", label: "Risks / asks", type: "textarea" },
+    ],
+  },
+  {
+    kind: "governance_narrative",
+    title: "Governance Narrative",
+    description: "Board-ready narrative from your governance scorecard.",
+    icon: ShieldCheck,
+    category: "Governance",
+    fields: [
+      { key: "scope", label: "Scope", required: true },
+      { key: "rag", label: "Overall RAG", placeholder: "green / amber / red" },
+      { key: "scores", label: "Cadence / Hygiene / Controls scores", type: "textarea", placeholder: "e.g. Cadence 82, Hygiene 71, Controls 90" },
+      { key: "issues", label: "Notable issues", type: "textarea" },
+    ],
+  },
+  {
+    kind: "risk_heatmap_narrative",
+    title: "Risk Heat-Map Narrative",
+    description: "Narrate the heat-map and propose mitigations for top risks.",
+    icon: Flame,
+    category: "Governance",
+    fields: [
+      { key: "scope", label: "Scope", required: true },
+      { key: "distribution", label: "Distribution (counts by quadrant)", type: "textarea", placeholder: "e.g. High×High: 3, High×Med: 5, ..." },
+      { key: "top_risks", label: "Top risks (titles)", type: "textarea" },
+    ],
+  },
+  {
+    kind: "stakeholder_map",
+    title: "Stakeholder Map",
+    description: "Influence × Interest grid with engagement strategy per quadrant.",
+    icon: Users,
+    category: "Governance",
+    fields: [
+      { key: "scope", label: "Scope", required: true },
+      { key: "stakeholders", label: "Stakeholder list", type: "textarea", required: true, placeholder: "Name — role — known position" },
+    ],
+  },
+  {
+    kind: "lessons_digest",
+    title: "Lessons Digest",
+    description: "Synthesise multiple lessons into themes and recommended actions.",
+    icon: ScrollText,
+    category: "Helper",
+    fields: [
+      { key: "scope", label: "Scope", required: true },
+      { key: "lessons", label: "Lessons (paste raw entries)", type: "textarea", required: true },
+    ],
+  },
+  {
+    kind: "sprint_retro_summary",
+    title: "Sprint Retro Summary",
+    description: "Polish raw retro notes into highlights, root causes and experiments.",
+    icon: RotateCcw,
+    category: "Helper",
+    fields: [
+      { key: "sprint", label: "Sprint name", required: true },
+      { key: "went_well", label: "Went well", type: "textarea" },
+      { key: "didnt_go_well", label: "Didn't go well", type: "textarea" },
+      { key: "ideas", label: "Ideas", type: "textarea" },
+    ],
+  },
+  {
+    kind: "definition_of_ready",
+    title: "Definition of Ready",
+    description: "Tailored DoR checklist for your team's user stories.",
+    icon: CheckCircle2,
+    category: "Helper",
+    fields: [
+      { key: "team_context", label: "Team context", type: "textarea", required: true, placeholder: "Stack, story shape, dependencies" },
+    ],
+  },
 ];
 
 export default function AIWizards() {
   const documents = WIZARDS.filter((w) => w.category === "Document");
+  const strategy = WIZARDS.filter((w) => w.category === "Strategy");
+  const governance = WIZARDS.filter((w) => w.category === "Governance");
   const helpers = WIZARDS.filter((w) => w.category === "Helper");
 
   return (
