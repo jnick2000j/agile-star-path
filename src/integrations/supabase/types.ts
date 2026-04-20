@@ -455,6 +455,50 @@ export type Database = {
           },
         ]
       }
+      audit_log_retention_policies: {
+        Row: {
+          auto_purge_enabled: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          last_purged_at: string | null
+          last_purged_count: number | null
+          organization_id: string | null
+          retention_days: number
+          updated_at: string
+        }
+        Insert: {
+          auto_purge_enabled?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_purged_at?: string | null
+          last_purged_count?: number | null
+          organization_id?: string | null
+          retention_days?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_purge_enabled?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_purged_at?: string | null
+          last_purged_count?: number | null
+          organization_id?: string | null
+          retention_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_retention_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auth_audit_log: {
         Row: {
           created_at: string
@@ -6079,6 +6123,10 @@ export type Database = {
         Args: { _entity_type: string; _organization_id: string }
         Returns: string
       }
+      get_effective_retention_days: {
+        Args: { _org_id: string }
+        Returns: number
+      }
       get_invitation_by_token: {
         Args: { _token: string }
         Returns: {
@@ -6167,6 +6215,7 @@ export type Database = {
         Args: { _scope_id: string; _scope_type: string }
         Returns: undefined
       }
+      purge_expired_audit_logs: { Args: never; Returns: Json }
     }
     Enums: {
       app_role:

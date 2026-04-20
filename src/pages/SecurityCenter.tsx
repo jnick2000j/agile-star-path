@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SSOConfigCard } from "@/components/sso/SSOConfigCard";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
+import { AuditRetentionPolicy } from "@/components/admin/AuditRetentionPolicy";
 import { ShieldCheck, Activity } from "lucide-react";
 
 export default function SecurityCenter() {
@@ -26,7 +27,8 @@ export default function SecurityCenter() {
           <SSOConfigCard />
         </TabsContent>
 
-        <TabsContent value="audit">
+        <TabsContent value="audit" className="space-y-4">
+          <AuditRetentionPolicy scope="org" />
           <AuditLogViewer scope="org" />
         </TabsContent>
       </Tabs>

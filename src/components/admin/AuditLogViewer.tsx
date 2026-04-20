@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -86,15 +88,19 @@ const eventLabels: Record<string, string> = {
 
 export function AuditLogViewer({ scope = "org" }: { scope?: "org" | "platform" }) {
   const { currentOrganization } = useOrganization();
+  const { toast } = useToast();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchLogs();
-  }, [currentOrganization?.id, scope]);
+  }, [currentOrganization?.id, scope, fromDate, toDate, categoryFilter, statusFilter]);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -108,6 +114,10 @@ export function AuditLogViewer({ scope = "org" }: { scope?: "org" | "platform" }
       if (scope === "org" && currentOrganization?.id) {
         query = query.eq("organization_id", currentOrganization.id);
       }
+      if (fromDate) query = query.gte("created_at", fromDate);
+      if (toDate) query = query.lte("created_at", `${toDate}T23:59:59`);
+      if (categoryFilter !== "all") query = query.eq("event_category", categoryFilter);
+      if (statusFilter !== "all") query = query.eq("status", statusFilter);
 
       const { data, error } = await query;
       if (error) throw error;
@@ -116,6 +126,38 @@ export function AuditLogViewer({ scope = "org" }: { scope?: "org" | "platform" }
       console.error("Audit log fetch error:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const exportFull = async (format: "csv" | "json") => {
+    setExporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("export-audit-log", {
+        body: {
+          scope,
+          organization_id: scope === "org" ? currentOrganization?.id : undefined,
+          from_date: fromDate || undefined,
+          to_date: toDate ? `${toDate}T23:59:59` : undefined,
+          category: categoryFilter,
+          status: statusFilter,
+          format,
+        },
+      });
+      if (error) throw error;
+
+      const content = format === "json" ? JSON.stringify(data, null, 2) : (data as string);
+      const blob = new Blob([content], { type: format === "json" ? "application/json" : "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `audit-log-${scope}-${format}-${new Date().toISOString().slice(0, 10)}.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Export ready", description: `Downloaded ${format.toUpperCase()} file.` });
+    } catch (e: any) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -195,10 +237,36 @@ export function AuditLogViewer({ scope = "org" }: { scope?: "org" | "platform" }
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
+            <Download className="h-4 w-4 mr-2" />
+            Page CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => exportFull("csv")} disabled={exporting}>
+            <Download className="h-4 w-4 mr-2" />
+            Full CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => exportFull("json")} disabled={exporting}>
+            <Download className="h-4 w-4 mr-2" />
+            JSON
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex items-center gap-1.5">
+          <Label htmlFor="from-date" className="text-xs text-muted-foreground">From</Label>
+          <Input id="from-date" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-9 w-[150px]" />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Label htmlFor="to-date" className="text-xs text-muted-foreground">To</Label>
+          <Input id="to-date" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-9 w-[150px]" />
+        </div>
+        {(fromDate || toDate) && (
+          <Button variant="ghost" size="sm" onClick={() => { setFromDate(""); setToDate(""); }}>
+            Clear dates
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
