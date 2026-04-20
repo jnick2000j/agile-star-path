@@ -234,6 +234,15 @@ export function RoleBuilderMatrix() {
           can_view_ai_advisor: selectedRole.can_view_ai_advisor,
           can_manage_translations: selectedRole.can_manage_translations,
           can_manage_regions: selectedRole.can_manage_regions,
+          can_view_audit_log: selectedRole.can_view_audit_log,
+          can_manage_compliance: selectedRole.can_manage_compliance,
+          can_publish_comms: selectedRole.can_publish_comms,
+          can_manage_templates: selectedRole.can_manage_templates,
+          can_manage_integrations: selectedRole.can_manage_integrations,
+          can_manage_platform: selectedRole.can_manage_platform,
+          can_view_ai_insights: selectedRole.can_view_ai_insights,
+          can_manage_ai_credits: selectedRole.can_manage_ai_credits,
+          can_manage_stakeholder_portal: selectedRole.can_manage_stakeholder_portal,
         })
         .select()
         .single();
