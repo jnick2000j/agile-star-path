@@ -104,27 +104,43 @@ export default function AIApprovals() {
       const summaryKind = entry.action_type.replace("summarize:", "");
       const persistentKinds = ["entity_overview", "weekly_status", "risk_issue_digest", "stakeholder_exec"];
       if (persistentKinds.includes(summaryKind)) {
-        const { error: pubError } = await supabase
+        const { data: published, error: pubError } = await supabase
           .from("ai_summaries")
           .update({
             published_content: { content: editedDraft } as never,
             draft_content: { content: editedDraft } as never,
             status: "published",
             is_stale: false,
+            translations: {} as never, // reset cache when content changes
             approved_by: user.id,
             approved_at: new Date().toISOString(),
           })
           .eq("scope_type", entry.entity_type)
           .eq("scope_id", entry.entity_id)
-          .eq("summary_kind", summaryKind);
+          .eq("summary_kind", summaryKind)
+          .select("id")
+          .maybeSingle();
         if (pubError) {
           console.error(pubError);
           toast.error("Approved, but couldn't publish summary.");
         }
+
+        // Phase 5 — auto-translate the approved summary into all supported non-English languages.
+        if (published?.id) {
+          const targetLangs = ["es", "fr", "de", "pt"];
+          // Fire and forget — translations land in `ai_summaries.translations` cache.
+          targetLangs.forEach((lang) => {
+            supabase.functions
+              .invoke("ai-translate", {
+                body: { text: editedDraft, target_language: lang, summary_id: published.id },
+              })
+              .catch((err) => console.error(`auto-translate ${lang} failed`, err));
+          });
+        }
       }
     }
 
-    toast.success(status === "approved" ? "Draft approved." : "Draft rejected.");
+    toast.success(status === "approved" ? "Draft approved — translating…" : "Draft rejected.");
     setSelected(null);
     fetchEntries();
   };
