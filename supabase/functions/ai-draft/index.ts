@@ -3,6 +3,7 @@
 // Logs every call to ai_audit_log with status = 'pending' (human approval required).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateResidency } from "../_shared/residency.ts";
+import { consumeAiCredits } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -158,6 +159,26 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
         { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // AI credits guard — atomically check + reserve one credit before calling the model.
+    const credits = await consumeAiCredits({
+      supabase,
+      organizationId: orgId,
+      userId: userData.user.id,
+      actionType: `ai-draft:${body.kind}`,
+      model: body.kind === "wizard" ? WIZARD_MODEL : FIELD_MODEL,
+      metadata: { entity_type: body.entity_type ?? null, entity_id: body.entity_id ?? null },
+    });
+    if (!credits.ok) {
+      return new Response(
+        JSON.stringify({
+          error: credits.message,
+          code: "credits_exhausted",
+          credits: { quota: credits.quota, used: credits.used, remaining: credits.remaining },
+        }),
+        { status: credits.status ?? 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 

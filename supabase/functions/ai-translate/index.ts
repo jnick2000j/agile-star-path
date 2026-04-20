@@ -1,6 +1,8 @@
 // Phase 5 — On-demand AI translation for any text snippet.
 // Used by the AISummaryPanel language switcher and by ai-summarize after approval.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { evaluateResidency } from "../_shared/residency.ts";
+import { consumeAiCredits } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,6 +81,25 @@ Deno.serve(async (req: Request) => {
         return new Response(
           JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
           { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      // AI credits guard (only when there's an org context).
+      const credits = await consumeAiCredits({
+        supabase: authClient,
+        organizationId: body.organization_id,
+        userId: userData.user.id,
+        actionType: "ai-translate",
+        metadata: { target_language: body.target_language, summary_id: body.summary_id ?? null },
+      });
+      if (!credits.ok) {
+        return new Response(
+          JSON.stringify({
+            error: credits.message,
+            code: "credits_exhausted",
+            credits: { quota: credits.quota, used: credits.used, remaining: credits.remaining },
+          }),
+          { status: credits.status ?? 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
     }

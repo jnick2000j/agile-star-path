@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { notifyAiCreditsChanged } from "@/components/billing/AICreditsMeter";
 import { toast } from "sonner";
 
 export type WizardKind =
@@ -78,14 +79,25 @@ export function AIDraftWizardDialog({
           organization_id: currentOrganization?.id ?? null,
         },
       });
-      if (error) throw error;
+      if (error) {
+        // Edge function returned a non-2xx — surface the structured error.
+        const ctx = (error as any)?.context;
+        const code = ctx?.body?.code ?? ctx?.code;
+        const msg = ctx?.body?.error ?? error.message;
+        if (code === "credits_exhausted") toast.error(msg ?? "AI credit allowance reached. Upgrade your plan to continue.");
+        else if (code === "residency_blocked") toast.error(msg ?? "Blocked by data-residency policy.");
+        else toast.error(msg ?? "Draft generation failed.");
+        return;
+      }
       if (data?.error) {
-        if (data.error === "rate_limited") toast.error("AI is busy — try again shortly.");
+        if (data.code === "credits_exhausted") toast.error(data.error ?? "AI credit allowance reached.");
+        else if (data.error === "rate_limited") toast.error("AI is busy — try again shortly.");
         else if (data.error === "payment_required") toast.error("AI credits exhausted.");
-        else toast.error("Draft generation failed.");
+        else toast.error(data.error ?? "Draft generation failed.");
         return;
       }
       setDraft(data?.content ?? "");
+      notifyAiCreditsChanged();
       toast.success("Draft generated — sent to AI Approvals.");
     } catch (e) {
       console.error(e);

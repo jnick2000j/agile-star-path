@@ -247,6 +247,94 @@ export type Database = {
           },
         ]
       }
+      ai_credit_ledger: {
+        Row: {
+          action_type: string
+          amount: number
+          created_at: string
+          decision: string
+          id: string
+          metadata: Json
+          model: string | null
+          organization_id: string
+          period_start: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          amount?: number
+          created_at?: string
+          decision?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          organization_id: string
+          period_start: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          amount?: number
+          created_at?: string
+          decision?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          organization_id?: string
+          period_start?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_ledger_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_credit_usage: {
+        Row: {
+          created_at: string
+          id: string
+          last_action: string | null
+          last_model: string | null
+          organization_id: string
+          period_start: string
+          updated_at: string
+          used: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_action?: string | null
+          last_model?: string | null
+          organization_id: string
+          period_start: string
+          updated_at?: string
+          used?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_action?: string | null
+          last_model?: string | null
+          organization_id?: string
+          period_start?: string
+          updated_at?: string
+          used?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_insights: {
         Row: {
           created_at: string
@@ -6118,11 +6206,23 @@ export type Database = {
         Args: { _scope_id: string; _scope_type: string }
         Returns: Json
       }
+      consume_ai_credits: {
+        Args: {
+          _action_type?: string
+          _amount?: number
+          _metadata?: Json
+          _model?: string
+          _org_id: string
+          _user_id?: string
+        }
+        Returns: Json
+      }
       create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
       generate_reference_number: {
         Args: { _entity_type: string; _organization_id: string }
         Returns: string
       }
+      get_ai_credit_status: { Args: { _org_id: string }; Returns: Json }
       get_effective_retention_days: {
         Args: { _org_id: string }
         Returns: number

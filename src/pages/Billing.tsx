@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { AICreditsMeter } from "@/components/billing/AICreditsMeter";
 
 interface Plan {
   id: string;
@@ -270,6 +271,8 @@ export default function Billing() {
             </p>
           </Card>
         )}
+
+        <AICreditsMeter variant="full" />
 
         {limits && (
           <Card className="p-6">

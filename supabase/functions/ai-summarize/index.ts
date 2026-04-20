@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
 import { evaluateResidency } from "../_shared/residency.ts";
+import { consumeAiCredits } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -94,6 +95,25 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
         { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // AI credits guard.
+    const credits = await consumeAiCredits({
+      supabase: authClient,
+      organizationId: body.organization_id,
+      userId: user.id,
+      actionType: `ai-summarize:${body.summary_kind}`,
+      metadata: { scope_type: body.scope_type, scope_id: body.scope_id },
+    });
+    if (!credits.ok) {
+      return new Response(
+        JSON.stringify({
+          error: credits.message,
+          code: "credits_exhausted",
+          credits: { quota: credits.quota, used: credits.used, remaining: credits.remaining },
+        }),
+        { status: credits.status ?? 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 

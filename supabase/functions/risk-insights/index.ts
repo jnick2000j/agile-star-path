@@ -2,6 +2,7 @@
 // Input: { organization_id, scope?: { programme_id?, project_id?, product_id? }, mode: "narrative" | "mitigation", risk_id? }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateResidency } from "../_shared/residency.ts";
+import { consumeAiCredits } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,6 +39,26 @@ Deno.serve(async (req) => {
     });
     if (!residency.ok) {
       return new Response(JSON.stringify({ error: residency.message }), { status: residency.status ?? 451, headers: corsHeaders });
+    }
+
+    // AI credits guard.
+    const credits = await consumeAiCredits({
+      supabase,
+      organizationId: organization_id,
+      userId: user.id,
+      actionType: `risk-insights:${mode}`,
+      model: "google/gemini-3-flash-preview",
+      metadata: { scope, risk_id: risk_id ?? null },
+    });
+    if (!credits.ok) {
+      return new Response(
+        JSON.stringify({
+          error: credits.message,
+          code: "credits_exhausted",
+          credits: { quota: credits.quota, used: credits.used, remaining: credits.remaining },
+        }),
+        { status: credits.status ?? 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Fetch risks in scope
