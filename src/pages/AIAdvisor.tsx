@@ -45,7 +45,7 @@ export default function AIAdvisor() {
     const { data } = await supabase
       .from("ai_advisor_messages").select("*")
       .eq("conversation_id", convoId).order("created_at");
-    setMessages((data ?? []) as ChatMessage[]);
+    setMessages((data ?? []) as unknown as ChatMessage[]);
   };
 
   useEffect(() => { loadConvos(); /* eslint-disable-next-line */ }, [user?.id]);
