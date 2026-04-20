@@ -20,6 +20,7 @@ import {
   Clock,
   Search,
   Bell,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -92,6 +93,14 @@ export function Sidebar() {
     { label: "Principles", icon: BookOpen, href: "/documentation" },
     { label: "Project Teams", icon: Users, href: "/team" },
     { label: "Wizards", icon: Wand2, href: "/wizards" },
+    {
+      label: "AI",
+      icon: Sparkles,
+      children: [
+        { label: "AI Wizards", href: "/ai-wizards" },
+        { label: "AI Approvals", href: "/ai-approvals" },
+      ],
+    },
   ];
 
   const toggleExpand = (label: string) => {

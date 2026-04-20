@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           action_type: string
           created_at: string
+          draft_payload: Json | null
           entity_id: string | null
           entity_type: string | null
           id: string
@@ -25,16 +26,19 @@ export type Database = {
           model: string | null
           organization_id: string | null
           output_summary: string | null
+          parent_audit_id: string | null
           prompt_summary: string | null
           prompt_version: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
+          target_field: string | null
           user_id: string | null
         }
         Insert: {
           action_type: string
           created_at?: string
+          draft_payload?: Json | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
@@ -42,16 +46,19 @@ export type Database = {
           model?: string | null
           organization_id?: string | null
           output_summary?: string | null
+          parent_audit_id?: string | null
           prompt_summary?: string | null
           prompt_version?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          target_field?: string | null
           user_id?: string | null
         }
         Update: {
           action_type?: string
           created_at?: string
+          draft_payload?: Json | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
@@ -59,11 +66,13 @@ export type Database = {
           model?: string | null
           organization_id?: string | null
           output_summary?: string | null
+          parent_audit_id?: string | null
           prompt_summary?: string | null
           prompt_version?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          target_field?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -72,6 +81,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_audit_log_parent_audit_id_fkey"
+            columns: ["parent_audit_id"]
+            isOneToOne: false
+            referencedRelation: "ai_audit_log"
             referencedColumns: ["id"]
           },
         ]
