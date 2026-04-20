@@ -38,7 +38,15 @@ type WizardKind =
   | "risk_suggestions"
   | "issue_suggestions"
   | "user_story"
-  | "status_update";
+  | "status_update"
+  | "vision_statement"
+  | "comms_pack_draft"
+  | "governance_narrative"
+  | "risk_heatmap_narrative"
+  | "stakeholder_map"
+  | "lessons_digest"
+  | "sprint_retro_summary"
+  | "definition_of_ready";
 
 interface WizardRequest {
   kind: "wizard";
