@@ -1170,11 +1170,106 @@ export default function Documentation() {
         </div>
       </div>
 
-      <Tabs defaultValue="principles" className="space-y-6">
+      <Tabs defaultValue="features" className="space-y-6">
         <TabsList className="bg-secondary">
+          <TabsTrigger value="features">Platform Features</TabsTrigger>
           <TabsTrigger value="principles">Principles</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="features" className="space-y-6">
+          <div className="metric-card">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Platform Feature Reference</h3>
+                <p className="text-sm text-muted-foreground">
+                  Every shipped capability across AI, Governance, Security, Billing and Delivery.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {platformFeatureGroups
+            .filter((g) => {
+              if (!searchQuery.trim()) return true;
+              const q = searchQuery.toLowerCase();
+              return (
+                g.group.toLowerCase().includes(q) ||
+                g.features.some(
+                  (f) =>
+                    f.name.toLowerCase().includes(q) ||
+                    f.summary.toLowerCase().includes(q) ||
+                    f.capabilities.some((c) => c.toLowerCase().includes(q)),
+                )
+              );
+            })
+            .map((group) => {
+              const GroupIcon = group.icon;
+              return (
+                <div key={group.group} className="metric-card">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <GroupIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{group.group}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {group.features.length} feature{group.features.length === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                  </div>
+                  <Accordion type="single" collapsible className="w-full">
+                    {group.features.map((feature, idx) => {
+                      const FeatureIcon = feature.icon;
+                      return (
+                        <AccordionItem key={idx} value={`${group.group}-${idx}`}>
+                          <AccordionTrigger className="text-sm text-left">
+                            <div className="flex items-center gap-2">
+                              <FeatureIcon className="h-4 w-4 text-muted-foreground" />
+                              <span>{feature.name}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-3">
+                            <p className="text-sm text-muted-foreground">{feature.summary}</p>
+                            <div>
+                              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">
+                                Capabilities
+                              </p>
+                              <ul className="space-y-1">
+                                {feature.capabilities.map((cap, ci) => (
+                                  <li
+                                    key={ci}
+                                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                                  >
+                                    <span className="text-primary mt-1">•</span>
+                                    {cap}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            {feature.permission && feature.permission !== "platform-default" && (
+                              <div className="flex items-center gap-2 pt-1">
+                                <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground">
+                                  Requires permission:{" "}
+                                  <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                                    {feature.permission}
+                                  </code>
+                                </span>
+                              </div>
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
+                </div>
+              );
+            })}
+        </TabsContent>
 
         <TabsContent value="principles" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
