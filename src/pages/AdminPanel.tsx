@@ -45,6 +45,7 @@ import { EditOrganizationDialog } from "@/components/dialogs/EditOrganizationDia
 import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
 import { UserAccessList } from "@/components/admin/UserAccessList";
 import { RoleTypesManager } from "@/components/admin/RoleTypesManager";
+import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
 
@@ -276,6 +277,7 @@ export default function AdminPanel() {
         <TabsList className="bg-secondary">
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="role-types">Role Types</TabsTrigger>
+          <TabsTrigger value="role-builder">Permission Matrix</TabsTrigger>
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
           <TabsTrigger value="access">Access Control</TabsTrigger>
         </TabsList>
@@ -479,6 +481,10 @@ export default function AdminPanel() {
 
         <TabsContent value="role-types">
           <RoleTypesManager />
+        </TabsContent>
+
+        <TabsContent value="role-builder">
+          <RoleBuilderMatrix />
         </TabsContent>
 
         <TabsContent value="organizations">
