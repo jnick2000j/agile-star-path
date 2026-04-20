@@ -582,6 +582,10 @@ export default function AdminPanel() {
           
           <UserAccessList />
         </TabsContent>
+
+        <TabsContent value="residency">
+          <ResidencyComplianceManager />
+        </TabsContent>
       </Tabs>
     </AppLayout>
   );
