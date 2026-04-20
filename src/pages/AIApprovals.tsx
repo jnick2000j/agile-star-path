@@ -90,7 +90,7 @@ export default function AIApprovals() {
         status,
         reviewed_by: user.id,
         reviewed_at: new Date().toISOString(),
-        draft_payload: { ...(entry.draft_payload ?? {}), content: editedDraft },
+        draft_payload: { ...(entry.draft_payload ?? {}), content: editedDraft } as never,
       })
       .eq("id", entry.id);
     if (error) {
