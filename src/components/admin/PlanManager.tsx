@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Plus, Pencil, Copy, Archive, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/currency";
 import { toast } from "sonner";
 import { PlanEditorDialog } from "./PlanEditorDialog";
 import { FeatureCatalogManager } from "./FeatureCatalogManager";
