@@ -48,9 +48,362 @@ import {
   GitBranch,
   AlertTriangle,
   Layers,
-  CalendarCheck
+  CalendarCheck,
+  Sparkles,
+  Brain,
+  Wand2,
+  CheckCircle2,
+  Globe2,
+  CreditCard,
+  Coins,
+  ShieldCheck,
+  Activity,
+  Lock,
+  Megaphone,
+  GitMerge,
+  Lightbulb,
+  Database,
+  KeyRound,
+  Workflow,
+  ScrollText,
+  TrendingUp,
+  Zap
 } from "lucide-react";
 import { toast } from "sonner";
+
+// Phase 1-6 platform feature documentation
+const platformFeatureGroups = [
+  {
+    group: "AI & Intelligence",
+    icon: Sparkles,
+    color: "primary",
+    features: [
+      {
+        name: "AI Field Assist",
+        icon: Wand2,
+        summary: "Inline AI helper on text fields to improve, shorten, expand, translate or formalize copy with one click.",
+        capabilities: [
+          "Available on description, rationale and notes fields across registers",
+          "Suggestions are diff-previewed before apply",
+          "Sensitive fields can require approval before publishing",
+          "Every action logged to the AI audit trail",
+        ],
+        permission: "can_draft_with_ai",
+      },
+      {
+        name: "AI Draft Wizards",
+        icon: Wand2,
+        summary: "Multi-step generators for Project Briefs, Risk entries, Benefit profiles, Programme Visions and more.",
+        capabilities: [
+          "Context-aware: pulls from linked programme/project data",
+          "Outputs structured drafts mapped to register fields",
+          "Save as draft for human review before publishing",
+        ],
+        permission: "can_draft_with_ai",
+      },
+      {
+        name: "AI Summary Panels",
+        icon: ScrollText,
+        summary: "On-demand executive summaries for programmes, projects and weekly reports with stale-detection.",
+        capabilities: [
+          "Auto-flags stale summaries when underlying data changes",
+          "Multi-language translations cached per scope",
+          "Approval workflow for published summaries",
+        ],
+        permission: "can_view_ai_advisor",
+      },
+      {
+        name: "AI Advisor (Ask the Task Master)",
+        icon: Brain,
+        summary: "Conversational PRINCE2/MSP/Agile expert that can read and act on your data via tool-calls.",
+        capabilities: [
+          "Conversation history per user/org",
+          "Tool-calls audited as agent actions, revertible by admins",
+          "Methodology guidance grounded in your live registers",
+        ],
+        permission: "can_view_ai_advisor",
+      },
+      {
+        name: "AI Insights Scanner",
+        icon: Lightbulb,
+        summary: "Background scans surface stale risks, orphan issues, missing benefit owners and overdue updates.",
+        capabilities: [
+          "Severity-tagged insights (info / warn / critical)",
+          "Dismiss / resolve workflow with audit trail",
+          "Scoped per programme, project or product",
+        ],
+        permission: "can_view_ai_insights",
+      },
+      {
+        name: "Risk Insights & Heat-Map Narratives",
+        icon: TrendingUp,
+        summary: "AI generates narrative explanations of the risk heat-map plus tailored mitigation suggestions.",
+        capabilities: [
+          "Reads probability×impact distribution",
+          "Suggests treatment (avoid / reduce / transfer / accept)",
+          "Highlights risks trending into the red zone",
+        ],
+        permission: "can_view_ai_insights",
+      },
+    ],
+  },
+  {
+    group: "Governance & Compliance",
+    icon: ShieldCheck,
+    color: "success",
+    features: [
+      {
+        name: "Compliance Scoring",
+        icon: ShieldCheck,
+        summary: "Per-scope health scores across cadence, hygiene and controls with configurable thresholds.",
+        capabilities: [
+          "Org-level rule editor: weights, windows, pass/warn thresholds",
+          "Scores recomputed on demand or on data change",
+          "Detailed breakdown of failed checks",
+        ],
+        permission: "can_manage_compliance",
+      },
+      {
+        name: "Governance Reports",
+        icon: FileText,
+        summary: "Automated period-bounded reports rolling up registers, status changes and compliance for any scope.",
+        capabilities: [
+          "Programme, project or org-wide scope",
+          "PDF download + scheduled email delivery",
+          "Includes evidence references for audits",
+        ],
+        permission: "can_view_reports",
+      },
+      {
+        name: "Audit Log Export & Retention",
+        icon: ScrollText,
+        summary: "Full auth and data audit trail with org-configurable retention and platform-admin viewer.",
+        capabilities: [
+          "Per-org retention policy with optional auto-purge",
+          "CSV/JSON export via edge function",
+          "Platform admins can query across all orgs",
+        ],
+        permission: "can_view_audit_log",
+      },
+      {
+        name: "Approval Workflows",
+        icon: CheckCircle2,
+        summary: "Triad approval matrices for stage gates, exceptions and benefit profiles with evidence checklists.",
+        capabilities: [
+          "Configurable approver roles per workflow",
+          "Evidence attestation with document linking",
+          "Decision comments preserved in audit trail",
+        ],
+        permission: "can_manage_stage_gates",
+      },
+      {
+        name: "Comms Pack Generator",
+        icon: Megaphone,
+        summary: "Publish governance reports as email, Slack and PDF-ready stakeholder updates in one click.",
+        capabilities: [
+          "Generates email HTML, Slack markdown and PDF summary",
+          "Period-bounded with publish/draft workflow",
+          "Linked back to the source governance report",
+        ],
+        permission: "can_publish_comms",
+      },
+    ],
+  },
+  {
+    group: "Multi-Tenancy & Security",
+    icon: Lock,
+    color: "info",
+    features: [
+      {
+        name: "Organization & Hybrid Deployment",
+        icon: Building2,
+        summary: "Org-level data siloing with optional hybrid (on-prem-style) regional deployment metadata.",
+        capabilities: [
+          "Every record scoped by organization_id via RLS",
+          "Users can belong to multiple organizations",
+          "Region badges show data residency at a glance",
+        ],
+        permission: "platform-default",
+      },
+      {
+        name: "Data Residency Policies",
+        icon: Globe2,
+        summary: "Per-org region pinning with warn/block enforcement for cross-region AI processing.",
+        capabilities: [
+          "Allow / warn / block decisions logged to residency_audit_log",
+          "Lovable AI gateway flagged as us-east processing",
+          "Returns HTTP 451 when blocked, evidence retained for audits",
+        ],
+        permission: "can_manage_regions",
+      },
+      {
+        name: "SSO Setup & Platform Queue",
+        icon: KeyRound,
+        summary: "SAML SSO request workflow with platform-admin provisioning queue.",
+        capabilities: [
+          "Self-service config request from org admins",
+          "Platform admins approve and configure IdP metadata",
+          "Email notifications via dedicated edge function",
+        ],
+        permission: "can_manage_integrations",
+      },
+      {
+        name: "Stakeholder Portal",
+        icon: Users,
+        summary: "Read-only external view for stakeholders with granular access settings per programme/project.",
+        capabilities: [
+          "Per-entity stakeholder access list",
+          "Hides internal status changes and audit detail",
+          "Configurable from Admin → Stakeholder Access",
+        ],
+        permission: "can_manage_stakeholder_portal",
+      },
+      {
+        name: "Dynamic RBAC",
+        icon: Shield,
+        summary: "Custom roles with 30+ capability flags including all Phase 6 modules.",
+        capabilities: [
+          "Locked Administrator role plus unlimited custom roles",
+          "Per-module flags for AI, compliance, comms, integrations, platform",
+          "Role builder matrix exposes every capability",
+        ],
+        permission: "can_manage_users",
+      },
+    ],
+  },
+  {
+    group: "Billing & Plans",
+    icon: CreditCard,
+    color: "warning",
+    features: [
+      {
+        name: "Plan Catalog & Stripe Sync",
+        icon: CreditCard,
+        summary: "Admin-managed plan catalog with feature limits, synced to Stripe products/prices.",
+        capabilities: [
+          "Per-feature limits (programmes, projects, users, AI credits)",
+          "Org-level overrides for enterprise deals",
+          "Embedded Stripe checkout + customer portal",
+        ],
+        permission: "can_manage_platform",
+      },
+      {
+        name: "AI Credits & Usage Meter",
+        icon: Coins,
+        summary: "Per-plan monthly AI credit allowance with atomic check-and-increment and transparent usage UI.",
+        capabilities: [
+          "Free 25 / Pro 500 / Enterprise unlimited (configurable)",
+          "Itemized ledger of every AI call (action, model, decision)",
+          "HTTP 402 returned when quota exhausted, with upgrade prompt",
+          "Compact meter in header, full meter on Billing page",
+        ],
+        permission: "can_manage_ai_credits",
+      },
+      {
+        name: "Trial & Upgrade Prompts",
+        icon: Zap,
+        summary: "Trial countdown banner and contextual upgrade prompts when feature limits are reached.",
+        capabilities: [
+          "Plan usage bars on registers approaching limits",
+          "Feature-gated components with friendly upgrade CTAs",
+          "Test-mode banner for sandbox Stripe keys",
+        ],
+        permission: "platform-default",
+      },
+    ],
+  },
+  {
+    group: "Delivery & Lifecycle",
+    icon: Workflow,
+    color: "primary",
+    features: [
+      {
+        name: "Programme Lifecycle (Blueprint, Vision, Tranches)",
+        icon: GitMerge,
+        summary: "Full MSP lifecycle: Programme Definition, Blueprint, Success Plan and integrated Tranches view.",
+        capabilities: [
+          "Editable vision and objectives with audit trail",
+          "Tranche planner linked to projects and benefits",
+          "Cross-tab summaries powered by AI",
+        ],
+        permission: "can_manage_programmes",
+      },
+      {
+        name: "Unified Backlog & Sprints",
+        icon: ListChecks,
+        summary: "Single backlog across products, projects and programmes with entity-specific sprint cycles.",
+        capabilities: [
+          "Drag-prioritized backlog with RICE/MoSCoW scoring",
+          "Sprint board per entity with capacity tracking",
+          "Story-point and LOE roll-ups",
+        ],
+        permission: "can_manage_work_packages",
+      },
+      {
+        name: "Work Packages",
+        icon: Package,
+        summary: "PRINCE2-style work packages linking tasks, milestones and deliverables to specific stages.",
+        capabilities: [
+          "Task and milestone linking with progress roll-up",
+          "Story-point / LOE tracking",
+          "Document attachments via private storage",
+        ],
+        permission: "can_manage_work_packages",
+      },
+      {
+        name: "Status Management & Audit Trail",
+        icon: Activity,
+        summary: "Lifecycle actions (start, pause, complete, cancel) with full status_history per entity.",
+        capabilities: [
+          "Every transition records actor, reason and timestamp",
+          "Status history dialog on every entity",
+          "Used by compliance scoring as a cadence signal",
+        ],
+        permission: "platform-default",
+      },
+      {
+        name: "Cross-Entity Traceability",
+        icon: GitMerge,
+        summary: "Risks, Issues, Benefits, Exceptions and Lessons all link back to programmes, projects or products.",
+        capabilities: [
+          "Filter registers by parent entity",
+          "Reverse lookup from any entity to its registers",
+          "Powers governance reports and AI insights",
+        ],
+        permission: "platform-default",
+      },
+    ],
+  },
+  {
+    group: "Branding & Localization",
+    icon: Database,
+    color: "info",
+    features: [
+      {
+        name: "Branding Customization",
+        icon: Database,
+        summary: "Global and per-org branding: logos, colors, hero copy, login layout and PNG transparency support.",
+        capabilities: [
+          "Color presets plus custom HSL palette",
+          "Login page customization (layout, hero, features)",
+          "Org logo overrides global branding when set",
+        ],
+        permission: "can_manage_platform",
+      },
+      {
+        name: "Language Preferences & AI Translation",
+        icon: Globe2,
+        summary: "Per-user language preference; AI drafts and summaries returned in chosen language.",
+        capabilities: [
+          "EN / ES / FR / PT / DE bundled",
+          "AI translate edge function for on-the-fly content",
+          "Translations cached on summaries to save credits",
+        ],
+        permission: "platform-default",
+      },
+    ],
+  },
+];
 
 const prince2Principles = [
   { title: "Continued Business Justification", description: "A valid business reason must exist throughout the project lifecycle. The project should remain viable and the expected benefits should justify the investment." },
@@ -803,13 +1156,13 @@ export default function Documentation() {
   const [selectedPhase, setSelectedPhase] = useState<typeof mspPhases[0] | null>(null);
 
   return (
-    <AppLayout title="Principles" subtitle="PRINCE2, MSP, Agile & Product Management resources">
+    <AppLayout title="Documentation" subtitle="Platform features, PRINCE2, MSP, Agile & Product Management">
       {/* Search */}
       <div className="flex gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search principles..."
+            placeholder="Search features, principles or processes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -817,11 +1170,106 @@ export default function Documentation() {
         </div>
       </div>
 
-      <Tabs defaultValue="principles" className="space-y-6">
+      <Tabs defaultValue="features" className="space-y-6">
         <TabsList className="bg-secondary">
+          <TabsTrigger value="features">Platform Features</TabsTrigger>
           <TabsTrigger value="principles">Principles</TabsTrigger>
           <TabsTrigger value="processes">Processes</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="features" className="space-y-6">
+          <div className="metric-card">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Platform Feature Reference</h3>
+                <p className="text-sm text-muted-foreground">
+                  Every shipped capability across AI, Governance, Security, Billing and Delivery.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {platformFeatureGroups
+            .filter((g) => {
+              if (!searchQuery.trim()) return true;
+              const q = searchQuery.toLowerCase();
+              return (
+                g.group.toLowerCase().includes(q) ||
+                g.features.some(
+                  (f) =>
+                    f.name.toLowerCase().includes(q) ||
+                    f.summary.toLowerCase().includes(q) ||
+                    f.capabilities.some((c) => c.toLowerCase().includes(q)),
+                )
+              );
+            })
+            .map((group) => {
+              const GroupIcon = group.icon;
+              return (
+                <div key={group.group} className="metric-card">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <GroupIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{group.group}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {group.features.length} feature{group.features.length === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                  </div>
+                  <Accordion type="single" collapsible className="w-full">
+                    {group.features.map((feature, idx) => {
+                      const FeatureIcon = feature.icon;
+                      return (
+                        <AccordionItem key={idx} value={`${group.group}-${idx}`}>
+                          <AccordionTrigger className="text-sm text-left">
+                            <div className="flex items-center gap-2">
+                              <FeatureIcon className="h-4 w-4 text-muted-foreground" />
+                              <span>{feature.name}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-3">
+                            <p className="text-sm text-muted-foreground">{feature.summary}</p>
+                            <div>
+                              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">
+                                Capabilities
+                              </p>
+                              <ul className="space-y-1">
+                                {feature.capabilities.map((cap, ci) => (
+                                  <li
+                                    key={ci}
+                                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                                  >
+                                    <span className="text-primary mt-1">•</span>
+                                    {cap}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            {feature.permission && feature.permission !== "platform-default" && (
+                              <div className="flex items-center gap-2 pt-1">
+                                <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground">
+                                  Requires permission:{" "}
+                                  <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                                    {feature.permission}
+                                  </code>
+                                </span>
+                              </div>
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
+                </div>
+              );
+            })}
+        </TabsContent>
 
         <TabsContent value="principles" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
