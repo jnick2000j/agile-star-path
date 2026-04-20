@@ -14,6 +14,158 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_advisor_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_advisor_conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_advisor_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          tool_calls: Json | null
+          tool_results: Json | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+          tool_calls?: Json | null
+          tool_results?: Json | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          tool_calls?: Json | null
+          tool_results?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_advisor_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_advisor_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_actions: {
+        Row: {
+          audit_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          is_write: boolean
+          organization_id: string | null
+          reverted_at: string | null
+          reverted_by: string | null
+          status: string
+          target_entity_id: string | null
+          target_entity_type: string | null
+          tool_input: Json
+          tool_name: string
+          tool_output: Json | null
+          user_id: string
+        }
+        Insert: {
+          audit_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          is_write?: boolean
+          organization_id?: string | null
+          reverted_at?: string | null
+          reverted_by?: string | null
+          status?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
+          tool_input?: Json
+          tool_name: string
+          tool_output?: Json | null
+          user_id: string
+        }
+        Update: {
+          audit_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          is_write?: boolean
+          organization_id?: string | null
+          reverted_at?: string | null
+          reverted_by?: string | null
+          status?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
+          tool_input?: Json
+          tool_name?: string
+          tool_output?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_actions_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "ai_audit_log"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_actions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_advisor_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_actions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_audit_log: {
         Row: {
           action_type: string
@@ -88,6 +240,77 @@ export type Database = {
             columns: ["parent_audit_id"]
             isOneToOne: false
             referencedRelation: "ai_audit_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_insights: {
+        Row: {
+          created_at: string
+          description: string | null
+          detected_at: string
+          dismissed: boolean
+          dismissed_at: string | null
+          dismissed_by: string | null
+          evidence: Json | null
+          expires_at: string | null
+          generated_by: string
+          id: string
+          insight_type: string
+          organization_id: string
+          recommendation: string | null
+          resolved: boolean
+          scope_id: string | null
+          scope_type: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          dismissed?: boolean
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          evidence?: Json | null
+          expires_at?: string | null
+          generated_by?: string
+          id?: string
+          insight_type: string
+          organization_id: string
+          recommendation?: string | null
+          resolved?: boolean
+          scope_id?: string | null
+          scope_type?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          dismissed?: boolean
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          evidence?: Json | null
+          expires_at?: string | null
+          generated_by?: string
+          id?: string
+          insight_type?: string
+          organization_id?: string
+          recommendation?: string | null
+          resolved?: boolean
+          scope_id?: string | null
+          scope_type?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]

@@ -97,6 +97,8 @@ export function Sidebar() {
       label: "AI",
       icon: Sparkles,
       children: [
+        { label: "AI Advisor", href: "/ai-advisor" },
+        { label: "AI Insights", href: "/ai-insights" },
         { label: "AI Wizards", href: "/ai-wizards" },
         { label: "AI Approvals", href: "/ai-approvals" },
       ],

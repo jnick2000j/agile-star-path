@@ -67,6 +67,8 @@ import Notifications from "./pages/Notifications";
 import StakeholderPortal from "./pages/StakeholderPortal";
 import AIApprovals from "./pages/AIApprovals";
 import AIWizards from "./pages/AIWizards";
+import AIAdvisor from "./pages/AIAdvisor";
+import AIInsights from "./pages/AIInsights";
 import NotFound from "./pages/NotFound";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
@@ -142,6 +144,8 @@ const App = () => (
             <Route path="/portal" element={<ProtectedRoute><StakeholderPortal /></ProtectedRoute>} />
             <Route path="/ai-approvals" element={<ProtectedRoute><AIApprovals /></ProtectedRoute>} />
             <Route path="/ai-wizards" element={<ProtectedRoute><AIWizards /></ProtectedRoute>} />
+            <Route path="/ai-advisor" element={<ProtectedRoute><AIAdvisor /></ProtectedRoute>} />
+            <Route path="/ai-insights" element={<ProtectedRoute><AIInsights /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </PermissionsProvider>
