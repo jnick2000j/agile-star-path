@@ -70,7 +70,7 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    const body = (await req.json()) as SummarizeBody;
+    const body = (await req.json()) as SummarizeBody & { output_language?: string };
     if (!body?.scope_type || !body?.scope_id || !body?.summary_kind || !body?.organization_id) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -79,6 +79,21 @@ serve(async (req) => {
     const requireApproval = body.require_approval !== false;
 
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Phase 5 — fetch the user's preferred language and pass it to the model.
+    let outputLanguage = body.output_language ?? null;
+    if (!outputLanguage) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("preferred_language")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      outputLanguage = (profile?.preferred_language as string | undefined) ?? "en";
+    }
+    const langDirective =
+      outputLanguage && outputLanguage !== "en"
+        ? ` IMPORTANT: Write the entire summary in ${outputLanguage}. Preserve product names and section headings naturally.`
+        : "";
 
     // Gather context based on scope
     const ctx: Record<string, unknown> = { scope_type: body.scope_type, scope_id: body.scope_id };
@@ -125,7 +140,7 @@ serve(async (req) => {
       Object.assign(ctx, body.inputs ?? {});
     }
 
-    const systemPrompt = `You are a senior PMO analyst. ${KIND_INSTRUCTIONS[body.summary_kind]} Output clear markdown. Be specific; cite numbers.`;
+    const systemPrompt = `You are a senior PMO analyst. ${KIND_INSTRUCTIONS[body.summary_kind]} Output clear markdown. Be specific; cite numbers.${langDirective}`;
     const userPrompt = `Context (JSON):\n\n${JSON.stringify(ctx).slice(0, 60_000)}\n\nUser inputs: ${JSON.stringify(body.inputs ?? {})}`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -168,6 +183,7 @@ serve(async (req) => {
         prompt_version: PROMPT_VERSION,
         prompt_summary: KIND_INSTRUCTIONS[body.summary_kind],
         output_summary: content.slice(0, 500),
+        target_language: outputLanguage,
         draft_payload: { content, inputs: body.inputs ?? {}, summary_kind: body.summary_kind } as never,
         status: requireApproval ? "pending" : "approved",
         reviewed_by: requireApproval ? null : user.id,

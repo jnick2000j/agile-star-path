@@ -141,8 +141,24 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const body = (await req.json()) as DraftRequest & { organization_id?: string };
+    const body = (await req.json()) as DraftRequest & { organization_id?: string; output_language?: string };
     const orgId = body.organization_id ?? null;
+
+    // Phase 5 — Look up the user's preferred language so AI output matches their UI language,
+    // unless the request explicitly overrides it (e.g. translate field assist).
+    let outputLanguage: string | null = body.output_language ?? null;
+    if (!outputLanguage) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("preferred_language")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+      outputLanguage = (profile?.preferred_language as string | undefined) ?? null;
+    }
+    const langDirective =
+      outputLanguage && outputLanguage !== "en"
+        ? `\n\nIMPORTANT: Respond in ${outputLanguage}. Preserve any product names, code, and terminology in their original form.`
+        : "";
 
     let model = FIELD_MODEL;
     let system = "";
@@ -152,7 +168,9 @@ Deno.serve(async (req: Request) => {
 
     if (body.kind === "field") {
       model = FIELD_MODEL;
-      system = FIELD_SYSTEM_PROMPTS[body.mode];
+      // For an explicit "translate" mode, the body.language wins over the user's preference.
+      system =
+        FIELD_SYSTEM_PROMPTS[body.mode] + (body.mode === "translate" ? "" : langDirective);
       const lang = body.language ? `Target language: ${body.language}.\n\n` : "";
       const ctx = body.context ? `Context: ${body.context}\n\n` : "";
       userPrompt = `${lang}${ctx}Text:\n${body.text}`;
@@ -160,7 +178,7 @@ Deno.serve(async (req: Request) => {
       targetField = body.field ?? null;
     } else if (body.kind === "wizard") {
       model = WIZARD_MODEL;
-      system = WIZARD_SYSTEM_PROMPTS[body.wizard];
+      system = WIZARD_SYSTEM_PROMPTS[body.wizard] + langDirective;
       userPrompt = `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nProduce the document in clean Markdown.`;
       actionType = `wizard:${body.wizard}`;
       targetField = body.wizard;
@@ -193,6 +211,8 @@ Deno.serve(async (req: Request) => {
         prompt_summary: userPrompt.slice(0, 500),
         output_summary: result.content.slice(0, 500),
         target_field: targetField,
+        target_language:
+          body.kind === "field" && body.mode === "translate" ? body.language ?? null : outputLanguage,
         draft_payload: { content: result.content, inputs: body.kind === "wizard" ? body.inputs : undefined },
         status: "pending",
       })
