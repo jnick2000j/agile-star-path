@@ -30,6 +30,16 @@ interface CustomRole {
   can_view_ai_advisor?: boolean;
   can_manage_translations?: boolean;
   can_manage_regions?: boolean;
+  // Phase 6 + recent feature flags
+  can_view_audit_log?: boolean;
+  can_manage_compliance?: boolean;
+  can_publish_comms?: boolean;
+  can_manage_templates?: boolean;
+  can_manage_integrations?: boolean;
+  can_manage_platform?: boolean;
+  can_view_ai_insights?: boolean;
+  can_manage_ai_credits?: boolean;
+  can_manage_stakeholder_portal?: boolean;
 }
 
 interface PermissionsContextType {
@@ -65,6 +75,22 @@ const legacyEntityToModule: Record<string, string> = {
   work_packages: "work_packages",
   tranches: "tranches",
   lessons: "lessons",
+  // Phase 6 + recent additions
+  audit_log: "audit_log",
+  compliance: "compliance",
+  comms_packs: "comms_packs",
+  governance_reports: "governance_reports",
+  scheduled_reports: "scheduled_reports",
+  templates: "templates",
+  notifications: "notifications",
+  search: "search",
+  integrations: "integrations",
+  plan_management: "plan_management",
+  platform_support: "platform_support",
+  sso_management: "sso_management",
+  stakeholder_portal: "stakeholder_portal",
+  ai_insights: "ai_insights",
+  ai_credits: "ai_credits",
 };
 
 export function PermissionsProvider({ children }: { children: ReactNode }) {
@@ -163,6 +189,16 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
       can_view_ai_advisor: isAdminR || isManager || isProductManager,
       can_manage_translations: isAdminR,
       can_manage_regions: isAdminR,
+      // Phase 6 + recent feature defaults
+      can_view_audit_log: isAdminR || isManager,
+      can_manage_compliance: isAdminR,
+      can_publish_comms: isAdminR || isManager || isProductManager,
+      can_manage_templates: isAdminR || isManager,
+      can_manage_integrations: isAdminR,
+      can_manage_platform: isAdminR,
+      can_view_ai_insights: isAdminR || isManager || isProductManager || isStakeholder,
+      can_manage_ai_credits: isAdminR,
+      can_manage_stakeholder_portal: isAdminR || isManager,
     };
   };
 

@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { Save, Copy, Shield, Sparkles, Globe, MapPin, Lock } from "lucide-react";
+import { Save, Copy, Shield, Sparkles, Globe, MapPin, Lock, FileText, ScrollText, MessageSquare, LayoutTemplate, Plug, Server, Brain, Coins, UserCheck } from "lucide-react";
 import {
   PERMISSION_ACTIONS,
   type PermissionAction,
@@ -35,6 +35,16 @@ interface CustomRoleRow {
   can_view_ai_advisor: boolean;
   can_manage_translations: boolean;
   can_manage_regions: boolean;
+  // Phase 6 + recent feature flags
+  can_view_audit_log: boolean;
+  can_manage_compliance: boolean;
+  can_publish_comms: boolean;
+  can_manage_templates: boolean;
+  can_manage_integrations: boolean;
+  can_manage_platform: boolean;
+  can_view_ai_insights: boolean;
+  can_manage_ai_credits: boolean;
+  can_manage_stakeholder_portal: boolean;
 }
 
 const ACTION_LABELS: Record<PermissionAction, string> = {
@@ -47,11 +57,25 @@ const ACTION_LABELS: Record<PermissionAction, string> = {
 };
 
 const TOP_LEVEL_FLAGS: { key: keyof CustomRoleRow; label: string; description: string; icon: typeof Sparkles }[] = [
+  // AI
   { key: "can_draft_with_ai", label: "AI Drafting", description: "Use AI to draft entity content", icon: Sparkles },
   { key: "can_approve_ai_output", label: "AI Approval", description: "Approve AI-drafted content before publish", icon: Shield },
   { key: "can_view_ai_advisor", label: "AI Advisor", description: "See AI recommendations and coaching", icon: Sparkles },
+  { key: "can_view_ai_insights", label: "AI Insights", description: "View automated risk narratives & insights", icon: Brain },
+  { key: "can_manage_ai_credits", label: "AI Credits", description: "Manage AI credit allowance & ledger", icon: Coins },
+  // Localisation
   { key: "can_manage_translations", label: "Translations", description: "Manage content translations", icon: Globe },
   { key: "can_manage_regions", label: "Regions & Compliance", description: "Manage region and residency settings", icon: MapPin },
+  // Compliance & governance
+  { key: "can_view_audit_log", label: "Audit Log", description: "View & export the security audit log", icon: ScrollText },
+  { key: "can_manage_compliance", label: "Compliance Rules", description: "Edit compliance rules & residency policy", icon: FileText },
+  { key: "can_publish_comms", label: "Publish Comms", description: "Generate & publish stakeholder comms packs", icon: MessageSquare },
+  // Productivity
+  { key: "can_manage_templates", label: "Templates & Wizards", description: "Create reusable templates & wizard flows", icon: LayoutTemplate },
+  { key: "can_manage_stakeholder_portal", label: "Stakeholder Portal", description: "Grant stakeholder portal access", icon: UserCheck },
+  // Admin / platform
+  { key: "can_manage_integrations", label: "Integrations", description: "Configure MCP / API integrations", icon: Plug },
+  { key: "can_manage_platform", label: "Platform Settings", description: "Super-admin: plans, SSO, support queue", icon: Server },
 ];
 
 export function RoleBuilderMatrix() {
