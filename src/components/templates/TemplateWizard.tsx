@@ -471,6 +471,255 @@ const getWizardSteps = (templateType: TemplateType, orgs: Organization[], progra
           ],
         },
       ];
+
+    case "issue_register":
+      return [
+        {
+          title: "Issue Identification",
+          description: "Capture the issue and its context.",
+          fields: [
+            orgField,
+            { key: "title", label: "Issue Title", type: "text", placeholder: "e.g. Vendor missed UAT date", required: true },
+            { key: "description", label: "Description", type: "textarea", placeholder: "What happened, what is the impact, what's needed to resolve?", fullWidth: true },
+            { key: "type", label: "Type", type: "select", required: true, options: [
+              { value: "problem", label: "Problem" },
+              { value: "concern", label: "Concern" },
+              { value: "change-request", label: "Change Request" },
+              { value: "off-specification", label: "Off-Specification" },
+            ]},
+          ],
+        },
+        {
+          title: "Priority & Dates",
+          description: "Set priority and target resolution.",
+          fields: [
+            { key: "priority", label: "Priority", type: "select", required: true, options: [
+              { value: "critical", label: "Critical" },
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ]},
+            { key: "date_raised", label: "Date Raised", type: "date" },
+            { key: "target_date", label: "Target Resolution", type: "date" },
+          ],
+        },
+        {
+          title: "Linkage",
+          description: "Link this issue to its parent entity.",
+          fields: entityParentFields(true),
+        },
+      ];
+
+    case "benefit_definition":
+      return [
+        {
+          title: "Benefit Identity",
+          description: "Name the benefit and pick a category.",
+          fields: [
+            orgField,
+            { key: "name", label: "Benefit Name", type: "text", placeholder: "e.g. 20% reduction in handling time", required: true },
+            { key: "description", label: "Description", type: "textarea", placeholder: "What is this benefit and how does it support the strategy?", fullWidth: true },
+            { key: "category", label: "Category", type: "select", required: true, options: [
+              { value: "financial", label: "Financial" },
+              { value: "operational", label: "Operational" },
+              { value: "strategic", label: "Strategic" },
+              { value: "compliance", label: "Compliance" },
+              { value: "customer", label: "Customer" },
+            ]},
+            { key: "type", label: "Type", type: "select", required: true, options: [
+              { value: "quantitative", label: "Quantitative" },
+              { value: "qualitative", label: "Qualitative" },
+            ]},
+          ],
+        },
+        {
+          title: "Measurement",
+          description: "How will this benefit be measured?",
+          fields: [
+            { key: "current_value", label: "Baseline (current value)", type: "text", placeholder: "e.g. 8 minutes" },
+            { key: "target_value", label: "Target", type: "text", placeholder: "e.g. 6.4 minutes" },
+            { key: "start_date", label: "Realisation Start", type: "date" },
+            { key: "end_date", label: "Realisation End", type: "date" },
+          ],
+        },
+        {
+          title: "Linkage",
+          description: "Link this benefit to a programme, project or product.",
+          fields: entityParentFields(true),
+        },
+      ];
+
+    case "stakeholder_engagement":
+      return [
+        {
+          title: "Stakeholder Profile",
+          description: "Identify the stakeholder and their role.",
+          fields: [
+            orgField,
+            { key: "name", label: "Name", type: "text", placeholder: "e.g. Jane Smith", required: true },
+            { key: "email", label: "Email", type: "text", placeholder: "jane@example.com" },
+            { key: "role", label: "Role / Title", type: "text", placeholder: "e.g. CFO" },
+            { key: "organization", label: "Organisation", type: "text", placeholder: "e.g. Acme Corp" },
+          ],
+        },
+        {
+          title: "Influence & Interest",
+          description: "Plot them on the influence/interest grid.",
+          fields: [
+            { key: "influence", label: "Influence", type: "select", required: true, options: [
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ]},
+            { key: "interest", label: "Interest", type: "select", required: true, options: [
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ]},
+            { key: "engagement", label: "Current Engagement", type: "select", required: true, options: [
+              { value: "champion", label: "Champion" },
+              { value: "supporter", label: "Supporter" },
+              { value: "neutral", label: "Neutral" },
+              { value: "critic", label: "Critic" },
+              { value: "blocker", label: "Blocker" },
+            ]},
+            { key: "communication_frequency", label: "Communication Cadence", type: "select", options: [
+              { value: "weekly", label: "Weekly" },
+              { value: "bi-weekly", label: "Bi-weekly" },
+              { value: "monthly", label: "Monthly" },
+              { value: "quarterly", label: "Quarterly" },
+            ]},
+          ],
+        },
+        {
+          title: "Linkage",
+          description: "Link to a programme, project or product.",
+          fields: entityParentFields(true),
+        },
+      ];
+
+    case "change_request_form":
+      return [
+        {
+          title: "Change Summary",
+          description: "Describe the change being requested.",
+          fields: [
+            orgField,
+            { key: "title", label: "Change Title", type: "text", placeholder: "e.g. Extend UAT window by 2 weeks", required: true },
+            { key: "description", label: "Description", type: "textarea", placeholder: "What change is being proposed?", fullWidth: true },
+            { key: "change_type", label: "Change Type", type: "select", required: true, options: [
+              { value: "scope", label: "Scope" },
+              { value: "schedule", label: "Schedule" },
+              { value: "budget", label: "Budget" },
+              { value: "quality", label: "Quality" },
+              { value: "resource", label: "Resource" },
+            ]},
+            { key: "reason", label: "Reason for Change", type: "textarea", placeholder: "Why is this change needed?", fullWidth: true },
+          ],
+        },
+        {
+          title: "Impact Analysis",
+          description: "Quantify the impact across dimensions.",
+          fields: [
+            { key: "cost_impact", label: "Cost Impact ($)", type: "number", placeholder: "e.g. 12500" },
+            { key: "time_impact_days", label: "Time Impact (days)", type: "number", placeholder: "e.g. 14" },
+            { key: "risk_impact", label: "Risk Impact", type: "textarea", placeholder: "How does this affect existing risks?", fullWidth: true },
+            { key: "quality_impact", label: "Quality Impact", type: "textarea", placeholder: "Any effect on quality criteria?", fullWidth: true },
+            { key: "benefits", label: "Benefits Impact", type: "textarea", placeholder: "How will benefits realisation be affected?", fullWidth: true },
+            { key: "impact_summary", label: "Overall Impact Summary", type: "textarea", placeholder: "One-paragraph summary for the change board.", fullWidth: true },
+          ],
+        },
+        {
+          title: "Decision & Linkage",
+          description: "Set priority, target date and link the change.",
+          fields: [
+            { key: "priority", label: "Priority", type: "select", required: true, options: [
+              { value: "critical", label: "Critical" },
+              { value: "high", label: "High" },
+              { value: "medium", label: "Medium" },
+              { value: "low", label: "Low" },
+            ]},
+            { key: "date_required", label: "Decision Required By", type: "date" },
+            ...entityParentFields(true),
+          ],
+        },
+      ];
+
+    case "sprint_retro":
+      return [
+        {
+          title: "Retro Setup",
+          description: "Which sprint are we reflecting on?",
+          fields: [
+            { key: "product_id", label: "Product", type: "select", required: true, placeholder: "Select the product", options: products.map(p => ({ value: p.id, label: p.name })) },
+            { key: "sprint_name", label: "Sprint Name", type: "text", placeholder: "e.g. Sprint 14", required: true },
+            { key: "sprint_goal_met", label: "Sprint Goal Met?", type: "select", options: [
+              { value: "yes", label: "Yes — goal achieved" },
+              { value: "partial", label: "Partial — some commitments slipped" },
+              { value: "no", label: "No — goal missed" },
+            ]},
+          ],
+        },
+        {
+          title: "What Worked / Didn't",
+          description: "Capture observations across the team.",
+          fields: [
+            { key: "went_well", label: "What went well", type: "textarea", placeholder: "Wins, improvements, things to keep doing...", fullWidth: true },
+            { key: "didnt_go_well", label: "What didn't go well", type: "textarea", placeholder: "Pain points, blockers, things to stop...", fullWidth: true },
+            { key: "ideas", label: "Ideas to try", type: "textarea", placeholder: "Experiments, new practices, process tweaks...", fullWidth: true },
+          ],
+        },
+        {
+          title: "Actions",
+          description: "Commit to a small number of concrete improvements.",
+          fields: [
+            { key: "actions", label: "Action Items", type: "textarea", placeholder: "1. [Owner] Action — by date\n2. ...", helpText: "Aim for 1-3 actions max — focused beats long lists.", fullWidth: true },
+          ],
+        },
+      ];
+
+    case "compliance_health_check":
+      return [
+        {
+          title: "Scope",
+          description: "Pick what we're checking.",
+          fields: [
+            orgField,
+            { key: "scope_type", label: "Scope", type: "select", required: true, options: [
+              { value: "organization", label: "Whole organisation" },
+              { value: "programme", label: "Single programme" },
+              { value: "project", label: "Single project" },
+            ]},
+            { key: "programme_id", label: "Programme", type: "select", placeholder: "If scope = programme", options: programmes.map(p => ({ value: p.id, label: p.name })) },
+            { key: "project_id", label: "Project", type: "select", placeholder: "If scope = project", options: projects.map(p => ({ value: p.id, label: p.name })) },
+          ],
+        },
+        {
+          title: "Cadence",
+          description: "Are status updates and reviews happening on time?",
+          fields: [
+            { key: "last_status_update", label: "Days since last status update", type: "number", placeholder: "e.g. 7" },
+            { key: "last_governance_review", label: "Days since last governance review", type: "number", placeholder: "e.g. 30" },
+          ],
+        },
+        {
+          title: "Hygiene",
+          description: "Are core registers populated and looked after?",
+          fields: [
+            { key: "open_risks", label: "Open risks (count)", type: "number" },
+            { key: "stale_risks", label: "Risks not reviewed in 30+ days", type: "number" },
+            { key: "open_issues", label: "Open issues (count)", type: "number" },
+            { key: "orphan_items", label: "Register items missing parent linkage", type: "number" },
+          ],
+        },
+        {
+          title: "Notes",
+          description: "Any context to flag for the steering committee.",
+          fields: [
+            { key: "notes", label: "Observations", type: "textarea", placeholder: "Anything else worth flagging...", fullWidth: true },
+          ],
+        },
+      ];
   }
 };
 
