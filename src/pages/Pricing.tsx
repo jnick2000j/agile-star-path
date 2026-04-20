@@ -159,7 +159,7 @@ export default function Pricing() {
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <p className="text-sm text-muted-foreground mb-4 min-h-[40px]">{plan.description}</p>
                   <div className="mb-6">
-                    <span className="text-4xl font-bold">{plan.currency} {price}</span>
+                    <span className="text-4xl font-bold">{formatPrice(plan.currency, price)}</span>
                     <span className="text-muted-foreground">/{cycle === "monthly" ? "mo" : "yr"}</span>
                   </div>
                   <Button
