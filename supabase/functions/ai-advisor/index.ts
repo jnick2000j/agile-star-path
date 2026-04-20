@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
+import { evaluateResidency } from "../_shared/residency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -220,6 +221,22 @@ serve(async (req) => {
     };
     if (!conversation_id || !organization_id || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Residency policy check.
+    const residency = await evaluateResidency({
+      supabase: authClient,
+      organizationId: organization_id,
+      userId: user.id,
+      operation: "ai-advisor:chat",
+      resourceType: "ai_advisor_conversation",
+      resourceId: conversation_id,
+    });
+    if (!residency.ok) {
+      return new Response(
+        JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+        { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const ctx = { supabase, userId: user.id, orgId: organization_id, conversationId: conversation_id };

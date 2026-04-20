@@ -1211,6 +1211,56 @@ export type Database = {
           },
         ]
       }
+      compliance_attestations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          evidence_url: string | null
+          expires_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          standard: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          evidence_url?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          standard: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          evidence_url?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          standard?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_attestations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_rule_configs: {
         Row: {
           cadence_window_days: number
@@ -2557,34 +2607,49 @@ export type Database = {
       }
       organizations: {
         Row: {
+          allow_cross_region_ai: boolean
           created_at: string
           created_by: string | null
+          data_region: string
           id: string
           logo_url: string | null
           name: string
           primary_color: string | null
+          residency_enforcement: string
+          residency_locked_at: string | null
+          residency_locked_by: string | null
           secondary_color: string | null
           slug: string
           updated_at: string
         }
         Insert: {
+          allow_cross_region_ai?: boolean
           created_at?: string
           created_by?: string | null
+          data_region?: string
           id?: string
           logo_url?: string | null
           name: string
           primary_color?: string | null
+          residency_enforcement?: string
+          residency_locked_at?: string | null
+          residency_locked_by?: string | null
           secondary_color?: string | null
           slug: string
           updated_at?: string
         }
         Update: {
+          allow_cross_region_ai?: boolean
           created_at?: string
           created_by?: string | null
+          data_region?: string
           id?: string
           logo_url?: string | null
           name?: string
           primary_color?: string | null
+          residency_enforcement?: string
+          residency_locked_at?: string | null
+          residency_locked_by?: string | null
           secondary_color?: string | null
           slug?: string
           updated_at?: string
@@ -3750,6 +3815,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "reference_sequences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      residency_audit_log: {
+        Row: {
+          created_at: string
+          decision: string
+          enforcement_mode: string
+          id: string
+          metadata: Json
+          operation: string
+          org_region: string
+          organization_id: string
+          processing_region: string | null
+          resource_id: string | null
+          resource_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision: string
+          enforcement_mode: string
+          id?: string
+          metadata?: Json
+          operation: string
+          org_region: string
+          organization_id: string
+          processing_region?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision?: string
+          enforcement_mode?: string
+          id?: string
+          metadata?: Json
+          operation?: string
+          org_region?: string
+          organization_id?: string
+          processing_region?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "residency_audit_log_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -5947,6 +6065,10 @@ export type Database = {
       check_plan_limit: {
         Args: { _org_id: string; _resource_type: string }
         Returns: boolean
+      }
+      check_residency_policy: {
+        Args: { _org_id: string; _processing_region: string }
+        Returns: Json
       }
       compute_compliance_score: {
         Args: { _scope_id: string; _scope_type: string }

@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { evaluateResidency } from "../_shared/residency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,6 +50,22 @@ Deno.serve(async (req) => {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Residency policy check.
+    const residency = await evaluateResidency({
+      supabase,
+      organizationId: report.organization_id,
+      userId: user.id,
+      operation: "generate-comms-pack",
+      resourceType: "governance_report",
+      resourceId: report.id,
+    });
+    if (!residency.ok) {
+      return new Response(
+        JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+        { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const adminDb = createClient(SUPABASE_URL, SERVICE_KEY);

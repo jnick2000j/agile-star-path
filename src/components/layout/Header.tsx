@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 import { OrganizationSelector } from "@/components/OrganizationSelector";
+import { RegionBadge } from "@/components/RegionBadge";
 import { AskSupportDialog } from "@/components/AskSupportDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -95,6 +96,7 @@ export function Header({ title, subtitle }: HeaderProps) {
         <div className="hidden md:block w-56">
           <OrganizationSelector />
         </div>
+        <RegionBadge />
         
 
         <Button

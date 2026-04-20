@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
+import { evaluateResidency } from "../_shared/residency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,12 +36,29 @@ serve(async (req) => {
       });
     }
 
-    const { query } = await req.json();
+    const { query, organization_id } = await req.json();
     if (!query || typeof query !== "string" || query.length > 2000) {
       return new Response(JSON.stringify({ error: "Invalid query" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Residency policy check (skip if no org context provided).
+    if (organization_id) {
+      const residency = await evaluateResidency({
+        supabase,
+        organizationId: organization_id,
+        userId: user.id,
+        operation: "generate-report",
+        metadata: { query_preview: query.slice(0, 120) },
+      });
+      if (!residency.ok) {
+        return new Response(
+          JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+          { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // Fetch portfolio data for context

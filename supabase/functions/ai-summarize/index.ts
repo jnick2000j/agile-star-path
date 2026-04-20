@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
+import { evaluateResidency } from "../_shared/residency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,6 +80,22 @@ serve(async (req) => {
     const requireApproval = body.require_approval !== false;
 
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Residency policy check (org-level, hybrid).
+    const residency = await evaluateResidency({
+      supabase: authClient,
+      organizationId: body.organization_id,
+      userId: user.id,
+      operation: `ai-summarize:${body.summary_kind}`,
+      resourceType: body.scope_type,
+      resourceId: body.scope_id,
+    });
+    if (!residency.ok) {
+      return new Response(
+        JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+        { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Phase 5 — fetch the user's preferred language and pass it to the model.
     let outputLanguage = body.output_language ?? null;
