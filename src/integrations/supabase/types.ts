@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_audit_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json
+          model: string | null
+          organization_id: string | null
+          output_summary: string | null
+          prompt_summary: string | null
+          prompt_version: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json
+          model?: string | null
+          organization_id?: string | null
+          output_summary?: string | null
+          prompt_summary?: string | null
+          prompt_version?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json
+          model?: string | null
+          organization_id?: string | null
+          output_summary?: string | null
+          prompt_summary?: string | null
+          prompt_version?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_evidence: {
         Row: {
           approval_id: string
@@ -955,6 +1017,8 @@ export type Database = {
       }
       custom_roles: {
         Row: {
+          can_approve_ai_output: boolean
+          can_draft_with_ai: boolean
           can_manage_benefits: boolean | null
           can_manage_change_requests: boolean | null
           can_manage_exceptions: boolean | null
@@ -965,13 +1029,16 @@ export type Database = {
           can_manage_programmes: boolean | null
           can_manage_projects: boolean | null
           can_manage_quality: boolean | null
+          can_manage_regions: boolean
           can_manage_requirements: boolean | null
           can_manage_risks: boolean | null
           can_manage_stage_gates: boolean | null
           can_manage_stakeholders: boolean | null
           can_manage_tranches: boolean | null
+          can_manage_translations: boolean
           can_manage_users: boolean | null
           can_manage_work_packages: boolean | null
+          can_view_ai_advisor: boolean
           can_view_reports: boolean | null
           color: string | null
           created_at: string
@@ -984,6 +1051,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          can_approve_ai_output?: boolean
+          can_draft_with_ai?: boolean
           can_manage_benefits?: boolean | null
           can_manage_change_requests?: boolean | null
           can_manage_exceptions?: boolean | null
@@ -994,13 +1063,16 @@ export type Database = {
           can_manage_programmes?: boolean | null
           can_manage_projects?: boolean | null
           can_manage_quality?: boolean | null
+          can_manage_regions?: boolean
           can_manage_requirements?: boolean | null
           can_manage_risks?: boolean | null
           can_manage_stage_gates?: boolean | null
           can_manage_stakeholders?: boolean | null
           can_manage_tranches?: boolean | null
+          can_manage_translations?: boolean
           can_manage_users?: boolean | null
           can_manage_work_packages?: boolean | null
+          can_view_ai_advisor?: boolean
           can_view_reports?: boolean | null
           color?: string | null
           created_at?: string
@@ -1013,6 +1085,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          can_approve_ai_output?: boolean
+          can_draft_with_ai?: boolean
           can_manage_benefits?: boolean | null
           can_manage_change_requests?: boolean | null
           can_manage_exceptions?: boolean | null
@@ -1023,13 +1097,16 @@ export type Database = {
           can_manage_programmes?: boolean | null
           can_manage_projects?: boolean | null
           can_manage_quality?: boolean | null
+          can_manage_regions?: boolean
           can_manage_requirements?: boolean | null
           can_manage_risks?: boolean | null
           can_manage_stage_gates?: boolean | null
           can_manage_stakeholders?: boolean | null
           can_manage_tranches?: boolean | null
+          can_manage_translations?: boolean
           can_manage_users?: boolean | null
           can_manage_work_packages?: boolean | null
+          can_view_ai_advisor?: boolean
           can_view_reports?: boolean | null
           color?: string | null
           created_at?: string
@@ -2185,6 +2262,33 @@ export type Database = {
           secondary_color?: string | null
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      permission_modules: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          label: string
+          module_key: string
+          sort_order: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          label: string
+          module_key: string
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          label?: string
+          module_key?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -3418,6 +3522,105 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_field_permissions: {
+        Row: {
+          created_at: string
+          field_name: string
+          id: string
+          module_key: string
+          role_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          field_name: string
+          id?: string
+          module_key: string
+          role_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          field_name?: string
+          id?: string
+          module_key?: string
+          role_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_field_permissions_module_key_fkey"
+            columns: ["module_key"]
+            isOneToOne: false
+            referencedRelation: "permission_modules"
+            referencedColumns: ["module_key"]
+          },
+          {
+            foreignKeyName: "role_field_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_module_permissions: {
+        Row: {
+          can_approve: boolean
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_export: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          module_key: string
+          role_id: string
+          updated_at: string
+        }
+        Insert: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_export?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_key: string
+          role_id: string
+          updated_at?: string
+        }
+        Update: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_export?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_key?: string
+          role_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_module_permissions_module_key_fkey"
+            columns: ["module_key"]
+            isOneToOne: false
+            referencedRelation: "permission_modules"
+            referencedColumns: ["module_key"]
+          },
+          {
+            foreignKeyName: "role_module_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -5459,6 +5662,10 @@ export type Database = {
       }
       has_feature: {
         Args: { _feature_key: string; _org_id: string }
+        Returns: boolean
+      }
+      has_module_permission: {
+        Args: { _action?: string; _module_key: string; _user_id: string }
         Returns: boolean
       }
       has_org_access: {
