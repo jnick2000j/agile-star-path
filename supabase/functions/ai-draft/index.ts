@@ -2,6 +2,7 @@
 // Routes "field" requests to gemini-2.5-flash and "wizard" requests to gemini-2.5-pro.
 // Logs every call to ai_audit_log with status = 'pending' (human approval required).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { evaluateResidency } from "../_shared/residency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -143,6 +144,22 @@ Deno.serve(async (req: Request) => {
 
     const body = (await req.json()) as DraftRequest & { organization_id?: string; output_language?: string };
     const orgId = body.organization_id ?? null;
+
+    // Residency policy check (org-level, hybrid: warn or block).
+    const residency = await evaluateResidency({
+      supabase,
+      organizationId: orgId,
+      userId: userData.user.id,
+      operation: `ai-draft:${body.kind}`,
+      resourceType: body.entity_type,
+      resourceId: body.entity_id,
+    });
+    if (!residency.ok) {
+      return new Response(
+        JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+        { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Phase 5 — Look up the user's preferred language so AI output matches their UI language,
     // unless the request explicitly overrides it (e.g. translate field assist).
