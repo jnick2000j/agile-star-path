@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { Loader2, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { formatDistanceToNow } from "date-fns";
+import { formatPrice } from "@/lib/currency";
 
 interface Plan {
   id?: string;
