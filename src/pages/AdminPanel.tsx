@@ -94,6 +94,7 @@ const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; clas
   programme_stakeholder: { label: "Program Stakeholder", icon: Briefcase, className: "bg-muted text-muted-foreground" },
   project_stakeholder: { label: "Project Stakeholder", icon: FolderKanban, className: "bg-muted text-muted-foreground" },
   product_stakeholder: { label: "Product Stakeholder", icon: Package, className: "bg-muted text-muted-foreground" },
+  stakeholder: { label: "Stakeholder", icon: Users, className: "bg-muted text-muted-foreground" },
 };
 
 export default function AdminPanel() {
