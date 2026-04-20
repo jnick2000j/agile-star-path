@@ -57,7 +57,7 @@ export default function Wizards() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          {["all", "MSP", "PRINCE2", "Agile", "Product"].map((cat) => (
+          {["all", "MSP", "PRINCE2", "Agile", "Product", "Governance"].map((cat) => (
             <Button
               key={cat}
               variant={categoryFilter === cat ? "default" : "outline"}
