@@ -185,6 +185,7 @@ export type Database = {
           reviewed_by: string | null
           status: string
           target_field: string | null
+          target_language: string | null
           user_id: string | null
         }
         Insert: {
@@ -205,6 +206,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           target_field?: string | null
+          target_language?: string | null
           user_id?: string | null
         }
         Update: {
@@ -225,6 +227,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           target_field?: string | null
+          target_language?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -335,6 +338,7 @@ export type Database = {
           scope_type: string
           status: string
           summary_kind: string
+          translations: Json
           updated_at: string
         }
         Insert: {
@@ -356,6 +360,7 @@ export type Database = {
           scope_type: string
           status?: string
           summary_kind: string
+          translations?: Json
           updated_at?: string
         }
         Update: {
@@ -377,6 +382,7 @@ export type Database = {
           scope_type?: string
           status?: string
           summary_kind?: string
+          translations?: Json
           updated_at?: string
         }
         Relationships: [
@@ -2979,6 +2985,7 @@ export type Database = {
           location: string | null
           mailing_address: string | null
           phone_number: string | null
+          preferred_language: string
           role: Database["public"]["Enums"]["app_role"]
           state: string | null
           updated_at: string
@@ -3002,6 +3009,7 @@ export type Database = {
           location?: string | null
           mailing_address?: string | null
           phone_number?: string | null
+          preferred_language?: string
           role?: Database["public"]["Enums"]["app_role"]
           state?: string | null
           updated_at?: string
@@ -3025,6 +3033,7 @@ export type Database = {
           location?: string | null
           mailing_address?: string | null
           phone_number?: string | null
+          preferred_language?: string
           role?: Database["public"]["Enums"]["app_role"]
           state?: string | null
           updated_at?: string
