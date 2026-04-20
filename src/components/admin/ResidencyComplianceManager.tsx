@@ -248,8 +248,8 @@ export function ResidencyComplianceManager() {
           </div>
 
           {org.data_region !== "global" && org.residency_enforcement === "warn" && org.allow_cross_region_ai && (
-            <div className="flex gap-2 rounded-lg border border-yellow-500/40 bg-yellow-500/5 p-3 text-sm">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+            <div className="flex gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
               <p>Soft-warn mode is active. Off-region AI calls will succeed and be logged to the audit trail. Switch to <strong>block</strong> for strict residency.</p>
             </div>
           )}

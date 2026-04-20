@@ -46,6 +46,7 @@ import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDia
 import { UserAccessList } from "@/components/admin/UserAccessList";
 import { RoleTypesManager } from "@/components/admin/RoleTypesManager";
 import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
+import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
 
@@ -280,6 +281,7 @@ export default function AdminPanel() {
           <TabsTrigger value="role-builder">Permission Matrix</TabsTrigger>
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
           <TabsTrigger value="access">Access Control</TabsTrigger>
+          <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
