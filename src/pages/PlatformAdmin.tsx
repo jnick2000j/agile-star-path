@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
 import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
+import { AuditRetentionPolicy } from "@/components/admin/AuditRetentionPolicy";
 import { PlanManager } from "@/components/admin/PlanManager";
 import { PlatformSupportQueue } from "@/components/admin/PlatformSupportQueue";
 
@@ -261,7 +262,8 @@ export default function PlatformAdmin() {
           <PlatformSSOQueue />
         </TabsContent>
 
-        <TabsContent value="audit">
+        <TabsContent value="audit" className="space-y-4">
+          <AuditRetentionPolicy scope="platform" />
           <AuditLogViewer scope="platform" />
         </TabsContent>
       </Tabs>
