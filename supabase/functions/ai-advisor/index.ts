@@ -223,6 +223,22 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Residency policy check.
+    const residency = await evaluateResidency({
+      supabase: authClient,
+      organizationId: organization_id,
+      userId: user.id,
+      operation: "ai-advisor:chat",
+      resourceType: "ai_advisor_conversation",
+      resourceId: conversation_id,
+    });
+    if (!residency.ok) {
+      return new Response(
+        JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+        { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const ctx = { supabase, userId: user.id, orgId: organization_id, conversationId: conversation_id };
 
     const systemPrompt = `You are the AI Advisor for a PMO platform. You help users analyse their portfolio and can take actions on their behalf using tools.

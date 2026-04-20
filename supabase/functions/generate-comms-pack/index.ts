@@ -52,6 +52,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Residency policy check.
+    const residency = await evaluateResidency({
+      supabase,
+      organizationId: report.organization_id,
+      userId: user.id,
+      operation: "generate-comms-pack",
+      resourceType: "governance_report",
+      resourceId: report.id,
+    });
+    if (!residency.ok) {
+      return new Response(
+        JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+        { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const adminDb = createClient(SUPABASE_URL, SERVICE_KEY);
     const scopeTable = report.scope_type === "programme" ? "programmes" : "projects";
     const { data: scope } = await adminDb.from(scopeTable).select("name").eq("id", report.scope_id).maybeSingle();

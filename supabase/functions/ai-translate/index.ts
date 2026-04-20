@@ -64,6 +64,25 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Residency policy check (skip if no org context — global op).
+    if (body.organization_id) {
+      const residency = await evaluateResidency({
+        supabase: authClient,
+        organizationId: body.organization_id,
+        userId: userData.user.id,
+        operation: "ai-translate",
+        resourceType: "ai_summary",
+        resourceId: body.summary_id,
+        metadata: { target_language: body.target_language },
+      });
+      if (!residency.ok) {
+        return new Response(
+          JSON.stringify({ error: residency.message, code: "residency_blocked", org_region: residency.org_region }),
+          { status: residency.status ?? 451, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const langName = LANGUAGE_NAMES[body.target_language] ?? body.target_language;
 
     // Cache hit — return early if we already have this translation stored.
