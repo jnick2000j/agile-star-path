@@ -98,6 +98,32 @@ export default function AIApprovals() {
       console.error(error);
       return;
     }
+
+    // If this is a summary draft and we're approving, publish it to ai_summaries
+    if (status === "approved" && entry.action_type?.startsWith("summarize:") && entry.entity_type && entry.entity_id) {
+      const summaryKind = entry.action_type.replace("summarize:", "");
+      const persistentKinds = ["entity_overview", "weekly_status", "risk_issue_digest", "stakeholder_exec"];
+      if (persistentKinds.includes(summaryKind)) {
+        const { error: pubError } = await supabase
+          .from("ai_summaries")
+          .update({
+            published_content: { content: editedDraft } as never,
+            draft_content: { content: editedDraft } as never,
+            status: "published",
+            is_stale: false,
+            approved_by: user.id,
+            approved_at: new Date().toISOString(),
+          })
+          .eq("scope_type", entry.entity_type)
+          .eq("scope_id", entry.entity_id)
+          .eq("summary_kind", summaryKind);
+        if (pubError) {
+          console.error(pubError);
+          toast.error("Approved, but couldn't publish summary.");
+        }
+      }
+    }
+
     toast.success(status === "approved" ? "Draft approved." : "Draft rejected.");
     setSelected(null);
     fetchEntries();

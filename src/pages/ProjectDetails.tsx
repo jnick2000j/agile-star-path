@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuickActionTabs } from "@/components/QuickActionTabs";
+import { AISummaryPanel } from "@/components/ai/AISummaryPanel";
 import {
   ArrowLeft,
   FolderKanban,
@@ -521,6 +522,13 @@ export default function ProjectDetails() {
             </div>
           </CardContent>
         </Card>
+
+        <AISummaryPanel
+          scopeType="project"
+          scopeId={project.id}
+          summaryKind="entity_overview"
+          title="AI Project Overview"
+        />
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="workpackages" className="space-y-4">

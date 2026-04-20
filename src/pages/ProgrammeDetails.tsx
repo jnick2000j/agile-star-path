@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuickActionTabs } from "@/components/QuickActionTabs";
+import { AISummaryPanel } from "@/components/ai/AISummaryPanel";
 import { BlueprintTabContent } from "@/components/programme-tabs/BlueprintTabContent";
 import { DefinitionTabContent } from "@/components/programme-tabs/DefinitionTabContent";
 import { SuccessPlanTabContent } from "@/components/programme-tabs/SuccessPlanTabContent";
@@ -443,6 +444,22 @@ export default function ProgrammeDetails() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <AISummaryPanel
+            scopeType="programme"
+            scopeId={programme.id}
+            summaryKind="entity_overview"
+            title="AI Programme Overview"
+          />
+          <AISummaryPanel
+            scopeType="programme"
+            scopeId={programme.id}
+            summaryKind="risk_issue_digest"
+            title="AI Risk & Issue Digest"
+            description="Top open risks and issues for this programme. Pending approval before publishing."
+          />
+        </div>
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="projects" className="space-y-4">
