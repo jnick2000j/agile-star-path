@@ -522,6 +522,13 @@ export default function ProjectDetails() {
           </CardContent>
         </Card>
 
+        <AISummaryPanel
+          scopeType="project"
+          scopeId={project.id}
+          summaryKind="entity_overview"
+          title="AI Project Overview"
+        />
+
         {/* Tabs for different sections */}
         <Tabs defaultValue="workpackages" className="space-y-4">
           <QuickActionTabs

@@ -444,6 +444,22 @@ export default function ProgrammeDetails() {
           </CardContent>
         </Card>
 
+        <div className="grid gap-4 lg:grid-cols-2">
+          <AISummaryPanel
+            scopeType="programme"
+            scopeId={programme.id}
+            summaryKind="entity_overview"
+            title="AI Programme Overview"
+          />
+          <AISummaryPanel
+            scopeType="programme"
+            scopeId={programme.id}
+            summaryKind="risk_issue_digest"
+            title="AI Risk & Issue Digest"
+            description="Top open risks and issues for this programme. Pending approval before publishing."
+          />
+        </div>
+
         {/* Tabs for different sections */}
         <Tabs defaultValue="projects" className="space-y-4">
           <QuickActionTabs

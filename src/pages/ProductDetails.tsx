@@ -446,6 +446,13 @@ export default function ProductDetails() {
           </CardContent>
         </Card>
 
+        <AISummaryPanel
+          scopeType="product"
+          scopeId={product.id}
+          summaryKind="entity_overview"
+          title="AI Product Overview"
+        />
+
         {/* Tabs for different sections */}
         <Tabs defaultValue="features" className="space-y-4">
           <QuickActionTabs
