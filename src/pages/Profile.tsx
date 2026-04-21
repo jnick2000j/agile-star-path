@@ -355,7 +355,7 @@ export default function Profile() {
         <MFASettingsCard />
 
         {/* Active sessions for the current user */}
-        {user && <ActiveSessionsCard scope="user" userId={user.id} />}
+        <ActiveSessionsCard scope="self" />
       </div>
     </AppLayout>
   );
