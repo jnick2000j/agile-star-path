@@ -18,7 +18,7 @@ interface Policy {
 }
 
 export function OrgMFAPolicyCard() {
-  const { selectedOrg } = useOrganization();
+  const { currentOrganization: selectedOrg } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [policy, setPolicy] = useState<Policy>({
