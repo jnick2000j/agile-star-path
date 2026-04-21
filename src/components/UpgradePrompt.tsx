@@ -8,7 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ShieldCheck } from "lucide-react";
+import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 
 interface UpgradePromptProps {
   open: boolean;
@@ -26,6 +27,32 @@ export function UpgradePrompt({
   limit,
 }: UpgradePromptProps) {
   const navigate = useNavigate();
+  const { isLicenseMode } = useDeploymentMode();
+
+  if (isLicenseMode) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+            </div>
+            <DialogTitle className="text-center">
+              {resource} limit reached
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Your license allows up to <strong>{limit ?? "—"}</strong> {resource}.
+              Contact your account manager to expand your license — Stripe checkout
+              isn't used for license-managed organizations.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => onOpenChange(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

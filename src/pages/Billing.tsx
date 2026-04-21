@@ -37,6 +37,8 @@ import { AICreditPacks } from "@/components/billing/AICreditPacks";
 import { AICreditHistory } from "@/components/billing/AICreditHistory";
 import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useDeploymentMode } from "@/hooks/useDeploymentMode";
+import { LicenseModeNotice } from "@/components/billing/LicenseModeNotice";
 
 interface Plan {
   id: string;
@@ -73,6 +75,7 @@ export default function Billing() {
 
   const isAdmin = accessLevel === "admin";
   const { isAdmin: isPlatformAdmin } = usePermissions();
+  const { isLicenseMode, deploymentMode, entitlements, loading: deploymentLoading } = useDeploymentMode();
 
   const handleCancelSubscription = async () => {
     if (!currentOrganization?.id) return;
@@ -206,7 +209,7 @@ export default function Billing() {
     }
   };
 
-  if (loading || limitsLoading) {
+  if (loading || limitsLoading || deploymentLoading) {
     return (
       <AppLayout title="Billing">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -215,6 +218,48 @@ export default function Billing() {
       </AppLayout>
     );
   }
+
+  // License mode: replace Stripe-driven UI with a license summary.
+  if (isLicenseMode) {
+    return (
+      <AppLayout title="Billing & Plans" subtitle="Managed via license">
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <div>
+            <h1 className="text-3xl font-bold">Billing & Plans</h1>
+            <p className="text-muted-foreground">
+              {currentOrganization?.name} runs on a managed license — no Stripe checkout.
+            </p>
+          </div>
+          <LicenseModeNotice entitlements={entitlements} deploymentMode={deploymentMode} />
+          <AICreditsMeter variant="full" />
+          {limits && (
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold mb-4">Current usage</h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {usageItems.map((item) => {
+                  const unlimited = item.max === -1;
+                  const pct = unlimited ? 0 : Math.round((item.current / item.max) * 100);
+                  const over = !unlimited && item.current >= item.max;
+                  return (
+                    <div key={item.label}>
+                      <div className="flex justify-between text-sm mb-1.5">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className={over ? "text-destructive font-medium" : "font-medium"}>
+                          {item.current} / {unlimited ? "∞" : item.max}
+                        </span>
+                      </div>
+                      <Progress value={unlimited ? 0 : Math.min(pct, 100)} className="h-2" />
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+        </div>
+      </AppLayout>
+    );
+  }
+
 
   const isTrial = subscription?.status === "trialing";
   const trialEndsAt = subscription?.trial_ends_at ? new Date(subscription.trial_ends_at) : null;

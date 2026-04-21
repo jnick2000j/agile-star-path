@@ -14,6 +14,7 @@ import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { toast } from "sonner";
 
 interface DBPack {
@@ -37,10 +38,14 @@ interface Props {
 export function AICreditPacks({ canPurchase }: Props) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
+  const { isLicenseMode } = useDeploymentMode();
   const [packs, setPacks] = useState<DBPack[]>([]);
   const [loading, setLoading] = useState(true);
   const [activePack, setActivePack] = useState<DBPack | null>(null);
   const [justPurchased, setJustPurchased] = useState(false);
+
+  // License-managed orgs don't buy AI credits via Stripe — capacity is in the license.
+  if (isLicenseMode) return null;
 
   // Detect a successful return from Stripe (?purchase=ai_credits)
   useEffect(() => {

@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function TrialBanner() {
   const { currentOrganization } = useOrganization();
+  const { isLicenseMode } = useDeploymentMode();
   const [sub, setSub] = useState<any>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -20,7 +22,8 @@ export function TrialBanner() {
       .then(({ data }) => setSub(data));
   }, [currentOrganization?.id]);
 
-  if (dismissed || !sub || sub.status !== "trialing" || !sub.trial_ends_at) return null;
+  // License-managed orgs never see the trial/upgrade banner.
+  if (isLicenseMode || dismissed || !sub || sub.status !== "trialing" || !sub.trial_ends_at) return null;
 
   const ends = new Date(sub.trial_ends_at);
   const daysLeft = Math.ceil((ends.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
