@@ -2810,6 +2810,85 @@ export type Database = {
         }
         Relationships: []
       }
+      org_mfa_policies: {
+        Row: {
+          allow_recovery_codes: boolean
+          created_at: string
+          enforcement_mode: string
+          grace_period_days: number
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_recovery_codes?: boolean
+          created_at?: string
+          enforcement_mode?: string
+          grace_period_days?: number
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_recovery_codes?: boolean
+          created_at?: string
+          enforcement_mode?: string
+          grace_period_days?: number
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_mfa_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_session_policies: {
+        Row: {
+          absolute_timeout_minutes: number
+          created_at: string
+          enforce_ip_allowlist: boolean
+          idle_timeout_minutes: number
+          ip_allowlist: string[]
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          absolute_timeout_minutes?: number
+          created_at?: string
+          enforce_ip_allowlist?: boolean
+          idle_timeout_minutes?: number
+          ip_allowlist?: string[]
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          absolute_timeout_minutes?: number
+          created_at?: string
+          enforce_ip_allowlist?: boolean
+          idle_timeout_minutes?: number
+          ip_allowlist?: string[]
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_session_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invitations: {
         Row: {
           accepted_at: string | null
@@ -4553,6 +4632,57 @@ export type Database = {
           },
         ]
       }
+      scim_group_role_mappings: {
+        Row: {
+          access_level: string
+          created_at: string
+          created_by: string | null
+          custom_role_id: string | null
+          id: string
+          organization_id: string
+          priority: number
+          scim_group_name: string
+          updated_at: string
+        }
+        Insert: {
+          access_level: string
+          created_at?: string
+          created_by?: string | null
+          custom_role_id?: string | null
+          id?: string
+          organization_id: string
+          priority?: number
+          scim_group_name: string
+          updated_at?: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          created_by?: string | null
+          custom_role_id?: string | null
+          id?: string
+          organization_id?: string
+          priority?: number
+          scim_group_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scim_group_role_mappings_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scim_group_role_mappings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scim_tokens: {
         Row: {
           created_at: string
@@ -4605,6 +4735,165 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "scim_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scim_user_sync_state: {
+        Row: {
+          active: boolean
+          created_at: string
+          external_id: string
+          id: string
+          last_synced_at: string
+          organization_id: string
+          scim_groups: string[]
+          scim_username: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          external_id: string
+          id?: string
+          last_synced_at?: string
+          organization_id: string
+          scim_groups?: string[]
+          scim_username?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          external_id?: string
+          id?: string
+          last_synced_at?: string
+          organization_id?: string
+          scim_groups?: string[]
+          scim_username?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scim_user_sync_state_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      siem_export_log: {
+        Row: {
+          attempt: number
+          created_at: string
+          duration_ms: number | null
+          event_count: number
+          exporter_id: string
+          http_status: number | null
+          id: string
+          organization_id: string
+          response_body: string | null
+          status: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          duration_ms?: number | null
+          event_count?: number
+          exporter_id: string
+          http_status?: number | null
+          id?: string
+          organization_id: string
+          response_body?: string | null
+          status: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          duration_ms?: number | null
+          event_count?: number
+          exporter_id?: string
+          http_status?: number | null
+          id?: string
+          organization_id?: string
+          response_body?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "siem_export_log_exporter_id_fkey"
+            columns: ["exporter_id"]
+            isOneToOne: false
+            referencedRelation: "siem_exporters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      siem_exporters: {
+        Row: {
+          auth_header_name: string | null
+          auth_secret_name: string | null
+          consecutive_failures: number
+          created_at: string
+          created_by: string | null
+          destination_type: string
+          endpoint_url: string
+          event_categories: string[]
+          format: string
+          id: string
+          is_active: boolean
+          last_delivery_at: string | null
+          last_delivery_status: string | null
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          auth_header_name?: string | null
+          auth_secret_name?: string | null
+          consecutive_failures?: number
+          created_at?: string
+          created_by?: string | null
+          destination_type: string
+          endpoint_url: string
+          event_categories?: string[]
+          format?: string
+          id?: string
+          is_active?: boolean
+          last_delivery_at?: string | null
+          last_delivery_status?: string | null
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          auth_header_name?: string | null
+          auth_secret_name?: string | null
+          consecutive_failures?: number
+          created_at?: string
+          created_by?: string | null
+          destination_type?: string
+          endpoint_url?: string
+          event_categories?: string[]
+          format?: string
+          id?: string
+          is_active?: boolean
+          last_delivery_at?: string | null
+          last_delivery_status?: string | null
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "siem_exporters_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -6003,6 +6292,66 @@ export type Database = {
           },
         ]
       }
+      user_mfa_factors: {
+        Row: {
+          created_at: string
+          factor_type: string
+          friendly_name: string | null
+          id: string
+          last_used_at: string | null
+          secret_encrypted: string
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          factor_type?: string
+          friendly_name?: string | null
+          id?: string
+          last_used_at?: string | null
+          secret_encrypted: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          factor_type?: string
+          friendly_name?: string | null
+          id?: string
+          last_used_at?: string | null
+          secret_encrypted?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      user_mfa_recovery_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_organization_access: {
         Row: {
           access_level: string
@@ -6183,6 +6532,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          device_label: string | null
+          id: string
+          ip_address: string | null
+          last_seen_at: string
+          organization_id: string | null
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          session_token_hash: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_label?: string | null
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          organization_id?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          session_token_hash: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_label?: string | null
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          organization_id?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          session_token_hash?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       weekly_reports: {
         Row: {
@@ -6739,6 +7141,10 @@ export type Database = {
         Returns: undefined
       }
       purge_expired_audit_logs: { Args: never; Returns: Json }
+      resolve_scim_groups_to_access_level: {
+        Args: { _groups: string[]; _org_id: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
