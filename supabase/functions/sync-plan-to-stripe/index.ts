@@ -52,6 +52,9 @@ serve(async (req) => {
     }
 
     const env = (environment || "sandbox") as StripeEnv;
+    if (!isStripeAvailable()) {
+      return licenseModeBlockedResponse("stripe_unavailable", corsHeaders);
+    }
     const stripe = createStripeClient(env);
 
     // Load plan

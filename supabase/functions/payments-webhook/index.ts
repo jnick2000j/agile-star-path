@@ -10,6 +10,15 @@ const supabase = createClient(
 serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
+  // Air-gapped / on-prem deployments don't accept webhooks at all.
+  if (!isStripeAvailable()) {
+    console.log("payments-webhook: Stripe not available in this deployment — ignoring");
+    return new Response(JSON.stringify({ received: true, skipped: "stripe_unavailable" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const url = new URL(req.url);
   const env = (url.searchParams.get("env") || "sandbox") as StripeEnv;
 

@@ -40,7 +40,13 @@ serve(async (req) => {
     const body = await req.json();
     const action = body?.action as "create" | "update" | "archive" | "restore";
     const env = (body?.environment || "sandbox") as StripeEnv;
-    const stripe = createStripeClient(env);
+
+    // Archive/restore are local DB operations; only block Stripe-touching create/update.
+    const needsStripe = action === "create" || action === "update";
+    if (needsStripe && !isStripeAvailable()) {
+      return licenseModeBlockedResponse("stripe_unavailable", corsHeaders);
+    }
+    const stripe = needsStripe ? createStripeClient(env) : (null as any);
 
     if (action === "archive" || action === "restore") {
       const id = body?.id as string;

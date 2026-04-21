@@ -28,6 +28,9 @@ serve(async (req) => {
       });
     }
 
+    const skip = await shouldSkipStripe(supabase, organizationId);
+    if (skip.skip) return licenseModeBlockedResponse(skip.reason!, corsHeaders, { organization_id: organizationId });
+
     const env = (environment || "sandbox") as StripeEnv;
 
     const { data: sub } = await supabase

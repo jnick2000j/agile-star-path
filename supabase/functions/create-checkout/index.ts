@@ -31,6 +31,10 @@ serve(async (req) => {
       });
     }
 
+    // License-mode short-circuit: org running on a license (or air-gapped) skips Stripe.
+    const skip = await shouldSkipStripe(supabase, organizationId ?? null);
+    if (skip.skip) return licenseModeBlockedResponse(skip.reason!, corsHeaders, { organization_id: organizationId });
+
     const env = (environment || "sandbox") as StripeEnv;
     const stripe = createStripeClient(env);
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });

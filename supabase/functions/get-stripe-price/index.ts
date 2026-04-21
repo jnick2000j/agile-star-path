@@ -13,6 +13,9 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (!isStripeAvailable()) {
+      return licenseModeBlockedResponse("stripe_unavailable", corsHeaders);
+    }
     const env = (environment || "sandbox") as StripeEnv;
     const stripe = createStripeClient(env);
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });
