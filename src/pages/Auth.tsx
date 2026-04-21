@@ -254,6 +254,7 @@ export default function Auth() {
       case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "";
       case "signup": return "Create your account";
       case "forgot-password": return "Reset your password";
+      case "sso": return "Sign in with SSO";
     }
   };
 
@@ -262,6 +263,7 @@ export default function Auth() {
       case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your credentials to access your dashboard.") : "";
       case "signup": return "Get started with your programme management journey.";
       case "forgot-password": return "Enter your email and we'll send you a reset link.";
+      case "sso": return "Enter your work email and we'll route you to your identity provider.";
     }
   };
 
@@ -270,6 +272,7 @@ export default function Auth() {
       case "login": return branding?.login_button_text || "Sign In";
       case "signup": return "Create Account";
       case "forgot-password": return "Send Reset Link";
+      case "sso": return "Continue with SSO";
     }
   };
 
