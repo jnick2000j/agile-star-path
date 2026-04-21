@@ -58,7 +58,6 @@ interface TeamMember {
   email: string;
   role: string;
   department: string | null;
-  phone_number: string | null;
   avatar_url: string | null;
   archived: boolean;
   is_disabled: boolean;
@@ -133,15 +132,17 @@ export default function Team() {
       const userIds = accessData.map(a => a.user_id);
       const accessByUser = new Map(accessData.map(a => [a.user_id, a]));
 
+      // Use the safe directory view — sensitive PII (phone, address, location)
+      // is restricted to self / admins / managers via RLS on `profiles`.
       const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
+        .from("profiles_directory" as any)
+        .select("id,user_id,full_name,email,role,department,avatar_url,archived")
         .in("user_id", userIds)
         .eq("archived", false);
 
       if (profilesError) throw profilesError;
 
-      const members: TeamMember[] = (profiles || []).map(p => {
+      const members: TeamMember[] = ((profiles || []) as any[]).map((p: any) => {
         const access = accessByUser.get(p.user_id);
         return {
           id: p.id,
@@ -150,7 +151,6 @@ export default function Team() {
           email: p.email,
           role: p.role,
           department: p.department,
-          phone_number: p.phone_number,
           avatar_url: p.avatar_url,
           archived: p.archived,
           is_disabled: !!access?.is_disabled,
@@ -176,8 +176,8 @@ export default function Team() {
     
     try {
       const { data: allProfiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
+        .from("profiles_directory" as any)
+        .select("id,user_id,full_name,email,role,department,avatar_url,archived")
         .eq("archived", false);
 
       if (profilesError) throw profilesError;
@@ -191,16 +191,15 @@ export default function Team() {
 
       const existingUserIds = new Set(existingAccess?.map(a => a.user_id) || []);
 
-      const available = (allProfiles || [])
-        .filter(p => !existingUserIds.has(p.user_id))
-        .map(p => ({
+      const available = ((allProfiles || []) as any[])
+        .filter((p: any) => !existingUserIds.has(p.user_id))
+        .map((p: any) => ({
           id: p.id,
           user_id: p.user_id,
           full_name: p.full_name,
           email: p.email,
           role: p.role,
           department: p.department,
-          phone_number: p.phone_number,
           avatar_url: p.avatar_url,
           archived: p.archived,
           is_disabled: false,
