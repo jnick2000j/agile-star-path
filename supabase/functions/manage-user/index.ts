@@ -1,9 +1,45 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+function inviteEmailHtml(opts: {
+  inviterName: string;
+  appName: string;
+  acceptUrl: string;
+  tempPassword?: string;
+}) {
+  const { inviterName, appName, acceptUrl, tempPassword } = opts;
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width:560px; margin:0 auto; padding:32px;">
+      <h2 style="color:#0f172a;">You've been invited to ${appName}</h2>
+      <p style="color:#475569; font-size:15px; line-height:1.6;">
+        ${inviterName} has created an account for you on <strong>${appName}</strong>.
+        Click the button below to confirm your email and sign in.
+      </p>
+      <p style="margin: 28px 0;">
+        <a href="${acceptUrl}" style="background:#2563eb; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600; display:inline-block;">
+          Confirm &amp; sign in
+        </a>
+      </p>
+      ${
+        tempPassword
+          ? `<p style="color:#475569; font-size:14px;">
+               Your temporary password is: <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${tempPassword}</code><br/>
+               You'll be asked to change it after signing in.
+             </p>`
+          : ""
+      }
+      <p style="color:#94a3b8; font-size:13px;">
+        Or copy this link: <br/>
+        <a href="${acceptUrl}" style="color:#2563eb; word-break:break-all;">${acceptUrl}</a>
+      </p>
+    </div>
+  `;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -13,7 +49,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
+
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         autoRefreshToken: false,
@@ -24,9 +60,9 @@ Deno.serve(async (req) => {
     // Verify caller is admin
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
-    
+
     const { data: { user: callerUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
+
     if (authError || !callerUser) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
@@ -40,7 +76,7 @@ Deno.serve(async (req) => {
       .select("role")
       .eq("user_id", callerUser.id)
       .single();
-    
+
     if (roleData?.role !== "admin") {
       return new Response(
         JSON.stringify({ error: "Only admins can perform this action" }),
@@ -51,38 +87,87 @@ Deno.serve(async (req) => {
     const { action, user_id, email, password, full_name, redirect_to } = await req.json();
 
     if (action === "invite") {
-      // Create user via admin API with email confirmation required
-      if (!email || !password) {
+      if (!email) {
         return new Response(
-          JSON.stringify({ error: "email and password are required for invite" }),
+          JSON.stringify({ error: "email is required for invite" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: false, // User must confirm via email
-        user_metadata: { full_name: full_name || email.split('@')[0] },
-      });
+      const redirectTo =
+        redirect_to ||
+        `${supabaseUrl.replace(".supabase.co", ".lovable.app")}/auth`;
 
+      // 1. Create the user. If a temp password was supplied use it, otherwise
+      //    create with email_confirm=false and rely on the invite link.
+      const createPayload: Record<string, unknown> = {
+        email,
+        email_confirm: false,
+        user_metadata: { full_name: full_name || email.split("@")[0] },
+      };
+      if (password) createPayload.password = password;
+
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser(
+        createPayload as any,
+      );
       if (createError) throw createError;
 
-      // Send the confirmation email by generating a signup link
+      // 2. Generate a signup confirmation link (does NOT send email itself).
       const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
         type: "signup",
         email,
-        options: {
-          redirectTo: redirect_to || `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/auth`,
-        },
-      });
+        password: password || undefined,
+        options: { redirectTo },
+      } as any);
 
       if (linkError) {
-        console.error("Error generating invite link:", linkError);
+        console.error("generateLink error:", linkError);
+      }
+
+      const acceptUrl =
+        (linkData as any)?.properties?.action_link ||
+        (linkData as any)?.action_link ||
+        redirectTo;
+
+      // 3. Actually send the email via the configured transport.
+      let emailSent = false;
+      let emailError: string | undefined;
+
+      if (isEmailConfigured()) {
+        const inviterName =
+          (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
+        const appName = Deno.env.get("APP_NAME") || "TaskMaster";
+        const result = await sendEmail({
+          to: [email],
+          subject: `${inviterName} invited you to ${appName}`,
+          html: inviteEmailHtml({
+            inviterName,
+            appName,
+            acceptUrl,
+            tempPassword: password,
+          }),
+        });
+        emailSent = result.ok;
+        if (!result.ok) {
+          emailError = result.error;
+          console.error("manage-user invite email failed:", result.error);
+        }
+      } else {
+        emailError = "No email transport configured (set SMTP_HOST or RESEND_API_KEY)";
+        console.warn("manage-user: email transport not configured; returning accept_url only");
       }
 
       return new Response(
-        JSON.stringify({ success: true, user_id: newUser.user?.id, message: "User created and invite email sent" }),
+        JSON.stringify({
+          success: true,
+          user_id: newUser.user?.id,
+          emailSent,
+          emailError,
+          accept_url: acceptUrl,
+          message: emailSent
+            ? "User created and invite email sent"
+            : "User created. Email not sent — share the accept_url manually.",
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -97,7 +182,7 @@ Deno.serve(async (req) => {
 
       // Get the user's email
       const { data: { user: targetUser }, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(user_id);
-      
+
       if (getUserError || !targetUser) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
@@ -105,19 +190,48 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Resend confirmation by generating a new signup link
-      const { error: resendError } = await supabaseAdmin.auth.admin.generateLink({
+      const redirectTo = redirect_to || `${req.headers.get("origin") || ""}/auth`;
+
+      const { data: linkData, error: resendError } = await supabaseAdmin.auth.admin.generateLink({
         type: "signup",
         email: targetUser.email!,
-        options: {
-          redirectTo: redirect_to || `${req.headers.get("origin") || ""}/auth`,
-        },
+        options: { redirectTo },
       });
 
       if (resendError) throw resendError;
 
+      const acceptUrl =
+        (linkData as any)?.properties?.action_link ||
+        (linkData as any)?.action_link ||
+        redirectTo;
+
+      let emailSent = false;
+      let emailError: string | undefined;
+      if (isEmailConfigured()) {
+        const inviterName =
+          (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
+        const appName = Deno.env.get("APP_NAME") || "TaskMaster";
+        const result = await sendEmail({
+          to: [targetUser.email!],
+          subject: `${inviterName} re-sent your invite to ${appName}`,
+          html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
+        });
+        emailSent = result.ok;
+        if (!result.ok) emailError = result.error;
+      } else {
+        emailError = "No email transport configured";
+      }
+
       return new Response(
-        JSON.stringify({ success: true, message: "Invite email resent" }),
+        JSON.stringify({
+          success: true,
+          emailSent,
+          emailError,
+          accept_url: acceptUrl,
+          message: emailSent
+            ? "Invite email resent"
+            : "Email transport not configured — share accept_url manually.",
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -132,9 +246,9 @@ Deno.serve(async (req) => {
     if (action === "archive") {
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
-        .update({ 
-          archived: true, 
-          archived_at: new Date().toISOString() 
+        .update({
+          archived: true,
+          archived_at: new Date().toISOString()
         })
         .eq("user_id", user_id);
 
@@ -150,14 +264,14 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: true, message: "User archived and disabled" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    } 
-    
+    }
+
     if (action === "unarchive") {
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
-        .update({ 
-          archived: false, 
-          archived_at: null 
+        .update({
+          archived: false,
+          archived_at: null
         })
         .eq("user_id", user_id);
 
@@ -174,7 +288,7 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    
+
     if (action === "delete") {
       const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user_id);
 

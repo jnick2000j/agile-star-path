@@ -81,7 +81,18 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         }, 1000);
       }
 
-      toast.success("User created! A confirmation email has been sent to verify their account.");
+      if (data?.emailSent) {
+        toast.success("User created and invite email sent.");
+      } else if (data?.accept_url) {
+        toast.warning(
+          `User created, but email could not be sent${
+            data?.emailError ? ` (${data.emailError})` : ""
+          }. Share this link manually: ${data.accept_url}`,
+          { duration: 15000 },
+        );
+      } else {
+        toast.success("User created.");
+      }
       setOpen(false);
       setFormData({
         email: "",
