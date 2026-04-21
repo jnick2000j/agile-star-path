@@ -121,13 +121,18 @@ Deno.serve(async (req) => {
         secret,
       });
 
+      // Encrypt the TOTP seed at rest using Supabase Vault.
+      // We store an opaque "vault:<id>" reference instead of the raw base32 secret,
+      // so a database compromise cannot reveal MFA seeds without also breaching Vault.
+      const vaultRef = await storeTotpSecretInVault(admin, secret.base32, user.id);
+
       const { data: factor, error } = await admin
         .from("user_mfa_factors")
         .insert({
           user_id: user.id,
           factor_type: "totp",
           friendly_name: friendly,
-          secret_encrypted: secret.base32, // TODO: wrap with vault if available
+          secret_encrypted: vaultRef,
           verified: false,
         })
         .select()
@@ -154,10 +159,11 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (error || !factor) return json({ error: "Factor not found" }, 404);
 
+      const totpSecret = await resolveTotpSecret(admin, factor.secret_encrypted);
       const totp = new OTPAuth.TOTP({
         issuer: "TaskMaster",
         label: user.email ?? user.id,
-        secret: OTPAuth.Secret.fromBase32(factor.secret_encrypted),
+        secret: OTPAuth.Secret.fromBase32(totpSecret),
       });
       const delta = totp.validate({ token: payload.code.replace(/\s/g, ""), window: 1 });
       if (delta === null) return json({ error: "Invalid code" }, 400);
@@ -223,10 +229,11 @@ Deno.serve(async (req) => {
       if (!factors || factors.length === 0) return json({ error: "No verified factor" }, 400);
 
       for (const factor of factors) {
+        const totpSecret = await resolveTotpSecret(admin, factor.secret_encrypted);
         const totp = new OTPAuth.TOTP({
           issuer: "TaskMaster",
           label: user.email ?? user.id,
-          secret: OTPAuth.Secret.fromBase32(factor.secret_encrypted),
+          secret: OTPAuth.Secret.fromBase32(totpSecret),
         });
         const delta = totp.validate({ token: payload.code.replace(/\s/g, ""), window: 1 });
         if (delta !== null) {
