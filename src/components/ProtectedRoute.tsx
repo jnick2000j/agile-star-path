@@ -3,6 +3,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useMFAGate } from "@/hooks/useMFAGate";
+import { MFAChallengeDialog } from "@/components/security/MFAChallengeDialog";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,6 +15,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   const { user, loading, userRole } = useAuth();
   const location = useLocation();
   const [orgCheck, setOrgCheck] = useState<"checking" | "has" | "none">("checking");
+  const mfa = useMFAGate();
 
   useEffect(() => {
     if (!user) {
@@ -58,6 +61,22 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
         </div>
       );
     }
+  }
+
+  // MFA gate — challenge before granting access if user has TOTP or org policy requires it.
+  if (mfa.required && !mfa.satisfied) {
+    return (
+      <>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        <MFAChallengeDialog
+          open
+          onVerified={mfa.markSatisfied}
+          onCancel={() => { /* signOut handled inside */ }}
+        />
+      </>
+    );
   }
 
   return <>{children}</>;
