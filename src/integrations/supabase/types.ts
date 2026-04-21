@@ -1863,6 +1863,53 @@ export type Database = {
         }
         Relationships: []
       }
+      domain_verifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          domain: string
+          id: string
+          last_checked_at: string | null
+          organization_id: string
+          status: string
+          updated_at: string
+          verification_token: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          domain: string
+          id?: string
+          last_checked_at?: string | null
+          organization_id: string
+          status?: string
+          updated_at?: string
+          verification_token?: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          domain?: string
+          id?: string
+          last_checked_at?: string | null
+          organization_id?: string
+          status?: string
+          updated_at?: string
+          verification_token?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_verifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entity_assignments: {
         Row: {
           assigned_by: string | null
@@ -4506,6 +4553,65 @@ export type Database = {
           },
         ]
       }
+      scim_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_access_level: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          token_hash: string
+          token_prefix: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_access_level?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          token_hash: string
+          token_prefix: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_access_level?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          token_hash?: string
+          token_prefix?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scim_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sprints: {
         Row: {
           capacity_points: number | null
@@ -4591,17 +4697,25 @@ export type Database = {
           acs_url: string | null
           activated_at: string | null
           allowed_domains: string[]
+          attribute_mapping: Json
           created_at: string
           default_access_level: string
+          domains_verified_at: string | null
           entity_id: string | null
           id: string
           metadata_url: string | null
           notes: string | null
+          oidc_client_id: string | null
+          oidc_client_secret_name: string | null
+          oidc_issuer_url: string | null
+          oidc_scopes: string[]
           organization_id: string
+          provider_type: string
           provisioning_notes: string | null
           requested_by: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          sso_config_id: string | null
           status: string
           updated_at: string
         }
@@ -4609,17 +4723,25 @@ export type Database = {
           acs_url?: string | null
           activated_at?: string | null
           allowed_domains?: string[]
+          attribute_mapping?: Json
           created_at?: string
           default_access_level?: string
+          domains_verified_at?: string | null
           entity_id?: string | null
           id?: string
           metadata_url?: string | null
           notes?: string | null
+          oidc_client_id?: string | null
+          oidc_client_secret_name?: string | null
+          oidc_issuer_url?: string | null
+          oidc_scopes?: string[]
           organization_id: string
+          provider_type?: string
           provisioning_notes?: string | null
           requested_by?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sso_config_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -4627,17 +4749,25 @@ export type Database = {
           acs_url?: string | null
           activated_at?: string | null
           allowed_domains?: string[]
+          attribute_mapping?: Json
           created_at?: string
           default_access_level?: string
+          domains_verified_at?: string | null
           entity_id?: string | null
           id?: string
           metadata_url?: string | null
           notes?: string | null
+          oidc_client_id?: string | null
+          oidc_client_secret_name?: string | null
+          oidc_issuer_url?: string | null
+          oidc_scopes?: string[]
           organization_id?: string
+          provider_type?: string
           provisioning_notes?: string | null
           requested_by?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sso_config_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -4647,6 +4777,66 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sso_jit_provisioning_log: {
+        Row: {
+          access_level_granted: string | null
+          created_at: string
+          email: string
+          email_domain: string
+          error_message: string | null
+          id: string
+          metadata: Json
+          organization_id: string
+          provider: string
+          sso_config_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          access_level_granted?: string | null
+          created_at?: string
+          email: string
+          email_domain: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          organization_id: string
+          provider: string
+          sso_config_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          access_level_granted?: string | null
+          created_at?: string
+          email?: string
+          email_domain?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          provider?: string
+          sso_config_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_jit_provisioning_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sso_jit_provisioning_log_sso_config_id_fkey"
+            columns: ["sso_config_id"]
+            isOneToOne: false
+            referencedRelation: "sso_configurations"
             referencedColumns: ["id"]
           },
         ]
@@ -6464,8 +6654,12 @@ export type Database = {
         Args: { _email: string }
         Returns: {
           default_access_level: string
+          oidc_client_id: string
+          oidc_issuer_url: string
           organization_id: string
           organization_name: string
+          provider_type: string
+          saml_provider_id: string
           sso_config_id: string
         }[]
       }
