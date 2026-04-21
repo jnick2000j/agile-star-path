@@ -203,6 +203,9 @@ export default function Team() {
           phone_number: p.phone_number,
           avatar_url: p.avatar_url,
           archived: p.archived,
+          is_disabled: false,
+          disabled_reason: null,
+          disabled_at: null,
         }));
 
       setAvailableUsers(available);
