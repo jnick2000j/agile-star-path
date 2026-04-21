@@ -42,8 +42,30 @@ export function OrgSuspensionDialog({ open, onOpenChange, organization, onSucces
       _kind: isSuspending ? kind : null,
       _reason: isSuspending ? (reason || null) : null,
     });
+    if (error) {
+      setSubmitting(false);
+      return toast.error(error.message);
+    }
+
+    // Notify org admins by email (best-effort — never block the suspension itself).
+    try {
+      const { error: emailErr } = await supabase.functions.invoke("notify-org-suspension", {
+        body: {
+          organization_id: organization.id,
+          action: isSuspending ? "suspended" : "reinstated",
+          kind: isSuspending ? kind : null,
+          reason: isSuspending ? (reason || null) : null,
+        },
+      });
+      if (emailErr) {
+        console.warn("Suspension email notification failed:", emailErr);
+        toast.warning("Suspension applied, but the email notification could not be sent.");
+      }
+    } catch (e) {
+      console.warn("Suspension email notification threw:", e);
+    }
+
     setSubmitting(false);
-    if (error) return toast.error(error.message);
     toast.success(isSuspending ? "Organization suspended" : "Organization reinstated");
     setReason("");
     onSuccess?.();
