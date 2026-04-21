@@ -522,6 +522,62 @@ export type Database = {
           },
         ]
       }
+      ai_provider_settings: {
+        Row: {
+          api_key_secret_name: string | null
+          base_url: string | null
+          created_at: string
+          created_by: string | null
+          default_model: string | null
+          enabled_modules: Json
+          id: string
+          is_active: boolean
+          notes: string | null
+          organization_id: string | null
+          provider: string
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_secret_name?: string | null
+          base_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_model?: string | null
+          enabled_modules?: Json
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          organization_id?: string | null
+          provider: string
+          scope: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_secret_name?: string | null
+          base_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_model?: string | null
+          enabled_modules?: Json
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          organization_id?: string | null
+          provider?: string
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_provider_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_summaries: {
         Row: {
           approved_at: string | null
@@ -6366,6 +6422,7 @@ export type Database = {
         Returns: string
       }
       get_ai_credit_status: { Args: { _org_id: string }; Returns: Json }
+      get_effective_ai_provider: { Args: { _org_id?: string }; Returns: Json }
       get_effective_retention_days: {
         Args: { _org_id: string }
         Returns: number
