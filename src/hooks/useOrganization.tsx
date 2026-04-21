@@ -40,11 +40,12 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Get organizations the user has access to
+      // Get organizations the user has access to (exclude memberships disabled by an org admin)
       const { data: accessData, error: accessError } = await supabase
         .from("user_organization_access")
-        .select("organization_id")
-        .eq("user_id", user.id);
+        .select("organization_id, is_disabled")
+        .eq("user_id", user.id)
+        .eq("is_disabled", false);
 
       if (accessError) throw accessError;
 
