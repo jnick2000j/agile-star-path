@@ -363,10 +363,6 @@ export default function Auth() {
             <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
           </button>
         ) : (
-          <button type="button" onClick={() => { setMode("login"); setErrors({}); }} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 mx-auto font-medium">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
-          </button>
-        ) : (
           <p className="text-sm text-muted-foreground">
             {mode === "login" ? "Don't have an account? " : "Already have an account? "}
             <button type="button" onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErrors({}); }} className="text-primary hover:text-primary/80 font-medium transition-colors">
