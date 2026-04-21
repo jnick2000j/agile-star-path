@@ -1,0 +1,71 @@
+name: Release on-prem bundle
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 1.4.0). If omitted, uses ./onprem/release/VERSION'
+        required: false
+
+permissions:
+  contents: write   # needed to create releases
+  packages: read    # needed to pull images from ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history for changelog
+
+      - name: Resolve VERSION
+        id: ver
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            V="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            V="${GITHUB_REF#refs/tags/v}"
+          else
+            V=$(cat onprem/release/VERSION | tr -d '[:space:]')
+          fi
+          echo "VERSION=$V"   >> "$GITHUB_OUTPUT"
+          echo "TAG=v$V"      >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+
+      - name: Install jq + openssl
+        run: sudo apt-get update && sudo apt-get install -y jq openssl
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build bundle
+        env:
+          VERSION:             ${{ steps.ver.outputs.VERSION }}
+          IMAGE_REGISTRY:      ghcr.io/${{ github.repository_owner }}/taskmaster
+          RELEASE_PRIVATE_KEY: ${{ secrets.RELEASE_PRIVATE_KEY }}
+        run: |
+          chmod +x onprem/release/*.sh onprem/scripts/*.sh onprem/scripts/pimp-cli
+          ./onprem/release/build-bundle.sh
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.TAG }}
+          name: TaskMaster ${{ steps.ver.outputs.TAG }}
+          body_path: onprem/release/dist/CHANGELOG-${{ steps.ver.outputs.TAG }}.md
+          files: |
+            onprem/release/dist/taskmaster-${{ steps.ver.outputs.TAG }}.tar.gz
+            onprem/release/dist/taskmaster-${{ steps.ver.outputs.TAG }}.tar.gz.sig
+            onprem/release/dist/taskmaster-${{ steps.ver.outputs.TAG }}.tar.gz.sha256
+            onprem/release/dist/manifest-${{ steps.ver.outputs.TAG }}.json
+          fail_on_unmatched_files: true

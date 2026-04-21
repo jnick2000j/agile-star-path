@@ -1,0 +1,8 @@
+# Release artifacts (auto-generated, never commit)
+dist/
+stage/
+
+# Signing keys — private key MUST NOT be committed
+keys/release.priv.pem
+keys/*.priv.pem
+keys/*.key
