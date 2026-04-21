@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@4.0.0";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,7 +43,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const resendKey = Deno.env.get("RESEND_API_KEY");
 
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -135,12 +134,10 @@ Deno.serve(async (req) => {
       },
     });
 
-    // 2. Send email (best-effort)
+    // 2. Send email (best-effort) via configured transport
     let emailSent = false;
-    if (resendKey && recipient.email) {
-      try {
-        const resend = new Resend(resendKey);
-        const html = `
+    if (isEmailConfigured() && recipient.email) {
+      const html = `
           <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">
             <h2 style="margin: 0 0 16px;">${subject}</h2>
             <p style="line-height: 1.5;">${intro}</p>
@@ -155,16 +152,13 @@ Deno.serve(async (req) => {
             </p>
           </div>
         `;
-        await resend.emails.send({
-          from: "TaskMaster <onboarding@resend.dev>",
-          to: [recipient.email],
-          subject,
-          html,
-        });
-        emailSent = true;
-      } catch (e) {
-        console.error("Resend error:", e);
-      }
+      const result = await sendEmail({
+        to: [recipient.email],
+        subject,
+        html,
+      });
+      emailSent = result.ok;
+      if (!result.ok) console.error("notify-workflow-assignment email failed:", result.error);
     }
 
     return new Response(

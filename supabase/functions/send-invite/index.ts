@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@4.0.0";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,24 +141,20 @@ Deno.serve(async (req) => {
 
     if (invErr) throw invErr;
 
-    // Send email via Resend
-    const resendKey = Deno.env.get("RESEND_API_KEY");
+    // Send email via configured transport (SMTP for on-prem, Resend for cloud)
     const origin =
       req.headers.get("origin") || req.headers.get("referer") || "";
     const baseUrl = origin.replace(/\/$/, "");
     const acceptUrl = `${baseUrl}/accept-invite?token=${invite.token}`;
 
     let emailSent = false;
-    if (resendKey) {
-      try {
-        const resend = new Resend(resendKey);
-        const inviterName =
-          inviter.user_metadata?.full_name || inviter.email || "A teammate";
-        await resend.emails.send({
-          from: "PIMP <onboarding@resend.dev>",
-          to: [email],
-          subject: `${inviterName} invited you to join ${org?.name || "their organization"}`,
-          html: `
+    if (isEmailConfigured()) {
+      const inviterName =
+        inviter.user_metadata?.full_name || inviter.email || "A teammate";
+      const result = await sendEmail({
+        to: [email],
+        subject: `${inviterName} invited you to join ${org?.name || "their organization"}`,
+        html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width:560px; margin:0 auto; padding:32px;">
               <h2 style="color:#0f172a;">You're invited to join ${org?.name || "an organization"}</h2>
               <p style="color:#475569; font-size:15px; line-height:1.6;">
@@ -179,11 +175,9 @@ Deno.serve(async (req) => {
               </p>
             </div>
           `,
-        });
-        emailSent = true;
-      } catch (e) {
-        console.error("Resend error:", e);
-      }
+      });
+      emailSent = result.ok;
+      if (!result.ok) console.error("send-invite email failed:", result.error);
     }
 
     return new Response(

@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@4.0.0";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,20 +78,16 @@ Deno.serve(async (req) => {
       await admin.from("notifications").insert(notifications);
     }
 
-    // Send email notification (best-effort)
-    const resendKey = Deno.env.get("RESEND_API_KEY");
+    // Send email notification (best-effort) via configured transport
     let emailSent = false;
-    if (resendKey && admins && admins.length > 0) {
-      try {
-        const resend = new Resend(resendKey);
-        const adminEmails = admins.map((a: any) => a.email).filter(Boolean);
+    if (isEmailConfigured() && admins && admins.length > 0) {
+      const adminEmails = admins.map((a: any) => a.email).filter(Boolean);
 
-        if (adminEmails.length > 0) {
-          await resend.emails.send({
-            from: "TaskMaster <onboarding@resend.dev>",
-            to: adminEmails,
-            subject: `New SSO Request: ${body.organization_name}`,
-            html: `
+      if (adminEmails.length > 0) {
+        const result = await sendEmail({
+          to: adminEmails,
+          subject: `New SSO Request: ${body.organization_name}`,
+          html: `
               <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width:560px; margin:0 auto; padding:32px;">
                 <h2 style="color:#0f172a;">New SSO/SAML Setup Request</h2>
                 <p style="color:#475569; font-size:15px; line-height:1.6;">
@@ -122,11 +118,9 @@ Deno.serve(async (req) => {
                 </p>
               </div>
             `,
-          });
-          emailSent = true;
-        }
-      } catch (e) {
-        console.error("SSO notification email error:", e);
+        });
+        emailSent = result.ok;
+        if (!result.ok) console.error("notify-sso-request email failed:", result.error);
       }
     }
 

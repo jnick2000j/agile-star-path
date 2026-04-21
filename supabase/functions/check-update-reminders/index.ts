@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -156,10 +157,8 @@ Deno.serve(async (req) => {
         notificationsCreated++;
       }
 
-      // Send emails if RESEND_API_KEY is available
-      const resendKey = Deno.env.get("RESEND_API_KEY");
-      const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-      if (resendKey && lovableKey) {
+      // Send emails via configured transport (SMTP for on-prem, Resend for cloud)
+      if (isEmailConfigured()) {
         for (const userId of assignedUsers) {
           const { data: profile } = await supabase
             .from("profiles")
@@ -168,26 +167,16 @@ Deno.serve(async (req) => {
             .maybeSingle();
 
           if (profile?.email) {
-            try {
-              await fetch("https://connector-gateway.lovable.dev/resend/emails", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${lovableKey}`,
-                  "X-Connection-Api-Key": resendKey,
-                },
-                body: JSON.stringify({
-                  from: "Updates <onboarding@resend.dev>",
-                  to: [profile.email],
-                  subject: `Update ${statusText}: ${entityLabel}`,
-                  html: `<p>Hi ${profile.full_name || "there"},</p>
-                    <p>Your <strong>${setting.frequency}</strong> update for this ${setting.entity_type} is <strong>${statusText}</strong>.</p>
-                    <p>Please log in and submit your update at your earliest convenience.</p>
-                    <p>Thank you.</p>`,
-                }),
-              });
-            } catch (emailError) {
-              console.error("Email send failed:", emailError);
+            const result = await sendEmail({
+              to: [profile.email],
+              subject: `Update ${statusText}: ${entityLabel}`,
+              html: `<p>Hi ${profile.full_name || "there"},</p>
+                <p>Your <strong>${setting.frequency}</strong> update for this ${setting.entity_type} is <strong>${statusText}</strong>.</p>
+                <p>Please log in and submit your update at your earliest convenience.</p>
+                <p>Thank you.</p>`,
+            });
+            if (!result.ok) {
+              console.error("Email send failed:", result.error);
             }
           }
         }

@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@4.0.0";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,8 +54,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const resendKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendKey) {
+    if (!isEmailConfigured()) {
       return new Response(
         JSON.stringify({ error: "Email is not configured" }),
         {
@@ -65,13 +64,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    const resend = new Resend(resendKey);
     const senderName =
       userData.user.user_metadata?.full_name || userData.user.email || "Timesheets";
     const filename = body.filename || "timesheet.pdf";
 
-    await resend.emails.send({
-      from: "Timesheets <onboarding@resend.dev>",
+    const result = await sendEmail({
       to: recipients,
       subject: body.subject || "Timesheet",
       html: `
@@ -93,9 +90,17 @@ Deno.serve(async (req) => {
         {
           filename,
           content: body.pdf_base64,
+          contentType: "application/pdf",
         },
       ],
     });
+    if (!result.ok) {
+      console.error("email-timesheet send failed:", result.error);
+      return new Response(
+        JSON.stringify({ error: result.error || "Email send failed" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

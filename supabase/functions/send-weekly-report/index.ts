@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "https://esm.sh/resend@4.0.0";
+import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,8 +38,7 @@ serve(async (req) => {
     }
 
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log("Generating weekly report...");
@@ -165,24 +164,21 @@ serve(async (req) => {
       </html>
     `;
 
-    // Send emails if Resend is configured
+    // Send emails via configured transport (SMTP / Resend)
     let emailsSent = 0;
-    if (resendApiKey && stakeholders && stakeholders.length > 0) {
-      const resend = new Resend(resendApiKey);
-      
+    if (isEmailConfigured() && stakeholders && stakeholders.length > 0) {
       for (const stakeholder of stakeholders) {
         if (stakeholder.email) {
-          try {
-            await resend.emails.send({
-              from: "TaskMaster Reports <onboarding@resend.dev>",
-              to: [stakeholder.email],
-              subject: `Weekly Programme Report - ${new Date().toLocaleDateString('en-GB')}`,
-              html: emailHtml,
-            });
+          const result = await sendEmail({
+            to: [stakeholder.email],
+            subject: `Weekly Programme Report - ${new Date().toLocaleDateString('en-GB')}`,
+            html: emailHtml,
+          });
+          if (result.ok) {
             emailsSent++;
             console.log(`Email sent to ${stakeholder.email}`);
-          } catch (emailError) {
-            console.error(`Failed to send email to stakeholder:`, emailError);
+          } else {
+            console.error(`Failed to send email to stakeholder:`, result.error);
           }
         }
       }
