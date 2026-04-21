@@ -3147,6 +3147,7 @@ export type Database = {
           created_by: string | null
           data_region: string
           id: string
+          is_suspended: boolean
           logo_url: string | null
           name: string
           primary_color: string | null
@@ -3155,6 +3156,10 @@ export type Database = {
           residency_locked_by: string | null
           secondary_color: string | null
           slug: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspended_reason: string | null
+          suspension_kind: string | null
           updated_at: string
         }
         Insert: {
@@ -3163,6 +3168,7 @@ export type Database = {
           created_by?: string | null
           data_region?: string
           id?: string
+          is_suspended?: boolean
           logo_url?: string | null
           name: string
           primary_color?: string | null
@@ -3171,6 +3177,10 @@ export type Database = {
           residency_locked_by?: string | null
           secondary_color?: string | null
           slug: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspended_reason?: string | null
+          suspension_kind?: string | null
           updated_at?: string
         }
         Update: {
@@ -3179,6 +3189,7 @@ export type Database = {
           created_by?: string | null
           data_region?: string
           id?: string
+          is_suspended?: boolean
           logo_url?: string | null
           name?: string
           primary_color?: string | null
@@ -3187,6 +3198,10 @@ export type Database = {
           residency_locked_by?: string | null
           secondary_color?: string | null
           slug?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspended_reason?: string | null
+          suspension_kind?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -7202,6 +7217,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_org_suspended: { Args: { _org_id: string }; Returns: boolean }
       log_audit_event: {
         Args: {
           _event_category?: string
@@ -7225,6 +7241,19 @@ export type Database = {
       resolve_scim_groups_to_access_level: {
         Args: { _groups: string[]; _org_id: string }
         Returns: string
+      }
+      set_license_status: {
+        Args: { _license_id: string; _reason?: string; _status: string }
+        Returns: Json
+      }
+      set_organization_suspension: {
+        Args: {
+          _kind?: string
+          _org_id: string
+          _reason?: string
+          _suspend: boolean
+        }
+        Returns: Json
       }
     }
     Enums: {
