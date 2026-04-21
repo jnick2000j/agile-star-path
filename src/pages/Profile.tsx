@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { User, Lock, MapPin, Save } from "lucide-react";
 import { LanguagePreferenceCard } from "@/components/settings/LanguagePreferenceCard";
 import { MFASettingsCard } from "@/components/security/MFASettingsCard";
+import { ActiveSessionsCard } from "@/components/security/ActiveSessionsCard";
 
 interface ProfileData {
   first_name: string;
@@ -352,6 +353,9 @@ export default function Profile() {
 
         {/* Two-factor authentication */}
         <MFASettingsCard />
+
+        {/* Active sessions for the current user */}
+        <ActiveSessionsCard scope="self" />
       </div>
     </AppLayout>
   );

@@ -39,13 +39,20 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Missing authorization" }, 401);
+    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+    const isServiceRole = token === SERVICE_KEY;
+
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+    let callerUserId: string | null = null;
+    if (!isServiceRole) {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+      callerUserId = userData.user.id;
+    }
 
     const payload: Payload = await req.json().catch(() => ({}));
 
@@ -59,12 +66,14 @@ Deno.serve(async (req) => {
       if (error) throw error;
       exporters = data ?? [];
     } else if (payload.organization_id) {
-      const { data: hasAccess } = await admin.rpc("has_org_access", {
-        _user_id: userData.user.id,
-        _org_id: payload.organization_id,
-        _min_level: "admin",
-      });
-      if (!hasAccess) return json({ error: "Forbidden" }, 403);
+      if (!isServiceRole) {
+        const { data: hasAccess } = await admin.rpc("has_org_access", {
+          _user_id: callerUserId,
+          _org_id: payload.organization_id,
+          _min_level: "admin",
+        });
+        if (!hasAccess) return json({ error: "Forbidden" }, 403);
+      }
       const { data, error } = await admin
         .from("siem_exporters")
         .select("*")

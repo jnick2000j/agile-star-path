@@ -7009,6 +7009,7 @@ export type Database = {
         Returns: Json
       }
       create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
+      cron_flush_siem_exporters: { Args: never; Returns: Json }
       generate_reference_number: {
         Args: { _entity_type: string; _organization_id: string }
         Returns: string
