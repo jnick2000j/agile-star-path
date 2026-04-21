@@ -675,7 +675,7 @@ export type Database = {
           evidence_label: string
           id: string
           is_required: boolean
-          organization_id: string | null
+          organization_id: string
         }
         Insert: {
           approval_id: string
@@ -689,7 +689,7 @@ export type Database = {
           evidence_label: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id: string
         }
         Update: {
           approval_id?: string
@@ -703,7 +703,7 @@ export type Database = {
           evidence_label?: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id?: string
         }
         Relationships: [
           {
@@ -827,7 +827,7 @@ export type Database = {
           id: string
           measurement_date: string
           notes: string | null
-          organization_id: string | null
+          organization_id: string
           qualitative_status: string | null
           recorded_by: string | null
         }
@@ -839,7 +839,7 @@ export type Database = {
           id?: string
           measurement_date?: string
           notes?: string | null
-          organization_id?: string | null
+          organization_id: string
           qualitative_status?: string | null
           recorded_by?: string | null
         }
@@ -851,7 +851,7 @@ export type Database = {
           id?: string
           measurement_date?: string
           notes?: string | null
-          organization_id?: string | null
+          organization_id?: string
           qualitative_status?: string | null
           recorded_by?: string | null
         }
@@ -885,7 +885,7 @@ export type Database = {
           id: string
           measurement_method: string | null
           measurement_unit: string | null
-          organization_id: string | null
+          organization_id: string
           profile_type: string
           qualitative_rubric: Json | null
           realization_owner: string | null
@@ -906,7 +906,7 @@ export type Database = {
           id?: string
           measurement_method?: string | null
           measurement_unit?: string | null
-          organization_id?: string | null
+          organization_id: string
           profile_type?: string
           qualitative_rubric?: Json | null
           realization_owner?: string | null
@@ -927,7 +927,7 @@ export type Database = {
           id?: string
           measurement_method?: string | null
           measurement_unit?: string | null
-          organization_id?: string | null
+          organization_id?: string
           profile_type?: string
           qualitative_rubric?: Json | null
           realization_owner?: string | null
@@ -956,7 +956,7 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           product_id: string | null
           programme_id: string | null
@@ -978,7 +978,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           product_id?: string | null
           programme_id?: string | null
@@ -1000,7 +1000,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           product_id?: string | null
           programme_id?: string | null
@@ -1202,7 +1202,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           priority: string
           product_id: string | null
@@ -1222,7 +1222,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -1242,7 +1242,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -1302,7 +1302,7 @@ export type Database = {
           description: string | null
           id: string
           impact_summary: string | null
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           priority: string
           product_id: string | null
@@ -1335,7 +1335,7 @@ export type Database = {
           description?: string | null
           id?: string
           impact_summary?: string | null
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -1368,7 +1368,7 @@ export type Database = {
           description?: string | null
           id?: string
           impact_summary?: string | null
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -1959,7 +1959,7 @@ export type Database = {
           entity_type: string
           id: string
           is_risk_flagged: boolean
-          organization_id: string | null
+          organization_id: string
           risk_criticality: string | null
           update_text: string
         }
@@ -1970,7 +1970,7 @@ export type Database = {
           entity_type: string
           id?: string
           is_risk_flagged?: boolean
-          organization_id?: string | null
+          organization_id: string
           risk_criticality?: string | null
           update_text: string
         }
@@ -1981,7 +1981,7 @@ export type Database = {
           entity_type?: string
           id?: string
           is_risk_flagged?: boolean
-          organization_id?: string | null
+          organization_id?: string
           risk_criticality?: string | null
           update_text?: string
         }
@@ -2005,7 +2005,7 @@ export type Database = {
           id: string
           impact_summary: string | null
           options_considered: Json | null
-          organization_id: string | null
+          organization_id: string
           recommendation: string | null
           recommended_option: string | null
           time_estimate_days: number | null
@@ -2020,7 +2020,7 @@ export type Database = {
           id?: string
           impact_summary?: string | null
           options_considered?: Json | null
-          organization_id?: string | null
+          organization_id: string
           recommendation?: string | null
           recommended_option?: string | null
           time_estimate_days?: number | null
@@ -2035,7 +2035,7 @@ export type Database = {
           id?: string
           impact_summary?: string | null
           options_considered?: Json | null
-          organization_id?: string | null
+          organization_id?: string
           recommendation?: string | null
           recommended_option?: string | null
           time_estimate_days?: number | null
@@ -2060,7 +2060,7 @@ export type Database = {
           id: string
           metadata: Json | null
           notes: string | null
-          organization_id: string | null
+          organization_id: string
         }
         Insert: {
           actor_id?: string | null
@@ -2070,7 +2070,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           notes?: string | null
-          organization_id?: string | null
+          organization_id: string
         }
         Update: {
           actor_id?: string | null
@@ -2080,7 +2080,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           notes?: string | null
-          organization_id?: string | null
+          organization_id?: string
         }
         Relationships: [
           {
@@ -2107,7 +2107,7 @@ export type Database = {
           id: string
           impact: string | null
           options: string[] | null
-          organization_id: string | null
+          organization_id: string
           original_tolerance: string | null
           owner_id: string | null
           product_id: string | null
@@ -2140,7 +2140,7 @@ export type Database = {
           id?: string
           impact?: string | null
           options?: string[] | null
-          organization_id?: string | null
+          organization_id: string
           original_tolerance?: string | null
           owner_id?: string | null
           product_id?: string | null
@@ -2173,7 +2173,7 @@ export type Database = {
           id?: string
           impact?: string | null
           options?: string[] | null
-          organization_id?: string | null
+          organization_id?: string
           original_tolerance?: string | null
           owner_id?: string | null
           product_id?: string | null
@@ -2349,7 +2349,7 @@ export type Database = {
           date_raised: string | null
           description: string | null
           id: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           priority: string
           product_id: string | null
@@ -2369,7 +2369,7 @@ export type Database = {
           date_raised?: string | null
           description?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -2389,7 +2389,7 @@ export type Database = {
           date_raised?: string | null
           description?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -2443,7 +2443,7 @@ export type Database = {
           created_at: string
           id: string
           lesson_id: string
-          organization_id: string | null
+          organization_id: string
           outcome: string | null
         }
         Insert: {
@@ -2454,7 +2454,7 @@ export type Database = {
           created_at?: string
           id?: string
           lesson_id: string
-          organization_id?: string | null
+          organization_id: string
           outcome?: string | null
         }
         Update: {
@@ -2465,7 +2465,7 @@ export type Database = {
           created_at?: string
           id?: string
           lesson_id?: string
-          organization_id?: string | null
+          organization_id?: string
           outcome?: string | null
         }
         Relationships: [
@@ -2524,7 +2524,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
-          organization_id: string | null
+          organization_id: string
           tag_name: string
         }
         Insert: {
@@ -2533,7 +2533,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           tag_name: string
         }
         Update: {
@@ -2542,7 +2542,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           tag_name?: string
         }
         Relationships: []
@@ -2559,7 +2559,7 @@ export type Database = {
           id: string
           identified_by: string | null
           lesson_type: string
-          organization_id: string | null
+          organization_id: string
           outcome: string | null
           owner_id: string | null
           priority: string
@@ -2586,7 +2586,7 @@ export type Database = {
           id?: string
           identified_by?: string | null
           lesson_type?: string
-          organization_id?: string | null
+          organization_id: string
           outcome?: string | null
           owner_id?: string | null
           priority?: string
@@ -2613,7 +2613,7 @@ export type Database = {
           id?: string
           identified_by?: string | null
           lesson_type?: string
-          organization_id?: string | null
+          organization_id?: string
           outcome?: string | null
           owner_id?: string | null
           priority?: string
@@ -2674,7 +2674,7 @@ export type Database = {
           is_stage_boundary: boolean | null
           milestone_type: string
           name: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           product_id: string | null
           programme_id: string | null
@@ -2699,7 +2699,7 @@ export type Database = {
           is_stage_boundary?: boolean | null
           milestone_type?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           product_id?: string | null
           programme_id?: string | null
@@ -2724,7 +2724,7 @@ export type Database = {
           is_stage_boundary?: boolean | null
           milestone_type?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           product_id?: string | null
           programme_id?: string | null
@@ -3480,7 +3480,7 @@ export type Database = {
           launch_date: string | null
           name: string
           next_review_date: string | null
-          organization_id: string | null
+          organization_id: string
           primary_metric: string | null
           product_owner_id: string | null
           product_type: string
@@ -3510,7 +3510,7 @@ export type Database = {
           launch_date?: string | null
           name: string
           next_review_date?: string | null
-          organization_id?: string | null
+          organization_id: string
           primary_metric?: string | null
           product_owner_id?: string | null
           product_type?: string
@@ -3540,7 +3540,7 @@ export type Database = {
           launch_date?: string | null
           name?: string
           next_review_date?: string | null
-          organization_id?: string | null
+          organization_id?: string
           primary_metric?: string | null
           product_owner_id?: string | null
           product_type?: string
@@ -3674,7 +3674,7 @@ export type Database = {
           current_state: string | null
           future_state: string | null
           id: string
-          organization_id: string | null
+          organization_id: string
           programme_id: string
           target_operating_model: string | null
           transformation_flow: string | null
@@ -3689,7 +3689,7 @@ export type Database = {
           current_state?: string | null
           future_state?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           programme_id: string
           target_operating_model?: string | null
           transformation_flow?: string | null
@@ -3704,7 +3704,7 @@ export type Database = {
           current_state?: string | null
           future_state?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           programme_id?: string
           target_operating_model?: string | null
           transformation_flow?: string | null
@@ -3729,7 +3729,7 @@ export type Database = {
           dependencies: string | null
           id: string
           key_assumptions: string | null
-          organization_id: string | null
+          organization_id: string
           out_of_scope: string | null
           programme_id: string
           scope_statement: string | null
@@ -3745,7 +3745,7 @@ export type Database = {
           dependencies?: string | null
           id?: string
           key_assumptions?: string | null
-          organization_id?: string | null
+          organization_id: string
           out_of_scope?: string | null
           programme_id: string
           scope_statement?: string | null
@@ -3761,7 +3761,7 @@ export type Database = {
           dependencies?: string | null
           id?: string
           key_assumptions?: string | null
-          organization_id?: string | null
+          organization_id?: string
           out_of_scope?: string | null
           programme_id?: string
           scope_statement?: string | null
@@ -3831,7 +3831,7 @@ export type Database = {
           governance_arrangements: string | null
           id: string
           measurement_approach: string | null
-          organization_id: string | null
+          organization_id: string
           programme_id: string
           review_cadence: string | null
           success_criteria: Json | null
@@ -3844,7 +3844,7 @@ export type Database = {
           governance_arrangements?: string | null
           id?: string
           measurement_approach?: string | null
-          organization_id?: string | null
+          organization_id: string
           programme_id: string
           review_cadence?: string | null
           success_criteria?: Json | null
@@ -3857,7 +3857,7 @@ export type Database = {
           governance_arrangements?: string | null
           id?: string
           measurement_approach?: string | null
-          organization_id?: string | null
+          organization_id?: string
           programme_id?: string
           review_cadence?: string | null
           success_criteria?: Json | null
@@ -3883,7 +3883,7 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           programme_id: string
           sequence_number: number
           start_date: string | null
@@ -3899,7 +3899,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           programme_id: string
           sequence_number?: number
           start_date?: string | null
@@ -3915,7 +3915,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           programme_id?: string
           sequence_number?: number
           start_date?: string | null
@@ -3943,7 +3943,7 @@ export type Database = {
           id: string
           manager_id: string | null
           name: string
-          organization_id: string | null
+          organization_id: string
           progress: number
           reference_number: string | null
           sponsor: string | null
@@ -3963,7 +3963,7 @@ export type Database = {
           id?: string
           manager_id?: string | null
           name: string
-          organization_id?: string | null
+          organization_id: string
           progress?: number
           reference_number?: string | null
           sponsor?: string | null
@@ -3983,7 +3983,7 @@ export type Database = {
           id?: string
           manager_id?: string | null
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           progress?: number
           reference_number?: string | null
           sponsor?: string | null
@@ -4014,7 +4014,7 @@ export type Database = {
           manager_id: string | null
           methodology: string
           name: string
-          organization_id: string | null
+          organization_id: string
           priority: string
           programme_id: string | null
           reference_number: string | null
@@ -4033,7 +4033,7 @@ export type Database = {
           manager_id?: string | null
           methodology?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           priority?: string
           programme_id?: string | null
           reference_number?: string | null
@@ -4052,7 +4052,7 @@ export type Database = {
           manager_id?: string | null
           methodology?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           priority?: string
           programme_id?: string | null
           reference_number?: string | null
@@ -4086,7 +4086,7 @@ export type Database = {
           criterion: string
           id: string
           method: string | null
-          organization_id: string | null
+          organization_id: string
           priority: string
           product_id: string | null
           programme_id: string | null
@@ -4103,7 +4103,7 @@ export type Database = {
           criterion: string
           id?: string
           method?: string | null
-          organization_id?: string | null
+          organization_id: string
           priority?: string
           product_id?: string | null
           programme_id?: string | null
@@ -4120,7 +4120,7 @@ export type Database = {
           criterion?: string
           id?: string
           method?: string | null
-          organization_id?: string | null
+          organization_id?: string
           priority?: string
           product_id?: string | null
           programme_id?: string | null
@@ -4176,7 +4176,7 @@ export type Database = {
           deliverable_version: string | null
           description: string | null
           id: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           planned_date: string | null
           product_id: string | null
@@ -4207,7 +4207,7 @@ export type Database = {
           deliverable_version?: string | null
           description?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           planned_date?: string | null
           product_id?: string | null
@@ -4238,7 +4238,7 @@ export type Database = {
           deliverable_version?: string | null
           description?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           planned_date?: string | null
           product_id?: string | null
@@ -4293,7 +4293,7 @@ export type Database = {
           evidence_document_id: string | null
           findings: string | null
           id: string
-          organization_id: string | null
+          organization_id: string
           quality_criteria_id: string
           result: string
           reviewed_at: string
@@ -4305,7 +4305,7 @@ export type Database = {
           evidence_document_id?: string | null
           findings?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           quality_criteria_id: string
           result: string
           reviewed_at?: string
@@ -4317,7 +4317,7 @@ export type Database = {
           evidence_document_id?: string | null
           findings?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           quality_criteria_id?: string
           result?: string
           reviewed_at?: string
@@ -4434,7 +4434,7 @@ export type Database = {
           description: string | null
           id: string
           impact: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           probability: string
           product_id: string | null
@@ -4456,7 +4456,7 @@ export type Database = {
           description?: string | null
           id?: string
           impact?: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           probability?: string
           product_id?: string | null
@@ -4478,7 +4478,7 @@ export type Database = {
           description?: string | null
           id?: string
           impact?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           probability?: string
           product_id?: string | null
@@ -5003,7 +5003,7 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           product_id: string | null
           programme_id: string | null
           project_id: string | null
@@ -5019,7 +5019,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
@@ -5035,7 +5035,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
@@ -5231,7 +5231,7 @@ export type Database = {
           decision: string
           id: string
           is_required: boolean
-          organization_id: string | null
+          organization_id: string
           reviewer_id: string
           reviewer_role: string | null
           signed_at: string | null
@@ -5245,7 +5245,7 @@ export type Database = {
           decision?: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id: string
           reviewer_id: string
           reviewer_role?: string | null
           signed_at?: string | null
@@ -5259,7 +5259,7 @@ export type Database = {
           decision?: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id?: string
           reviewer_id?: string
           reviewer_role?: string | null
           signed_at?: string | null
@@ -5291,7 +5291,7 @@ export type Database = {
           gate_decision: Database["public"]["Enums"]["gate_decision"]
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           planned_date: string | null
           programme_id: string | null
@@ -5316,7 +5316,7 @@ export type Database = {
           gate_decision?: Database["public"]["Enums"]["gate_decision"]
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           planned_date?: string | null
           programme_id?: string | null
@@ -5341,7 +5341,7 @@ export type Database = {
           gate_decision?: Database["public"]["Enums"]["gate_decision"]
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           planned_date?: string | null
           programme_id?: string | null
@@ -5430,7 +5430,7 @@ export type Database = {
           last_contact: string | null
           name: string
           organization: string | null
-          organization_id: string | null
+          organization_id: string
           product_id: string | null
           programme_id: string | null
           project_id: string | null
@@ -5449,7 +5449,7 @@ export type Database = {
           last_contact?: string | null
           name: string
           organization?: string | null
-          organization_id?: string | null
+          organization_id: string
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
@@ -5468,7 +5468,7 @@ export type Database = {
           last_contact?: string | null
           name?: string
           organization?: string | null
-          organization_id?: string | null
+          organization_id?: string
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
@@ -5648,7 +5648,7 @@ export type Database = {
           critical_success_factors: string | null
           id: string
           key_milestones: string | null
-          organization_id: string | null
+          organization_id: string
           programme_id: string
           resource_requirements: string | null
           review_schedule: string | null
@@ -5664,7 +5664,7 @@ export type Database = {
           critical_success_factors?: string | null
           id?: string
           key_milestones?: string | null
-          organization_id?: string | null
+          organization_id: string
           programme_id: string
           resource_requirements?: string | null
           review_schedule?: string | null
@@ -5680,7 +5680,7 @@ export type Database = {
           critical_success_factors?: string | null
           id?: string
           key_milestones?: string | null
-          organization_id?: string | null
+          organization_id?: string
           programme_id?: string
           resource_requirements?: string | null
           review_schedule?: string | null
@@ -5851,7 +5851,7 @@ export type Database = {
           id: string
           milestone_id: string | null
           name: string
-          organization_id: string | null
+          organization_id: string
           parent_task_id: string | null
           planned_end: string | null
           planned_start: string | null
@@ -5880,7 +5880,7 @@ export type Database = {
           id?: string
           milestone_id?: string | null
           name: string
-          organization_id?: string | null
+          organization_id: string
           parent_task_id?: string | null
           planned_end?: string | null
           planned_start?: string | null
@@ -5909,7 +5909,7 @@ export type Database = {
           id?: string
           milestone_id?: string | null
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           parent_task_id?: string | null
           planned_end?: string | null
           planned_start?: string | null
@@ -5987,7 +5987,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           priority: string
           product_id: string | null
@@ -6008,7 +6008,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -6029,7 +6029,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           priority?: string
           product_id?: string | null
@@ -6264,7 +6264,7 @@ export type Database = {
           id: string
           name: string
           objectives: string[] | null
-          organization_id: string | null
+          organization_id: string
           owner_id: string | null
           planned_end: string | null
           planned_start: string | null
@@ -6286,7 +6286,7 @@ export type Database = {
           id?: string
           name: string
           objectives?: string[] | null
-          organization_id?: string | null
+          organization_id: string
           owner_id?: string | null
           planned_end?: string | null
           planned_start?: string | null
@@ -6308,7 +6308,7 @@ export type Database = {
           id?: string
           name?: string
           objectives?: string[] | null
-          organization_id?: string | null
+          organization_id?: string
           owner_id?: string | null
           planned_end?: string | null
           planned_start?: string | null
@@ -6808,7 +6808,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           progress: number
           project_id: string | null
           reporting_requirements: string | null
@@ -6828,7 +6828,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           progress?: number
           project_id?: string | null
           reporting_requirements?: string | null
@@ -6848,7 +6848,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           progress?: number
           project_id?: string | null
           reporting_requirements?: string | null
@@ -6883,7 +6883,7 @@ export type Database = {
           comment: string
           created_at: string
           id: string
-          organization_id: string | null
+          organization_id: string
           updated_at: string
         }
         Insert: {
@@ -6892,7 +6892,7 @@ export type Database = {
           comment: string
           created_at?: string
           id?: string
-          organization_id?: string | null
+          organization_id: string
           updated_at?: string
         }
         Update: {
@@ -6901,7 +6901,7 @@ export type Database = {
           comment?: string
           created_at?: string
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           updated_at?: string
         }
         Relationships: [
