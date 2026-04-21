@@ -275,6 +275,39 @@ export default function Team() {
     }
   };
 
+  const openStatusDialog = (member: TeamMember, action: "disable" | "enable") => {
+    setStatusTarget(member);
+    setStatusAction(action);
+    setStatusReason(action === "disable" ? "" : member.disabled_reason ?? "");
+  };
+
+  const handleConfirmStatus = async () => {
+    if (!statusTarget || !currentOrganization) return;
+    setStatusBusy(true);
+    try {
+      const { error } = await supabase.rpc("set_org_member_disabled", {
+        _org_id: currentOrganization.id,
+        _user_id: statusTarget.user_id,
+        _disable: statusAction === "disable",
+        _reason: statusAction === "disable" ? (statusReason.trim() || null) : null,
+      });
+      if (error) throw error;
+      toast.success(
+        statusAction === "disable"
+          ? `${statusTarget.full_name || statusTarget.email} has been disabled`
+          : `${statusTarget.full_name || statusTarget.email} has been re-enabled`
+      );
+      setStatusTarget(null);
+      setStatusReason("");
+      fetchTeamMembers();
+    } catch (e: any) {
+      console.error("Status change error:", e);
+      toast.error(e.message || "Failed to update member status");
+    } finally {
+      setStatusBusy(false);
+    }
+  };
+
   const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
     setFilters(prev => 
       prev.includes(value) 
