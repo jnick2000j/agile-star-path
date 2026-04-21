@@ -33,6 +33,7 @@ import { formatDistanceToNow } from "date-fns";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { AICreditsMeter } from "@/components/billing/AICreditsMeter";
+import { AICreditPacks } from "@/components/billing/AICreditPacks";
 
 interface Plan {
   id: string;
@@ -273,6 +274,8 @@ export default function Billing() {
         )}
 
         <AICreditsMeter variant="full" />
+
+        <AICreditPacks canPurchase={isAdmin} />
 
         {limits && (
           <Card className="p-6">

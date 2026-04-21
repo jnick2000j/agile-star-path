@@ -10,6 +10,10 @@ interface Props {
   customerEmail?: string;
   organizationId?: string;
   returnUrl?: string;
+  /** Optional metadata for one-time purchases (e.g. AI credit packs) */
+  purchaseType?: string;
+  packId?: string;
+  credits?: number;
 }
 
 export function StripeEmbeddedCheckout({
@@ -17,6 +21,9 @@ export function StripeEmbeddedCheckout({
   customerEmail,
   organizationId,
   returnUrl,
+  purchaseType,
+  packId,
+  credits,
 }: Props) {
   const fetchClientSecret = async (): Promise<string> => {
     const { data, error } = await supabase.functions.invoke("create-checkout", {
@@ -26,6 +33,9 @@ export function StripeEmbeddedCheckout({
         organizationId,
         returnUrl,
         environment: getStripeEnvironment(),
+        purchaseType,
+        packId,
+        credits,
       },
     });
     if (error || !data?.clientSecret) {

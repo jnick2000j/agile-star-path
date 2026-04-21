@@ -42,8 +42,52 @@ serve(async (req) => {
   }
 });
 
-async function handleCheckoutCompleted(session: any, _env: StripeEnv) {
-  console.log("Checkout completed:", session.id);
+async function handleCheckoutCompleted(session: any, env: StripeEnv) {
+  console.log("Checkout completed:", session.id, "mode:", session.mode);
+
+  // Only act on one-time payments here. Subscription provisioning is handled by
+  // customer.subscription.* events.
+  if (session.mode !== "payment") return;
+
+  const meta = session.metadata || {};
+  if (meta.purchaseType !== "ai_credits") {
+    console.log("One-time payment is not an AI credit pack — skipping.");
+    return;
+  }
+
+  const orgId = meta.organizationId;
+  const userId = meta.userId || null;
+  const packId = meta.packId || "ai_credits_pack";
+  const credits = parseInt(meta.credits ?? "0", 10);
+
+  if (!orgId || !credits || credits < 1) {
+    console.error("Missing organizationId or credits on AI-credit checkout", meta);
+    return;
+  }
+
+  if (session.payment_status && session.payment_status !== "paid") {
+    console.log("Payment not yet paid:", session.payment_status);
+    return;
+  }
+
+  const { data, error } = await supabase.rpc("grant_ai_credits", {
+    _org_id: orgId,
+    _credits: credits,
+    _pack_id: packId,
+    _amount_cents: session.amount_total ?? 0,
+    _currency: session.currency ?? "usd",
+    _stripe_session_id: session.id,
+    _stripe_payment_intent: session.payment_intent ?? null,
+    _environment: env,
+    _user_id: userId,
+    _metadata: { mode: session.mode, customer_email: session.customer_email ?? null },
+  });
+
+  if (error) {
+    console.error("grant_ai_credits failed:", error.message);
+    throw error;
+  }
+  console.log("AI credits granted:", data);
 }
 
 async function upsertSubscription(sub: any, env: StripeEnv) {

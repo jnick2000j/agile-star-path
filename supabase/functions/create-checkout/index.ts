@@ -7,7 +7,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { priceId, customerEmail, organizationId, returnUrl, environment } = await req.json();
+    const { priceId, customerEmail, organizationId, returnUrl, environment, purchaseType, packId, credits } = await req.json();
 
     if (!priceId || typeof priceId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(priceId)) {
       return new Response(JSON.stringify({ error: "Invalid priceId" }), {
@@ -53,6 +53,9 @@ serve(async (req) => {
       metadata: {
         userId: user.id,
         ...(organizationId && { organizationId }),
+        ...(purchaseType && { purchaseType }),
+        ...(packId && { packId }),
+        ...(credits && { credits: String(credits) }),
       },
       ...(isRecurring && {
         subscription_data: {

@@ -294,6 +294,65 @@ export type Database = {
           },
         ]
       }
+      ai_credit_purchases: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          credits: number
+          currency: string
+          environment: string
+          id: string
+          metadata: Json
+          organization_id: string
+          pack_id: string
+          period_start: string
+          status: string
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          credits: number
+          currency?: string
+          environment?: string
+          id?: string
+          metadata?: Json
+          organization_id: string
+          pack_id: string
+          period_start: string
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          credits?: number
+          currency?: string
+          environment?: string
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          pack_id?: string
+          period_start?: string
+          status?: string
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_purchases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_credit_usage: {
         Row: {
           created_at: string
@@ -302,6 +361,7 @@ export type Database = {
           last_model: string | null
           organization_id: string
           period_start: string
+          purchased: number
           updated_at: string
           used: number
         }
@@ -312,6 +372,7 @@ export type Database = {
           last_model?: string | null
           organization_id: string
           period_start: string
+          purchased?: number
           updated_at?: string
           used?: number
         }
@@ -322,6 +383,7 @@ export type Database = {
           last_model?: string | null
           organization_id?: string
           period_start?: string
+          purchased?: number
           updated_at?: string
           used?: number
         }
@@ -6285,6 +6347,21 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      grant_ai_credits: {
+        Args: {
+          _amount_cents: number
+          _credits: number
+          _currency: string
+          _environment: string
+          _metadata?: Json
+          _org_id: string
+          _pack_id: string
+          _stripe_payment_intent: string
+          _stripe_session_id: string
+          _user_id?: string
+        }
+        Returns: Json
       }
       has_feature: {
         Args: { _feature_key: string; _org_id: string }
