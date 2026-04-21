@@ -162,10 +162,12 @@ export default function PlatformAdmin() {
   return (
     <AppLayout title="Platform Admin" subtitle="Cross-tenant overview and management">
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-secondary">
+        <TabsList className="bg-secondary flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tenants">Tenant Management</TabsTrigger>
+          <TabsTrigger value="licenses">Licenses</TabsTrigger>
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+          <TabsTrigger value="ai">AI &amp; Credits</TabsTrigger>
           <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
@@ -202,6 +204,11 @@ export default function PlatformAdmin() {
                       {org.user_count} users · {org.programme_count} programmes · {org.project_count} projects
                     </p>
                   </div>
+                  {org.is_suspended && (
+                    <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">
+                      Suspended
+                    </Badge>
+                  )}
                   {getStatusBadge(org.sub_status)}
                 </div>
               ))}
@@ -221,25 +228,32 @@ export default function PlatformAdmin() {
                   <TableHead>Products</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Access</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">Loading...</TableCell>
+                    <TableCell colSpan={10} className="text-center py-8">Loading...</TableCell>
                   </TableRow>
                 ) : orgs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">No organizations found</TableCell>
+                    <TableCell colSpan={10} className="text-center py-8">No organizations found</TableCell>
                   </TableRow>
                 ) : (
                   orgs.map((org) => (
-                    <TableRow key={org.id}>
+                    <TableRow key={org.id} className={org.is_suspended ? "bg-destructive/5" : undefined}>
                       <TableCell>
                         <div>
                           <p className="font-medium">{org.name}</p>
                           <p className="text-xs text-muted-foreground">/{org.slug}</p>
+                          {org.is_suspended && org.suspended_reason && (
+                            <p className="text-xs text-destructive mt-1 line-clamp-1" title={org.suspended_reason}>
+                              {org.suspension_kind?.replace("_", " ")}: {org.suspended_reason}
+                            </p>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>{org.user_count}</TableCell>
@@ -250,8 +264,33 @@ export default function PlatformAdmin() {
                         <Badge variant="outline">{org.plan_name || "None"}</Badge>
                       </TableCell>
                       <TableCell>{getStatusBadge(org.sub_status)}</TableCell>
+                      <TableCell>
+                        {org.is_suspended ? (
+                          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">
+                            Suspended
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-success/10 text-success border-success/30">
+                            Active
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {new Date(org.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className={org.is_suspended ? "" : "text-destructive hover:text-destructive"}
+                          onClick={() => setSuspensionTarget(org)}
+                        >
+                          {org.is_suspended ? (
+                            <><RotateCcw className="h-3.5 w-3.5 mr-1" /> Reinstate</>
+                          ) : (
+                            <><Ban className="h-3.5 w-3.5 mr-1" /> Suspend</>
+                          )}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -261,8 +300,17 @@ export default function PlatformAdmin() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="licenses">
+          <LicenseManager />
+        </TabsContent>
+
         <TabsContent value="plans">
           <PlanManager />
+        </TabsContent>
+
+        <TabsContent value="ai" className="space-y-6">
+          <PlatformAIProviderSettings />
+          <AICreditPackManager />
         </TabsContent>
 
         <TabsContent value="support">
@@ -278,6 +326,15 @@ export default function PlatformAdmin() {
           <AuditLogViewer scope="platform" />
         </TabsContent>
       </Tabs>
+
+      {suspensionTarget && (
+        <OrgSuspensionDialog
+          open={!!suspensionTarget}
+          onOpenChange={(o) => !o && setSuspensionTarget(null)}
+          organization={suspensionTarget}
+          onSuccess={() => { setSuspensionTarget(null); fetchData(); }}
+        />
+      )}
     </AppLayout>
   );
 }
