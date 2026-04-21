@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.sync-plan-to-stripe]
 verify_jwt = false
+
+[functions.manage-ai-credit-packs]
+verify_jwt = false

@@ -34,6 +34,9 @@ import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { AICreditsMeter } from "@/components/billing/AICreditsMeter";
 import { AICreditPacks } from "@/components/billing/AICreditPacks";
+import { AICreditHistory } from "@/components/billing/AICreditHistory";
+import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Plan {
   id: string;
@@ -69,6 +72,7 @@ export default function Billing() {
   const [reactivating, setReactivating] = useState(false);
 
   const isAdmin = accessLevel === "admin";
+  const { isAdmin: isPlatformAdmin } = usePermissions();
 
   const handleCancelSubscription = async () => {
     if (!currentOrganization?.id) return;
@@ -276,6 +280,10 @@ export default function Billing() {
         <AICreditsMeter variant="full" />
 
         <AICreditPacks canPurchase={isAdmin} />
+
+        <AICreditHistory />
+
+        {isPlatformAdmin && <AICreditPackManager />}
 
         {limits && (
           <Card className="p-6">
