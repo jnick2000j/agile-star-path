@@ -183,9 +183,12 @@ export default function Pricing() {
                     className="w-full gap-2 mb-6"
                     variant={plan.highlight ? "default" : "outline"}
                     onClick={() => handleStart(plan.id)}
+                    disabled={!!user && isLicenseMode}
                   >
-                    {plan.cta_label || (plan.price_monthly === 0 ? "Start free" : "Start free trial")}
-                    <ArrowRight className="h-4 w-4" />
+                    {user && isLicenseMode
+                      ? "Managed via license"
+                      : (plan.cta_label || (plan.price_monthly === 0 ? "Start free" : "Start free trial"))}
+                    {!(user && isLicenseMode) && <ArrowRight className="h-4 w-4" />}
                   </Button>
                   <ul className="space-y-2 text-sm">
                     {lines.map((l, i) => (
