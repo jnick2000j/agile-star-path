@@ -1,0 +1,151 @@
+# TaskMaster on-prem stack.
+# All images are pinned by tag; the upgrade.sh script swaps tags atomically.
+# Versions are read from .env (set by install.sh / upgrade.sh).
+version: "3.9"
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  # -----------------------------------------------------------------
+  # Postgres + Supabase-compatible auth/realtime/storage layer
+  # -----------------------------------------------------------------
+  db:
+    image: ghcr.io/taskmaster/onprem-db:${IMAGE_TAG:-latest}
+    <<: *restart
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./seed:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  auth:
+    image: ghcr.io/taskmaster/onprem-auth:${IMAGE_TAG:-latest}
+    <<: *restart
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY}
+      GOTRUE_SITE_URL: ${PUBLIC_URL}
+      GOTRUE_SMTP_HOST: ${SMTP_HOST}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT}
+      GOTRUE_SMTP_USER: ${SMTP_USER}
+      GOTRUE_SMTP_PASS: ${SMTP_PASSWORD}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_FROM}
+
+  realtime:
+    image: ghcr.io/taskmaster/onprem-realtime:${IMAGE_TAG:-latest}
+    <<: *restart
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+
+  storage:
+    image: ghcr.io/taskmaster/onprem-storage:${IMAGE_TAG:-latest}
+    <<: *restart
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      STORAGE_BACKEND: ${STORAGE_DRIVER}
+      FILE_STORAGE_BACKEND_PATH: ${STORAGE_PATH}
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - storage-data:${STORAGE_PATH}
+
+  # -----------------------------------------------------------------
+  # Edge runtime (Deno) — runs the supabase/functions/* code
+  # -----------------------------------------------------------------
+  edge:
+    image: ghcr.io/taskmaster/onprem-edge:${IMAGE_TAG:-latest}
+    <<: *restart
+    depends_on:
+      db: { condition: service_healthy }
+      auth: { condition: service_started }
+    environment:
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      AI_PROVIDER: ${AI_PROVIDER}
+      AI_BASE_URL: ${AI_BASE_URL}
+      AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL}
+      AI_API_KEY: ${AI_API_KEY:-}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}
+      LICENSE_KEY: ${LICENSE_KEY}
+      ALLOW_OUTBOUND_TELEMETRY: ${ALLOW_OUTBOUND_TELEMETRY:-false}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+  # -----------------------------------------------------------------
+  # API gateway (kong) — routes /auth, /rest, /realtime, /functions, /storage
+  # -----------------------------------------------------------------
+  kong:
+    image: ghcr.io/taskmaster/onprem-kong:${IMAGE_TAG:-latest}
+    <<: *restart
+    depends_on:
+      auth: { condition: service_started }
+      edge: { condition: service_started }
+    ports:
+      - "${PUBLIC_PORT:-8000}:8000"
+    environment:
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+
+  # -----------------------------------------------------------------
+  # Static web bundle (nginx serving the Vite build)
+  # -----------------------------------------------------------------
+  web:
+    image: ghcr.io/taskmaster/onprem-web:${IMAGE_TAG:-latest}
+    <<: *restart
+    depends_on:
+      kong: { condition: service_started }
+    ports:
+      - "${WEB_PORT:-80}:80"
+      - "${WEB_TLS_PORT:-443}:443"
+    environment:
+      VITE_SUPABASE_URL: ${PUBLIC_URL}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY}
+    volumes:
+      - ./tls:/etc/nginx/tls:ro
+
+  # -----------------------------------------------------------------
+  # Optional: local Ollama for AI when AI_PROVIDER=ollama
+  # Comment out if you point AI_BASE_URL at an external service.
+  # -----------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    <<: *restart
+    profiles: ["ollama"]
+    volumes:
+      - ollama-models:/root/.ollama
+
+volumes:
+  db-data:
+  storage-data:
+  ollama-models:

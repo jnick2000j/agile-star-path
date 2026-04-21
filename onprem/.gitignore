@@ -1,0 +1,7 @@
+.env
+.env.tag
+backups/
+bundles/
+keys/*.pem
+tls/
+web-current/

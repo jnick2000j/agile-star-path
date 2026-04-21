@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Thin wrapper for managing TaskMaster release bundles.
+#
+#   pimp-cli download <version>   fetch a bundle from the release server
+#   pimp-cli verify   <version>   check signature + manifest checksums
+#   pimp-cli upgrade  <version>   delegate to ./upgrade.sh
+#   pimp-cli rollback             delegate to ./rollback.sh
+#   pimp-cli list                 list bundles present locally
+#
+# For air-gapped sites: skip 'download', sneakernet the tarball into ./bundles/
+# and call 'verify' + 'upgrade' directly.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+RELEASE_SERVER="${RELEASE_SERVER:-https://updates.taskmaster.app}"
+PUBKEY="./keys/release.pub.pem"
+
+cmd="${1:-}"; shift || true
+case "$cmd" in
+  download)
+    VERSION="${1:?usage: pimp-cli download <version>}"
+    DEST="./bundles/$VERSION"
+    mkdir -p "$DEST"
+    echo "[pimp-cli] downloading $VERSION..."
+    curl -fL "$RELEASE_SERVER/bundles/$VERSION.tar.gz"     -o "$DEST.tar.gz"
+    curl -fL "$RELEASE_SERVER/bundles/$VERSION.tar.gz.sig" -o "$DEST.tar.gz.sig"
+    tar -xzf "$DEST.tar.gz" -C "$DEST"
+    echo "[pimp-cli] extracted to $DEST"
+    ;;
+
+  verify)
+    VERSION="${1:?usage: pimp-cli verify <version>}"
+    DEST="./bundles/$VERSION"
+    [ -f "$DEST.tar.gz" ] && [ -f "$DEST.tar.gz.sig" ] || { echo "Missing tarball or signature" >&2; exit 1; }
+    [ -f "$PUBKEY" ] || { echo "Missing release public key at $PUBKEY" >&2; exit 1; }
+    openssl dgst -sha256 -verify "$PUBKEY" -signature "$DEST.tar.gz.sig" "$DEST.tar.gz" \
+      || { echo "[pimp-cli] signature INVALID" >&2; exit 1; }
+    # Verify manifest checksum
+    EXPECTED=$(jq -r '.checksum' "$DEST/manifest.json")
+    ACTUAL=$(sha256sum "$DEST.tar.gz" | awk '{print $1}')
+    [ "$EXPECTED" = "$ACTUAL" ] || { echo "[pimp-cli] checksum mismatch" >&2; exit 1; }
+    echo "[pimp-cli] $VERSION verified"
+    ;;
+
+  upgrade)
+    VERSION="${1:?usage: pimp-cli upgrade <version>}"
+    exec ./scripts/upgrade.sh "$VERSION"
+    ;;
+
+  rollback)
+    exec ./scripts/rollback.sh
+    ;;
+
+  list)
+    ls -1 ./bundles 2>/dev/null | grep -v '^\.' || true
+    ;;
+
+  *)
+    echo "Usage: pimp-cli {download|verify|upgrade|rollback|list} [version]" >&2
+    exit 1
+    ;;
+esac
