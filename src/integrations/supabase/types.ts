@@ -6449,21 +6449,33 @@ export type Database = {
         Row: {
           access_level: string
           created_at: string
+          disabled_at: string | null
+          disabled_by: string | null
+          disabled_reason: string | null
           id: string
+          is_disabled: boolean
           organization_id: string
           user_id: string
         }
         Insert: {
           access_level?: string
           created_at?: string
+          disabled_at?: string | null
+          disabled_by?: string | null
+          disabled_reason?: string | null
           id?: string
+          is_disabled?: boolean
           organization_id: string
           user_id: string
         }
         Update: {
           access_level?: string
           created_at?: string
+          disabled_at?: string | null
+          disabled_by?: string | null
+          disabled_reason?: string | null
           id?: string
+          is_disabled?: boolean
           organization_id?: string
           user_id?: string
         }
@@ -7252,6 +7264,15 @@ export type Database = {
       }
       set_license_status: {
         Args: { _license_id: string; _reason?: string; _status: string }
+        Returns: Json
+      }
+      set_org_member_disabled: {
+        Args: {
+          _disable: boolean
+          _org_id: string
+          _reason?: string
+          _user_id: string
+        }
         Returns: Json
       }
       set_organization_suspension: {
