@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { 
-  Plus, 
-  Search, 
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Plus,
+  Search,
   Filter,
   Mail,
   MoreVertical,
   Send,
   Loader2,
+  ShieldOff,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -39,11 +42,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 interface TeamMember {
@@ -56,6 +61,9 @@ interface TeamMember {
   phone_number: string | null;
   avatar_url: string | null;
   archived: boolean;
+  is_disabled: boolean;
+  disabled_reason: string | null;
+  disabled_at: string | null;
 }
 
 const roleConfig: Record<string, { label: string; className: string }> = {
@@ -74,6 +82,7 @@ const roleConfig: Record<string, { label: string; className: string }> = {
 
 export default function Team() {
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,13 +90,19 @@ export default function Team() {
   const [departmentFilters, setDepartmentFilters] = useState<string[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [resendingFor, setResendingFor] = useState<string | null>(null);
-  
+
   // Add member dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<TeamMember[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("org_stakeholder");
   const [adding, setAdding] = useState(false);
+
+  // Disable / enable member dialog state
+  const [statusTarget, setStatusTarget] = useState<TeamMember | null>(null);
+  const [statusAction, setStatusAction] = useState<"disable" | "enable">("disable");
+  const [statusReason, setStatusReason] = useState("");
+  const [statusBusy, setStatusBusy] = useState(false);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -104,7 +119,7 @@ export default function Team() {
     try {
       const { data: accessData, error: accessError } = await supabase
         .from("user_organization_access")
-        .select("user_id, access_level")
+        .select("user_id, access_level, is_disabled, disabled_at, disabled_reason")
         .eq("organization_id", currentOrganization.id);
 
       if (accessError) throw accessError;
@@ -116,6 +131,7 @@ export default function Team() {
       }
 
       const userIds = accessData.map(a => a.user_id);
+      const accessByUser = new Map(accessData.map(a => [a.user_id, a]));
 
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
@@ -125,20 +141,26 @@ export default function Team() {
 
       if (profilesError) throw profilesError;
 
-      const members: TeamMember[] = (profiles || []).map(p => ({
-        id: p.id,
-        user_id: p.user_id,
-        full_name: p.full_name,
-        email: p.email,
-        role: p.role,
-        department: p.department,
-        phone_number: p.phone_number,
-        avatar_url: p.avatar_url,
-        archived: p.archived,
-      }));
+      const members: TeamMember[] = (profiles || []).map(p => {
+        const access = accessByUser.get(p.user_id);
+        return {
+          id: p.id,
+          user_id: p.user_id,
+          full_name: p.full_name,
+          email: p.email,
+          role: p.role,
+          department: p.department,
+          phone_number: p.phone_number,
+          avatar_url: p.avatar_url,
+          archived: p.archived,
+          is_disabled: !!access?.is_disabled,
+          disabled_reason: access?.disabled_reason ?? null,
+          disabled_at: access?.disabled_at ?? null,
+        };
+      });
 
       setTeamMembers(members);
-      
+
       const depts = [...new Set(members.map(m => m.department).filter(Boolean))] as string[];
       setDepartments(depts);
     } catch (error) {
