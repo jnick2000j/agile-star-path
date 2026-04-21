@@ -49,6 +49,9 @@ interface OrgOverview {
   name: string;
   slug: string;
   created_at: string;
+  is_suspended: boolean;
+  suspension_kind: string | null;
+  suspended_reason: string | null;
   user_count: number;
   programme_count: number;
   project_count: number;
@@ -65,6 +68,7 @@ export default function PlatformAdmin() {
   });
   const [orgs, setOrgs] = useState<OrgOverview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [suspensionTarget, setSuspensionTarget] = useState<OrgOverview | null>(null);
 
   useEffect(() => {
     fetchData();
