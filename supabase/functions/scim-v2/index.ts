@@ -76,12 +76,18 @@ Deno.serve(async (req) => {
     if (subPath.length === 2 && req.method === "GET") {
       return await getUser(admin, orgId, subPath[1]);
     }
-    if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH" || req.method === "DELETE") {
-      return scimError(501, "Write operations not yet implemented (stub).");
+    if (subPath.length === 1 && req.method === "POST") {
+      return await createUser(admin, orgId, await req.json().catch(() => ({})));
+    }
+    if (subPath.length === 2 && (req.method === "PUT" || req.method === "PATCH")) {
+      return await updateUser(admin, orgId, subPath[1], await req.json().catch(() => ({})), req.method);
+    }
+    if (subPath.length === 2 && req.method === "DELETE") {
+      return await deactivateUser(admin, orgId, subPath[1]);
     }
   }
 
-  // Groups
+  // Groups (read-only — group membership is driven via mappings)
   if (subPath[0] === "Groups") {
     if (subPath.length === 1 && req.method === "GET") {
       return await listGroups(admin, orgId, url);
@@ -90,7 +96,7 @@ Deno.serve(async (req) => {
       return await getGroup(admin, orgId, subPath[1]);
     }
     if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH" || req.method === "DELETE") {
-      return scimError(501, "Write operations not yet implemented (stub).");
+      return scimError(501, "Group writes not supported — manage memberships via Users.groups.");
     }
   }
 
