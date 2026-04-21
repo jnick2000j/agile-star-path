@@ -6933,7 +6933,7 @@ export type Database = {
           entity_type: string
           id: string
           is_required: boolean
-          organization_id: string | null
+          organization_id: string
           reviewer_id: string
           reviewer_role: string | null
           signed_at: string | null
@@ -6950,7 +6950,7 @@ export type Database = {
           entity_type: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id: string
           reviewer_id: string
           reviewer_role?: string | null
           signed_at?: string | null
@@ -6967,7 +6967,7 @@ export type Database = {
           entity_type?: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id?: string
           reviewer_id?: string
           reviewer_role?: string | null
           signed_at?: string | null
@@ -6996,7 +6996,7 @@ export type Database = {
           evidence_label: string
           id: string
           is_required: boolean
-          organization_id: string | null
+          organization_id: string
         }
         Insert: {
           attested_at?: string | null
@@ -7010,7 +7010,7 @@ export type Database = {
           evidence_label: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id: string
         }
         Update: {
           attested_at?: string | null
@@ -7024,7 +7024,7 @@ export type Database = {
           evidence_label?: string
           id?: string
           is_required?: boolean
-          organization_id?: string | null
+          organization_id?: string
         }
         Relationships: [
           {
@@ -7051,7 +7051,7 @@ export type Database = {
           entity_type: string
           id: string
           notify_role: string | null
-          organization_id: string | null
+          organization_id: string
           user_id: string
         }
         Insert: {
@@ -7061,7 +7061,7 @@ export type Database = {
           entity_type: string
           id?: string
           notify_role?: string | null
-          organization_id?: string | null
+          organization_id: string
           user_id: string
         }
         Update: {
@@ -7071,7 +7071,7 @@ export type Database = {
           entity_type?: string
           id?: string
           notify_role?: string | null
-          organization_id?: string | null
+          organization_id?: string
           user_id?: string
         }
         Relationships: [
