@@ -294,6 +294,60 @@ export type Database = {
           },
         ]
       }
+      ai_credit_packs: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          created_by: string | null
+          credits: number
+          currency: string
+          description: string | null
+          highlight: boolean
+          id: string
+          is_active: boolean
+          name: string
+          pack_key: string
+          sort_order: number
+          stripe_price_lookup_key: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          created_by?: string | null
+          credits: number
+          currency?: string
+          description?: string | null
+          highlight?: boolean
+          id?: string
+          is_active?: boolean
+          name: string
+          pack_key: string
+          sort_order?: number
+          stripe_price_lookup_key?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          currency?: string
+          description?: string | null
+          highlight?: boolean
+          id?: string
+          is_active?: boolean
+          name?: string
+          pack_key?: string
+          sort_order?: number
+          stripe_price_lookup_key?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_credit_purchases: {
         Row: {
           amount_cents: number
@@ -6324,6 +6378,20 @@ export type Database = {
           expires_at: string
           organization_id: string
           organization_name: string
+          status: string
+        }[]
+      }
+      get_org_credit_purchase_history: {
+        Args: { _limit?: number; _org_id: string }
+        Returns: {
+          amount_cents: number
+          created_at: string
+          credits: number
+          currency: string
+          environment: string
+          id: string
+          pack_id: string
+          period_start: string
           status: string
         }[]
       }
