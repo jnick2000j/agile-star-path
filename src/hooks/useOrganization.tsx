@@ -10,6 +10,9 @@ interface Organization {
   slug: string;
   logo_url: string | null;
   primary_color: string | null;
+  is_suspended?: boolean | null;
+  suspension_kind?: string | null;
+  suspended_reason?: string | null;
 }
 
 interface OrganizationContextType {
@@ -50,7 +53,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       if (orgIds.length > 0) {
         const { data: orgs, error: orgsError } = await supabase
           .from("organizations")
-          .select("id, name, slug, logo_url, primary_color")
+          .select("id, name, slug, logo_url, primary_color, is_suspended, suspension_kind, suspended_reason")
           .in("id", orgIds)
           .order("name");
 
@@ -79,7 +82,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         if (roleData) {
           const { data: allOrgs, error: allOrgsError } = await supabase
             .from("organizations")
-            .select("id, name, slug, logo_url, primary_color")
+            .select("id, name, slug, logo_url, primary_color, is_suspended, suspension_kind, suspended_reason")
             .order("name");
 
           if (!allOrgsError && allOrgs) {

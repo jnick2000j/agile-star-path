@@ -1,18 +1,32 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useMFAGate } from "@/hooks/useMFAGate";
 import { MFAChallengeDialog } from "@/components/security/MFAChallengeDialog";
+import { SuspendedOrgBlock } from "@/components/SuspendedOrgBlock";
 
 interface ProtectedRouteProps {
   children: ReactNode;
   requiredRoles?: string[];
 }
 
+// Routes that remain accessible even when the current org is suspended.
+// Platform admins still need to manage suspensions, billing, and support.
+const SUSPENSION_ALLOWED_PATHS = [
+  "/platform-admin",
+  "/billing",
+  "/support",
+  "/profile",
+  "/onboarding",
+  "/accept-invite",
+];
+
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
   const { user, loading, userRole } = useAuth();
+  const { currentOrganization } = useOrganization();
   const location = useLocation();
   const [orgCheck, setOrgCheck] = useState<"checking" | "has" | "none">("checking");
   const mfa = useMFAGate();
@@ -77,6 +91,22 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
         />
       </>
     );
+  }
+
+  // Suspension gate — block access if the current organization is suspended.
+  // Platform admins can still reach platform-admin / billing / support / profile to resolve.
+  if (currentOrganization?.is_suspended) {
+    const isAllowedPath = SUSPENSION_ALLOWED_PATHS.some((p) =>
+      location.pathname === p || location.pathname.startsWith(`${p}/`)
+    );
+    if (!isAllowedPath) {
+      return (
+        <SuspendedOrgBlock
+          reason={currentOrganization.suspended_reason}
+          kind={currentOrganization.suspension_kind}
+        />
+      );
+    }
   }
 
   return <>{children}</>;
