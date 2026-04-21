@@ -47,6 +47,7 @@ import { UserAccessList } from "@/components/admin/UserAccessList";
 import { RoleTypesManager } from "@/components/admin/RoleTypesManager";
 import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
+import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
 
@@ -283,6 +284,7 @@ export default function AdminPanel() {
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
           <TabsTrigger value="access">Access Control</TabsTrigger>
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
+          <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -586,6 +588,10 @@ export default function AdminPanel() {
 
         <TabsContent value="residency">
           <ResidencyComplianceManager />
+        </TabsContent>
+
+        <TabsContent value="ai-provider">
+          <AIProviderSettings />
         </TabsContent>
       </Tabs>
     </AppLayout>

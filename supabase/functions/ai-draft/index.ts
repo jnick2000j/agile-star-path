@@ -4,6 +4,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateResidency } from "../_shared/residency.ts";
 import { consumeAiCredits } from "../_shared/credits.ts";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -109,36 +110,26 @@ const WIZARD_SYSTEM_PROMPTS: Record<WizardKind, string> = {
     "You are a scrum master. Draft a Definition of Ready checklist for the team's user stories: User value clear, Acceptance criteria written, Dependencies identified, Estimable, Sized to fit a sprint, Test approach agreed, Designs/assets available where relevant. Tailor wording to the inputs.",
 };
 
-async function callGateway(model: string, system: string, user: string) {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
-
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
+async function callGateway(
+  supabase: ReturnType<typeof createClient>,
+  organizationId: string | null,
+  model: string,
+  system: string,
+  user: string,
+) {
+  const result = await callAI({
+    supabase,
+    organizationId,
+    model,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
   });
-
-  if (resp.status === 429) {
-    return { error: "rate_limited", status: 429 } as const;
+  if (!result.ok) {
+    return { error: "gateway_error", status: result.errorResponse.status, response: result.errorResponse } as const;
   }
-  if (resp.status === 402) {
-    return { error: "payment_required", status: 402 } as const;
-  }
-  if (!resp.ok) {
-    const t = await resp.text();
-    console.error("AI gateway error", resp.status, t);
-    return { error: "gateway_error", status: 500 } as const;
-  }
-
-  const json = await resp.json();
-  const content: string = json?.choices?.[0]?.message?.content ?? "";
+  const content: string = result.data?.choices?.[0]?.message?.content ?? "";
   return { content } as const;
 }
 
@@ -251,8 +242,9 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const result = await callGateway(model, system, userPrompt);
+    const result = await callGateway(supabase, orgId, model, system, userPrompt);
     if ("error" in result) {
+      if ("response" in result && result.response) return result.response;
       return new Response(JSON.stringify({ error: result.error }), {
         status: result.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

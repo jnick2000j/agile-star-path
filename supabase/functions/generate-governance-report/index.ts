@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,7 +9,6 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 interface RequestBody {
   report_type: "highlight" | "end_stage" | "programme_status" | "product_status";
@@ -147,45 +147,19 @@ Return ONLY valid JSON with this structure:
   "tolerance_status": "ON_TRACK | AT_RISK | EXCEEDED"
 }`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
+    const aiRes = await callAI({
+      supabase,
+      organizationId: organization_id,
+      model: "google/gemini-2.5-pro",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
     });
+    if (!aiRes.ok) return aiRes.errorResponse;
 
-    if (aiRes.status === 429) {
-      return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (aiRes.status === 402) {
-      return new Response(JSON.stringify({ error: "AI credits exhausted. Add credits to continue." }), {
-        status: 402,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      console.error("AI gateway error:", errText);
-      return new Response(JSON.stringify({ error: "AI generation failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const aiData = await aiRes.json();
-    const rawContent = aiData.choices?.[0]?.message?.content || "{}";
+    const rawContent = aiRes.data.choices?.[0]?.message?.content || "{}";
     let content;
     try {
       content = typeof rawContent === "string" ? JSON.parse(rawContent) : rawContent;

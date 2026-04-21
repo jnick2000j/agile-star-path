@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateResidency } from "../_shared/residency.ts";
 import { consumeAiCredits } from "../_shared/credits.ts";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,8 +33,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
+    // API key is resolved per-provider inside callAI().
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -124,45 +124,22 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          {
-            role: "system",
-            content: `You are a professional translator for a project & programme management platform.
+    const aiResp = await callAI({
+      supabase: authClient,
+      organizationId: body.organization_id ?? null,
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are a professional translator for a project & programme management platform.
 Translate the user's text into ${langName}. Preserve markdown formatting, headings, bullet points, terminology and any product names.
 Return ONLY the translated text — no preamble.`,
-          },
-          { role: "user", content: body.text },
-        ],
-      }),
+        },
+        { role: "user", content: body.text },
+      ],
     });
-
-    if (aiResp.status === 429) {
-      return new Response(JSON.stringify({ error: "rate_limited" }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (aiResp.status === 402) {
-      return new Response(JSON.stringify({ error: "payment_required" }), {
-        status: 402,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!aiResp.ok) {
-      const t = await aiResp.text();
-      console.error("ai-translate gateway", aiResp.status, t);
-      return new Response(JSON.stringify({ error: "gateway_error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const aiData = await aiResp.json();
-    const content: string = aiData?.choices?.[0]?.message?.content ?? "";
+    if (!aiResp.ok) return aiResp.errorResponse;
+    const content: string = aiResp.data?.choices?.[0]?.message?.content ?? "";
 
     // Persist translation in cache if we have a summary id.
     if (body.summary_id && content) {

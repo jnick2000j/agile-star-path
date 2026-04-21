@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
 import { evaluateResidency } from "../_shared/residency.ts";
 import { consumeAiCredits } from "../_shared/credits.ts";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,8 +59,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableKey) throw new Error("LOVABLE_API_KEY not configured");
 
     const authClient = createClient(supabaseUrl, anon, {
       global: { headers: { Authorization: authHeader } },
@@ -180,32 +179,17 @@ serve(async (req) => {
     const systemPrompt = `You are a senior PMO analyst. ${KIND_INSTRUCTIONS[body.summary_kind]} Output clear markdown. Be specific; cite numbers.${langDirective}`;
     const userPrompt = `Context (JSON):\n\n${JSON.stringify(ctx).slice(0, 60_000)}\n\nUser inputs: ${JSON.stringify(body.inputs ?? {})}`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
+    const aiResponse = await callAI({
+      supabase: authClient,
+      organizationId: body.organization_id,
+      model: MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
     });
-
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Try again in a moment." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Add funds in Settings → Workspace → Usage." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      const t = await aiResponse.text();
-      console.error("AI gateway", aiResponse.status, t);
-      throw new Error("AI gateway error");
-    }
-
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content ?? "";
+    if (!aiResponse.ok) return aiResponse.errorResponse;
+    const content = aiResponse.data.choices?.[0]?.message?.content ?? "";
 
     // Audit log entry
     const { data: audit } = await supabase

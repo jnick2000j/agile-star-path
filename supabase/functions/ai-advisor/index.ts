@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
 import { evaluateResidency } from "../_shared/residency.ts";
 import { consumeAiCredits } from "../_shared/credits.ts";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -203,8 +204,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableKey) throw new Error("LOVABLE_API_KEY not configured");
 
     const authClient = createClient(supabaseUrl, anon, { global: { headers: { Authorization: authHeader } } });
     const { data: userData, error: userErr } = await authClient.auth.getUser();
@@ -279,20 +278,16 @@ Rules:
     const allToolCalls: unknown[] = [];
 
     for (let iter = 0; iter < 5; iter++) {
-      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: MODEL, messages: convo, tools: TOOLS, tool_choice: "auto" }),
+      const aiResp = await callAI({
+        supabase: authClient,
+        organizationId: organization_id,
+        model: MODEL,
+        messages: convo as never,
+        tools: TOOLS,
+        tool_choice: "auto",
       });
-
-      if (!aiResp.ok) {
-        if (aiResp.status === 429) return new Response(JSON.stringify({ error: "Rate limited. Please try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        if (aiResp.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Add funds in Settings → Workspace → Usage." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        const t = await aiResp.text(); console.error("AI", aiResp.status, t);
-        throw new Error("AI gateway error");
-      }
-      const aiData = await aiResp.json();
-      const msg = aiData.choices?.[0]?.message;
+      if (!aiResp.ok) return aiResp.errorResponse;
+      const msg = aiResp.data.choices?.[0]?.message;
       if (!msg) break;
 
       const toolCalls = msg.tool_calls as Array<{ id: string; function: { name: string; arguments: string } }> | undefined;
