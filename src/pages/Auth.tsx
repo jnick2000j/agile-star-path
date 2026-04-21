@@ -4,11 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2, ShieldCheck, Apple } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { applyBrandingCssVars, DEFAULT_BRANDING } from "@/lib/branding";
+import { lovable } from "@/integrations/lovable/index";
 
 interface LoginBranding {
   logo_url: string | null;
@@ -60,7 +61,7 @@ const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(1, "Name is required");
 
-type AuthMode = "login" | "signup" | "forgot-password";
+type AuthMode = "login" | "signup" | "forgot-password" | "sso";
 
 const defaultFeatures = [
   { icon: Layers, title: "Programme Management", description: "Track programmes, projects, and products with full lifecycle governance." },
@@ -165,8 +166,57 @@ export default function Auth() {
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
       if (error) toast.error(error.message);
       else { toast.success("Password reset email sent. Check your inbox."); setMode("login"); }
+    } else if (mode === "sso") {
+      try {
+        const { data, error } = await supabase.rpc("get_org_sso_config_by_domain", { _email: email });
+        if (error) throw error;
+        const cfg = Array.isArray(data) ? data[0] : data;
+        if (!cfg?.saml_provider_id && !cfg?.oidc_issuer_url) {
+          toast.error("No SSO configured for this email domain. Use email + password or contact your admin.");
+          setLoading(false);
+          return;
+        }
+        // SAML path via signInWithSSO (provider id was returned by Supabase admin API)
+        if (cfg.saml_provider_id) {
+          const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
+            providerId: cfg.saml_provider_id,
+            options: { redirectTo: `${window.location.origin}/` },
+          });
+          if (ssoError) throw ssoError;
+        } else {
+          // OIDC fallback — also via signInWithSSO domain-based
+          const domain = email.split("@")[1];
+          const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
+            domain,
+            options: { redirectTo: `${window.location.origin}/` },
+          });
+          if (ssoError) throw ssoError;
+        }
+      } catch (e: any) {
+        toast.error(e.message || "SSO sign-in failed");
+      }
     }
     setLoading(false);
+  };
+
+  const handleOAuth = async (provider: "google" | "apple") => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(result.error.message || `${provider} sign-in failed`);
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) return; // browser will redirect
+      // Tokens were returned
+      navigate("/");
+    } catch (e: any) {
+      toast.error(e.message || `${provider} sign-in failed`);
+      setLoading(false);
+    }
   };
 
   const appName = branding?.app_name || "TaskMaster";
@@ -204,6 +254,7 @@ export default function Auth() {
       case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "";
       case "signup": return "Create your account";
       case "forgot-password": return "Reset your password";
+      case "sso": return "Sign in with SSO";
     }
   };
 
@@ -212,6 +263,7 @@ export default function Auth() {
       case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your credentials to access your dashboard.") : "";
       case "signup": return "Get started with your programme management journey.";
       case "forgot-password": return "Enter your email and we'll send you a reset link.";
+      case "sso": return "Enter your work email and we'll route you to your identity provider.";
     }
   };
 
@@ -220,6 +272,7 @@ export default function Auth() {
       case "login": return branding?.login_button_text || "Sign In";
       case "signup": return "Create Account";
       case "forgot-password": return "Send Reset Link";
+      case "sso": return "Continue with SSO";
     }
   };
 
@@ -305,7 +358,11 @@ export default function Auth() {
       </form>
 
       <div className="mt-6 pt-5 border-t border-border/60 text-center">
-        {mode === "forgot-password" ? (
+        {mode === "forgot-password" || mode === "sso" ? (
+          <button type="button" onClick={() => { setMode("login"); setErrors({}); }} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 mx-auto font-medium">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
+          </button>
+        ) : (
           <button type="button" onClick={() => { setMode("login"); setErrors({}); }} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 mx-auto font-medium">
             <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
           </button>
