@@ -54,7 +54,13 @@ export default function AcceptInvite() {
       navigate("/");
       setTimeout(() => window.location.reload(), 100);
     } catch (err: any) {
-      toast.error(err.message || "Failed to accept invitation");
+      const msg: string = err?.message || "Failed to accept invitation";
+      // Detect suspension errors raised by the RPC and surface them inline.
+      if (/suspended/i.test(msg)) {
+        setError(msg);
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setAccepting(false);
     }

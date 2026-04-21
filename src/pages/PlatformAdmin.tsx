@@ -31,6 +31,7 @@ import { PlanManager } from "@/components/admin/PlanManager";
 import { PlatformSupportQueue } from "@/components/admin/PlatformSupportQueue";
 import { LicenseManager } from "@/components/admin/LicenseManager";
 import { OrgSuspensionDialog } from "@/components/admin/OrgSuspensionDialog";
+import { SuspensionHistory } from "@/components/admin/SuspensionHistory";
 import { PlatformAIProviderSettings } from "@/components/admin/PlatformAIProviderSettings";
 import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 
@@ -216,7 +217,7 @@ export default function PlatformAdmin() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="tenants">
+        <TabsContent value="tenants" className="space-y-6">
           <Card className="overflow-hidden">
             <Table>
               <TableHeader>
@@ -286,9 +287,9 @@ export default function PlatformAdmin() {
                           onClick={() => setSuspensionTarget(org)}
                         >
                           {org.is_suspended ? (
-                            <><RotateCcw className="h-3.5 w-3.5 mr-1" /> Reinstate</>
+                            <><RotateCcw className="h-3.5 w-3.5 mr-1" /> Enable Access</>
                           ) : (
-                            <><Ban className="h-3.5 w-3.5 mr-1" /> Suspend</>
+                            <><Ban className="h-3.5 w-3.5 mr-1" /> Disable Access</>
                           )}
                         </Button>
                       </TableCell>
@@ -298,6 +299,8 @@ export default function PlatformAdmin() {
               </TableBody>
             </Table>
           </Card>
+
+          <SuspensionHistory limit={50} />
         </TabsContent>
 
         <TabsContent value="licenses">
