@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe, Sparkles, CreditCard } from "lucide-react";
+import { HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe, Sparkles, CreditCard, KeyRound } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +9,7 @@ import { AICreditsMeter } from "@/components/billing/AICreditsMeter";
 import { AskSupportDialog } from "@/components/AskSupportDialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -28,6 +29,7 @@ interface HeaderProps {
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut, userRole, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
+  const { isLicenseMode } = useDeploymentMode();
   const navigate = useNavigate();
   const isAdmin = userRole === "admin";
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string | null>(null);
@@ -165,8 +167,8 @@ export function Header({ title, subtitle }: HeaderProps) {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/billing" className="flex items-center gap-2 cursor-pointer">
-                <CreditCard className="h-4 w-4" />
-                Billing
+                {isLicenseMode ? <KeyRound className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
+                {isLicenseMode ? "License" : "Billing"}
               </Link>
             </DropdownMenuItem>
             {(isAdmin || userRole === "org_admin") && (
