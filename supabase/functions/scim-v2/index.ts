@@ -195,6 +195,140 @@ async function getGroup(admin: any, orgId: string, groupId: string) {
 
 // --- SCIM helpers -----------------------------------------------------------
 
+async function createUser(admin: any, orgId: string, body: any) {
+  const email = body.userName ?? body.emails?.[0]?.value;
+  if (!email) return scimError(400, "userName/email required");
+  const externalId = body.externalId ?? null;
+  const groups: string[] = (body.groups ?? []).map((g: any) => g.display ?? g.value).filter(Boolean);
+  const fullName = body.displayName ?? `${body.name?.givenName ?? ""} ${body.name?.familyName ?? ""}`.trim();
+
+  // Resolve access level via group→role mapping; default to viewer
+  let accessLevel = "viewer";
+  if (groups.length > 0) {
+    const { data: lvl } = await admin.rpc("resolve_scim_groups_to_access_level", {
+      _org_id: orgId,
+      _groups: groups,
+    });
+    if (lvl) accessLevel = lvl;
+  }
+
+  // Find or create auth user
+  const { data: existing } = await admin
+    .from("profiles")
+    .select("user_id")
+    .ilike("email", email)
+    .maybeSingle();
+
+  let userId = existing?.user_id;
+  if (!userId) {
+    const { data: created, error: cErr } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { full_name: fullName, scim_provisioned: true },
+    });
+    if (cErr) return scimError(500, cErr.message);
+    userId = created.user.id;
+  }
+
+  await admin.from("user_organization_access").upsert(
+    { user_id: userId, organization_id: orgId, access_level: accessLevel },
+    { onConflict: "user_id,organization_id" }
+  );
+
+  await admin.from("scim_user_sync_state").upsert(
+    {
+      organization_id: orgId,
+      user_id: userId,
+      external_id: externalId ?? userId,
+      scim_username: email,
+      scim_groups: groups,
+      active: body.active !== false,
+      last_synced_at: new Date().toISOString(),
+    },
+    { onConflict: "organization_id,user_id" }
+  );
+
+  await admin.rpc("log_audit_event", {
+    _event_type: "scim_user_created",
+    _event_category: "sso",
+    _organization_id: orgId,
+    _target_user_id: userId,
+    _metadata: { email, groups, access_level: accessLevel },
+  });
+
+  const { data: profile } = await admin.from("profiles").select("*").eq("user_id", userId).maybeSingle();
+  return scimJson(userToScim(profile, accessLevel), 201);
+}
+
+async function updateUser(admin: any, orgId: string, userId: string, body: any, method: string) {
+  // Handle PATCH ops minimally; accept full PUT representation otherwise
+  const patchOps: any[] = method === "PATCH" ? body.Operations ?? [] : [];
+  let active: boolean | undefined;
+  let groups: string[] | undefined;
+
+  if (method === "PUT") {
+    active = body.active;
+    groups = (body.groups ?? []).map((g: any) => g.display ?? g.value).filter(Boolean);
+  } else {
+    for (const op of patchOps) {
+      const path = (op.path ?? "").toLowerCase();
+      if (path === "active") active = op.value;
+      if (path === "groups") groups = (op.value ?? []).map((g: any) => g.display ?? g.value).filter(Boolean);
+    }
+  }
+
+  if (active === false) {
+    await admin.from("user_organization_access").delete().eq("user_id", userId).eq("organization_id", orgId);
+  } else if (groups) {
+    const { data: lvl } = await admin.rpc("resolve_scim_groups_to_access_level", {
+      _org_id: orgId,
+      _groups: groups,
+    });
+    if (lvl) {
+      await admin.from("user_organization_access").upsert(
+        { user_id: userId, organization_id: orgId, access_level: lvl },
+        { onConflict: "user_id,organization_id" }
+      );
+    }
+  }
+
+  await admin
+    .from("scim_user_sync_state")
+    .update({
+      active: active ?? true,
+      scim_groups: groups ?? [],
+      last_synced_at: new Date().toISOString(),
+    })
+    .eq("organization_id", orgId)
+    .eq("user_id", userId);
+
+  await admin.rpc("log_audit_event", {
+    _event_type: "scim_user_updated",
+    _event_category: "sso",
+    _organization_id: orgId,
+    _target_user_id: userId,
+    _metadata: { active, groups },
+  });
+
+  return await getUser(admin, orgId, userId);
+}
+
+async function deactivateUser(admin: any, orgId: string, userId: string) {
+  await admin.from("user_organization_access").delete().eq("user_id", userId).eq("organization_id", orgId);
+  await admin
+    .from("scim_user_sync_state")
+    .update({ active: false, last_synced_at: new Date().toISOString() })
+    .eq("organization_id", orgId)
+    .eq("user_id", userId);
+  await admin.rpc("log_audit_event", {
+    _event_type: "scim_user_deactivated",
+    _event_category: "sso",
+    _organization_id: orgId,
+    _target_user_id: userId,
+  });
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 function userToScim(p: any, accessLevel: string) {
   const [given, ...rest] = (p.full_name ?? "").split(" ");
   return {
