@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,10 +18,10 @@ import {
   Layers,
   FolderKanban,
   Package,
-  TrendingUp,
   CreditCard,
   Activity,
-  AlertTriangle,
+  Ban,
+  RotateCcw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
@@ -29,6 +29,10 @@ import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
 import { AuditRetentionPolicy } from "@/components/admin/AuditRetentionPolicy";
 import { PlanManager } from "@/components/admin/PlanManager";
 import { PlatformSupportQueue } from "@/components/admin/PlatformSupportQueue";
+import { LicenseManager } from "@/components/admin/LicenseManager";
+import { OrgSuspensionDialog } from "@/components/admin/OrgSuspensionDialog";
+import { PlatformAIProviderSettings } from "@/components/admin/PlatformAIProviderSettings";
+import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 
 interface PlatformStats {
   totalOrgs: number;
