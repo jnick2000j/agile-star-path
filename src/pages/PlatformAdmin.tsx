@@ -229,6 +229,13 @@ export default function PlatformAdmin() {
                       Suspended
                     </Badge>
                   )}
+                  {org.license_id && (
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 gap-1">
+                      <KeyRound className="h-3 w-3" />
+                      {org.license_deployment_mode === "on_prem" ? "On-Prem" : "Licensed"}
+                      {org.license_customer_reference ? ` · ${org.license_customer_reference}` : ""}
+                    </Badge>
+                  )}
                   {getStatusBadge(org.sub_status)}
                 </div>
               ))}
@@ -281,7 +288,16 @@ export default function PlatformAdmin() {
                       <TableCell>{org.project_count}</TableCell>
                       <TableCell>{org.product_count}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{org.plan_name || "None"}</Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline">{org.plan_name || "None"}</Badge>
+                          {org.license_id && (
+                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 gap-1 w-fit">
+                              <KeyRound className="h-3 w-3" />
+                              {org.license_deployment_mode === "on_prem" ? "On-Prem" : "Licensed"}
+                              {org.license_customer_reference ? ` · ${org.license_customer_reference}` : ""}
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(org.sub_status)}</TableCell>
                       <TableCell>
