@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,9 +38,6 @@ serve(async (req) => {
     const { report_id, week_ending, programme_id } = await req.json();
     
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!lovableKey) throw new Error("LOVABLE_API_KEY not configured");
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -150,56 +148,37 @@ Please provide:
 
 Return as a JSON object with those 5 keys.`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "You are a programme management assistant. Generate professional status report summaries. Always respond with valid JSON." },
-          { role: "user", content: prompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "generate_summary",
-            description: "Generate weekly report summaries",
-            parameters: {
-              type: "object",
-              properties: {
-                ai_summary: { type: "string", description: "Executive summary" },
-                task_summary: { type: "string", description: "Task progress summary" },
-                project_summary: { type: "string", description: "Project health summary" },
-                programme_summary: { type: "string", description: "Programme progress summary" },
-                product_summary: { type: "string", description: "Product development summary" },
-              },
-              required: ["ai_summary", "task_summary", "project_summary", "programme_summary", "product_summary"],
+    const aiResponse = await callAI({
+      supabase: authClient,
+      organizationId: null,
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: "You are a programme management assistant. Generate professional status report summaries. Always respond with valid JSON." },
+        { role: "user", content: prompt },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "generate_summary",
+          description: "Generate weekly report summaries",
+          parameters: {
+            type: "object",
+            properties: {
+              ai_summary: { type: "string", description: "Executive summary" },
+              task_summary: { type: "string", description: "Task progress summary" },
+              project_summary: { type: "string", description: "Project health summary" },
+              programme_summary: { type: "string", description: "Programme progress summary" },
+              product_summary: { type: "string", description: "Product development summary" },
             },
+            required: ["ai_summary", "task_summary", "project_summary", "programme_summary", "product_summary"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "generate_summary" } },
-      }),
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "generate_summary" } },
     });
+    if (!aiResponse.ok) return aiResponse.errorResponse;
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${status}`);
-    }
-
-    const aiData = await aiResponse.json();
+    const aiData = aiResponse.data;
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     let summaries;
     

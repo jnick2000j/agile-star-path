@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateResidency } from "../_shared/residency.ts";
 import { consumeAiCredits } from "../_shared/credits.ts";
+import { callAI } from "../_shared/ai-provider.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,60 +79,51 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
     if (mode === "mitigation") {
       // Per-risk mitigation suggestions via tool calling
       const r = risks[0];
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: "You are a PRINCE2 / MoR risk specialist. Suggest pragmatic mitigation strategies for the risk provided. Map each suggestion to one of: avoid, reduce, transfer, accept, share, exploit. Be specific and actionable." },
-            { role: "user", content: `Risk: ${r.title}\nCategory: ${r.category ?? "general"}\nProbability: ${r.probability}, Impact: ${r.impact}, Score: ${r.score}\nStatus: ${r.status}\nDescription: ${r.description ?? "(none)"}\nCurrent response: ${r.response ?? "(none)"}` },
-          ],
-          tools: [{
-            type: "function",
-            function: {
-              name: "propose_mitigations",
-              description: "Return 3-5 mitigation actions for the risk.",
-              parameters: {
-                type: "object",
-                properties: {
-                  suggestions: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        strategy: { type: "string", enum: ["avoid", "reduce", "transfer", "accept", "share", "exploit"] },
-                        action: { type: "string", description: "Specific action to take" },
-                        owner_role: { type: "string", description: "Suggested owner role (e.g. Project Manager, Sponsor)" },
-                        effort: { type: "string", enum: ["low", "medium", "high"] },
-                        rationale: { type: "string" },
-                      },
-                      required: ["strategy", "action", "owner_role", "effort", "rationale"],
-                      additionalProperties: false,
+      const aiRes = await callAI({
+        supabase,
+        organizationId: organization_id,
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: "You are a PRINCE2 / MoR risk specialist. Suggest pragmatic mitigation strategies for the risk provided. Map each suggestion to one of: avoid, reduce, transfer, accept, share, exploit. Be specific and actionable." },
+          { role: "user", content: `Risk: ${r.title}\nCategory: ${r.category ?? "general"}\nProbability: ${r.probability}, Impact: ${r.impact}, Score: ${r.score}\nStatus: ${r.status}\nDescription: ${r.description ?? "(none)"}\nCurrent response: ${r.response ?? "(none)"}` },
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "propose_mitigations",
+            description: "Return 3-5 mitigation actions for the risk.",
+            parameters: {
+              type: "object",
+              properties: {
+                suggestions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      strategy: { type: "string", enum: ["avoid", "reduce", "transfer", "accept", "share", "exploit"] },
+                      action: { type: "string", description: "Specific action to take" },
+                      owner_role: { type: "string", description: "Suggested owner role (e.g. Project Manager, Sponsor)" },
+                      effort: { type: "string", enum: ["low", "medium", "high"] },
+                      rationale: { type: "string" },
                     },
+                    required: ["strategy", "action", "owner_role", "effort", "rationale"],
+                    additionalProperties: false,
                   },
                 },
-                required: ["suggestions"],
-                additionalProperties: false,
               },
+              required: ["suggestions"],
+              additionalProperties: false,
             },
-          }],
-          tool_choice: { type: "function", function: { name: "propose_mitigations" } },
-        }),
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "propose_mitigations" } },
       });
+      if (!aiRes.ok) return aiRes.errorResponse;
 
-      if (aiRes.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again shortly." }), { status: 429, headers: corsHeaders });
-      if (aiRes.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Add credits in your workspace." }), { status: 402, headers: corsHeaders });
-      if (!aiRes.ok) throw new Error(`AI error: ${await aiRes.text()}`);
-
-      const aiData = await aiRes.json();
-      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      const toolCall = aiRes.data.choices?.[0]?.message?.tool_calls?.[0];
       const args = toolCall ? JSON.parse(toolCall.function.arguments) : { suggestions: [] };
 
       return new Response(JSON.stringify({ risk_id: r.id, suggestions: args.suggestions }), {
@@ -167,24 +159,18 @@ Deno.serve(async (req) => {
       })),
     };
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "You are a senior risk officer briefing executives. Write a concise (3-5 short paragraph) narrative interpreting the risk heat-map data. Highlight: (1) the overall risk posture, (2) clusters or hotspots in the heat-map, (3) category concentration, (4) the top 2-3 critical risks demanding attention, (5) one clear recommended next action. No headers, no bullet lists — flowing prose. Be direct, no fluff." },
-          { role: "user", content: `Risk register summary:\n${JSON.stringify(summary, null, 2)}` },
-        ],
-      }),
+    const aiRes = await callAI({
+      supabase,
+      organizationId: organization_id,
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: "You are a senior risk officer briefing executives. Write a concise (3-5 short paragraph) narrative interpreting the risk heat-map data. Highlight: (1) the overall risk posture, (2) clusters or hotspots in the heat-map, (3) category concentration, (4) the top 2-3 critical risks demanding attention, (5) one clear recommended next action. No headers, no bullet lists — flowing prose. Be direct, no fluff." },
+        { role: "user", content: `Risk register summary:\n${JSON.stringify(summary, null, 2)}` },
+      ],
     });
+    if (!aiRes.ok) return aiRes.errorResponse;
 
-    if (aiRes.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again shortly." }), { status: 429, headers: corsHeaders });
-    if (aiRes.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Add credits in your workspace." }), { status: 402, headers: corsHeaders });
-    if (!aiRes.ok) throw new Error(`AI error: ${await aiRes.text()}`);
-
-    const aiData = await aiRes.json();
-    const narrative = aiData.choices?.[0]?.message?.content ?? "";
+    const narrative = aiRes.data.choices?.[0]?.message?.content ?? "";
 
     return new Response(JSON.stringify({ narrative, summary, residency: residency.decision }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
