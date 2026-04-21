@@ -2939,6 +2939,84 @@ export type Database = {
           },
         ]
       }
+      organization_licenses: {
+        Row: {
+          ai_credits_monthly: number
+          created_at: string
+          customer_reference: string | null
+          deployment_mode: string
+          features_override: Json
+          id: string
+          issued_at: string
+          issued_by: string | null
+          license_key: string
+          notes: string | null
+          organization_id: string
+          plan_id: string | null
+          plan_tier: string | null
+          seats: number
+          status: string
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          ai_credits_monthly?: number
+          created_at?: string
+          customer_reference?: string | null
+          deployment_mode?: string
+          features_override?: Json
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          license_key: string
+          notes?: string | null
+          organization_id: string
+          plan_id?: string | null
+          plan_tier?: string | null
+          seats?: number
+          status?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          ai_credits_monthly?: number
+          created_at?: string
+          customer_reference?: string | null
+          deployment_mode?: string
+          features_override?: Json
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          license_key?: string
+          notes?: string | null
+          organization_id?: string
+          plan_id?: string | null
+          plan_tier?: string | null
+          seats?: number
+          status?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_licenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_licenses_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_plan_overrides: {
         Row: {
           created_at: string
@@ -7031,6 +7109,7 @@ export type Database = {
           status: string
         }[]
       }
+      get_license_entitlements: { Args: { _org_id: string }; Returns: Json }
       get_org_credit_purchase_history: {
         Args: { _limit?: number; _org_id: string }
         Returns: {
@@ -7085,6 +7164,7 @@ export type Database = {
         }
         Returns: Json
       }
+      has_active_license: { Args: { _org_id: string }; Returns: boolean }
       has_feature: {
         Args: { _feature_key: string; _org_id: string }
         Returns: boolean
