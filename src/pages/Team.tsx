@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { 
-  Plus, 
-  Search, 
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Plus,
+  Search,
   Filter,
   Mail,
   MoreVertical,
   Send,
   Loader2,
+  ShieldOff,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -39,11 +42,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 interface TeamMember {
@@ -56,6 +61,9 @@ interface TeamMember {
   phone_number: string | null;
   avatar_url: string | null;
   archived: boolean;
+  is_disabled: boolean;
+  disabled_reason: string | null;
+  disabled_at: string | null;
 }
 
 const roleConfig: Record<string, { label: string; className: string }> = {
@@ -74,6 +82,7 @@ const roleConfig: Record<string, { label: string; className: string }> = {
 
 export default function Team() {
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,13 +90,19 @@ export default function Team() {
   const [departmentFilters, setDepartmentFilters] = useState<string[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [resendingFor, setResendingFor] = useState<string | null>(null);
-  
+
   // Add member dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<TeamMember[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("org_stakeholder");
   const [adding, setAdding] = useState(false);
+
+  // Disable / enable member dialog state
+  const [statusTarget, setStatusTarget] = useState<TeamMember | null>(null);
+  const [statusAction, setStatusAction] = useState<"disable" | "enable">("disable");
+  const [statusReason, setStatusReason] = useState("");
+  const [statusBusy, setStatusBusy] = useState(false);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -104,7 +119,7 @@ export default function Team() {
     try {
       const { data: accessData, error: accessError } = await supabase
         .from("user_organization_access")
-        .select("user_id, access_level")
+        .select("user_id, access_level, is_disabled, disabled_at, disabled_reason")
         .eq("organization_id", currentOrganization.id);
 
       if (accessError) throw accessError;
@@ -116,6 +131,7 @@ export default function Team() {
       }
 
       const userIds = accessData.map(a => a.user_id);
+      const accessByUser = new Map(accessData.map(a => [a.user_id, a]));
 
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
@@ -125,20 +141,26 @@ export default function Team() {
 
       if (profilesError) throw profilesError;
 
-      const members: TeamMember[] = (profiles || []).map(p => ({
-        id: p.id,
-        user_id: p.user_id,
-        full_name: p.full_name,
-        email: p.email,
-        role: p.role,
-        department: p.department,
-        phone_number: p.phone_number,
-        avatar_url: p.avatar_url,
-        archived: p.archived,
-      }));
+      const members: TeamMember[] = (profiles || []).map(p => {
+        const access = accessByUser.get(p.user_id);
+        return {
+          id: p.id,
+          user_id: p.user_id,
+          full_name: p.full_name,
+          email: p.email,
+          role: p.role,
+          department: p.department,
+          phone_number: p.phone_number,
+          avatar_url: p.avatar_url,
+          archived: p.archived,
+          is_disabled: !!access?.is_disabled,
+          disabled_reason: access?.disabled_reason ?? null,
+          disabled_at: access?.disabled_at ?? null,
+        };
+      });
 
       setTeamMembers(members);
-      
+
       const depts = [...new Set(members.map(m => m.department).filter(Boolean))] as string[];
       setDepartments(depts);
     } catch (error) {
@@ -181,6 +203,9 @@ export default function Team() {
           phone_number: p.phone_number,
           avatar_url: p.avatar_url,
           archived: p.archived,
+          is_disabled: false,
+          disabled_reason: null,
+          disabled_at: null,
         }));
 
       setAvailableUsers(available);
@@ -247,6 +272,39 @@ export default function Team() {
       toast.error(error.message || "Failed to resend invite");
     } finally {
       setResendingFor(null);
+    }
+  };
+
+  const openStatusDialog = (member: TeamMember, action: "disable" | "enable") => {
+    setStatusTarget(member);
+    setStatusAction(action);
+    setStatusReason(action === "disable" ? "" : member.disabled_reason ?? "");
+  };
+
+  const handleConfirmStatus = async () => {
+    if (!statusTarget || !currentOrganization) return;
+    setStatusBusy(true);
+    try {
+      const { error } = await supabase.rpc("set_org_member_disabled", {
+        _org_id: currentOrganization.id,
+        _user_id: statusTarget.user_id,
+        _disable: statusAction === "disable",
+        _reason: statusAction === "disable" ? (statusReason.trim() || null) : null,
+      });
+      if (error) throw error;
+      toast.success(
+        statusAction === "disable"
+          ? `${statusTarget.full_name || statusTarget.email} has been disabled`
+          : `${statusTarget.full_name || statusTarget.email} has been re-enabled`
+      );
+      setStatusTarget(null);
+      setStatusReason("");
+      fetchTeamMembers();
+    } catch (e: any) {
+      console.error("Status change error:", e);
+      toast.error(e.message || "Failed to update member status");
+    } finally {
+      setStatusBusy(false);
     }
   };
 
@@ -417,10 +475,15 @@ export default function Team() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredMembers.map((member, index) => (
-            <div 
-              key={member.id} 
-              className="metric-card animate-slide-up"
+          {filteredMembers.map((member, index) => {
+            const isSelf = member.user_id === user?.id;
+            return (
+            <div
+              key={member.id}
+              className={cn(
+                "metric-card animate-slide-up",
+                member.is_disabled && "opacity-70 border-destructive/40"
+              )}
               style={{ animationDelay: `${index * 0.03}s` }}
             >
               <div className="flex items-start justify-between mb-4">
@@ -453,14 +516,44 @@ export default function Team() {
                       )}
                       Resend Invite
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {member.is_disabled ? (
+                      <DropdownMenuItem onClick={() => openStatusDialog(member, "enable")}>
+                        <ShieldCheck className="h-4 w-4 mr-2" />
+                        Enable access
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem
+                        onClick={() => openStatusDialog(member, "disable")}
+                        disabled={isSelf}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <ShieldOff className="h-4 w-4 mr-2" />
+                        Disable access
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
               <div className="space-y-3">
-                <Badge variant="secondary" className={cn("text-xs", roleConfig[member.role]?.className || "")}>
-                  {roleConfig[member.role]?.label || member.role}
-                </Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary" className={cn("text-xs", roleConfig[member.role]?.className || "")}>
+                    {roleConfig[member.role]?.label || member.role}
+                  </Badge>
+                  {member.is_disabled && (
+                    <Badge variant="outline" className="text-xs gap-1 border-destructive/40 text-destructive">
+                      <ShieldOff className="h-3 w-3" />
+                      Disabled
+                    </Badge>
+                  )}
+                </div>
+
+                {member.is_disabled && member.disabled_reason && (
+                  <p className="text-xs text-muted-foreground italic line-clamp-2">
+                    Reason: {member.disabled_reason}
+                  </p>
+                )}
 
                 <div className="pt-3 border-t border-border">
                   <Button variant="ghost" size="sm" className="w-full gap-2 justify-start text-muted-foreground hover:text-foreground">
@@ -470,9 +563,57 @@ export default function Team() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
+
+      {/* Disable / enable member dialog */}
+      <Dialog open={!!statusTarget} onOpenChange={(open) => !open && setStatusTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {statusAction === "disable" ? "Disable member access" : "Re-enable member access"}
+            </DialogTitle>
+            <DialogDescription>
+              {statusAction === "disable"
+                ? `${statusTarget?.full_name || statusTarget?.email} will lose access to ${currentOrganization?.name ?? "this organization"}. They will keep access to any other organizations they belong to.`
+                : `Restore access for ${statusTarget?.full_name || statusTarget?.email} to ${currentOrganization?.name ?? "this organization"}.`}
+            </DialogDescription>
+          </DialogHeader>
+          {statusAction === "disable" && (
+            <div className="space-y-2 py-2">
+              <Label htmlFor="disable-reason">Reason (optional)</Label>
+              <Textarea
+                id="disable-reason"
+                placeholder="e.g. Left the team, security concern, awaiting review…"
+                value={statusReason}
+                onChange={(e) => setStatusReason(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Shown to the user on the access-blocked screen and recorded in the audit log.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStatusTarget(null)} disabled={statusBusy}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmStatus}
+              disabled={statusBusy}
+              variant={statusAction === "disable" ? "destructive" : "default"}
+            >
+              {statusBusy
+                ? "Saving…"
+                : statusAction === "disable"
+                ? "Disable access"
+                : "Enable access"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
