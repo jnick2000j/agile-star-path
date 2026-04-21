@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Check, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeploymentMode } from "@/hooks/useDeploymentMode";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { KeyRound } from "lucide-react";
 import { formatPrice } from "@/lib/currency";
 
 interface Plan {
@@ -45,6 +48,7 @@ const formatLimit = (key: string, val: any) => {
 export default function Pricing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isLicenseMode, entitlements, loading: licenseLoading } = useDeploymentMode();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [featureMeta, setFeatureMeta] = useState<FeatureMeta[]>([]);
   const [planValues, setPlanValues] = useState<PlanFeatureValue[]>([]);
@@ -118,6 +122,18 @@ export default function Pricing() {
       </header>
 
       <section className="max-w-4xl mx-auto px-6 py-16 text-center">
+        {user && isLicenseMode && !licenseLoading && (
+          <Alert className="mb-8 text-left border-primary/40 bg-primary/5">
+            <KeyRound className="h-4 w-4" />
+            <AlertTitle>Your organization runs on a license</AlertTitle>
+            <AlertDescription>
+              {entitlements?.customer_reference
+                ? `License ${entitlements.customer_reference} is active — `
+                : "An active license is in place — "}
+              plan and seat changes are managed by your account team. The plans below are for informational purposes only.
+            </AlertDescription>
+          </Alert>
+        )}
         <Badge variant="secondary" className="mb-4">Free trial • No card required</Badge>
         <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
           Pricing that scales with your portfolio
