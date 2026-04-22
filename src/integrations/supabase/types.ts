@@ -7452,6 +7452,7 @@ export type Database = {
         | "rejected"
         | "implemented"
         | "withdrawn"
+        | "needs_information"
       exception_status:
         | "raised"
         | "under_review"
@@ -7631,6 +7632,7 @@ export const Constants = {
         "rejected",
         "implemented",
         "withdrawn",
+        "needs_information",
       ],
       exception_status: [
         "raised",
