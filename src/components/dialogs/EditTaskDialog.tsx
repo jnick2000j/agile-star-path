@@ -38,6 +38,8 @@ interface TaskData {
   programme_id: string | null;
   product_id: string | null;
   work_package_id: string | null;
+  risk_id: string | null;
+  issue_id: string | null;
 }
 
 interface EditTaskDialogProps {
@@ -62,6 +64,8 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
   const [projectId, setProjectId] = useState("");
   const [productId, setProductId] = useState("");
   const [workPackageId, setWorkPackageId] = useState("");
+  const [riskId, setRiskId] = useState("");
+  const [issueId, setIssueId] = useState("");
   const [saving, setSaving] = useState(false);
 
   const { data: sprints = [] } = useQuery({
@@ -130,6 +134,34 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
     enabled: open && !!projectId,
   });
 
+  const { data: risks = [] } = useQuery({
+    queryKey: ["risks-for-task", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data } = await supabase
+        .from("risks")
+        .select("id, title, reference_number")
+        .eq("organization_id", currentOrganization.id)
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+    enabled: open && !!currentOrganization?.id,
+  });
+
+  const { data: issues = [] } = useQuery({
+    queryKey: ["issues-for-task", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data } = await supabase
+        .from("issues")
+        .select("id, title, reference_number")
+        .eq("organization_id", currentOrganization.id)
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+    enabled: open && !!currentOrganization?.id,
+  });
+
   useEffect(() => {
     if (task) {
       setName(task.name);
@@ -145,8 +177,32 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       setProjectId(task.project_id || "");
       setProductId(task.product_id || "");
       setWorkPackageId(task.work_package_id || "");
+      setRiskId((task as any).risk_id || "");
+      setIssueId((task as any).issue_id || "");
     }
   }, [task]);
+
+  if (!task) return null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updateData: Record<string, unknown> = {
+      name,
+      description: description || null,
+      priority,
+      status,
+      planned_start: plannedStart || null,
+      planned_end: plannedEnd || null,
+      estimated_hours: estimatedHours ? Number(estimatedHours) : null,
+      story_points: storyPoints ? Number(storyPoints) : null,
+      sprint_id: sprintId || null,
+      programme_id: programmeId || null,
+      project_id: projectId || null,
+      product_id: productId || null,
+      work_package_id: workPackageId || null,
+      risk_id: riskId || null,
+      issue_id: issueId || null,
+    };
 
   if (!task) return null;
 
