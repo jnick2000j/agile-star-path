@@ -175,6 +175,8 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
 
   const config = typeConfig[type];
 
+  const [links, setLinks] = useState({ programmeId: "", projectId: "", productId: "" });
+
   useEffect(() => {
     if (open) {
       const initialData: Record<string, string> = {};
@@ -182,6 +184,11 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
         initialData[field.key] = (item[field.key] as string) || "";
       });
       setFormData(initialData);
+      setLinks({
+        programmeId: (item.programme_id as string) || "",
+        projectId: (item.project_id as string) || "",
+        productId: (item.product_id as string) || "",
+      });
     }
   }, [open, item, type]);
 
@@ -195,6 +202,13 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
       config.fields.forEach((field) => {
         updateData[field.key] = formData[field.key] || null;
       });
+
+      // Entity association edits (risks, issues, benefits)
+      if (type === "risks" || type === "issues" || type === "benefits") {
+        updateData.programme_id = links.programmeId || null;
+        updateData.project_id = links.projectId || null;
+        updateData.product_id = links.productId || null;
+      }
 
       // Calculate score for risks
       if (type === "risks") {
