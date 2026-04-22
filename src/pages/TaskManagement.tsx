@@ -679,6 +679,22 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                               WP: {getWorkPackageName(task.work_package_id)}
                             </Badge>
                           )}
+                          {task.risk_id && (() => {
+                            const r = risksList.find((x: any) => x.id === task.risk_id);
+                            return (
+                              <Badge variant="outline" className="text-xs border-destructive/40 text-destructive">
+                                Risk: {r?.reference_number || r?.title || "—"}
+                              </Badge>
+                            );
+                          })()}
+                          {task.issue_id && (() => {
+                            const i = issuesList.find((x: any) => x.id === task.issue_id);
+                            return (
+                              <Badge variant="outline" className="text-xs border-warning/40 text-warning">
+                                Issue: {i?.reference_number || i?.title || "—"}
+                              </Badge>
+                            );
+                          })()}
                         </div>
                       </TableCell>
                       <TableCell>
