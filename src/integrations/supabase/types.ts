@@ -2660,6 +2660,60 @@ export type Database = {
           },
         ]
       }
+      milestone_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          comment: string | null
+          event_type: string
+          from_value: string | null
+          id: string
+          metadata: Json
+          milestone_id: string
+          organization_id: string | null
+          to_value: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          comment?: string | null
+          event_type: string
+          from_value?: string | null
+          id?: string
+          metadata?: Json
+          milestone_id: string
+          organization_id?: string | null
+          to_value?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          comment?: string | null
+          event_type?: string
+          from_value?: string | null
+          id?: string
+          metadata?: Json
+          milestone_id?: string
+          organization_id?: string | null
+          to_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_history_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestones: {
         Row: {
           acceptance_criteria: string | null
@@ -2675,11 +2729,14 @@ export type Database = {
           milestone_type: string
           name: string
           organization_id: string
+          original_target_date: string | null
           owner_id: string | null
           product_id: string | null
           programme_id: string | null
           project_id: string | null
           reference_number: string | null
+          revised_target_date: string | null
+          revision_reason: string | null
           status: Database["public"]["Enums"]["milestone_status"]
           target_date: string
           updated_at: string
@@ -2700,11 +2757,14 @@ export type Database = {
           milestone_type?: string
           name: string
           organization_id: string
+          original_target_date?: string | null
           owner_id?: string | null
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           reference_number?: string | null
+          revised_target_date?: string | null
+          revision_reason?: string | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date: string
           updated_at?: string
@@ -2725,11 +2785,14 @@ export type Database = {
           milestone_type?: string
           name?: string
           organization_id?: string
+          original_target_date?: string | null
           owner_id?: string | null
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
           reference_number?: string | null
+          revised_target_date?: string | null
+          revision_reason?: string | null
           status?: Database["public"]["Enums"]["milestone_status"]
           target_date?: string
           updated_at?: string

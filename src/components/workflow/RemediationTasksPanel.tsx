@@ -14,6 +14,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -24,6 +37,7 @@ import {
   Trash2,
   XCircle,
   ListChecks,
+  Link2,
 } from "lucide-react";
 
 type Parent =
@@ -48,6 +62,7 @@ export function RemediationTasksPanel({ parent }: RemediationTasksPanelProps) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
+  const [showLinkPopover, setShowLinkPopover] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
@@ -66,6 +81,23 @@ export function RemediationTasksPanel({ parent }: RemediationTasksPanelProps) {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Available unlinked tasks within the same org for linking
+  const { data: linkableTasks = [] } = useQuery({
+    queryKey: ["linkable-tasks", parent.kind, parent.id, parent.organizationId],
+    queryFn: async () => {
+      const linkedIds = new Set((tasks || []).map((t: any) => t.id));
+      const { data } = await supabase
+        .from("tasks")
+        .select("id, name, reference_number, status, risk_id, issue_id")
+        .eq("organization_id", parent.organizationId)
+        .is(filterCol, null)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      return (data || []).filter((t: any) => !linkedIds.has(t.id));
+    },
+    enabled: showLinkPopover,
   });
 
   const createTask = useMutation({
@@ -97,6 +129,24 @@ export function RemediationTasksPanel({ parent }: RemediationTasksPanelProps) {
       setShowForm(false);
     },
     onError: (err: any) => toast.error(err.message || "Failed to add task"),
+  });
+
+  const linkExistingTask = useMutation({
+    mutationFn: async (taskId: string) => {
+      const { error } = await supabase
+        .from("tasks")
+        .update({ [filterCol]: parent.id })
+        .eq("id", taskId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["remediation-tasks", parent.kind, parent.id] });
+      qc.invalidateQueries({ queryKey: ["linkable-tasks", parent.kind, parent.id] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Task linked");
+      setShowLinkPopover(false);
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to link"),
   });
 
   const updateStatus = useMutation({
@@ -140,10 +190,51 @@ export function RemediationTasksPanel({ parent }: RemediationTasksPanelProps) {
           <ListChecks className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Remediation Tasks ({tasks.length})</h3>
         </div>
-        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-          <Plus className="h-3.5 w-3.5 mr-1" />
-          {showForm ? "Cancel" : "Add Task"}
-        </Button>
+        <div className="flex gap-2">
+          <Popover open={showLinkPopover} onOpenChange={setShowLinkPopover}>
+            <PopoverTrigger asChild>
+              <Button size="sm" variant="outline">
+                <Link2 className="h-3.5 w-3.5 mr-1" />
+                Link Existing
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end">
+              <Command>
+                <CommandInput placeholder="Search tasks..." />
+                <CommandList>
+                  <CommandEmpty>No unlinked tasks found.</CommandEmpty>
+                  <CommandGroup>
+                    {linkableTasks.map((t: any) => (
+                      <CommandItem
+                        key={t.id}
+                        value={`${t.reference_number || ""} ${t.name}`}
+                        onSelect={() => linkExistingTask.mutate(t.id)}
+                      >
+                        <div className="flex flex-col gap-0.5 w-full">
+                          <div className="flex items-center gap-2">
+                            {t.reference_number && (
+                              <span className="font-mono text-[10px] text-muted-foreground">
+                                {t.reference_number}
+                              </span>
+                            )}
+                            <span className="text-sm truncate">{t.name}</span>
+                          </div>
+                          <Badge variant="outline" className="text-[9px] w-fit">
+                            {t.status}
+                          </Badge>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            {showForm ? "Cancel" : "New Task"}
+          </Button>
+        </div>
       </div>
 
       {showForm && (
@@ -186,7 +277,7 @@ export function RemediationTasksPanel({ parent }: RemediationTasksPanelProps) {
         {isLoading ? (
           <p className="text-xs text-muted-foreground">Loading tasks…</p>
         ) : tasks.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No remediation tasks yet. Add one to track mitigation actions.</p>
+          <p className="text-xs text-muted-foreground">No remediation tasks yet. Add a new one or link an existing task.</p>
         ) : (
           tasks.map((t: any) => {
             const cfg = statusConfig[t.status as TaskStatus];

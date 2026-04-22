@@ -13,6 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import { BenefitProfilePanel } from "@/components/workflow/BenefitProfilePanel";
 import { RemediationTasksPanel } from "@/components/workflow/RemediationTasksPanel";
+import { EntityLinksFields } from "@/components/EntityLinksFields";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type RegisterType = "risks" | "issues" | "benefits" | "stakeholders";
@@ -174,6 +175,8 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
 
   const config = typeConfig[type];
 
+  const [links, setLinks] = useState({ programmeId: "", projectId: "", productId: "" });
+
   useEffect(() => {
     if (open) {
       const initialData: Record<string, string> = {};
@@ -181,6 +184,11 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
         initialData[field.key] = (item[field.key] as string) || "";
       });
       setFormData(initialData);
+      setLinks({
+        programmeId: (item.programme_id as string) || "",
+        projectId: (item.project_id as string) || "",
+        productId: (item.product_id as string) || "",
+      });
     }
   }, [open, item, type]);
 
@@ -194,6 +202,13 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
       config.fields.forEach((field) => {
         updateData[field.key] = formData[field.key] || null;
       });
+
+      // Entity association edits (risks, issues, benefits)
+      if (type === "risks" || type === "issues" || type === "benefits") {
+        updateData.programme_id = links.programmeId || null;
+        updateData.project_id = links.projectId || null;
+        updateData.product_id = links.productId || null;
+      }
 
       // Calculate score for risks
       if (type === "risks") {
@@ -278,6 +293,10 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
                 deleting={deleting}
                 loading={loading}
                 itemName={itemName}
+                showLinks
+                links={links}
+                setLinks={setLinks}
+                organizationId={item.organization_id}
               />
             </TabsContent>
             <TabsContent value="profile" className="mt-4">
@@ -306,6 +325,10 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
                 deleting={deleting}
                 loading={loading}
                 itemName={itemName}
+                showLinks
+                links={links}
+                setLinks={setLinks}
+                organizationId={item.organization_id}
               />
             </TabsContent>
             <TabsContent value="remediation" className="mt-4">
@@ -314,9 +337,9 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
                   kind: type === "risks" ? "risk" : "issue",
                   id: item.id,
                   organizationId: item.organization_id,
-                  programmeId: item.programme_id,
-                  projectId: item.project_id,
-                  productId: item.product_id,
+                  programmeId: links.programmeId || item.programme_id,
+                  projectId: links.projectId || item.project_id,
+                  productId: links.productId || item.product_id,
                 }}
               />
             </TabsContent>
@@ -353,6 +376,10 @@ interface EditFormProps {
   deleting: boolean;
   loading: boolean;
   itemName: string;
+  showLinks?: boolean;
+  links?: { programmeId: string; projectId: string; productId: string };
+  setLinks?: (l: { programmeId: string; projectId: string; productId: string }) => void;
+  organizationId?: string | null;
 }
 
 function EditForm({
@@ -367,6 +394,10 @@ function EditForm({
   deleting,
   loading,
   itemName,
+  showLinks,
+  links,
+  setLinks,
+  organizationId,
 }: EditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
