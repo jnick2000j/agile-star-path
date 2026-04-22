@@ -716,6 +716,32 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
                       </div>
                     )}
                   </div>
+                  {(selectedMilestone.original_target_date ||
+                    selectedMilestone.revised_target_date) && (
+                    <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-1">
+                      {selectedMilestone.original_target_date && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Original target</span>
+                          <span>
+                            {format(parseISO(selectedMilestone.original_target_date), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                      )}
+                      {selectedMilestone.revised_target_date && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Revised target</span>
+                          <span className="font-medium">
+                            {format(parseISO(selectedMilestone.revised_target_date), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                      )}
+                      {selectedMilestone.revision_reason && (
+                        <p className="text-xs text-muted-foreground pt-1 border-t mt-2">
+                          <strong>Reason:</strong> {selectedMilestone.revision_reason}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {selectedMilestone.description && (
                     <div>
                       <p className="text-sm text-muted-foreground">Description</p>
@@ -728,6 +754,9 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
                       <p className="bg-muted p-3 rounded">{selectedMilestone.acceptance_criteria}</p>
                     </div>
                   )}
+                </TabsContent>
+                <TabsContent value="timeline" className="mt-4">
+                  <MilestoneTimeline milestoneId={selectedMilestone.id} />
                 </TabsContent>
                 <TabsContent value="signoff" className="mt-4">
                   <ApprovalTriadPanel
