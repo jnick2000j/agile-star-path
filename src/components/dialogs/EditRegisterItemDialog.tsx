@@ -401,6 +401,21 @@ function EditForm({
 }: EditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {showLinks && links && setLinks && (
+        <div className="rounded-md border bg-muted/30 p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">
+            Linked entities
+          </p>
+          <EntityLinksFields
+            organizationId={organizationId}
+            programmeId={links.programmeId}
+            projectId={links.projectId}
+            productId={links.productId}
+            onChange={setLinks}
+            disabled={!canEdit}
+          />
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         {config.fields.map((field: any) => (
           <div key={field.key} className={field.type === "textarea" ? "sm:col-span-2" : ""}>
