@@ -13,6 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import { BenefitProfilePanel } from "@/components/workflow/BenefitProfilePanel";
 import { RemediationTasksPanel } from "@/components/workflow/RemediationTasksPanel";
+import { EntityLinksFields } from "@/components/EntityLinksFields";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type RegisterType = "risks" | "issues" | "benefits" | "stakeholders";
