@@ -5849,6 +5849,7 @@ export type Database = {
           description: string | null
           estimated_hours: number | null
           id: string
+          issue_id: string | null
           milestone_id: string | null
           name: string
           organization_id: string
@@ -5860,6 +5861,7 @@ export type Database = {
           programme_id: string | null
           project_id: string | null
           reference_number: string | null
+          risk_id: string | null
           sprint_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           story_points: number | null
@@ -5878,6 +5880,7 @@ export type Database = {
           description?: string | null
           estimated_hours?: number | null
           id?: string
+          issue_id?: string | null
           milestone_id?: string | null
           name: string
           organization_id: string
@@ -5889,6 +5892,7 @@ export type Database = {
           programme_id?: string | null
           project_id?: string | null
           reference_number?: string | null
+          risk_id?: string | null
           sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
@@ -5907,6 +5911,7 @@ export type Database = {
           description?: string | null
           estimated_hours?: number | null
           id?: string
+          issue_id?: string | null
           milestone_id?: string | null
           name?: string
           organization_id?: string
@@ -5918,6 +5923,7 @@ export type Database = {
           programme_id?: string | null
           project_id?: string | null
           reference_number?: string | null
+          risk_id?: string | null
           sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
@@ -5925,6 +5931,13 @@ export type Database = {
           work_package_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_milestone_id_fkey"
             columns: ["milestone_id"]
@@ -5965,6 +5978,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "risks"
             referencedColumns: ["id"]
           },
           {
