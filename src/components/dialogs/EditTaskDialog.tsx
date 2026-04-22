@@ -338,6 +338,36 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
               </Select>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Linked Risk</Label>
+              <Select value={riskId || "none"} onValueChange={(v) => setRiskId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="No linked risk" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Risk</SelectItem>
+                  {risks.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.reference_number ? `${r.reference_number} — ` : ""}{r.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Linked Issue</Label>
+              <Select value={issueId || "none"} onValueChange={(v) => setIssueId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="No linked issue" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Issue</SelectItem>
+                  {issues.map((i: any) => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.reference_number ? `${i.reference_number} — ` : ""}{i.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label>Sprint</Label>
             <Select value={sprintId || "none"} onValueChange={(v) => setSprintId(v === "none" ? "" : v)}>
