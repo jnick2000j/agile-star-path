@@ -50,6 +50,7 @@ import { LessonTagsPanel } from "@/components/workflow/LessonTagsPanel";
 
 interface Lesson {
   id: string;
+  reference_number: string | null;
   title: string;
   description: string | null;
   lesson_type: string;
@@ -540,6 +541,7 @@ export default function LessonsLearned({ embedded = false }: { embedded?: boolea
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[110px]">Ref</TableHead>
               <TableHead>Lesson</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Category</TableHead>
@@ -553,13 +555,13 @@ export default function LessonsLearned({ embedded = false }: { embedded?: boolea
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   Loading lessons...
                 </TableCell>
               </TableRow>
             ) : filteredLessons.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   No lessons found. Start capturing lessons from your projects.
                 </TableCell>
               </TableRow>
@@ -573,6 +575,9 @@ export default function LessonsLearned({ embedded = false }: { embedded?: boolea
 
                 return (
                   <TableRow key={lesson.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.03}s` }}>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {lesson.reference_number || "—"}
+                    </TableCell>
                     <TableCell>
                       <div className="max-w-xs">
                         <p className="font-medium truncate">{lesson.title}</p>

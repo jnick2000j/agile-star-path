@@ -38,6 +38,7 @@ import { toast } from "sonner";
 
 interface Benefit {
   id: string;
+  reference_number: string | null;
   name: string;
   description: string | null;
   category: string;
@@ -290,6 +291,7 @@ export default function BenefitsRegister({ embedded = false }: { embedded?: bool
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[110px]">Ref</TableHead>
               <TableHead>Benefit Name</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Target</TableHead>
@@ -302,13 +304,13 @@ export default function BenefitsRegister({ embedded = false }: { embedded?: bool
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   Loading benefits...
                 </TableCell>
               </TableRow>
             ) : filteredBenefits.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   No benefits found. Create your first benefit to get started.
                 </TableCell>
               </TableRow>
@@ -320,6 +322,9 @@ export default function BenefitsRegister({ embedded = false }: { embedded?: bool
                   style={{ animationDelay: `${index * 0.03}s` }}
                   onClick={() => handleEditClick(benefit)}
                 >
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {benefit.reference_number || "—"}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <p className="font-medium">{benefit.name}</p>

@@ -37,6 +37,7 @@ import { toast } from "sonner";
 
 interface Risk {
   id: string;
+  reference_number: string | null;
   title: string;
   description: string | null;
   category: string | null;
@@ -296,6 +297,7 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[110px]">Ref</TableHead>
               <TableHead>Risk Title</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-center">P</TableHead>
@@ -309,13 +311,13 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   Loading risks...
                 </TableCell>
               </TableRow>
             ) : filteredRisks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   No risks found. Create your first risk to get started.
                 </TableCell>
               </TableRow>
@@ -327,6 +329,9 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
                   style={{ animationDelay: `${index * 0.03}s` }}
                   onClick={() => handleEditClick(risk)}
                 >
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {risk.reference_number || "—"}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <p className="font-medium">{risk.title}</p>

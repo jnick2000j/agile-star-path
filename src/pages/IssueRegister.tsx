@@ -36,6 +36,7 @@ import { toast } from "sonner";
 
 interface Issue {
   id: string;
+  reference_number: string | null;
   title: string;
   description: string | null;
   type: string;
@@ -286,6 +287,7 @@ export default function IssueRegister({ embedded = false }: { embedded?: boolean
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[110px]">Ref</TableHead>
               <TableHead>Issue Title</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Priority</TableHead>
@@ -297,13 +299,13 @@ export default function IssueRegister({ embedded = false }: { embedded?: boolean
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   Loading issues...
                 </TableCell>
               </TableRow>
             ) : filteredIssues.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   No issues found. Create your first issue to get started.
                 </TableCell>
               </TableRow>
@@ -315,6 +317,9 @@ export default function IssueRegister({ embedded = false }: { embedded?: boolean
                   style={{ animationDelay: `${index * 0.03}s` }}
                   onClick={() => handleEditClick(issue)}
                 >
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {issue.reference_number || "—"}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <p className="font-medium">{issue.title}</p>
