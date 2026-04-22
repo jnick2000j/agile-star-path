@@ -203,15 +203,22 @@ export function ApprovalTriadPanel({
     queryKey: ["org-users", organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
-      const { data, error } = await supabase
+      const { data: access, error: accessErr } = await supabase
         .from("user_organization_access")
-        .select("user_id, profiles!inner(full_name, email)")
+        .select("user_id")
         .eq("organization_id", organizationId);
-      if (error) throw error;
-      return (data ?? []).map((row: any) => ({
-        user_id: row.user_id,
-        full_name: row.profiles?.full_name,
-        email: row.profiles?.email,
+      if (accessErr) throw accessErr;
+      const userIds = (access ?? []).map((r: any) => r.user_id).filter(Boolean);
+      if (userIds.length === 0) return [];
+      const { data: profiles, error: profErr } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .in("user_id", userIds);
+      if (profErr) throw profErr;
+      return (profiles ?? []).map((p: any) => ({
+        user_id: p.user_id,
+        full_name: p.full_name,
+        email: p.email,
       })) as OrgUser[];
     },
     enabled: !!organizationId,
