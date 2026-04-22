@@ -44,6 +44,8 @@ import {
 import { format, differenceInDays, parseISO } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApprovalTriadPanel } from "@/components/workflow/ApprovalTriadPanel";
+import { MilestoneStatusChangeDialog } from "@/components/workflow/MilestoneStatusChangeDialog";
+import { MilestoneTimeline } from "@/components/workflow/MilestoneTimeline";
 
 type MilestoneStatus = "planned" | "in_progress" | "achieved" | "missed" | "deferred";
 
@@ -67,6 +69,9 @@ interface MilestoneData {
   created_by: string | null;
   created_at: string;
   reference_number: string | null;
+  original_target_date: string | null;
+  revised_target_date: string | null;
+  revision_reason: string | null;
 }
 
 interface WorkPackage {
@@ -91,6 +96,7 @@ export default function MilestoneTracking({ embedded }: { embedded?: boolean }) 
   const [selectedMilestone, setSelectedMilestone] = useState<MilestoneData | null>(null);
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusChangeTarget, setStatusChangeTarget] = useState<{ milestone: MilestoneData; newStatus: MilestoneStatus } | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
