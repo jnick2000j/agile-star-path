@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import { BenefitProfilePanel } from "@/components/workflow/BenefitProfilePanel";
+import { RemediationTasksPanel } from "@/components/workflow/RemediationTasksPanel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type RegisterType = "risks" | "issues" | "benefits" | "stakeholders";
@@ -283,6 +284,40 @@ export function EditRegisterItemDialog({ item, type, open, onOpenChange, onSucce
               <BenefitProfilePanel
                 benefitId={item.id}
                 organizationId={item.organization_id ?? null}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : type === "risks" || type === "issues" ? (
+          <Tabs defaultValue="details" className="mt-2">
+            <TabsList>
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="remediation">Remediation Tasks</TabsTrigger>
+            </TabsList>
+            <TabsContent value="details" className="mt-4">
+              <EditForm
+                config={config}
+                formData={formData}
+                setFormData={setFormData}
+                canEdit={canEdit}
+                handleSubmit={handleSubmit}
+                onOpenChange={onOpenChange}
+                isAdmin={isAdmin}
+                handleDelete={handleDelete}
+                deleting={deleting}
+                loading={loading}
+                itemName={itemName}
+              />
+            </TabsContent>
+            <TabsContent value="remediation" className="mt-4">
+              <RemediationTasksPanel
+                parent={{
+                  kind: type === "risks" ? "risk" : "issue",
+                  id: item.id,
+                  organizationId: item.organization_id,
+                  programmeId: item.programme_id,
+                  projectId: item.project_id,
+                  productId: item.product_id,
+                }}
               />
             </TabsContent>
           </Tabs>
