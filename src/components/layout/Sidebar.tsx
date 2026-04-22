@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Wand2,
   FolderKanban,
-  Users,
   BarChart3,
   BookOpen,
   ChevronDown,
@@ -91,7 +90,6 @@ export function Sidebar() {
       ],
     },
     { label: "Principles", icon: BookOpen, href: "/documentation" },
-    { label: "Project Teams", icon: Users, href: "/team" },
     { label: "Wizards", icon: Wand2, href: "/wizards" },
     {
       label: "AI",
