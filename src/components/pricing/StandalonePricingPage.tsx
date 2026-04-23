@@ -137,6 +137,52 @@ export function StandalonePricingPage({
     return lines;
   }, [featureMeta, planValues, kind]);
 
+  // Comparison table row config — labels and feature_keys to look up per plan
+  const comparisonGroups = useMemo(() => {
+    if (kind === "helpdesk") {
+      return [
+        {
+          group: "Limits",
+          rows: [
+            { label: "Agents included", featureKey: "helpdesk_max_agents" },
+            { label: "Tickets per month", featureKey: "helpdesk_max_tickets_per_month" },
+          ],
+        },
+        {
+          group: "Capabilities",
+          rows: [
+            { label: "Helpdesk module", featureKey: "feature_helpdesk" },
+            { label: "Public API access", featureKey: "feature_api_access" },
+          ],
+        },
+      ];
+    }
+    return [
+      {
+        group: "Limits",
+        rows: [
+          { label: "Users included", featureKey: "helpdesk_max_agents" },
+          { label: "Change approvers", featureKey: "cm_max_approvers" },
+        ],
+      },
+      {
+        group: "Modules",
+        rows: [
+          { label: "Helpdesk", featureKey: "feature_helpdesk" },
+          { label: "Change Management", featureKey: "feature_change_management" },
+          { label: "Public API access", featureKey: "feature_api_access" },
+        ],
+      },
+    ];
+  }, [kind]);
+
+  const getCellFor = (planId: string, featureKey: string) => {
+    const meta = featureMeta.find((f) => f.feature_key === featureKey);
+    const pv = planValues.find((v) => v.plan_id === planId && v.feature_key === featureKey);
+    if (!meta) return { display: "—", isCheck: false, isDash: true };
+    return formatCellValue(meta, pv?.value);
+  };
+
   const handleStart = (plan: Plan) => {
     const lookupKey = cycle === "monthly" ? plan.stripe_lookup_key_monthly : plan.stripe_lookup_key_yearly;
     // Free / contact-sales plans: route to signup or contact
