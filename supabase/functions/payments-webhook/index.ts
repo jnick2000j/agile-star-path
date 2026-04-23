@@ -7,10 +7,15 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+// Optional Stripe-availability check used by air-gapped/on-prem deployments.
+// Returns true unless the deployment opts out via env flag.
+function isStripeAvailable(): boolean {
+  return Deno.env.get("DISABLE_STRIPE") !== "true";
+}
+
 serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
-  // Air-gapped / on-prem deployments don't accept webhooks at all.
   if (!isStripeAvailable()) {
     console.log("payments-webhook: Stripe not available in this deployment — ignoring");
     return new Response(JSON.stringify({ received: true, skipped: "stripe_unavailable" }), {
@@ -54,8 +59,6 @@ serve(async (req) => {
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   console.log("Checkout completed:", session.id, "mode:", session.mode);
 
-  // Only act on one-time payments here. Subscription provisioning is handled by
-  // customer.subscription.* events.
   if (session.mode !== "payment") return;
 
   const meta = session.metadata || {};
@@ -111,19 +114,18 @@ async function upsertSubscription(sub: any, env: StripeEnv) {
   const interval = item?.price?.recurring?.interval === "year" ? "yearly" : "monthly";
 
   // Find matching plan via lookup key
-  let planId: string | null = null;
+  let plan: any = null;
   if (lookupKey) {
-    const col =
-      interval === "yearly" ? "stripe_lookup_key_yearly" : "stripe_lookup_key_monthly";
-    const { data: plan } = await supabase
+    const col = interval === "yearly" ? "stripe_lookup_key_yearly" : "stripe_lookup_key_monthly";
+    const { data } = await supabase
       .from("subscription_plans")
-      .select("id")
+      .select("id, plan_kind, is_addon")
       .eq(col, lookupKey)
       .maybeSingle();
-    planId = plan?.id ?? null;
+    plan = data;
   }
 
-  if (!planId) {
+  if (!plan) {
     console.error("Could not match Stripe price to a plan:", lookupKey);
     return;
   }
@@ -131,12 +133,26 @@ async function upsertSubscription(sub: any, env: StripeEnv) {
   const periodStart = sub.current_period_start;
   const periodEnd = sub.current_period_end;
 
-  await supabase
-    .from("organization_subscriptions")
-    .upsert(
+  // ============================================================
+  // Add-on subscription path
+  // Add-on plans live in their own table and grant feature flags
+  // via the `apply_addon_feature_overrides` trigger.
+  // ============================================================
+  if (plan.is_addon || plan.plan_kind === "addon") {
+    // Resolve which feature flags this add-on grants
+    const { data: featureRows } = await supabase
+      .from("plan_feature_values")
+      .select("feature_key, value")
+      .eq("plan_id", plan.id);
+
+    const featureKeys = (featureRows || [])
+      .filter((r: any) => r.value === true || r.value === "true")
+      .map((r: any) => r.feature_key as string);
+
+    await supabase.from("organization_addon_subscriptions").upsert(
       {
         organization_id: orgId,
-        plan_id: planId,
+        addon_plan_id: plan.id,
         stripe_subscription_id: sub.id,
         stripe_customer_id: sub.customer,
         stripe_price_id: item?.price?.id,
@@ -146,13 +162,60 @@ async function upsertSubscription(sub: any, env: StripeEnv) {
         current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
         current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
         cancel_at_period_end: sub.cancel_at_period_end || false,
+        feature_keys: featureKeys,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "organization_id" },
+      { onConflict: "stripe_subscription_id" },
     );
+
+    console.log("Add-on subscription upserted, feature_keys:", featureKeys);
+    return;
+  }
+
+  // ============================================================
+  // Core / standalone plan path (replaces org's main plan)
+  // ============================================================
+  await supabase.from("organization_subscriptions").upsert(
+    {
+      organization_id: orgId,
+      plan_id: plan.id,
+      stripe_subscription_id: sub.id,
+      stripe_customer_id: sub.customer,
+      stripe_price_id: item?.price?.id,
+      billing_interval: interval,
+      status: sub.status,
+      environment: env,
+      current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+      current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      cancel_at_period_end: sub.cancel_at_period_end || false,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "organization_id" },
+  );
 }
 
 async function cancelSubscription(sub: any, env: StripeEnv) {
+  // Try add-on table first
+  const { data: addon } = await supabase
+    .from("organization_addon_subscriptions")
+    .select("id")
+    .eq("stripe_subscription_id", sub.id)
+    .eq("environment", env)
+    .maybeSingle();
+
+  if (addon) {
+    await supabase
+      .from("organization_addon_subscriptions")
+      .update({
+        status: "canceled",
+        canceled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", addon.id);
+    console.log("Cancelled add-on subscription:", addon.id);
+    return;
+  }
+
   await supabase
     .from("organization_subscriptions")
     .update({
