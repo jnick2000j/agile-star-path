@@ -11,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles } from "lucide-react";
+import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useQuery } from "@tanstack/react-query";
@@ -101,6 +102,13 @@ export default function Helpdesk() {
         description="Premium module: ticket portal, email intake, SLA tracking, and links to projects, programmes, and products."
       >
         <div className="space-y-6">
+          <ViewSwitcher
+            current="console"
+            tabs={[
+              { key: "console", label: "Agent console", to: "/support", icon: Headset },
+              { key: "portal", label: "Get support (AI)", to: "/support/portal", icon: Sparkles },
+            ]}
+          />
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <StatCard label="Open" value={stats.open} icon={<LifeBuoy className="h-4 w-4" />} />

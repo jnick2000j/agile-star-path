@@ -1,7 +1,8 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LifeBuoy, Sparkles } from "lucide-react";
+import { LifeBuoy, Sparkles, Headset } from "lucide-react";
+import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -46,6 +47,13 @@ export default function SupportPortal() {
   return (
     <AppLayout title="Support Portal" subtitle="Get help and track your support requests">
       <div className="space-y-6 max-w-4xl">
+        <ViewSwitcher
+          current="portal"
+          tabs={[
+            { key: "console", label: "Agent console", to: "/support", icon: Headset },
+            { key: "portal", label: "Get support (AI)", to: "/support/portal", icon: Sparkles },
+          ]}
+        />
         <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">

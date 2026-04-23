@@ -1,7 +1,8 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GitBranch, Sparkles, Lock } from "lucide-react";
+import { GitBranch, Sparkles, Lock, ListChecks } from "lucide-react";
+import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -61,6 +62,13 @@ export default function ChangeControlPortal() {
   return (
     <AppLayout title="Change Control Portal" subtitle="Raise and track your change requests">
       <div className="space-y-6 max-w-4xl">
+        <ViewSwitcher
+          current="portal"
+          tabs={[
+            { key: "register", label: "Change Register", to: "/change-management", icon: ListChecks },
+            { key: "portal", label: "Raise a change (AI)", to: "/change-management/portal", icon: Sparkles },
+          ]}
+        />
         <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
