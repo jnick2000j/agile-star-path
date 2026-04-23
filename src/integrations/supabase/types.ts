@@ -3132,6 +3132,238 @@ export type Database = {
           },
         ]
       }
+      kb_article_chunks: {
+        Row: {
+          article_id: string
+          chunk_index: number
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          organization_id: string
+          token_estimate: number | null
+        }
+        Insert: {
+          article_id: string
+          chunk_index: number
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          organization_id: string
+          token_estimate?: number | null
+        }
+        Update: {
+          article_id?: string
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          organization_id?: string
+          token_estimate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_chunks_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_chunks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_articles: {
+        Row: {
+          author_user_id: string | null
+          body: string
+          category: string | null
+          created_at: string
+          embedding_status: string
+          embedding_updated_at: string | null
+          helpful_count: number
+          id: string
+          last_edited_by: string | null
+          not_helpful_count: number
+          organization_id: string
+          published_at: string | null
+          slug: string | null
+          source: string
+          status: string
+          summary: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          view_count: number
+          visibility: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          body?: string
+          category?: string | null
+          created_at?: string
+          embedding_status?: string
+          embedding_updated_at?: string | null
+          helpful_count?: number
+          id?: string
+          last_edited_by?: string | null
+          not_helpful_count?: number
+          organization_id: string
+          published_at?: string | null
+          slug?: string | null
+          source?: string
+          status?: string
+          summary?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          view_count?: number
+          visibility?: string
+        }
+        Update: {
+          author_user_id?: string | null
+          body?: string
+          category?: string | null
+          created_at?: string
+          embedding_status?: string
+          embedding_updated_at?: string | null
+          helpful_count?: number
+          id?: string
+          last_edited_by?: string | null
+          not_helpful_count?: number
+          organization_id?: string
+          published_at?: string | null
+          slug?: string | null
+          source?: string
+          status?: string
+          summary?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          view_count?: number
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_articles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_attachments: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          organization_id: string
+          parsed: boolean
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          organization_id: string
+          parsed?: boolean
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          organization_id?: string
+          parsed?: boolean
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_attachments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_attachments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_search_log: {
+        Row: {
+          ai_answer: string | null
+          created_at: string
+          created_ticket: boolean
+          id: string
+          matched_article_ids: string[]
+          organization_id: string
+          query: string
+          surface: string
+          ticket_id: string | null
+          user_id: string | null
+          was_helpful: boolean | null
+        }
+        Insert: {
+          ai_answer?: string | null
+          created_at?: string
+          created_ticket?: boolean
+          id?: string
+          matched_article_ids?: string[]
+          organization_id: string
+          query: string
+          surface?: string
+          ticket_id?: string | null
+          user_id?: string | null
+          was_helpful?: boolean | null
+        }
+        Update: {
+          ai_answer?: string | null
+          created_at?: string
+          created_ticket?: boolean
+          id?: string
+          matched_article_ids?: string[]
+          organization_id?: string
+          query?: string
+          surface?: string
+          ticket_id?: string | null
+          user_id?: string | null
+          was_helpful?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_search_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_applications: {
         Row: {
           application_notes: string | null
@@ -8191,6 +8423,25 @@ export type Database = {
       mark_summaries_stale_for_scope: {
         Args: { _scope_id: string; _scope_type: string }
         Returns: undefined
+      }
+      match_kb_chunks: {
+        Args: {
+          _match_count?: number
+          _match_threshold?: number
+          _org_id: string
+          _query_embedding: string
+        }
+        Returns: {
+          article_id: string
+          category: string
+          chunk_id: string
+          content: string
+          similarity: number
+          status: string
+          summary: string
+          title: string
+          visibility: string
+        }[]
       }
       purge_expired_audit_logs: { Args: never; Returns: Json }
       resolve_scim_groups_to_access_level: {
