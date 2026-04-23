@@ -1,18 +1,16 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LifeBuoy, Plus } from "lucide-react";
+import { LifeBuoy, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
-import { KBAssistant } from "@/components/kb/KBAssistant";
 import { cn } from "@/lib/utils";
+import { AIIntakeChat } from "@/components/intake/AIIntakeChat";
+import { KBAssistant } from "@/components/kb/KBAssistant";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-info/10 text-info",
@@ -27,9 +25,8 @@ export default function SupportPortal() {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
-  const [createOpen, setCreateOpen] = useState(false);
 
-  const { data: tickets = [], refetch } = useQuery({
+  const { data: tickets = [] } = useQuery({
     queryKey: ["my-tickets", user?.id, currentOrganization?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -47,27 +44,33 @@ export default function SupportPortal() {
   const closed = tickets.filter((t: any) => ["closed", "cancelled"].includes(t.status));
 
   return (
-    <AppLayout title="Support Portal" subtitle="Submit and track your support requests">
+    <AppLayout title="Support Portal" subtitle="Get help and track your support requests">
       <div className="space-y-6 max-w-4xl">
         <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <LifeBuoy className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">Need help?</h2>
-                <p className="text-sm text-muted-foreground">Submit a ticket and our team will get back to you.</p>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <LifeBuoy className="h-6 w-6 text-primary" />
             </div>
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Ticket
-            </Button>
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Need help?
+                <Badge variant="secondary" className="text-xs">
+                  <Sparkles className="h-3 w-3 mr-1" /> AI-assisted
+                </Badge>
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Describe your issue and the assistant will draft a ticket for you to review and submit.
+              </p>
+            </div>
           </div>
         </Card>
 
-        <KBAssistant surface="portal" placeholder="Search the knowledgebase before raising a ticket…" />
+        <KBAssistant surface="portal" placeholder="Search the knowledgebase first…" />
+
+        <AIIntakeChat
+          intent="ticket"
+          greeting="Hi! I'll help you raise a support ticket. In a sentence or two, what's going on?"
+        />
 
         <div>
           <h3 className="font-semibold mb-3">Open tickets ({open.length})</h3>
@@ -124,8 +127,6 @@ export default function SupportPortal() {
           </div>
         )}
       </div>
-
-      <CreateTicketDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={() => refetch()} />
     </AppLayout>
   );
 }

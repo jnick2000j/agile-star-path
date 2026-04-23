@@ -81,8 +81,22 @@ export function Sidebar() {
     { label: "Tasks", icon: ListTodo, href: "/tasks" },
     { label: "Timesheets", icon: Clock, href: "/timesheets" },
     { label: "Governance", icon: Shield, href: "/prince2" },
-    { label: "Change Management", icon: GitBranch, href: "/change-management" },
-    { label: "Helpdesk", icon: LifeBuoy, href: "/support" },
+    {
+      label: "Change Management",
+      icon: GitBranch,
+      children: [
+        { label: "Change Register", href: "/change-management" },
+        { label: "Raise a change (AI)", href: "/change-management/portal" },
+      ],
+    },
+    {
+      label: "Helpdesk",
+      icon: LifeBuoy,
+      children: [
+        { label: "Agent console", href: "/support" },
+        { label: "Get support (AI)", href: "/support/portal" },
+      ],
+    },
     { label: "Knowledgebase", icon: BookOpen, href: "/knowledgebase" },
     { label: "Registers", icon: ClipboardList, href: "/registers" },
     {

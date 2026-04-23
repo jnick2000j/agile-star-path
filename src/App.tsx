@@ -69,6 +69,7 @@ import HelpdeskTicketDetail from "./pages/HelpdeskTicketDetail";
 import SupportPortal from "./pages/SupportPortal";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
+import ChangeControlPortal from "./pages/ChangeControlPortal";
 import Governance from "./pages/Governance";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
@@ -155,6 +156,7 @@ const App = () => (
             <Route path="/support/portal" element={<ProtectedRoute><SupportPortal /></ProtectedRoute>} />
             <Route path="/support/tickets/:id" element={<ProtectedRoute><HelpdeskTicketDetail /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
+            <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
             <Route path="/change-management/:id" element={<ProtectedRoute><ChangeManagementDetail /></ProtectedRoute>} />
             <Route path="/governance" element={<ProtectedRoute><Governance /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
