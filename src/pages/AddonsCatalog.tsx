@@ -213,7 +213,7 @@ export default function AddonsCatalog() {
           </div>
         </div>
 
-        <Dialog open={!!checkoutPriceId} onOpenChange={(o) => !o && setCheckoutPriceId(null)}>
+        <Dialog open={!!checkoutPriceId} onOpenChange={(o) => { if (!o) { setCheckoutPriceId(null); setPurchasingAddon(null); } }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Complete your add-on subscription</DialogTitle>
@@ -224,7 +224,7 @@ export default function AddonsCatalog() {
                 customerEmail={user?.email}
                 organizationId={currentOrganization?.id}
                 purchaseType="addon"
-                returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+                returnUrl={addonReturnUrl()}
               />
             )}
           </DialogContent>
