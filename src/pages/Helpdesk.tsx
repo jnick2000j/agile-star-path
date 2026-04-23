@@ -18,7 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
-import { cn } from "@/lib/utils";
+import { cn, formatLabel } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -188,9 +188,9 @@ export default function Helpdesk() {
                   >
                     <TableCell className="font-mono text-xs">{t.reference_number ?? "—"}</TableCell>
                     <TableCell className="font-medium">{t.subject}</TableCell>
-                    <TableCell><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? t.ticket_type}</Badge></TableCell>
-                    <TableCell><Badge className={cn(PRIORITY_STYLES[t.priority])}>{t.priority}</Badge></TableCell>
-                    <TableCell><Badge className={cn(STATUS_STYLES[t.status])}>{t.status.replace("_", " ")}</Badge></TableCell>
+                    <TableCell><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? formatLabel(t.ticket_type)}</Badge></TableCell>
+                    <TableCell><Badge className={cn(PRIORITY_STYLES[t.priority])}>{formatLabel(t.priority)}</Badge></TableCell>
+                    <TableCell><Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge></TableCell>
                     <TableCell className="text-sm">{t.reporter_name || t.reporter_email || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {t.created_at ? format(new Date(t.created_at), "MMM d, yyyy") : "—"}

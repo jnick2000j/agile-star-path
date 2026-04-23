@@ -22,7 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatLabel } from "@/lib/utils";
 import { SLAStatus } from "@/components/helpdesk/SLAStatus";
 import { KBAssistant } from "@/components/kb/KBAssistant";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
@@ -201,7 +201,7 @@ export default function HelpdeskTicketDetail() {
                     {ticket.created_at && ` · ${format(new Date(ticket.created_at), "PPp")}`}
                   </p>
                 </div>
-                <Badge className={cn(STATUS_STYLES[ticket.status])}>{ticket.status.replace("_", " ")}</Badge>
+                <Badge className={cn(STATUS_STYLES[ticket.status])}>{formatLabel(ticket.status)}</Badge>
               </div>
               <p className="whitespace-pre-wrap text-sm">{ticket.description || <span className="text-muted-foreground">No description</span>}</p>
             </Card>
@@ -269,21 +269,21 @@ export default function HelpdeskTicketDetail() {
                 <Label className="text-xs text-muted-foreground">Status</Label>
                 <Select value={ticket.status} onValueChange={(v) => updateField("status", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>)}</SelectContent>
+                  <SelectContent>{STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Priority</Label>
                 <Select value={ticket.priority} onValueChange={(v) => updateField("priority", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{PRIORITY_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  <SelectContent>{PRIORITY_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Type</Label>
                 <Select value={ticket.ticket_type} onValueChange={(v) => updateField("ticket_type", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>)}</SelectContent>
+                  <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">

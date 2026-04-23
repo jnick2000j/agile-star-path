@@ -8,7 +8,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, formatLabel } from "@/lib/utils";
 import { AIIntakeChat } from "@/components/intake/AIIntakeChat";
 import { KBAssistant } from "@/components/kb/KBAssistant";
 
@@ -88,8 +88,8 @@ export default function SupportPortal() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-mono text-xs text-muted-foreground">{t.reference_number}</span>
-                        <Badge className={cn(STATUS_STYLES[t.status])}>{t.status.replace("_", " ")}</Badge>
-                        <Badge variant="outline" className="text-xs">{t.ticket_type.replace("_", " ")}</Badge>
+                        <Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge>
+                        <Badge variant="outline" className="text-xs">{formatLabel(t.ticket_type)}</Badge>
                       </div>
                       <p className="font-medium">{t.subject}</p>
                       {t.description && <p className="text-sm text-muted-foreground line-clamp-1 mt-1">{t.description}</p>}
@@ -119,7 +119,7 @@ export default function SupportPortal() {
                       <span className="font-mono text-xs text-muted-foreground">{t.reference_number}</span>
                       <span className="text-sm">{t.subject}</span>
                     </div>
-                    <Badge className={cn(STATUS_STYLES[t.status])}>{t.status}</Badge>
+                    <Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge>
                   </div>
                 </Card>
               ))}
