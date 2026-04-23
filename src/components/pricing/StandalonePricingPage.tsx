@@ -52,6 +52,21 @@ const formatLimit = (key: string, val: any) => {
   return String(val);
 };
 
+const formatCellValue = (meta: FeatureMeta, value: any): { display: string; isCheck: boolean; isDash: boolean } => {
+  if (value === undefined || value === null) return { display: "—", isCheck: false, isDash: true };
+  if (meta.feature_type === "boolean") {
+    const on = value === true || value === "true";
+    return { display: on ? "✓" : "—", isCheck: on, isDash: !on };
+  }
+  if (meta.feature_type === "numeric") {
+    const n = Number(value);
+    if (n === -1) return { display: "Unlimited", isCheck: false, isDash: false };
+    if (meta.feature_key === "helpdesk_max_tickets_per_month") return { display: `${n.toLocaleString()}/mo`, isCheck: false, isDash: false };
+    return { display: n.toLocaleString(), isCheck: false, isDash: false };
+  }
+  return { display: String(value), isCheck: false, isDash: false };
+};
+
 interface Props {
   kind: "helpdesk" | "itsm";
   heroBadge: string;
