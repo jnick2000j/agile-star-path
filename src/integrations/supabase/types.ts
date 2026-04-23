@@ -1285,6 +1285,270 @@ export type Database = {
           },
         ]
       }
+      change_management_activity: {
+        Row: {
+          actor_user_id: string | null
+          change_id: string
+          created_at: string
+          event_type: string
+          from_value: Json | null
+          id: string
+          notes: string | null
+          organization_id: string
+          to_value: Json | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          change_id: string
+          created_at?: string
+          event_type: string
+          from_value?: Json | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          to_value?: Json | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          change_id?: string
+          created_at?: string
+          event_type?: string
+          from_value?: Json | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          to_value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_management_activity_change_id_fkey"
+            columns: ["change_id"]
+            isOneToOne: false
+            referencedRelation: "change_management_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_activity_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      change_management_approvals: {
+        Row: {
+          approval_kind: Database["public"]["Enums"]["cm_approval_kind"]
+          approver_id: string | null
+          change_id: string
+          created_at: string
+          decided_at: string | null
+          decision: Database["public"]["Enums"]["cm_approval_decision"]
+          decision_notes: string | null
+          id: string
+          organization_id: string
+          required: boolean
+          sequence: number
+          updated_at: string
+        }
+        Insert: {
+          approval_kind: Database["public"]["Enums"]["cm_approval_kind"]
+          approver_id?: string | null
+          change_id: string
+          created_at?: string
+          decided_at?: string | null
+          decision?: Database["public"]["Enums"]["cm_approval_decision"]
+          decision_notes?: string | null
+          id?: string
+          organization_id: string
+          required?: boolean
+          sequence?: number
+          updated_at?: string
+        }
+        Update: {
+          approval_kind?: Database["public"]["Enums"]["cm_approval_kind"]
+          approver_id?: string | null
+          change_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decision?: Database["public"]["Enums"]["cm_approval_decision"]
+          decision_notes?: string | null
+          id?: string
+          organization_id?: string
+          required?: boolean
+          sequence?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_management_approvals_change_id_fkey"
+            columns: ["change_id"]
+            isOneToOne: false
+            referencedRelation: "change_management_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_approvals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      change_management_requests: {
+        Row: {
+          actual_end_at: string | null
+          actual_start_at: string | null
+          affected_services: string[] | null
+          business_justification: string | null
+          category: string | null
+          change_type: Database["public"]["Enums"]["cm_change_type"]
+          communication_plan: string | null
+          cost_estimate: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          downtime_minutes: number | null
+          downtime_required: boolean
+          id: string
+          impact: Database["public"]["Enums"]["cm_impact"]
+          implementation_plan: string | null
+          implementer_id: string | null
+          metadata: Json
+          organization_id: string
+          owner_id: string | null
+          planned_end_at: string | null
+          planned_start_at: string | null
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reason: string | null
+          reference_number: string | null
+          related_ticket_id: string | null
+          requested_by: string | null
+          risk_score: number | null
+          rollback_plan: string | null
+          status: Database["public"]["Enums"]["cm_status"]
+          test_plan: string | null
+          title: string
+          updated_at: string
+          urgency: Database["public"]["Enums"]["cm_urgency"]
+        }
+        Insert: {
+          actual_end_at?: string | null
+          actual_start_at?: string | null
+          affected_services?: string[] | null
+          business_justification?: string | null
+          category?: string | null
+          change_type?: Database["public"]["Enums"]["cm_change_type"]
+          communication_plan?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          downtime_minutes?: number | null
+          downtime_required?: boolean
+          id?: string
+          impact?: Database["public"]["Enums"]["cm_impact"]
+          implementation_plan?: string | null
+          implementer_id?: string | null
+          metadata?: Json
+          organization_id: string
+          owner_id?: string | null
+          planned_end_at?: string | null
+          planned_start_at?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reason?: string | null
+          reference_number?: string | null
+          related_ticket_id?: string | null
+          requested_by?: string | null
+          risk_score?: number | null
+          rollback_plan?: string | null
+          status?: Database["public"]["Enums"]["cm_status"]
+          test_plan?: string | null
+          title: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["cm_urgency"]
+        }
+        Update: {
+          actual_end_at?: string | null
+          actual_start_at?: string | null
+          affected_services?: string[] | null
+          business_justification?: string | null
+          category?: string | null
+          change_type?: Database["public"]["Enums"]["cm_change_type"]
+          communication_plan?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          downtime_minutes?: number | null
+          downtime_required?: boolean
+          id?: string
+          impact?: Database["public"]["Enums"]["cm_impact"]
+          implementation_plan?: string | null
+          implementer_id?: string | null
+          metadata?: Json
+          organization_id?: string
+          owner_id?: string | null
+          planned_end_at?: string | null
+          planned_start_at?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reason?: string | null
+          reference_number?: string | null
+          related_ticket_id?: string | null
+          requested_by?: string | null
+          risk_score?: number | null
+          rollback_plan?: string | null
+          status?: Database["public"]["Enums"]["cm_status"]
+          test_plan?: string | null
+          title?: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["cm_urgency"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_management_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_requests_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_requests_related_ticket_id_fkey"
+            columns: ["related_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       change_requests: {
         Row: {
           approver_id: string | null
@@ -2338,6 +2602,312 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_email_log: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          created_at: string
+          direction: string
+          error_message: string | null
+          from_address: string | null
+          id: string
+          message_id: string | null
+          organization_id: string | null
+          processed_at: string | null
+          raw_payload: Json | null
+          status: string
+          subject: string | null
+          ticket_id: string | null
+          to_address: string | null
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string
+          direction?: string
+          error_message?: string | null
+          from_address?: string | null
+          id?: string
+          message_id?: string | null
+          organization_id?: string | null
+          processed_at?: string | null
+          raw_payload?: Json | null
+          status?: string
+          subject?: string | null
+          ticket_id?: string | null
+          to_address?: string | null
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string
+          direction?: string
+          error_message?: string | null
+          from_address?: string | null
+          id?: string
+          message_id?: string | null
+          organization_id?: string | null
+          processed_at?: string | null
+          raw_payload?: Json | null
+          status?: string
+          subject?: string | null
+          ticket_id?: string | null
+          to_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_email_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_email_log_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_ticket_activity: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          from_value: Json | null
+          id: string
+          notes: string | null
+          organization_id: string
+          ticket_id: string
+          to_value: Json | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          from_value?: Json | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          ticket_id: string
+          to_value?: Json | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          from_value?: Json | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          ticket_id?: string
+          to_value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_activity_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_activity_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_ticket_comments: {
+        Row: {
+          author_email: string | null
+          author_name: string | null
+          author_user_id: string | null
+          body: string
+          created_at: string
+          id: string
+          is_from_email: boolean
+          is_internal: boolean
+          metadata: Json
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          author_email?: string | null
+          author_name?: string | null
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_from_email?: boolean
+          is_internal?: boolean
+          metadata?: Json
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          author_email?: string | null
+          author_name?: string | null
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_from_email?: boolean
+          is_internal?: boolean
+          metadata?: Json
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_comments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_tickets: {
+        Row: {
+          assignee_id: string | null
+          category: string | null
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_at: string | null
+          first_response_at: string | null
+          id: string
+          metadata: Json
+          organization_id: string
+          parent_problem_id: string | null
+          priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reference_number: string | null
+          reporter_email: string | null
+          reporter_name: string | null
+          reporter_user_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          source: Database["public"]["Enums"]["helpdesk_ticket_source"]
+          status: Database["public"]["Enums"]["helpdesk_ticket_status"]
+          subject: string
+          tags: string[] | null
+          ticket_type: Database["public"]["Enums"]["helpdesk_ticket_type"]
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          category?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id: string
+          parent_problem_id?: string | null
+          priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_user_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          source?: Database["public"]["Enums"]["helpdesk_ticket_source"]
+          status?: Database["public"]["Enums"]["helpdesk_ticket_status"]
+          subject: string
+          tags?: string[] | null
+          ticket_type?: Database["public"]["Enums"]["helpdesk_ticket_type"]
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          category?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          parent_problem_id?: string | null
+          priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_user_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          source?: Database["public"]["Enums"]["helpdesk_ticket_source"]
+          status?: Database["public"]["Enums"]["helpdesk_ticket_status"]
+          subject?: string
+          tags?: string[] | null
+          ticket_type?: Database["public"]["Enums"]["helpdesk_ticket_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_parent_problem_id_fkey"
+            columns: ["parent_problem_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -7453,6 +8023,30 @@ export type Database = {
         | "implemented"
         | "withdrawn"
         | "needs_information"
+      cm_approval_decision: "pending" | "approved" | "rejected" | "abstain"
+      cm_approval_kind:
+        | "technical"
+        | "business"
+        | "cab"
+        | "security"
+        | "operational"
+      cm_change_type: "standard" | "normal" | "emergency" | "operational"
+      cm_impact: "low" | "medium" | "high" | "critical"
+      cm_status:
+        | "draft"
+        | "submitted"
+        | "in_review"
+        | "cab_review"
+        | "needs_information"
+        | "approved"
+        | "rejected"
+        | "scheduled"
+        | "in_progress"
+        | "implemented"
+        | "closed"
+        | "cancelled"
+        | "failed"
+      cm_urgency: "low" | "medium" | "high" | "critical"
       exception_status:
         | "raised"
         | "under_review"
@@ -7465,6 +8059,28 @@ export type Database = {
         | "conditional"
         | "rejected"
         | "deferred"
+      helpdesk_ticket_priority: "low" | "medium" | "high" | "urgent"
+      helpdesk_ticket_source:
+        | "portal"
+        | "email"
+        | "api"
+        | "phone"
+        | "chat"
+        | "internal"
+      helpdesk_ticket_status:
+        | "new"
+        | "open"
+        | "pending"
+        | "on_hold"
+        | "resolved"
+        | "closed"
+        | "cancelled"
+      helpdesk_ticket_type:
+        | "support"
+        | "incident"
+        | "service_request"
+        | "question"
+        | "problem"
       milestone_status:
         | "planned"
         | "in_progress"
@@ -7634,6 +8250,32 @@ export const Constants = {
         "withdrawn",
         "needs_information",
       ],
+      cm_approval_decision: ["pending", "approved", "rejected", "abstain"],
+      cm_approval_kind: [
+        "technical",
+        "business",
+        "cab",
+        "security",
+        "operational",
+      ],
+      cm_change_type: ["standard", "normal", "emergency", "operational"],
+      cm_impact: ["low", "medium", "high", "critical"],
+      cm_status: [
+        "draft",
+        "submitted",
+        "in_review",
+        "cab_review",
+        "needs_information",
+        "approved",
+        "rejected",
+        "scheduled",
+        "in_progress",
+        "implemented",
+        "closed",
+        "cancelled",
+        "failed",
+      ],
+      cm_urgency: ["low", "medium", "high", "critical"],
       exception_status: [
         "raised",
         "under_review",
@@ -7647,6 +8289,31 @@ export const Constants = {
         "conditional",
         "rejected",
         "deferred",
+      ],
+      helpdesk_ticket_priority: ["low", "medium", "high", "urgent"],
+      helpdesk_ticket_source: [
+        "portal",
+        "email",
+        "api",
+        "phone",
+        "chat",
+        "internal",
+      ],
+      helpdesk_ticket_status: [
+        "new",
+        "open",
+        "pending",
+        "on_hold",
+        "resolved",
+        "closed",
+        "cancelled",
+      ],
+      helpdesk_ticket_type: [
+        "support",
+        "incident",
+        "service_request",
+        "question",
+        "problem",
       ],
       milestone_status: [
         "planned",

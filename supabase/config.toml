@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.scim-v2]
 verify_jwt = false
+
+[functions.helpdesk-inbound-email]
+verify_jwt = false

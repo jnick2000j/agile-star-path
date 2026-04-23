@@ -20,6 +20,8 @@ import {
   Search,
   Bell,
   Sparkles,
+  LifeBuoy,
+  GitBranch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -79,6 +81,8 @@ export function Sidebar() {
     { label: "Tasks", icon: ListTodo, href: "/tasks" },
     { label: "Timesheets", icon: Clock, href: "/timesheets" },
     { label: "Governance", icon: Shield, href: "/prince2" },
+    { label: "Change Management", icon: GitBranch, href: "/change-management" },
+    { label: "Helpdesk", icon: LifeBuoy, href: "/support" },
     { label: "Registers", icon: ClipboardList, href: "/registers" },
     {
       label: "Reporting",

@@ -61,6 +61,11 @@ import Pricing from "./pages/Pricing";
 import AcceptInvite from "./pages/AcceptInvite";
 import CheckoutReturn from "./pages/CheckoutReturn";
 import Support from "./pages/Support";
+import Helpdesk from "./pages/Helpdesk";
+import HelpdeskTicketDetail from "./pages/HelpdeskTicketDetail";
+import SupportPortal from "./pages/SupportPortal";
+import ChangeManagement from "./pages/ChangeManagement";
+import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import Governance from "./pages/Governance";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
@@ -137,7 +142,12 @@ const App = () => (
             <Route path="/prince2/change-control" element={<ProtectedRoute><ChangeControl /></ProtectedRoute>} />
             <Route path="/prince2/exceptions" element={<ProtectedRoute><ExceptionManagement /></ProtectedRoute>} />
             <Route path="/prince2/quality" element={<ProtectedRoute><QualityManagement /></ProtectedRoute>} />
-            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute><Helpdesk /></ProtectedRoute>} />
+            <Route path="/support/legacy" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+            <Route path="/support/portal" element={<ProtectedRoute><SupportPortal /></ProtectedRoute>} />
+            <Route path="/support/tickets/:id" element={<ProtectedRoute><HelpdeskTicketDetail /></ProtectedRoute>} />
+            <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
+            <Route path="/change-management/:id" element={<ProtectedRoute><ChangeManagementDetail /></ProtectedRoute>} />
             <Route path="/governance" element={<ProtectedRoute><Governance /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
