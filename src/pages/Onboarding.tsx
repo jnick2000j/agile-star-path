@@ -121,21 +121,58 @@ export default function Onboarding() {
       <div className="w-full max-w-2xl">
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8 justify-center">
-          {["org", "invite", "plan", "done"].map((s, i) => (
+          {(["intent", "org", "invite", "plan", "done"] as Step[]).map((s, i, arr) => (
             <div key={s} className="flex items-center gap-2">
               <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 step === s ? "bg-primary text-primary-foreground" :
-                ["org", "invite", "plan", "done"].indexOf(step) > i
+                arr.indexOf(step) > i
                   ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
               }`}>
-                {["org", "invite", "plan", "done"].indexOf(step) > i ? (
+                {arr.indexOf(step) > i ? (
                   <Check className="h-4 w-4" />
                 ) : i + 1}
               </div>
-              {i < 3 && <div className="w-12 h-0.5 bg-muted" />}
+              {i < arr.length - 1 && <div className="w-10 h-0.5 bg-muted" />}
             </div>
           ))}
         </div>
+
+        {/* Step: Choose Intent */}
+        {step === "intent" && (
+          <Card className="p-8">
+            <div className="text-center mb-6">
+              <Rocket className="h-12 w-12 mx-auto text-primary mb-4" />
+              <h2 className="text-2xl font-bold mb-2">What brings you to TaskMaster?</h2>
+              <p className="text-muted-foreground">
+                Pick the area you want to focus on. You can add more later.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                { id: "ppm" as Intent, icon: Layers, title: "Full PPM", desc: "PRINCE2, MSP programmes, projects, products, agile" },
+                { id: "helpdesk" as Intent, icon: Headphones, title: "Helpdesk only", desc: "Tickets, SLA, customer portal, email intake" },
+                { id: "itsm" as Intent, icon: GitBranch, title: "ITSM", desc: "Helpdesk + Change Management, CAB workflow" },
+              ].map(({ id, icon: Icon, title, desc }) => (
+                <Card
+                  key={id}
+                  className={`p-4 cursor-pointer transition-all hover:border-primary text-left ${
+                    intent === id ? "border-primary ring-2 ring-primary/20" : ""
+                  }`}
+                  onClick={() => setIntent(id)}
+                >
+                  <Icon className="h-6 w-6 text-primary mb-2" />
+                  <div className="font-semibold mb-1">{title}</div>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </Card>
+              ))}
+            </div>
+            <div className="flex justify-center mt-6">
+              <Button onClick={() => setStep("org")} className="gap-2">
+                Continue <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* Step: Create Organization */}
         {step === "org" && (
