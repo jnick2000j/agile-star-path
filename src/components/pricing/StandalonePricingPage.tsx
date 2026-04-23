@@ -331,6 +331,93 @@ export function StandalonePricingPage({
         )}
       </section>
 
+      {!loading && plans.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 pb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Compare plans</h2>
+            <p className="text-muted-foreground">Side-by-side limits and capabilities for every tier.</p>
+          </div>
+          <div className="border rounded-lg overflow-x-auto bg-card">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/40">
+                  <th className="text-left font-medium p-4 min-w-[180px]">Feature</th>
+                  {plans.map((p) => (
+                    <th key={p.id} className="text-center font-medium p-4 min-w-[140px]">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className={p.highlight ? "text-primary" : ""}>{p.name}</span>
+                        {p.highlight && (
+                          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                            Popular
+                          </Badge>
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonGroups.map((group) => (
+                  <React.Fragment key={`g-${group.group}`}>
+                    <tr className="bg-muted/20 border-b">
+                      <td
+                        colSpan={plans.length + 1}
+                        className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        {group.group}
+                      </td>
+                    </tr>
+                    {group.rows.map((row) => (
+                      <tr key={`${group.group}-${row.featureKey}`} className="border-b last:border-0">
+                        <td className="p-4 font-medium">{row.label}</td>
+                        {plans.map((p) => {
+                          const cell = getCellFor(p.id, row.featureKey);
+                          return (
+                            <td key={p.id} className="p-4 text-center">
+                              {cell.isCheck ? (
+                                <Check className="h-4 w-4 text-primary mx-auto" />
+                              ) : cell.isDash ? (
+                                <span className="text-muted-foreground">—</span>
+                              ) : (
+                                <span className="font-medium">{cell.display}</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))}
+                <tr className="border-t bg-muted/10">
+                  <td className="p-4 font-medium">Starting price</td>
+                  {plans.map((p) => {
+                    const isContact =
+                      p.price_monthly === 0 && p.price_yearly === 0 && p.name.toLowerCase().includes("enterprise");
+                    const price = cycle === "monthly" ? p.price_monthly : p.price_yearly;
+                    return (
+                      <td key={p.id} className="p-4 text-center">
+                        {isContact ? (
+                          <span className="font-semibold">Custom</span>
+                        ) : price === 0 ? (
+                          <span className="font-semibold">Free</span>
+                        ) : (
+                          <span className="font-semibold">
+                            ${(price / 100).toFixed(0)}
+                            <span className="text-xs text-muted-foreground font-normal">
+                              /{cycle === "monthly" ? "mo" : "yr"}
+                            </span>
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
       <section className="max-w-3xl mx-auto px-6 pb-16 text-center">
         <h2 className="text-2xl font-bold mb-3">Need the full PPM platform?</h2>
         <p className="text-muted-foreground mb-6">
