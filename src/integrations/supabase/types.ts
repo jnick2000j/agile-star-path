@@ -2675,6 +2675,116 @@ export type Database = {
           },
         ]
       }
+      helpdesk_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json
+          notification_type: string
+          organization_id: string
+          recipient_email: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          ticket_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          notification_type: string
+          organization_id: string
+          recipient_email: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          ticket_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          notification_type?: string
+          organization_id?: string
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_notifications_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_sla_policies: {
+        Row: {
+          business_hours_only: boolean
+          created_at: string
+          id: string
+          organization_id: string
+          priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          resolution_minutes: number
+          response_minutes: number
+          ticket_type:
+            | Database["public"]["Enums"]["helpdesk_ticket_type"]
+            | null
+          updated_at: string
+        }
+        Insert: {
+          business_hours_only?: boolean
+          created_at?: string
+          id?: string
+          organization_id: string
+          priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          resolution_minutes?: number
+          response_minutes?: number
+          ticket_type?:
+            | Database["public"]["Enums"]["helpdesk_ticket_type"]
+            | null
+          updated_at?: string
+        }
+        Update: {
+          business_hours_only?: boolean
+          created_at?: string
+          id?: string
+          organization_id?: string
+          priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          resolution_minutes?: number
+          response_minutes?: number
+          ticket_type?:
+            | Database["public"]["Enums"]["helpdesk_ticket_type"]
+            | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_sla_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_ticket_activity: {
         Row: {
           actor_user_id: string | null
@@ -2807,6 +2917,12 @@ export type Database = {
           reporter_user_id: string | null
           resolution: string | null
           resolved_at: string | null
+          sla_paused_at: string | null
+          sla_paused_seconds: number
+          sla_resolution_breached: boolean
+          sla_resolution_due_at: string | null
+          sla_response_breached: boolean
+          sla_response_due_at: string | null
           source: Database["public"]["Enums"]["helpdesk_ticket_source"]
           status: Database["public"]["Enums"]["helpdesk_ticket_status"]
           subject: string
@@ -2837,6 +2953,12 @@ export type Database = {
           reporter_user_id?: string | null
           resolution?: string | null
           resolved_at?: string | null
+          sla_paused_at?: string | null
+          sla_paused_seconds?: number
+          sla_resolution_breached?: boolean
+          sla_resolution_due_at?: string | null
+          sla_response_breached?: boolean
+          sla_response_due_at?: string | null
           source?: Database["public"]["Enums"]["helpdesk_ticket_source"]
           status?: Database["public"]["Enums"]["helpdesk_ticket_status"]
           subject: string
@@ -2867,6 +2989,12 @@ export type Database = {
           reporter_user_id?: string | null
           resolution?: string | null
           resolved_at?: string | null
+          sla_paused_at?: string | null
+          sla_paused_seconds?: number
+          sla_resolution_breached?: boolean
+          sla_resolution_due_at?: string | null
+          sla_response_breached?: boolean
+          sla_response_due_at?: string | null
           source?: Database["public"]["Enums"]["helpdesk_ticket_source"]
           status?: Database["public"]["Enums"]["helpdesk_ticket_status"]
           subject?: string
