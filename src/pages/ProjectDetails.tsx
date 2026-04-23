@@ -27,7 +27,9 @@ import {
   ListTodo,
   FileText,
   MessageSquarePlus,
+  LifeBuoy,
 } from "lucide-react";
+import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
@@ -543,9 +545,10 @@ export default function ProjectDetails() {
               { value: "brief", label: "Project Brief", icon: FileText },
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
+              { value: "tickets", label: "Tickets", icon: LifeBuoy },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
-            className="grid-cols-10 sm:grid-cols-10 md:grid-cols-10 lg:grid-cols-10"
+            className="grid-cols-11 sm:grid-cols-11 md:grid-cols-11 lg:grid-cols-11"
           />
 
           {/* Work Packages Tab */}

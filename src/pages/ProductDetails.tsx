@@ -465,9 +465,10 @@ export default function ProductDetails() {
               { value: "sprints", label: "Sprints", icon: Calendar },
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
+              { value: "tickets", label: "Tickets", icon: LifeBuoy },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
-            className="grid-cols-8 sm:grid-cols-8 md:grid-cols-8 lg:grid-cols-8"
+            className="grid-cols-9 sm:grid-cols-9 md:grid-cols-9 lg:grid-cols-9"
           />
 
           {/* Features Tab */}
