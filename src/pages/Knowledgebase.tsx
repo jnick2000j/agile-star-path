@@ -18,7 +18,7 @@ import { format } from "date-fns";
 export default function Knowledgebase() {
   const { currentOrganization } = useOrganization();
   const navigate = useNavigate();
-  const accessLevel = useOrgAccessLevel();
+  const { accessLevel } = useOrgAccessLevel();
   const canEdit = ["admin", "manager", "editor"].includes(accessLevel ?? "");
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);

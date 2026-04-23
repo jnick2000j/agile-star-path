@@ -17,7 +17,7 @@ import { toast } from "sonner";
 export default function KnowledgebaseArticle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const accessLevel = useOrgAccessLevel();
+  const { accessLevel } = useOrgAccessLevel();
   const canEdit = ["admin", "manager", "editor"].includes(accessLevel ?? "");
   const [editOpen, setEditOpen] = useState(false);
   const [feedback, setFeedback] = useState<"helpful" | "not_helpful" | null>(null);
