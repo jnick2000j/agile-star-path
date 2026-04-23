@@ -61,24 +61,27 @@ export function AIIntakeChat({ intent, greeting }: Props) {
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<any | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [shownArticleIds, setShownArticleIds] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, draft, loading]);
 
-  const send = async () => {
-    if (!input.trim() || !currentOrganization?.id) return;
-    const next: ChatMessage[] = [...messages, { role: "user", content: input.trim() }];
+  const send = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
+    if (!text || !currentOrganization?.id) return;
+    const next: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(next);
-    setInput("");
+    if (!overrideText) setInput("");
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("ai-ticket-intake", {
         body: {
           intent,
           organization_id: currentOrganization.id,
-          messages: next,
+          messages: next.map(({ role, content }) => ({ role, content })),
+          shown_article_ids: shownArticleIds,
         },
       });
       if (error) throw error;
@@ -91,6 +94,17 @@ export function AIIntakeChat({ intent, greeting }: Props) {
             content:
               data.draft.summary_for_user ??
               "I've drafted this for you — please review below and confirm.",
+          },
+        ]);
+      } else if (data?.status === "kb_suggestions" && Array.isArray(data.articles)) {
+        const articles = data.articles as KbArticle[];
+        setShownArticleIds((ids) => [...ids, ...articles.map((a) => a.id)]);
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            content: data.message ?? "Here are some articles that might help:",
+            articles,
           },
         ]);
       } else {
@@ -110,6 +124,7 @@ export function AIIntakeChat({ intent, greeting }: Props) {
     setMessages([{ role: "assistant", content: greeting ?? DEFAULT_GREETINGS[intent] }]);
     setDraft(null);
     setInput("");
+    setShownArticleIds([]);
   };
 
   const updateDraft = (field: string, value: any) =>
