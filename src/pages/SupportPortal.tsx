@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
+import { KBAssistant } from "@/components/kb/KBAssistant";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -65,6 +66,8 @@ export default function SupportPortal() {
             </Button>
           </div>
         </Card>
+
+        <KBAssistant surface="user_portal" placeholder="Search the knowledgebase before raising a ticket…" />
 
         <div>
           <h3 className="font-semibold mb-3">Open tickets ({open.length})</h3>

@@ -24,6 +24,8 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { SLAStatus } from "@/components/helpdesk/SLAStatus";
+import { KBAssistant } from "@/components/kb/KBAssistant";
+import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -339,6 +341,10 @@ export default function HelpdeskTicketDetail() {
                 placeholder="Resolution details..."
               />
             </Card>
+
+            <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
+
+            <KBAssistant surface="agent_ticket" placeholder="Ask the KB for a suggested reply…" />
           </div>
         </div>
       </div>

@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
 
 interface Props {
   open: boolean;
@@ -190,6 +191,7 @@ export function CreateTicketDialog({
               placeholder="Provide as much detail as possible..."
             />
           </div>
+          <KBInlineSuggestions subject={form.subject} description={form.description} />
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Programme</Label>
