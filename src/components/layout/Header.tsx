@@ -195,9 +195,24 @@ export function Header({ title, subtitle }: HeaderProps) {
             <DropdownMenuItem asChild>
               <Link to="/billing" className="flex items-center gap-2 cursor-pointer">
                 {isLicenseMode ? <KeyRound className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
-                {isLicenseMode ? "License" : "Billing"}
+                {isLicenseMode ? "License" : "Billing & Plans"}
               </Link>
             </DropdownMenuItem>
+            {!isLicenseMode && (
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()}
+                onClick={handleOpenBillingPortal}
+                disabled={openingPortal}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                {openingPortal ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Receipt className="h-4 w-4" />
+                )}
+                Manage payment & invoices
+              </DropdownMenuItem>
+            )}
             {(isAdmin || userRole === "org_admin") && (
               <DropdownMenuItem asChild>
                 <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
