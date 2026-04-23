@@ -51,17 +51,20 @@ export default function Onboarding() {
       setOrgId(org.id);
       localStorage.setItem("currentOrganizationId", org.id);
 
-      // Fetch plans for next step
+      // Fetch plans for next step — filter to the intent the user picked
+      const planKinds = intent === "ppm" ? ["core"] : intent === "helpdesk" ? ["helpdesk"] : ["itsm"];
       const { data: plansData } = await supabase
         .from("subscription_plans")
         .select("*")
         .eq("is_active", true)
+        .eq("is_archived", false)
+        .in("plan_kind", planKinds)
         .order("sort_order");
 
       setPlans(plansData || []);
 
-      // Auto-assign free plan
-      const freePlan = plansData?.find(p => p.price_monthly === 0);
+      // Auto-assign free plan if available (PPM Free, Helpdesk Free)
+      const freePlan = plansData?.find(p => p.price_monthly === 0 && p.price_yearly === 0);
       if (freePlan && org.id) {
         await supabase.from("organization_subscriptions").insert({
           organization_id: org.id,
