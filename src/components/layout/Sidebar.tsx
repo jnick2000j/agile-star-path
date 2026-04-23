@@ -83,6 +83,7 @@ export function Sidebar() {
     { label: "Governance", icon: Shield, href: "/prince2" },
     { label: "Change Management", icon: GitBranch, href: "/change-management" },
     { label: "Helpdesk", icon: LifeBuoy, href: "/support" },
+    { label: "Knowledgebase", icon: BookOpen, href: "/knowledgebase" },
     { label: "Registers", icon: ClipboardList, href: "/registers" },
     {
       label: "Reporting",
