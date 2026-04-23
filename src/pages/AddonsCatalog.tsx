@@ -96,7 +96,7 @@ export default function AddonsCatalog() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout title="Add-ons">
       <div className="max-w-6xl mx-auto p-6">
         <Button variant="ghost" size="sm" className="gap-2 mb-4" onClick={() => navigate("/billing")}>
           <ArrowLeft className="h-4 w-4" /> Back to Billing
