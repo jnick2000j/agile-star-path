@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
