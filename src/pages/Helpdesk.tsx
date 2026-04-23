@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox } from "lucide-react";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -107,6 +107,7 @@ export default function Helpdesk() {
             tabs={[
               { key: "console", label: "Agent console", to: "/support", icon: Headset },
               { key: "portal", label: "Get support (AI)", to: "/support/portal", icon: Sparkles },
+              { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
             ]}
           />
           {/* Stats */}

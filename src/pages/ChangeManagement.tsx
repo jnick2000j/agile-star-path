@@ -9,7 +9,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, GitBranch, ListChecks, Sparkles } from "lucide-react";
+import { Search, Plus, GitBranch, ListChecks, Sparkles, Inbox } from "lucide-react";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -95,6 +95,7 @@ export default function ChangeManagement() {
             tabs={[
               { key: "register", label: "Change Register", to: "/change-management", icon: ListChecks },
               { key: "portal", label: "Raise a change (AI)", to: "/change-management/portal", icon: Sparkles },
+              { key: "mine", label: "My changes", to: "/change-management/my-changes", icon: Inbox },
             ]}
           />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
