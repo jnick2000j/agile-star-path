@@ -23,6 +23,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { SLAStatus } from "@/components/helpdesk/SLAStatus";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -125,6 +126,16 @@ export default function HelpdeskTicketDetail() {
       from_value: { [field]: prev },
       to_value: { [field]: value },
     });
+    if (field === "assignee_id" && value) {
+      supabase.functions.invoke("helpdesk-notify", {
+        body: { ticket_id: ticket.id, notification_type: "assigned" },
+      }).catch(() => {});
+    }
+    if (field === "status") {
+      supabase.functions.invoke("helpdesk-notify", {
+        body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: value } },
+      }).catch(() => {});
+    }
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-activity", id] });
@@ -150,6 +161,15 @@ export default function HelpdeskTicketDetail() {
         status: "open",
         first_response_at: ticket.first_response_at ?? new Date().toISOString(),
       }).eq("id", ticket.id);
+    }
+    if (!internal) {
+      supabase.functions.invoke("helpdesk-notify", {
+        body: {
+          ticket_id: ticket.id,
+          notification_type: "reply",
+          metadata: { comment_body: reply.trim() },
+        },
+      }).catch(() => {});
     }
     toast.success("Reply added");
     qc.invalidateQueries({ queryKey: ["helpdesk-comments", id] });
@@ -285,6 +305,17 @@ export default function HelpdeskTicketDetail() {
                 <Badge variant="outline">{ticket.source}</Badge>
               </div>
             </Card>
+
+            <SLAStatus
+              createdAt={ticket.created_at}
+              responseDueAt={(ticket as any).sla_response_due_at}
+              resolutionDueAt={(ticket as any).sla_resolution_due_at}
+              firstResponseAt={ticket.first_response_at}
+              resolvedAt={ticket.resolved_at}
+              responseBreached={(ticket as any).sla_response_breached ?? false}
+              resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
+              status={ticket.status}
+            />
 
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>

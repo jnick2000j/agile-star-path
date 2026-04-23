@@ -33,7 +33,9 @@ import {
   Package,
   ListTodo,
   MessageSquarePlus,
+  LifeBuoy,
 } from "lucide-react";
+import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
@@ -476,9 +478,10 @@ export default function ProgrammeDetails() {
               { value: "tranches", label: "Tranches", icon: Calendar },
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
+              { value: "tickets", label: "Tickets", icon: LifeBuoy },
               { value: "history", label: "Timeline", icon: History },
             ]}
-            className="grid-cols-12 sm:grid-cols-12 md:grid-cols-12 lg:grid-cols-12"
+            className="grid-cols-13 sm:grid-cols-13 md:grid-cols-13 lg:grid-cols-13"
           />
 
           {/* Linked Projects Tab */}
@@ -748,6 +751,11 @@ export default function ProgrammeDetails() {
           {/* Tranches Tab */}
           <TabsContent value="tranches">
             <TranchesTabContent programmeId={programmeId!} />
+          </TabsContent>
+
+          {/* Tickets Tab */}
+          <TabsContent value="tickets">
+            {programme && <EntityTicketsCard scope="programme" entityId={programme.id} entityName={programme.name} />}
           </TabsContent>
 
           {/* Status Timeline Tab */}
