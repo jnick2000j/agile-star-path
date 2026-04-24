@@ -31,6 +31,10 @@ import { SavedReports } from "@/components/reports/SavedReports";
 import { ScheduleReportDialog } from "@/components/reports/ScheduleReportDialog";
 import { ScheduledReportsList } from "@/components/reports/ScheduledReportsList";
 import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
+import {
+  ScopeStat, ScopePanel, statusBreakdown, countBy,
+  HelpdeskAnalytics, ChangeAnalytics,
+} from "@/components/reports/ScopeAnalytics";
 
 const resourceColors = [
   "hsl(217, 91%, 50%)",
