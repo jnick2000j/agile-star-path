@@ -39,7 +39,7 @@ export default function Onboarding() {
     try {
       const { data: org, error: orgError } = await supabase
         .from("organizations")
-        .insert({ name: orgName.trim(), slug: generateSlug(orgName), created_by: user.id })
+        .insert({ name: orgName.trim(), slug: generateSlug(orgName), created_by: user.id, industry_vertical: vertical })
         .select()
         .single();
 
