@@ -4925,6 +4925,56 @@ export type Database = {
           },
         ]
       }
+      org_override_audit_log: {
+        Row: {
+          actor_email: string | null
+          actor_user_id: string | null
+          after_value: Json | null
+          before_value: Json | null
+          change_kind: string
+          created_at: string
+          feature_key: string | null
+          id: string
+          operation: string
+          organization_id: string
+          reason: string | null
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          change_kind: string
+          created_at?: string
+          feature_key?: string | null
+          id?: string
+          operation: string
+          organization_id: string
+          reason?: string | null
+        }
+        Update: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          change_kind?: string
+          created_at?: string
+          feature_key?: string | null
+          id?: string
+          operation?: string
+          organization_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_override_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_session_policies: {
         Row: {
           absolute_timeout_minutes: number
@@ -5173,6 +5223,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          effective_from: string | null
           expires_at: string | null
           feature_key: string
           id: string
@@ -5184,6 +5235,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          effective_from?: string | null
           expires_at?: string | null
           feature_key: string
           id?: string
@@ -5195,6 +5247,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          effective_from?: string | null
           expires_at?: string | null
           feature_key?: string
           id?: string
