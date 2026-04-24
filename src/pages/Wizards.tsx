@@ -38,6 +38,16 @@ const createTemplates = [
   { type: "sprint_retro" as TemplateType, name: "Sprint Retrospective", category: "Agile", icon: "🔁", description: "Capture went-well / didn't-go-well / ideas and commit to 1-3 concrete actions.", creates: null },
   { type: "definition_of_done" as TemplateType, name: "Definition of Done", category: "Agile", icon: "✅", description: "Define code quality, testing, deployment, and acceptance criteria for your team.", creates: null },
   { type: "compliance_health_check" as TemplateType, name: "Compliance Health Check", category: "Governance", icon: "🛡️", description: "Walk through cadence, hygiene and linkage signals to gauge governance health for any scope.", creates: null },
+  // ─── Construction & Engineering guides (use AI Draft tab to generate the artefact) ───
+  { type: "compliance_health_check" as TemplateType, name: "RFI Workflow Guide", category: "Construction", icon: "📨", description: "Step through how to raise, route, track and close an RFI on a live site — with response SLAs and impact tagging.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Submittal Process Guide", category: "Construction", icon: "📑", description: "End-to-end submittal flow: spec section → vendor data → reviewer → approval codes → procurement release.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Permit to Work Setup", category: "Construction", icon: "🪪", description: "Stand up a Permit to Work regime: hot work, confined space, WAH, excavation, electrical isolation, lifting.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "RAMS Library Setup", category: "Construction", icon: "📋", description: "Build a Risk Assessment & Method Statement library for high-risk activities (CDM 2015 / ISO 45001 aligned).", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "NCR & CAPA Process", category: "Construction", icon: "🛑", description: "Open, investigate and close Non-Conformance Reports with root cause and corrective/preventive action.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Daily Site Log Routine", category: "Construction", icon: "📝", description: "Set up the superintendent daily log: weather, manpower, plant, deliveries, delays and works completed/planned.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Punch / Snag Walkdown", category: "Construction", icon: "✅", description: "Plan inspection walkdowns, capture snags by location/trade and drive them to verified closure for handover.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Change Order Workflow", category: "Construction", icon: "🔀", description: "Raise variations / compensation events with cost & time impact, contractual mechanism and approval routing.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Commissioning & Handover", category: "Construction", icon: "🏁", description: "Plan Cx test packs, witness points, O&M manuals, as-builts, training and the H&S file for Practical Completion.", creates: null },
 ];
 
 // ---------- DRAFT wizards (AI-generated documents) ----------
