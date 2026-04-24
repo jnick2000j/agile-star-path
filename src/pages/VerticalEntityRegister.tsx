@@ -105,7 +105,7 @@ export default function VerticalEntityRegister() {
     );
   }
 
-  const fields = (entity.fields as FieldDef[]) || [];
+  const fields = ((entity.fields as unknown) as FieldDef[]) || [];
   const statusOptions = entity.default_status_options || ["open", "in_progress", "closed"];
 
   return (
