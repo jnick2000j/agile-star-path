@@ -5534,11 +5534,14 @@ export type Database = {
       organizations: {
         Row: {
           allow_cross_region_ai: boolean
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           created_by: string | null
           data_region: string
           id: string
           industry_vertical: string
+          is_archived: boolean
           is_suspended: boolean
           logo_url: string | null
           name: string
@@ -5556,11 +5559,14 @@ export type Database = {
         }
         Insert: {
           allow_cross_region_ai?: boolean
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           data_region?: string
           id?: string
           industry_vertical?: string
+          is_archived?: boolean
           is_suspended?: boolean
           logo_url?: string | null
           name: string
@@ -5578,11 +5584,14 @@ export type Database = {
         }
         Update: {
           allow_cross_region_ai?: boolean
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           data_region?: string
           id?: string
           industry_vertical?: string
+          is_archived?: boolean
           is_suspended?: boolean
           logo_url?: string | null
           name?: string
@@ -9991,6 +10000,10 @@ export type Database = {
         Args: { _addon_sub_id: string }
         Returns: undefined
       }
+      archive_organization: {
+        Args: { _archive?: boolean; _org_id: string }
+        Returns: undefined
+      }
       check_plan_limit: {
         Args: { _org_id: string; _resource_type: string }
         Returns: boolean
@@ -10016,6 +10029,10 @@ export type Database = {
       }
       create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
       cron_flush_siem_exporters: { Args: never; Returns: Json }
+      delete_organization_cascade: {
+        Args: { _org_id: string }
+        Returns: undefined
+      }
       generate_reference_number: {
         Args: { _entity_type: string; _organization_id: string }
         Returns: string
@@ -10155,6 +10172,10 @@ export type Database = {
       helpdesk_sla_sweep_breaches: { Args: never; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_helpdesk_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
