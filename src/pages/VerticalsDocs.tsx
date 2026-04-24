@@ -73,7 +73,7 @@ export default function VerticalsDocs() {
                 Light pack plus bespoke registers (custom entities) with their own fields and statuses.
               </p>
               <div className="text-xs text-muted-foreground">
-                Examples: Construction & Engineering (RFIs, NCRs, permits, commissioning), Professional Services (SOWs, deliverables, WIP), Healthcare (clinical incidents).
+                Examples: Construction (RFIs, submittals), Healthcare (incidents), Manufacturing (work orders).
               </div>
             </Card>
           </div>
@@ -131,7 +131,7 @@ export default function VerticalsDocs() {
             vertical's <code>enabled_modules</code> are hidden. Items with no module key always appear.
           </p>
           <div className="flex flex-wrap gap-1">
-            {["programmes", "projects", "products", "tasks", "timesheets", "helpdesk", "change_management", "risks", "issues", "reports", "knowledgebase", "automations", "rfis", "submittals", "daily_logs", "punch_list", "engagements", "retainers", "msa", "sow", "deliverables", "qa_reviews", "wip", "invoices", "opportunities", "proposals", "staffing_requests", "skills_matrix"].map(m => (
+            {["programmes", "projects", "products", "tasks", "timesheets", "helpdesk", "change_management", "risks", "issues", "reports", "knowledgebase", "automations", "rfis", "submittals", "daily_logs", "punch_list", "engagements", "retainers"].map(m => (
               <code key={m} className="text-xs px-2 py-1 rounded bg-muted">{m}</code>
             ))}
           </div>

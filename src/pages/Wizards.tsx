@@ -18,7 +18,6 @@ import {
   LifeBuoy, AlertTriangle, Wrench, Smile, Clock,
   HardHat, FileCheck, ClipboardList, BadgeAlert, KeyRound, Power,
   PenTool, FileSignature, CalendarRange, FileEdit,
-  Handshake, FileSpreadsheet, RefreshCcw, UserPlus, Hourglass, Wallet, MessageCircleHeart, Award, BookMarked, PackageCheck,
 } from "lucide-react";
 
 // ---------- CREATE wizards (template-driven entity creation) ----------
@@ -39,26 +38,26 @@ const createTemplates = [
   { type: "sprint_retro" as TemplateType, name: "Sprint Retrospective", category: "Agile", icon: "🔁", description: "Capture went-well / didn't-go-well / ideas and commit to 1-3 concrete actions.", creates: null },
   { type: "definition_of_done" as TemplateType, name: "Definition of Done", category: "Agile", icon: "✅", description: "Define code quality, testing, deployment, and acceptance criteria for your team.", creates: null },
   { type: "compliance_health_check" as TemplateType, name: "Compliance Health Check", category: "Governance", icon: "🛡️", description: "Walk through cadence, hygiene and linkage signals to gauge governance health for any scope.", creates: null },
-  // ─── Construction & Engineering guides (use AI Draft tab to generate the artefact) ───
-  { type: "compliance_health_check" as TemplateType, name: "RFI Workflow Guide", category: "Construction", icon: "📨", description: "Step through how to raise, route, track and close an RFI on a live site — with response SLAs and impact tagging.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Submittal Process Guide", category: "Construction", icon: "📑", description: "End-to-end submittal flow: spec section → vendor data → reviewer → approval codes → procurement release.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Permit to Work Setup", category: "Construction", icon: "🪪", description: "Stand up a Permit to Work regime: hot work, confined space, WAH, excavation, electrical isolation, lifting.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "RAMS Library Setup", category: "Construction", icon: "📋", description: "Build a Risk Assessment & Method Statement library for high-risk activities (CDM 2015 / ISO 45001 aligned).", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "NCR & CAPA Process", category: "Construction", icon: "🛑", description: "Open, investigate and close Non-Conformance Reports with root cause and corrective/preventive action.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Daily Site Log Routine", category: "Construction", icon: "📝", description: "Set up the superintendent daily log: weather, manpower, plant, deliveries, delays and works completed/planned.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Punch / Snag Walkdown", category: "Construction", icon: "✅", description: "Plan inspection walkdowns, capture snags by location/trade and drive them to verified closure for handover.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Change Order Workflow", category: "Construction", icon: "🔀", description: "Raise variations / compensation events with cost & time impact, contractual mechanism and approval routing.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Commissioning & Handover", category: "Construction", icon: "🏁", description: "Plan Cx test packs, witness points, O&M manuals, as-builts, training and the H&S file for Practical Completion.", creates: null },
-  // ─── Professional Services & Consulting guides ───
-  { type: "compliance_health_check" as TemplateType, name: "Bid / No-Bid Decision", category: "Pro Services", icon: "🎯", description: "Walk through the qualification gate: strategic fit, win probability, margin, capacity and conflict checks.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "MSA → SOW → CO Workflow", category: "Pro Services", icon: "📜", description: "Set up the contracting cascade: Master Services Agreement, Statement of Work and Change Order routing.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Engagement Setup", category: "Pro Services", icon: "🤝", description: "Mobilise a new engagement: governance, RACI, ways-of-working, risk log, comms plan and 30-day plan.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Deliverable Acceptance", category: "Pro Services", icon: "📦", description: "Submit deliverables for formal acceptance with criteria mapping and deemed-acceptance windows.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Internal QA Review", category: "Pro Services", icon: "🔍", description: "Run a partner-quality QA review before client submission — protect firm reputation.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Resource Planning Cycle", category: "Pro Services", icon: "📅", description: "Weekly demand vs supply: staffing requests, bench, skills matrix, utilisation targets.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Time, WIP & Billing", category: "Pro Services", icon: "💷", description: "Time capture, WIP aging, write-offs, billing realisation and lock-up days.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "CSAT / NPS Programme", category: "Pro Services", icon: "❤️", description: "Run mid-engagement CSAT, end-of-engagement reviews and annual NPS with closed-loop follow-up.", creates: null },
-  { type: "compliance_health_check" as TemplateType, name: "Post-Engagement Review", category: "Pro Services", icon: "🧠", description: "Capture lessons, reusable assets, follow-on pipeline and case-study potential.", creates: null },
+  // ─── Construction & Engineering ──────────────────────────────────────────
+  { type: "con_rfi_form" as TemplateType, name: "Raise an RFI", category: "Construction", icon: "📨", description: "Open a Request for Information against a project — discipline, spec/drawing refs, question, response SLA.", creates: "RFI" },
+  { type: "con_submittal_form" as TemplateType, name: "Log a Submittal", category: "Construction", icon: "📑", description: "Add a submittal to the register: spec section, type (product data / shop drawing / sample / mock-up), reviewer due date.", creates: "Submittal" },
+  { type: "con_daily_log_form" as TemplateType, name: "Daily Site Log", category: "Construction", icon: "📝", description: "Capture the superintendent's daily log: weather, manpower, hours, work performed, delays, safety, visitors.", creates: "Daily Log" },
+  { type: "con_punch_item_form" as TemplateType, name: "Add Punch / Snag Item", category: "Construction", icon: "✅", description: "Raise a defect / snag with location, trade, priority and target close date.", creates: "Punch Item" },
+  { type: "con_change_order_form" as TemplateType, name: "Raise Change Order / Variation", category: "Construction", icon: "🔀", description: "NEC4 CE / JCT VO / AIA G701 — cost & time impact with contractual mechanism for the change board.", creates: "Change Order" },
+  { type: "con_permit_to_work_form" as TemplateType, name: "Issue Permit to Work", category: "Construction", icon: "🪪", description: "Hot work / confined space / WAH / excavation / electrical isolation / lifting — controls, validity, rescue plan.", creates: "Permit" },
+  { type: "con_toolbox_talk_form" as TemplateType, name: "Record Toolbox Talk", category: "Construction", icon: "📣", description: "Capture topic, audience, key messages and attendees for the safety record.", creates: "Toolbox Talk" },
+  { type: "con_ncr_form" as TemplateType, name: "Open Non-Conformance (NCR)", category: "Construction", icon: "🛑", description: "ISO 9001 NCR with severity, root cause (5 Whys), proposed disposition and CAPA.", creates: "NCR" },
+  { type: "con_handover_checklist" as TemplateType, name: "PC Handover Checklist", category: "Construction", icon: "🏁", description: "Verify the standard PC deliverables: O&Ms, as-builts, certs, warranties, training, H&S file.", creates: "Handover" },
+  // ─── Professional Services & Consulting ─────────────────────────────────
+  { type: "ps_engagement_setup" as TemplateType, name: "Set Up Client Engagement", category: "Pro Services", icon: "🤝", description: "Create a client engagement: type (T&M / Fixed / Retainer / Milestone), value, dates, account manager.", creates: "Engagement" },
+  { type: "ps_sow_form" as TemplateType, name: "Statement of Work (SOW)", category: "Pro Services", icon: "📄", description: "Draft a SOW: objectives, in/out scope, deliverables with acceptance criteria, fees and payment terms.", creates: "SOW" },
+  { type: "ps_msa_summary" as TemplateType, name: "MSA Summary", category: "Pro Services", icon: "📜", description: "Capture the key MSA terms PMs need at a glance — liability cap, IP, confidentiality, notice period.", creates: "MSA" },
+  { type: "ps_change_order_form" as TemplateType, name: "Engagement Change Order", category: "Pro Services", icon: "🔄", description: "Scope / fee / schedule change against an SOW with client decision deadline.", creates: "Change Order" },
+  { type: "ps_deliverable_form" as TemplateType, name: "Define a Deliverable", category: "Pro Services", icon: "📦", description: "Create a deliverable with explicit acceptance criteria — stored as a work package on the engagement.", creates: "Deliverable" },
+  { type: "ps_retainer_setup" as TemplateType, name: "Set Up Retainer Period", category: "Pro Services", icon: "🗓️", description: "Allocate hours, monthly value and rollover rules for a retainer period.", creates: "Retainer" },
+  { type: "ps_timesheet_entry" as TemplateType, name: "Log Timesheet Entry", category: "Pro Services", icon: "⏱️", description: "Record billable / non-billable hours against an engagement with rate-card reference.", creates: "Timesheet" },
+  { type: "ps_csat_capture" as TemplateType, name: "Capture CSAT / NPS", category: "Pro Services", icon: "😊", description: "Record CSAT (1-5) + NPS (0-10) plus what-went-well / what-to-improve from the client.", creates: "CSAT Response" },
+  { type: "ps_bid_no_bid" as TemplateType, name: "Bid / No-Bid Decision", category: "Pro Services", icon: "⚖️", description: "Score strategic fit, win probability, delivery risk and team availability — recommend Bid / No-Bid.", creates: "Decision" },
 ];
 
 // ---------- DRAFT wizards (AI-generated documents) ----------
@@ -67,7 +66,7 @@ interface AIWizardSpec {
   title: string;
   description: string;
   icon: React.ElementType;
-  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk" | "Construction" | "Pro Services";
+  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk" | "Construction";
   fields: WizardField[];
 }
 
@@ -343,103 +342,70 @@ const aiWizards: AIWizardSpec[] = [
   ]},
 
   // ─── Professional Services & Consulting ─────────────────────────────────
-  { kind: "ps_proposal", title: "Client Proposal", description: "Win-themed client proposal with approach, team, pricing model and risks.", icon: FileSpreadsheet, category: "Pro Services", fields: [
-    { key: "client", label: "Client", required: true },
-    { key: "situation", label: "Client situation / brief", type: "textarea", required: true, placeholder: "What did the client say they need? Pain points, drivers, ambition." },
-    { key: "service_line", label: "Service line", placeholder: "strategy / transformation / technology / data / change / managed services" },
-    { key: "indicative_value", label: "Indicative deal value", placeholder: "e.g. £350k" },
-    { key: "pricing_model", label: "Preferred pricing model", placeholder: "fixed-fee / T&M / capped T&M / outcome-based" },
-    { key: "duration", label: "Indicative duration", placeholder: "e.g. 14 weeks" },
-    { key: "differentiators", label: "Why us (3-4 themes)", type: "textarea" },
-  ]},
-  { kind: "ps_sow", title: "Statement of Work (SOW)", description: "Full SOW under an MSA: scope, deliverables, acceptance, fees, governance, RACI.", icon: FileSignature, category: "Pro Services", fields: [
-    { key: "client", label: "Client", required: true },
-    { key: "msa_ref", label: "Parent MSA reference" },
-    { key: "engagement_name", label: "Engagement name", required: true },
-    { key: "objectives", label: "Objectives", type: "textarea", required: true },
-    { key: "scope_in", label: "In scope", type: "textarea", required: true },
-    { key: "scope_out", label: "Out of scope (explicit)", type: "textarea" },
-    { key: "deliverables", label: "Key deliverables", type: "textarea", required: true },
-    { key: "pricing_model", label: "Pricing model", placeholder: "fixed_fee / time_materials / capped_tm / milestone / retainer / outcome_based" },
-    { key: "fees", label: "Fees / payment milestones", type: "textarea" },
-    { key: "duration", label: "Start & end dates" },
-    { key: "key_personnel", label: "Key personnel (named)", type: "textarea" },
-  ]},
-  { kind: "ps_msa_summary", title: "MSA Terms Summary", description: "One-page MSA summary for the engagement team — caps, IP, GDPR, termination.", icon: BookMarked, category: "Pro Services", fields: [
-    { key: "client", label: "Client", required: true },
-    { key: "msa_text", label: "Paste key MSA clauses (or summary notes)", type: "textarea", required: true },
-    { key: "jurisdiction", label: "Governing law / jurisdiction", placeholder: "e.g. England & Wales" },
-  ]},
-  { kind: "ps_change_order", title: "Change Order (PS)", description: "SOW change order with scope/fee/schedule impact and approvals.", icon: FileEdit, category: "Pro Services", fields: [
-    { key: "sow_ref", label: "Parent SOW ref", required: true },
-    { key: "reason", label: "Reason category", placeholder: "scope_change / additional_request / schedule_change / rate_change / rework / client_delay" },
-    { key: "description", label: "Description of change", type: "textarea", required: true },
-    { key: "effort_hours", label: "Estimated effort (hrs)", placeholder: "e.g. 120" },
-    { key: "fee_impact", label: "Fee impact", placeholder: "e.g. +£24,000" },
-    { key: "schedule_impact", label: "Schedule impact (days)", placeholder: "e.g. 10 working days" },
-  ]},
-  { kind: "ps_engagement_kickoff", title: "Engagement Kickoff Pack", description: "Internal briefing + client kickoff outline + first-30-days plan.", icon: Handshake, category: "Pro Services", fields: [
-    { key: "engagement", label: "Engagement name", required: true },
-    { key: "client", label: "Client", required: true },
+  { kind: "ps_sow_draft" as WizardKind, title: "SOW Draft", description: "Statement of Work with objectives, in/out scope, deliverables, acceptance criteria, fees, payment terms.", icon: FileSignature, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "engagement_name", label: "Engagement / project name", required: true, placeholder: "e.g. ERP Discovery Phase" },
+    { key: "pricing_model", label: "Pricing model", placeholder: "fixed_price / time_and_materials / milestone_based / retainer" },
     { key: "objectives", label: "Engagement objectives", type: "textarea", required: true },
-    { key: "team", label: "Core team (roles)", type: "textarea" },
-    { key: "duration", label: "Duration & key milestones", placeholder: "e.g. 14 weeks; M1 Discovery, M2 Design, M3 Pilot" },
-    { key: "ways_of_working", label: "Ways of working / governance cadence", type: "textarea" },
-    { key: "known_risks", label: "Known risks / sensitivities", type: "textarea" },
+    { key: "scope_summary", label: "Scope summary", type: "textarea", required: true },
+    { key: "constraints", label: "Constraints / assumptions", type: "textarea" },
+    { key: "fees", label: "Fees / budget envelope", placeholder: "e.g. $120k fixed; or $250/hr capped at $200k" },
   ]},
-  { kind: "ps_status_report", title: "Weekly Status Report", description: "Concise client-ready status with RAG, deliverables, decisions, burn.", icon: MessageSquare, category: "Pro Services", fields: [
+  { kind: "ps_msa_summary_draft" as WizardKind, title: "MSA Summary", description: "Plain-English summary of an MSA — liability cap, IP, confidentiality, notice, change control.", icon: ScrollText, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "msa_terms", label: "Paste key MSA clauses or talking points", type: "textarea", required: true },
+  ]},
+  { kind: "ps_change_order_draft" as WizardKind, title: "Engagement Change Order", description: "Client-ready change order: scope delta, fee impact, schedule impact, recommendation.", icon: FileEdit, category: "Pro Services" as any, fields: [
+    { key: "engagement", label: "Engagement / SOW reference", required: true },
+    { key: "change_summary", label: "What's changing", type: "textarea", required: true },
+    { key: "reason", label: "Why", type: "textarea", required: true },
+    { key: "fee_impact", label: "Fee impact", placeholder: "e.g. +$25k" },
+    { key: "time_impact", label: "Time impact", placeholder: "e.g. +2 weeks" },
+  ]},
+  { kind: "ps_proposal_exec_summary" as WizardKind, title: "Proposal Executive Summary", description: "Open a proposal with a sharp 1-page exec summary — problem, approach, why us, outcomes.", icon: Briefcase, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "client_problem", label: "Client's problem (in their words)", type: "textarea", required: true },
+    { key: "our_approach", label: "Our approach (one paragraph)", type: "textarea", required: true },
+    { key: "differentiators", label: "Why us — 3 bullets", type: "textarea" },
+    { key: "outcomes", label: "Outcomes the client will get", type: "textarea" },
+  ]},
+  { kind: "ps_engagement_kickoff" as WizardKind, title: "Engagement Kick-off Pack", description: "Kick-off agenda + RACI + governance cadence + risk pre-mortem for a new client engagement.", icon: Target, category: "Pro Services" as any, fields: [
+    { key: "engagement_name", label: "Engagement", required: true },
+    { key: "client_team", label: "Client team (names + roles)", type: "textarea", required: true },
+    { key: "our_team", label: "Our team (names + roles)", type: "textarea", required: true },
+    { key: "duration_weeks", label: "Duration (weeks)", placeholder: "e.g. 12" },
+  ]},
+  { kind: "ps_status_report" as WizardKind, title: "Client Status Report", description: "Weekly client-facing status: progress, decisions needed, risks, next week, hours used.", icon: Activity, category: "Pro Services" as any, fields: [
+    { key: "engagement_name", label: "Engagement", required: true },
+    { key: "week_of", label: "Week of (YYYY-MM-DD)", required: true },
+    { key: "raw_notes", label: "Raw notes from the team", type: "textarea", required: true },
+    { key: "hours_used_pct", label: "Hours used vs budget (%)", placeholder: "e.g. 42" },
+  ]},
+  { kind: "ps_qbr_pack" as WizardKind, title: "QBR Pack", description: "Quarterly Business Review pack — value delivered, KPIs, risks, roadmap, expansion ideas.", icon: TrendingUp, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "quarter", label: "Quarter (e.g. Q2 2026)", required: true },
+    { key: "outcomes_delivered", label: "Outcomes delivered this quarter", type: "textarea", required: true },
+    { key: "kpis", label: "KPIs (numbers)", type: "textarea" },
+    { key: "next_quarter_focus", label: "Next quarter focus", type: "textarea" },
+  ]},
+  { kind: "ps_wip_writeoff" as WizardKind, title: "WIP Write-off Memo", description: "Internal memo justifying a Work-in-Progress write-off — root cause, financial impact, controls.", icon: AlertOctagon, category: "Pro Services" as any, fields: [
     { key: "engagement", label: "Engagement", required: true },
-    { key: "period", label: "Period covered", placeholder: "e.g. Week ending 28 Apr 2026" },
-    { key: "rag", label: "Overall RAG", placeholder: "green / amber / red" },
-    { key: "raw_notes", label: "Raw notes (anything goes)", type: "textarea", required: true, placeholder: "Progress, deliverables, blockers, decisions needed, hours burn..." },
+    { key: "amount", label: "Amount to write off", required: true, placeholder: "e.g. $18,500" },
+    { key: "reason", label: "Root cause", type: "textarea", required: true },
+    { key: "prevention", label: "What we'll change to prevent recurrence", type: "textarea" },
   ]},
-  { kind: "ps_deliverable_acceptance", title: "Deliverable Acceptance Pack", description: "Cover note + acceptance form mapping deliverable to acceptance criteria.", icon: PackageCheck, category: "Pro Services", fields: [
-    { key: "deliverable_ref", label: "Deliverable ref", required: true },
-    { key: "title", label: "Deliverable title", required: true },
-    { key: "sow_clause", label: "SOW clause / acceptance criteria", type: "textarea", required: true },
-    { key: "summary", label: "What is being submitted (summary)", type: "textarea", required: true },
-    { key: "fee_milestone", label: "Linked fee milestone", placeholder: "e.g. Milestone 3 — £85,000" },
-    { key: "review_window_days", label: "Review window (working days)", placeholder: "e.g. 10" },
-  ]},
-  { kind: "ps_qa_review", title: "Internal QA Review", description: "Partner-style QA review with rating, findings and sign-off conditions.", icon: ClipboardCheck, category: "Pro Services", fields: [
-    { key: "deliverable", label: "Deliverable", required: true },
-    { key: "client", label: "Client" },
-    { key: "deliverable_summary", label: "Deliverable summary / contents", type: "textarea", required: true },
-    { key: "areas_of_concern", label: "Specific areas to scrutinise", type: "textarea", placeholder: "e.g. financial model assumptions, recommendation defensibility" },
-  ]},
-  { kind: "ps_resource_plan", title: "Resource Plan", description: "Demand by role/week, gaps, named recommendations and margin impact.", icon: UserPlus, category: "Pro Services", fields: [
-    { key: "engagement", label: "Engagement", required: true },
-    { key: "duration_weeks", label: "Duration (weeks)", placeholder: "e.g. 14" },
-    { key: "demand_summary", label: "Demand by role (rough)", type: "textarea", required: true, placeholder: "e.g. 1x Partner 10%, 1x SM 50%, 2x Consultant 100%, 1x Analyst 80%" },
-    { key: "constraints", label: "Constraints", type: "textarea", placeholder: "Holidays, key-person risk, ramp-up, location" },
-    { key: "sow_pricing", label: "SOW pricing (for margin check)", placeholder: "e.g. fixed-fee £350k" },
-  ]},
-  { kind: "ps_wip_writeoff_memo", title: "WIP Write-Off Memo", description: "Internal memo: WIP balance, root cause, lessons and approval routing.", icon: Hourglass, category: "Pro Services", fields: [
-    { key: "engagement", label: "Engagement", required: true },
-    { key: "wip_balance", label: "WIP balance", placeholder: "e.g. £42,000" },
-    { key: "proposed_writeoff", label: "Proposed write-off", placeholder: "e.g. £18,000 (43%)" },
-    { key: "category", label: "Category", placeholder: "over-run / scope-not-charged / efficiency / billing-dispute / goodwill / strategic-investment" },
-    { key: "context", label: "Context & root cause (factual)", type: "textarea", required: true },
-  ]},
-  { kind: "ps_post_engagement_review", title: "Post-Engagement Review", description: "What worked, what didn't, root causes, reusable assets, follow-on pipeline.", icon: RotateCcw, category: "Pro Services", fields: [
-    { key: "engagement", label: "Engagement", required: true },
-    { key: "client", label: "Client" },
-    { key: "summary", label: "Engagement summary", type: "textarea", required: true, placeholder: "Objectives, scope, duration, team, fees, margin actual vs target" },
-    { key: "highlights", label: "Highlights / what went well", type: "textarea" },
-    { key: "issues", label: "Issues / what didn't", type: "textarea" },
-  ]},
-  { kind: "ps_csat_followup", title: "Low CSAT/NPS Follow-up", description: "Empathetic client email + recovery plan + renewal-risk mitigation.", icon: MessageCircleHeart, category: "Pro Services", fields: [
-    { key: "client", label: "Client", required: true },
-    { key: "score", label: "Score & scale", placeholder: "e.g. NPS 2 (out of 10)" },
-    { key: "verbatim", label: "Client verbatim feedback", type: "textarea", required: true },
-    { key: "engagement_context", label: "Engagement context", type: "textarea" },
-  ]},
-  { kind: "ps_case_study", title: "Client Case Study", description: "Outcome-led case study draft (subject to client approval).", icon: Award, category: "Pro Services", fields: [
-    { key: "client", label: "Client (or 'anonymise')", required: true },
+  { kind: "ps_case_study_draft" as WizardKind, title: "Case Study Draft", description: "Sales-ready case study: client context, challenge, approach, results, quote.", icon: BookOpen, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client (or pseudonym)", required: true },
+    { key: "client_industry", label: "Industry", placeholder: "e.g. retail banking" },
     { key: "challenge", label: "Challenge", type: "textarea", required: true },
-    { key: "approach", label: "Approach (protect IP)", type: "textarea", required: true },
-    { key: "results", label: "Quantified results", type: "textarea", required: true, placeholder: "Financial / time / quality / risk" },
-    { key: "team_duration", label: "Team & duration", placeholder: "e.g. 6 consultants, 14 weeks" },
+    { key: "approach", label: "Approach", type: "textarea", required: true },
+    { key: "results", label: "Results (with numbers)", type: "textarea", required: true },
+  ]},
+  { kind: "ps_csat_followup" as WizardKind, title: "CSAT Follow-up", description: "Empathetic follow-up email + internal action note from a low CSAT/NPS score.", icon: Smile, category: "Pro Services" as any, fields: [
+    { key: "client_contact", label: "Client contact name", required: true },
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "score", label: "Score given", placeholder: "e.g. CSAT 2/5, NPS 4" },
+    { key: "comment", label: "Their verbatim comment", type: "textarea" },
   ]},
 ];
 
