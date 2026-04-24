@@ -2048,6 +2048,128 @@ export type Database = {
           },
         ]
       }
+      csat_responses: {
+        Row: {
+          comment: string | null
+          created_at: string
+          expires_at: string | null
+          follow_up_answer: string | null
+          id: string
+          organization_id: string
+          rating: number | null
+          reporter_email: string | null
+          responded_at: string | null
+          sent_at: string | null
+          ticket_id: string
+          token: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          expires_at?: string | null
+          follow_up_answer?: string | null
+          id?: string
+          organization_id: string
+          rating?: number | null
+          reporter_email?: string | null
+          responded_at?: string | null
+          sent_at?: string | null
+          ticket_id: string
+          token: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          expires_at?: string | null
+          follow_up_answer?: string | null
+          id?: string
+          organization_id?: string
+          rating?: number | null
+          reporter_email?: string | null
+          responded_at?: string | null
+          sent_at?: string | null
+          ticket_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "csat_responses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "csat_responses_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      csat_surveys: {
+        Row: {
+          comment_label: string
+          created_at: string
+          enabled: boolean
+          follow_up_label: string | null
+          id: string
+          intro_text: string
+          min_priority: string | null
+          organization_id: string
+          rating_label: string
+          rating_scale: number
+          send_delay_hours: number
+          thank_you_message: string
+          ticket_types: string[]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          comment_label?: string
+          created_at?: string
+          enabled?: boolean
+          follow_up_label?: string | null
+          id?: string
+          intro_text?: string
+          min_priority?: string | null
+          organization_id: string
+          rating_label?: string
+          rating_scale?: number
+          send_delay_hours?: number
+          thank_you_message?: string
+          ticket_types?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          comment_label?: string
+          created_at?: string
+          enabled?: boolean
+          follow_up_label?: string | null
+          id?: string
+          intro_text?: string
+          min_priority?: string | null
+          organization_id?: string
+          rating_label?: string
+          rating_scale?: number
+          send_delay_hours?: number
+          thank_you_message?: string
+          ticket_types?: string[]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "csat_surveys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_roles: {
         Row: {
           can_approve_ai_output: boolean
