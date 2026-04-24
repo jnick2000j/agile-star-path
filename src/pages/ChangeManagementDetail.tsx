@@ -53,6 +53,14 @@ const REQUIRE_FIELD_MAP: Record<string, string> = {
   owner_id: "require_comment_on_owner",
 };
 
+// Map activity event_type → admin "require comment on activity" setting column
+const REQUIRE_ACTIVITY_MAP: Record<string, string> = {
+  progress_note: "require_comment_on_progress",
+  test_result: "require_comment_on_test",
+  implementation_note: "require_comment_on_implementation",
+  comment: "require_comment_on_comment",
+};
+
 const FIELD_LABELS: Record<string, string> = {
   status: "Status",
   change_type: "Type",
