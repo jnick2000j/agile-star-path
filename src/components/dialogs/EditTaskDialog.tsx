@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TaskAssignments } from "@/components/TaskAssignments";
+import { TaskComments } from "@/components/TaskComments";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
