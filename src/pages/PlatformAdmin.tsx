@@ -463,13 +463,15 @@ export default function PlatformAdmin() {
           <div className="flex items-center justify-between gap-3 rounded-lg border bg-card p-4">
             <div>
               <h3 className="text-base font-semibold flex items-center gap-2">
-                <Briefcase className="h-4 w-4" /> Professional Services Onboarding
+                <Briefcase className="h-4 w-4" /> Organization Onboarding Wizard
               </h3>
               <p className="text-sm text-muted-foreground">
-                Configure an account for PS&amp;C — terminology, modules, dashboards and starter content.
+                Walk an account through vertical setup — terminology, modules, dashboards and starter content.
               </p>
             </div>
-            <Button onClick={() => setPsOnboardingOpen(true)}>Launch wizard</Button>
+            <Button onClick={() => setOnboardingTarget({ id: "", name: "", slug: "", created_at: "", is_suspended: false, suspension_kind: null, suspended_reason: null, user_count: 0, programme_count: 0, project_count: 0, product_count: 0, plan_name: null, sub_status: null, trial_ends_at: null, license_id: null, license_status: null, license_deployment_mode: null, license_customer_reference: null, industry_vertical: null })}>
+              Launch wizard
+            </Button>
           </div>
           <VerticalPacksManager />
         </TabsContent>
@@ -496,11 +498,61 @@ export default function PlatformAdmin() {
         onSuccess={() => { setVerticalTarget(null); fetchData(); }}
       />
 
-      <PSOnboardingWizard
-        open={psOnboardingOpen}
-        onOpenChange={setPsOnboardingOpen}
-        onSuccess={() => fetchData()}
+      <OrgOnboardingWizard
+        open={!!onboardingTarget}
+        onOpenChange={(o) => !o && setOnboardingTarget(null)}
+        organization={onboardingTarget && onboardingTarget.id ? { id: onboardingTarget.id, name: onboardingTarget.name, slug: onboardingTarget.slug, industry_vertical: onboardingTarget.industry_vertical } : null}
+        onSuccess={() => { setOnboardingTarget(null); fetchData(); }}
       />
+
+      <AlertDialog open={!!archiveTarget} onOpenChange={(o) => !o && setArchiveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {archiveTarget?.is_archived ? "Restore organization?" : "Archive organization?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {archiveTarget?.is_archived
+                ? `Restore "${archiveTarget?.name}" — members will regain access and the org will be removed from archived state.`
+                : `Archive "${archiveTarget?.name}" — the org and its data are preserved but hidden from active lists. You can restore it later.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={actionLoading}
+              onClick={(e) => { e.preventDefault(); if (archiveTarget) void handleArchive(archiveTarget, !archiveTarget.is_archived); }}
+            >
+              {archiveTarget?.is_archived ? "Restore" : "Archive"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Permanently delete organization?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will <strong>permanently delete "{deleteTarget?.name}"</strong> and all its associated content
+              ({deleteTarget?.user_count} members, {deleteTarget?.programme_count} programmes,{" "}
+              {deleteTarget?.project_count} projects, {deleteTarget?.product_count} products and all related records).
+              <br /><br />
+              This action <strong>cannot be undone</strong>. Consider archiving instead.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={actionLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={actionLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => { e.preventDefault(); if (deleteTarget) void handleDelete(deleteTarget); }}
+            >
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
