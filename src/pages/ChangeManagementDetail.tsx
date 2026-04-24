@@ -40,8 +40,18 @@ const STATUS_STYLES: Record<string, string> = {
   failed: "bg-destructive/10 text-destructive",
 };
 
-// Fields that should prompt the user for an explanatory comment when changed.
+// Default fields that prompt the user for an explanatory comment when changed.
+// (Always-on prompt — admin "require_comment_*" toggles in addition to this make it MANDATORY.)
 const COMMENT_FIELDS = new Set(["status", "change_type", "urgency", "impact", "owner_id"]);
+
+// Map field key → admin "require comment" setting column
+const REQUIRE_FIELD_MAP: Record<string, string> = {
+  status: "require_comment_on_status",
+  change_type: "require_comment_on_type",
+  urgency: "require_comment_on_urgency",
+  impact: "require_comment_on_impact",
+  owner_id: "require_comment_on_owner",
+};
 
 const FIELD_LABELS: Record<string, string> = {
   status: "Status",
@@ -129,6 +139,26 @@ export default function ChangeManagementDetail() {
     },
     enabled: !!currentOrganization?.id,
   });
+
+  const { data: notifSettings } = useQuery({
+    queryKey: ["cm-notif-settings", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return null;
+      const { data } = await supabase
+        .from("change_notification_settings")
+        .select("*")
+        .eq("organization_id", currentOrganization.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!currentOrganization?.id,
+  });
+
+  const requiresComment = (field: string): boolean => {
+    if (!notifSettings) return false;
+    const key = REQUIRE_FIELD_MAP[field];
+    return key ? !!(notifSettings as any)[key] : false;
+  };
 
   const usersById = useMemo(() => {
     const map = new Map<string, { name: string; email: string }>();
