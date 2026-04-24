@@ -173,6 +173,27 @@ export default function Automations() {
     }
   };
 
+  const installTemplate = async (tpl: AutomationTemplate) => {
+    if (!currentOrganization?.id) return;
+    const { error } = await supabase.from("automation_workflows").insert({
+      organization_id: currentOrganization.id,
+      module: tpl.module,
+      name: tpl.name,
+      description: tpl.description,
+      trigger_event: tpl.trigger_event,
+      match_conditions: tpl.match_conditions || [],
+      steps: tpl.steps,
+      is_active: false,
+      priority: tpl.priority ?? 100,
+      category: tpl.category || null,
+      created_by: user?.id,
+      updated_by: user?.id,
+    });
+    if (error) return toast.error(error.message);
+    toast.success(`Installed "${tpl.name}" — review & enable it`);
+    qc.invalidateQueries({ queryKey: ["automations-workflows"] });
+  };
+
   return (
     <AppLayout title="AI Automations" subtitle="Program AI-driven workflows across every module">
       <div className="space-y-4">
@@ -343,6 +364,42 @@ export default function Automations() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditorOpen(false)}>Cancel</Button>
             <Button onClick={saveWorkflow}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Starter templates */}
+      <Dialog open={templatesOpen} onOpenChange={setTemplatesOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Starter Automation Templates</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Install a prebuilt workflow with one click. It will be created as inactive — review the steps, then enable it.
+          </p>
+          <div className="grid gap-3 mt-2">
+            {AUTOMATION_TEMPLATES.map((tpl) => (
+              <Card key={tpl.key} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-semibold">{tpl.name}</h4>
+                      <Badge variant="outline">{AUTOMATION_MODULES.find(m => m.key === tpl.module)?.label || tpl.module}</Badge>
+                      <Badge variant="secondary">{tpl.trigger_event.replace(/_/g, " ")}</Badge>
+                      {tpl.category && <Badge variant="outline" className="text-xs">{tpl.category}</Badge>}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{tpl.description}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{tpl.steps.length} steps</p>
+                  </div>
+                  <Button size="sm" onClick={() => installTemplate(tpl)}>
+                    <Plus className="h-4 w-4 mr-1" /> Install
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTemplatesOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
