@@ -164,13 +164,12 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
               />
             </div>
             <div>
-              <Label htmlFor="organization">Organization</Label>
-              <Select value={formData.organization_id || "none"} onValueChange={(v) => setFormData({ ...formData, organization_id: v === "none" ? "" : v })}>
+              <Label htmlFor="organization">Organization *</Label>
+              <Select value={formData.organization_id} onValueChange={(v) => setFormData({ ...formData, organization_id: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select organization" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
                   ))}
