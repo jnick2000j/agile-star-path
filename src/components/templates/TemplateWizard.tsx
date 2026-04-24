@@ -1705,6 +1705,171 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
         if (error) throw error;
         toast.success("Change request raised!");
         navigate("/change-control");
+      } else if (entityType === "rfi") {
+        const ref = `RFI-${Date.now().toString(36).toUpperCase()}`;
+        const { error } = await supabase.from("rfis").insert({
+          rfi_number: ref,
+          subject: formData.subject,
+          question: [formData.question, formData.proposed_solution ? `\n\nProposed solution:\n${formData.proposed_solution}` : ""].join(""),
+          priority: formData.priority || "medium",
+          status: "open",
+          due_date: formData.due_date || null,
+          organization_id: formData.organization_id,
+          project_id: formData.project_id || null,
+          submitted_by: user.id,
+        });
+        if (error) throw error;
+        toast.success("RFI raised!");
+        navigate("/rfis");
+      } else if (entityType === "submittal") {
+        const ref = `SUB-${Date.now().toString(36).toUpperCase()}`;
+        const { error } = await supabase.from("submittals").insert({
+          submittal_number: ref,
+          title: formData.title,
+          spec_section: formData.spec_section || null,
+          description: [formData.description || "", formData.submittal_type ? `\nType: ${formData.submittal_type}` : ""].join(""),
+          status: "pending",
+          due_date: formData.due_date || null,
+          organization_id: formData.organization_id,
+          project_id: formData.project_id || null,
+          submitted_by: user.id,
+        });
+        if (error) throw error;
+        toast.success("Submittal logged!");
+        navigate("/submittals");
+      } else if (entityType === "daily_log") {
+        const { error } = await supabase.from("daily_logs").insert({
+          log_date: formData.log_date,
+          weather: formData.weather || null,
+          crew_count: formData.crew_count ? parseInt(formData.crew_count) : 0,
+          hours_worked: formData.hours_worked ? parseFloat(formData.hours_worked) : 0,
+          work_performed: formData.work_performed || null,
+          delays: formData.delays || null,
+          safety_incidents: formData.safety_incidents || null,
+          visitors: formData.visitors || null,
+          notes: formData.notes || null,
+          organization_id: formData.organization_id,
+          project_id: formData.project_id || null,
+          created_by: user.id,
+        });
+        if (error) throw error;
+        toast.success("Daily log saved!");
+        navigate("/daily-logs");
+      } else if (entityType === "punch_item") {
+        const ref = `PL-${Date.now().toString(36).toUpperCase().slice(0, 6)}`;
+        const { error } = await supabase.from("punch_list_items").insert({
+          item_number: ref,
+          description: formData.description,
+          location: formData.location || null,
+          trade: formData.trade || null,
+          priority: formData.priority || "medium",
+          status: "open",
+          due_date: formData.due_date || null,
+          organization_id: formData.organization_id,
+          project_id: formData.project_id || null,
+          identified_by: user.id,
+        });
+        if (error) throw error;
+        toast.success("Punch item added!");
+        navigate("/punch-list");
+      } else if (entityType === "engagement") {
+        const { error } = await supabase.from("client_engagements").insert({
+          engagement_code: formData.engagement_code,
+          client_name: formData.client_name,
+          engagement_type: formData.engagement_type || "time_and_materials",
+          status: "active",
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          contract_value: formData.contract_value ? parseFloat(formData.contract_value) : 0,
+          notes: formData.notes || null,
+          organization_id: formData.organization_id,
+          account_manager: user.id,
+        });
+        if (error) throw error;
+        toast.success("Engagement created!");
+        navigate("/engagements");
+      } else if (entityType === "retainer") {
+        const { error } = await supabase.from("retainers").insert({
+          client_name: formData.client_name,
+          period_start: formData.period_start,
+          period_end: formData.period_end,
+          hours_allocated: formData.hours_allocated ? parseFloat(formData.hours_allocated) : 0,
+          hours_consumed: 0,
+          monthly_value: formData.monthly_value ? parseFloat(formData.monthly_value) : 0,
+          rollover_allowed: formData.rollover_allowed === "true",
+          status: "active",
+          notes: formData.notes || null,
+          organization_id: formData.organization_id,
+        });
+        if (error) throw error;
+        toast.success("Retainer set up!");
+        navigate("/retainers");
+      } else if (entityType === "csat") {
+        // CSAT capture lives in csat_responses; needs a survey first — keep it simple by storing notes on the engagement.
+        const note = `CSAT ${formData.csat_score}/5${formData.nps_score ? `, NPS ${formData.nps_score}` : ""}\nRespondent: ${formData.respondent_name || "—"}\nWent well: ${formData.what_went_well || "—"}\nImprove: ${formData.what_to_improve || "—"}`;
+        const { error } = await supabase.from("entity_updates").insert({
+          entity_type: "project",
+          entity_id: formData.project_id,
+          organization_id: formData.organization_id,
+          update_type: "csat",
+          summary: `CSAT ${formData.csat_score}/5 from ${formData.respondent_name || "client"}`,
+          details: note,
+          created_by: user.id,
+        });
+        if (error) throw error;
+        toast.success("CSAT response captured!");
+      } else if (entityType === "deliverable") {
+        // Deliverables are tracked as work packages in the project module.
+        const { error } = await supabase.from("work_packages").insert({
+          name: formData.name,
+          description: [formData.description || "", formData.acceptance_criteria ? `\n\nAcceptance criteria:\n${formData.acceptance_criteria}` : ""].join(""),
+          project_id: formData.project_id || null,
+          priority: formData.priority || "medium",
+          status: "not_started",
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          organization_id: formData.organization_id,
+          created_by: user.id,
+        });
+        if (error) throw error;
+        toast.success("Deliverable created!");
+        navigate("/work-packages");
+      } else if (entityType === "vertical_record") {
+        // Generic vertical entity record — find the matching vertical_entity and insert a record.
+        const slugByTemplate: Record<string, string> = {
+          con_permit_to_work_form: "permits_to_work",
+          con_toolbox_talk_form: "toolbox_talks",
+          con_ncr_form: "quality_ncrs",
+          con_handover_checklist: "handover",
+          ps_sow_form: "sow",
+          ps_msa_summary: "msa",
+          ps_timesheet_entry: "timesheets",
+          ps_bid_no_bid: "opportunities",
+        };
+        const slug = slugByTemplate[templateType];
+        if (slug) {
+          const { data: ve } = await supabase
+            .from("vertical_entities")
+            .select("id")
+            .eq("slug", slug)
+            .eq("organization_id", formData.organization_id || null as any)
+            .maybeSingle();
+          // Fall back to a global definition if the org doesn't have one.
+          const veId = ve?.id ?? null;
+          if (veId) {
+            const { error } = await supabase.from("vertical_entity_records").insert({
+              vertical_entity_id: veId,
+              organization_id: formData.organization_id,
+              data: formData,
+              status: "open",
+              created_by: user.id,
+            });
+            if (error) throw error;
+          }
+          toast.success(`${getEntityLabel(entityType)} captured.`);
+        } else {
+          toast.success("Captured.");
+        }
       }
 
       // For non-entity wizards (guides), just close and show success.
