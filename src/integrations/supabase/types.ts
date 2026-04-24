@@ -8591,6 +8591,7 @@ export type Database = {
           depends_on: string[] | null
           description: string | null
           estimated_hours: number | null
+          feature_id: string | null
           id: string
           issue_id: string | null
           milestone_id: string | null
@@ -8622,6 +8623,7 @@ export type Database = {
           depends_on?: string[] | null
           description?: string | null
           estimated_hours?: number | null
+          feature_id?: string | null
           id?: string
           issue_id?: string | null
           milestone_id?: string | null
@@ -8653,6 +8655,7 @@ export type Database = {
           depends_on?: string[] | null
           description?: string | null
           estimated_hours?: number | null
+          feature_id?: string | null
           id?: string
           issue_id?: string | null
           milestone_id?: string | null
@@ -8674,6 +8677,13 @@ export type Database = {
           work_package_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "product_features"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_issue_id_fkey"
             columns: ["issue_id"]
