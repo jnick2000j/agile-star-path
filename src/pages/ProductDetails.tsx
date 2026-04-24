@@ -167,6 +167,7 @@ export default function ProductDetails() {
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("features");
 
   const fetchProduct = async () => {
     if (!productId) return;
@@ -339,6 +340,14 @@ export default function ProductDetails() {
             Back to Products
           </Button>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("tickets")}>
+              <LifeBuoy className="h-4 w-4 mr-2" />
+              Tickets
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("changes")}>
+              <GitPullRequest className="h-4 w-4 mr-2" />
+              Changes
+            </Button>
             <DocumentUpload
               entityType="product"
               entityId={product.id}
@@ -461,7 +470,7 @@ export default function ProductDetails() {
         />
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="features" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <QuickActionTabs
             items={[
               { value: "features", label: "Features", icon: Lightbulb, count: features.length },
