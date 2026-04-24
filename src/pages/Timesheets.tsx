@@ -673,6 +673,16 @@ export default function Timesheets() {
                           <Button size="sm" variant="ghost" onClick={() => openEmail(s)}>
                             <Mail className="h-3.5 w-3.5" />
                           </Button>
+                          {s.status === "draft" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteSheet(s)}
+                              title="Delete draft"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
