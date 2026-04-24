@@ -74,7 +74,21 @@ type WizardKind =
   | "con_handover_register"
   | "con_subcontractor_scope"
   | "con_lookahead_plan"
-  | "con_permit_to_work";
+  | "con_permit_to_work"
+  // Professional Services & Consulting wizards
+  | "ps_proposal"
+  | "ps_sow"
+  | "ps_msa_summary"
+  | "ps_change_order"
+  | "ps_engagement_kickoff"
+  | "ps_status_report"
+  | "ps_deliverable_acceptance"
+  | "ps_qa_review"
+  | "ps_resource_plan"
+  | "ps_wip_writeoff_memo"
+  | "ps_post_engagement_review"
+  | "ps_csat_followup"
+  | "ps_case_study";
 
 interface WizardRequest {
   kind: "wizard";
