@@ -60,6 +60,9 @@ export default function Settings() {
               </Button>
             </div>
           </div>
+          <div className="mt-6">
+            <OrgVerticalCard />
+          </div>
         </TabsContent>
 
         <TabsContent value="notifications">

@@ -11,8 +11,8 @@ import { toast } from "sonner";
 
 export function OrgVerticalCard() {
   const { currentOrganization, refreshOrganizations } = useOrganization();
-  const { accessLevel } = useOrgAccessLevel(currentOrganization?.id);
-  const isOrgAdmin = accessLevel === "admin" || accessLevel === "owner";
+  const { accessLevel } = useOrgAccessLevel();
+  const isOrgAdmin = accessLevel === "admin";
 
   const [verticals, setVerticals] = useState<any[]>([]);
   const [current, setCurrent] = useState<string>("it_infrastructure");
