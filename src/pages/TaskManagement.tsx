@@ -912,6 +912,13 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
         onUpdate={() => queryClient.invalidateQueries({ queryKey: ["tasks"] })}
       />
 
+      <RecurringTaskDialog
+        open={recurringOpen}
+        onOpenChange={setRecurringOpen}
+        seedTask={recurringSeed}
+        onCreated={() => queryClient.invalidateQueries({ queryKey: ["tasks"] })}
+      />
+
       <AlertDialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
