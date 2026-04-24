@@ -168,7 +168,7 @@ export function RecurringTaskDialog({
         name: name.trim(),
         description: description?.toString().trim() || null,
         priority,
-        status: "not_started",
+        status: "not_started" as const,
         organization_id: currentOrganization.id,
         created_by: user.id,
         project_id: seedTask?.project_id ?? null,
