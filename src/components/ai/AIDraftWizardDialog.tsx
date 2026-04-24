@@ -47,7 +47,20 @@ export type WizardKind =
   | "hd_kb_article"
   | "hd_major_incident_comms"
   | "hd_csat_followup"
-  | "hd_sla_policy_draft";
+  | "hd_sla_policy_draft"
+  // Construction & Engineering wizards
+  | "con_rfi"
+  | "con_submittal_log"
+  | "con_method_statement"
+  | "con_ncr"
+  | "con_toolbox_talk"
+  | "con_daily_log"
+  | "con_change_order"
+  | "con_commissioning_pack"
+  | "con_handover_register"
+  | "con_subcontractor_scope"
+  | "con_lookahead_plan"
+  | "con_permit_to_work";
 
 export interface WizardField {
   key: string;
