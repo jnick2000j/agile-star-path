@@ -249,6 +249,39 @@ export function ChangeNotificationSettings() {
         </div>
       </Card>
 
+      <Card className="p-6 space-y-4">
+        <div className="flex items-start gap-3">
+          <MessageSquareWarning className="h-5 w-5 text-primary mt-0.5" />
+          <div>
+            <h3 className="font-semibold">Require an explanatory comment on status transitions</h3>
+            <p className="text-sm text-muted-foreground">
+              When enabled, users must enter a note before moving a Change Request into the selected status. Useful for recording why a change was rejected, cancelled, scheduled, etc.
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {REQUIRE_STATUS_FIELDS.map((f) => (
+            <div
+              key={f.key}
+              className="flex items-start justify-between gap-4 p-3 rounded-md border bg-muted/20"
+            >
+              <div className="space-y-0.5">
+                <Label htmlFor={f.key} className="font-medium">{f.label}</Label>
+                <p className="text-xs text-muted-foreground">{f.help}</p>
+              </div>
+              <Switch
+                id={f.key}
+                checked={values[f.key]}
+                onCheckedChange={(v) => setValues((s) => ({ ...s, [f.key]: v }))}
+              />
+            </div>
+          ))}
+        </div>
+      </Card>
+
       <div className="flex justify-end">
         <Button onClick={save} disabled={saving}>
           {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
