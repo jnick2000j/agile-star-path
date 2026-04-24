@@ -86,6 +86,50 @@ export function AICreditsMeter({ variant = "full", hideWhenEmpty = false }: Prop
     day: "numeric",
   });
 
+  if (variant === "menu") {
+    const iconClass = isExhausted ? "text-destructive" : isLow ? "text-warning" : "text-primary";
+    return (
+      <div className="px-2 py-1.5">
+        <div className="flex items-center gap-2 text-xs">
+          <Sparkles className={`h-3.5 w-3.5 ${iconClass}`} />
+          <span className="font-medium">AI Credits</span>
+          {status.unlimited && (
+            <Badge variant="outline" className="text-[10px] gap-1 h-4 px-1">
+              <InfinityIcon className="h-2.5 w-2.5" /> Unlimited
+            </Badge>
+          )}
+          {isLow && !isExhausted && !status.unlimited && (
+            <Badge variant="outline" className="text-[10px] gap-1 h-4 px-1 border-warning text-warning">
+              Low
+            </Badge>
+          )}
+          {isExhausted && (
+            <Badge variant="destructive" className="text-[10px] h-4 px-1">Exhausted</Badge>
+          )}
+        </div>
+        {!status.unlimited && !isDisabled && (
+          <>
+            <div className="mt-1.5 flex items-baseline gap-1 text-xs">
+              <span className="font-medium text-foreground">{status.remaining.toLocaleString()}</span>
+              <span className="text-muted-foreground">of {totalQuota.toLocaleString()} left</span>
+              {purchased > 0 && (
+                <span className="text-[10px] text-primary">+{purchased} bought</span>
+              )}
+            </div>
+            <Progress value={pct} className="h-1.5 mt-1" />
+            <p className="mt-1 text-[10px] text-muted-foreground">Resets {resetLabel}</p>
+          </>
+        )}
+        {status.unlimited && (
+          <p className="mt-1 text-[10px] text-muted-foreground">Unlimited AI usage on your plan.</p>
+        )}
+        {isDisabled && (
+          <p className="mt-1 text-[10px] text-muted-foreground">Upgrade your plan to unlock AI features.</p>
+        )}
+      </div>
+    );
+  }
+
   if (variant === "compact") {
     return (
       <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border bg-card text-xs">
