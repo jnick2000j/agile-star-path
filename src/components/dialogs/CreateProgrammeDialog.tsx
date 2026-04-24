@@ -29,6 +29,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
 
   const handleOpen = (newOpen: boolean) => {
