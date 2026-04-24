@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
+import { CatalogPicker, saveTicketCatalogSelection, type CatalogSelection } from "@/components/helpdesk/CatalogPicker";
 
 interface Props {
   open: boolean;
