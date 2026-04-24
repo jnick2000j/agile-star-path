@@ -205,6 +205,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       setWorkPackageId(task.work_package_id || "");
       setRiskId((task as any).risk_id || "");
       setIssueId((task as any).issue_id || "");
+      setFeatureId((task as any).feature_id || "");
     }
   }, [task]);
 
