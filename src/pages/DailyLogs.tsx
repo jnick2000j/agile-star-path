@@ -65,7 +65,7 @@ export default function DailyLogs() {
   });
 
   return (
-    <AppLayout>
+    <AppLayout title="Daily Logs">
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
