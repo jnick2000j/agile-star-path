@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.95.0/cors";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 
 serve(async (req) => {

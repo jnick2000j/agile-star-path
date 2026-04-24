@@ -1,7 +1,7 @@
 // Platform-admin-only CRUD for AI credit packs, with Stripe product/price sync.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.95.0/cors";
+import { createClient } from "npm:@supabase/supabase-js@2.95.0";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 
 const slugify = (s: string) =>
