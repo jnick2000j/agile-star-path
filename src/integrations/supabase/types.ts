@@ -8811,6 +8811,7 @@ export type Database = {
           project_id: string | null
           sort_order: number
           task_id: string | null
+          ticket_id: string | null
           timesheet_id: string
           updated_at: string
         }
@@ -8830,6 +8831,7 @@ export type Database = {
           project_id?: string | null
           sort_order?: number
           task_id?: string | null
+          ticket_id?: string | null
           timesheet_id: string
           updated_at?: string
         }
@@ -8849,6 +8851,7 @@ export type Database = {
           project_id?: string | null
           sort_order?: number
           task_id?: string | null
+          ticket_id?: string | null
           timesheet_id?: string
           updated_at?: string
         }
@@ -8879,6 +8882,13 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
             referencedColumns: ["id"]
           },
           {

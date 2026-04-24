@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,6 +88,7 @@ interface Entry {
   project_id: string | null;
   product_id: string | null;
   task_id: string | null;
+  ticket_id: string | null;
   description: string | null;
   hours_mon: number;
   hours_tue: number;
@@ -140,6 +142,7 @@ function statusBadge(status: Status) {
 export default function Timesheets() {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [tab, setTab] = useState("mine");
   const [loading, setLoading] = useState(false);
@@ -152,6 +155,7 @@ export default function Timesheets() {
   const [projects, setProjects] = useState<NamedRow[]>([]);
   const [products, setProducts] = useState<NamedRow[]>([]);
   const [tasksList, setTasksList] = useState<NamedRow[]>([]);
+  const [tickets, setTickets] = useState<NamedRow[]>([]);
   const [orgUsers, setOrgUsers] = useState<ProfileRow[]>([]);
 
   // Editor state
@@ -188,7 +192,7 @@ export default function Timesheets() {
     if (!user || !currentOrganization) return;
     setLoading(true);
     try {
-      const [mineRes, approvalsRes, progRes, projRes, prodRes, taskRes, profRes, accessRes] =
+      const [mineRes, approvalsRes, progRes, projRes, prodRes, taskRes, ticketRes, profRes, accessRes] =
         await Promise.all([
           supabase
             .from("timesheets")
@@ -226,6 +230,13 @@ export default function Timesheets() {
             .select("id, name")
             .eq("organization_id", currentOrganization.id)
             .order("name"),
+          supabase
+            .from("helpdesk_tickets")
+            .select("id, subject, reference_number")
+            .eq("organization_id", currentOrganization.id)
+            .not("status", "in", "(closed,cancelled)")
+            .order("created_at", { ascending: false })
+            .limit(500),
           supabase.from("profiles").select("user_id, full_name, email"),
           supabase
             .from("user_organization_access")
@@ -245,6 +256,12 @@ export default function Timesheets() {
         ((taskRes.data || []) as Array<{ id: string; name: string }>).map((t) => ({
           id: t.id,
           name: t.name,
+        })),
+      );
+      setTickets(
+        ((ticketRes.data || []) as Array<{ id: string; subject: string; reference_number: string | null }>).map((t) => ({
+          id: t.id,
+          name: t.reference_number ? `${t.reference_number} — ${t.subject}` : t.subject,
         })),
       );
 
@@ -267,6 +284,21 @@ export default function Timesheets() {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, currentOrganization?.id]);
+
+  // If navigated here with ?ticketId=, auto-create/open this week and add the ticket entry.
+  useEffect(() => {
+    const tid = searchParams.get("ticketId");
+    if (!tid) return;
+    if (!user || !currentOrganization) return;
+    // Wait until lookups have loaded so logTimeForTicket sees mySheets.
+    if (loading) return;
+    logTimeForTicket(tid).finally(() => {
+      const next = new URLSearchParams(searchParams);
+      next.delete("ticketId");
+      setSearchParams(next, { replace: true });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user?.id, currentOrganization?.id, loading]);
 
   const loadEntries = async (sheetId: string) => {
     const { data, error } = await supabase
@@ -341,6 +373,67 @@ export default function Timesheets() {
       return;
     }
     setEntries((es) => [...es, data as Entry]);
+  };
+
+  // Open / create the current week's draft and append an entry pre-linked to a ticket.
+  const logTimeForTicket = async (ticketId: string) => {
+    if (!user || !currentOrganization) return;
+    const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const sunday = endOfWeek(new Date(), { weekStartsOn: 1 });
+    const period_start = format(monday, "yyyy-MM-dd");
+    const period_end = format(sunday, "yyyy-MM-dd");
+
+    let sheet = mySheets.find((s) => s.period_start === period_start) ?? null;
+    if (!sheet) {
+      const { data, error } = await supabase
+        .from("timesheets")
+        .insert({
+          organization_id: currentOrganization.id,
+          user_id: user.id,
+          period_start,
+          period_end,
+          status: "draft",
+        })
+        .select()
+        .single();
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      sheet = data as Timesheet;
+      setMySheets((s) => [sheet as Timesheet, ...s]);
+    }
+    if (sheet.status !== "draft") {
+      toast.error("This week's timesheet is no longer a draft");
+      await openEditor(sheet);
+      return;
+    }
+
+    // Load existing entries to compute sort order, then add a ticket-linked entry.
+    const { data: existing } = await supabase
+      .from("timesheet_entries")
+      .select("id")
+      .eq("timesheet_id", sheet.id);
+    const sortOrder = (existing?.length ?? 0);
+
+    const { data: newEntry, error: entryErr } = await supabase
+      .from("timesheet_entries")
+      .insert({
+        timesheet_id: sheet.id,
+        sort_order: sortOrder,
+        ticket_id: ticketId,
+      })
+      .select()
+      .single();
+    if (entryErr) {
+      toast.error(entryErr.message);
+      return;
+    }
+
+    setSelectedSheet(sheet);
+    await loadEntries(sheet.id);
+    setEditorOpen(true);
+    toast.success("Ticket added to this week's timesheet");
   };
 
   const updateEntry = async (id: string, patch: Partial<Entry>) => {
@@ -490,6 +583,8 @@ export default function Timesheets() {
         labelParts.push(`Product: ${products.find((p) => p.id === e.product_id)?.name ?? e.product_id}`);
       if (e.task_id)
         labelParts.push(`Task: ${tasksList.find((t) => t.id === e.task_id)?.name ?? e.task_id}`);
+      if (e.ticket_id)
+        labelParts.push(`Ticket: ${tickets.find((t) => t.id === e.ticket_id)?.name ?? e.ticket_id}`);
       return {
         label: labelParts.join(" · ") || "—",
         description: e.description,
@@ -807,9 +902,11 @@ export default function Timesheets() {
                           ? "project"
                           : e.product_id
                             ? "product"
-                            : "task";
+                            : e.ticket_id
+                              ? "ticket"
+                              : "task";
                       const linkValue =
-                        e.programme_id || e.project_id || e.product_id || e.task_id || "";
+                        e.programme_id || e.project_id || e.product_id || e.task_id || e.ticket_id || "";
                       return (
                         <TableRow key={e.id}>
                           <TableCell>
@@ -823,6 +920,7 @@ export default function Timesheets() {
                                     project_id: null,
                                     product_id: null,
                                     task_id: null,
+                                    ticket_id: null,
                                   };
                                   const first =
                                     v === "programme"
@@ -831,11 +929,14 @@ export default function Timesheets() {
                                         ? projects[0]?.id
                                         : v === "product"
                                           ? products[0]?.id
-                                          : tasksList[0]?.id;
+                                          : v === "ticket"
+                                            ? tickets[0]?.id
+                                            : tasksList[0]?.id;
                                   if (v === "programme") patch.programme_id = first ?? null;
                                   if (v === "project") patch.project_id = first ?? null;
                                   if (v === "product") patch.product_id = first ?? null;
                                   if (v === "task") patch.task_id = first ?? null;
+                                  if (v === "ticket") patch.ticket_id = first ?? null;
                                   updateEntry(e.id, patch);
                                 }}
                                 disabled={!canEdit}
@@ -848,6 +949,7 @@ export default function Timesheets() {
                                   <SelectItem value="project">Project</SelectItem>
                                   <SelectItem value="product">Product</SelectItem>
                                   <SelectItem value="task">Task</SelectItem>
+                                  <SelectItem value="ticket">Ticket</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Select
@@ -858,11 +960,13 @@ export default function Timesheets() {
                                     project_id: null,
                                     product_id: null,
                                     task_id: null,
+                                    ticket_id: null,
                                   };
                                   if (linkType === "programme") patch.programme_id = v;
                                   if (linkType === "project") patch.project_id = v;
                                   if (linkType === "product") patch.product_id = v;
                                   if (linkType === "task") patch.task_id = v;
+                                  if (linkType === "ticket") patch.ticket_id = v;
                                   updateEntry(e.id, patch);
                                 }}
                                 disabled={!canEdit}
@@ -877,7 +981,9 @@ export default function Timesheets() {
                                       ? projects
                                       : linkType === "product"
                                         ? products
-                                        : tasksList
+                                        : linkType === "ticket"
+                                          ? tickets
+                                          : tasksList
                                   ).map((row) => (
                                     <SelectItem key={row.id} value={row.id}>
                                       {row.name}

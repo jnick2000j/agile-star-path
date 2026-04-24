@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageSquare, Activity, Save } from "lucide-react";
+import { ArrowLeft, MessageSquare, Activity, Save, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -363,6 +363,14 @@ export default function HelpdeskTicketDetail() {
                 <Label className="text-xs text-muted-foreground">Source</Label>
                 <Badge variant="outline">{ticket.source}</Badge>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}
+              >
+                <Clock className="h-4 w-4 mr-2" /> Log time on this ticket
+              </Button>
             </Card>
 
             <SLAStatus
