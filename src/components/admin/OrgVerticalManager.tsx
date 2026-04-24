@@ -72,7 +72,7 @@ export function OrgVerticalManager() {
               <div className="flex items-center gap-2 shrink-0">
                 {current && <Badge variant="outline">{current.name}</Badge>}
                 <Select
-                  value={org.industry_vertical || "it_infrastructure"}
+                  value={org.industry_vertical || "technology"}
                   onValueChange={(v) => updateVertical.mutate({ orgId: org.id, verticalId: v })}
                 >
                   <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>

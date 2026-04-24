@@ -15,7 +15,7 @@ export function OrgVerticalCard() {
   const isOrgAdmin = accessLevel === "admin";
 
   const [verticals, setVerticals] = useState<any[]>([]);
-  const [current, setCurrent] = useState<string>("it_infrastructure");
+  const [current, setCurrent] = useState<string>("technology");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
