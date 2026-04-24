@@ -822,9 +822,11 @@ export default function Timesheets() {
                           ? "project"
                           : e.product_id
                             ? "product"
-                            : "task";
+                            : e.ticket_id
+                              ? "ticket"
+                              : "task";
                       const linkValue =
-                        e.programme_id || e.project_id || e.product_id || e.task_id || "";
+                        e.programme_id || e.project_id || e.product_id || e.task_id || e.ticket_id || "";
                       return (
                         <TableRow key={e.id}>
                           <TableCell>
@@ -838,6 +840,7 @@ export default function Timesheets() {
                                     project_id: null,
                                     product_id: null,
                                     task_id: null,
+                                    ticket_id: null,
                                   };
                                   const first =
                                     v === "programme"
@@ -846,11 +849,14 @@ export default function Timesheets() {
                                         ? projects[0]?.id
                                         : v === "product"
                                           ? products[0]?.id
-                                          : tasksList[0]?.id;
+                                          : v === "ticket"
+                                            ? tickets[0]?.id
+                                            : tasksList[0]?.id;
                                   if (v === "programme") patch.programme_id = first ?? null;
                                   if (v === "project") patch.project_id = first ?? null;
                                   if (v === "product") patch.product_id = first ?? null;
                                   if (v === "task") patch.task_id = first ?? null;
+                                  if (v === "ticket") patch.ticket_id = first ?? null;
                                   updateEntry(e.id, patch);
                                 }}
                                 disabled={!canEdit}
@@ -863,6 +869,7 @@ export default function Timesheets() {
                                   <SelectItem value="project">Project</SelectItem>
                                   <SelectItem value="product">Product</SelectItem>
                                   <SelectItem value="task">Task</SelectItem>
+                                  <SelectItem value="ticket">Ticket</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Select
@@ -873,11 +880,13 @@ export default function Timesheets() {
                                     project_id: null,
                                     product_id: null,
                                     task_id: null,
+                                    ticket_id: null,
                                   };
                                   if (linkType === "programme") patch.programme_id = v;
                                   if (linkType === "project") patch.project_id = v;
                                   if (linkType === "product") patch.product_id = v;
                                   if (linkType === "task") patch.task_id = v;
+                                  if (linkType === "ticket") patch.ticket_id = v;
                                   updateEntry(e.id, patch);
                                 }}
                                 disabled={!canEdit}
@@ -892,7 +901,9 @@ export default function Timesheets() {
                                       ? projects
                                       : linkType === "product"
                                         ? products
-                                        : tasksList
+                                        : linkType === "ticket"
+                                          ? tickets
+                                          : tasksList
                                   ).map((row) => (
                                     <SelectItem key={row.id} value={row.id}>
                                       {row.name}
