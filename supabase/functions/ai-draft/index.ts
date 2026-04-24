@@ -61,7 +61,9 @@ type WizardKind =
   | "hd_kb_article"
   | "hd_major_incident_comms"
   | "hd_csat_followup"
-  | "hd_sla_policy_draft";
+  | "hd_sla_policy_draft"
+  | "hd_major_incident_pack"
+  | "hd_ticket_triage";
 
 interface WizardRequest {
   kind: "wizard";
@@ -152,6 +154,10 @@ const WIZARD_SYSTEM_PROMPTS: Record<WizardKind, string> = {
     "You are a service-desk supervisor following up on a LOW CSAT score. Draft: (1) Empathetic email to the customer acknowledging the experience, summarising the ticket, asking for specific feedback, and offering a call, (2) Internal coaching note for the agent (what went well, what to improve, suggested KB to study), (3) Process improvement candidate if a systemic issue is suspected.",
   hd_sla_policy_draft:
     "You are an ITSM consultant drafting an SLA POLICY for a service desk. For each ticket type (Incident, Service Request, Question, Problem) and each priority (P1-P4), recommend: Response target, Resolution target, Business hours vs 24×7, Pause-clock conditions (pending customer, vendor, scheduled), Escalation thresholds (50%, 75%, 100%), Breach handling, Reporting cadence. Output as a clear policy document with a summary matrix table.",
+  hd_major_incident_pack:
+    "You are an Incident Commander producing a COORDINATED MAJOR-INCIDENT COMMUNICATION PACK tied to a specific incident timeline. Return STRICT JSON only — no markdown, no prose outside JSON — matching this exact shape: {\"initial\":{\"audience\":\"customer\",\"channel\":\"status-page\",\"timestamp_label\":\"T+0 (Initial)\",\"subject\":\"...\",\"body\":\"...\"},\"status_update\":{\"audience\":\"customer + internal\",\"channel\":\"status-page + Slack\",\"timestamp_label\":\"T+30m (Update)\",\"subject\":\"...\",\"body\":\"...\"},\"executive_summary\":{\"audience\":\"executives\",\"channel\":\"email\",\"timestamp_label\":\"During incident\",\"subject\":\"...\",\"body\":\"...\"},\"post_incident\":{\"audience\":\"customer + internal\",\"channel\":\"email + status-page\",\"timestamp_label\":\"After resolution\",\"subject\":\"...\",\"body\":\"...\"}}. Each body must be calm, factual, time-stamped using the supplied incident_started_at, reference what is currently known vs unknown, name the next-update commitment, and be consistent across the four messages (same facts, same impact framing, escalating detail). Customer-facing messages must avoid speculation. Executive summary must include business-impact framing and decisions needed. Post-incident message must thank users, summarise root cause at high level, and link to PIR commitment.",
+  hd_ticket_triage:
+    "You are a senior service-desk triage analyst. From the raw user message provided, produce a STRUCTURED INCIDENT/SERVICE-REQUEST DRAFT. Return STRICT JSON only matching: {\"subject\":\"concise symptom-led title, ≤80 chars\",\"description\":\"cleaned-up multi-line description with reproduction steps if present\",\"ticket_type\":\"incident|service_request|question|problem\",\"priority\":\"low|medium|high|urgent\",\"priority_rationale\":\"one-sentence reason citing impact × urgency\",\"category\":\"short category like Access, Performance, Email, VPN, Hardware, Account, Billing\",\"suggested_assignee_group\":\"e.g. Tier 1 Support, Network Ops, Identity team\",\"sla_response_minutes\":N,\"sla_resolution_minutes\":N,\"sla_rationale\":\"one sentence explaining target choice\",\"affected_users_estimate\":\"e.g. 1, small team, all of finance, all customers\",\"initial_diagnosis_hypothesis\":\"one short paragraph\",\"recommended_first_actions\":[\"action 1\",\"action 2\",\"action 3\"]}. SLA defaults: urgent → response 15 min, resolution 240 min; high → 60 / 480; medium → 240 / 1440; low → 480 / 2880 — but adjust if the supplied service_context overrides. Calculate priority from impact × urgency: many users + service down = urgent; one user + minor inconvenience = low.",
 };
 
 async function callGateway(
@@ -276,7 +282,11 @@ Deno.serve(async (req: Request) => {
     } else if (body.kind === "wizard") {
       model = WIZARD_MODEL;
       system = WIZARD_SYSTEM_PROMPTS[body.wizard] + langDirective;
-      userPrompt = `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nProduce the document in clean Markdown.`;
+      const isJsonWizard =
+        body.wizard === "hd_major_incident_pack" || body.wizard === "hd_ticket_triage";
+      userPrompt = isJsonWizard
+        ? `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nReturn STRICT JSON only — no markdown fences, no commentary.`
+        : `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nProduce the document in clean Markdown.`;
       actionType = `wizard:${body.wizard}`;
       targetField = body.wizard;
     } else {
