@@ -1570,10 +1570,19 @@ export type Database = {
           require_comment_on_owner: boolean
           require_comment_on_progress: boolean
           require_comment_on_status: boolean
+          require_comment_on_status_approved: boolean
+          require_comment_on_status_cab_review: boolean
+          require_comment_on_status_cancelled: boolean
           require_comment_on_status_closed: boolean
+          require_comment_on_status_draft: boolean
+          require_comment_on_status_failed: boolean
           require_comment_on_status_implemented: boolean
           require_comment_on_status_in_progress: boolean
+          require_comment_on_status_in_review: boolean
+          require_comment_on_status_needs_information: boolean
+          require_comment_on_status_rejected: boolean
           require_comment_on_status_scheduled: boolean
+          require_comment_on_status_submitted: boolean
           require_comment_on_test: boolean
           require_comment_on_type: boolean
           require_comment_on_urgency: boolean
@@ -1600,10 +1609,19 @@ export type Database = {
           require_comment_on_owner?: boolean
           require_comment_on_progress?: boolean
           require_comment_on_status?: boolean
+          require_comment_on_status_approved?: boolean
+          require_comment_on_status_cab_review?: boolean
+          require_comment_on_status_cancelled?: boolean
           require_comment_on_status_closed?: boolean
+          require_comment_on_status_draft?: boolean
+          require_comment_on_status_failed?: boolean
           require_comment_on_status_implemented?: boolean
           require_comment_on_status_in_progress?: boolean
+          require_comment_on_status_in_review?: boolean
+          require_comment_on_status_needs_information?: boolean
+          require_comment_on_status_rejected?: boolean
           require_comment_on_status_scheduled?: boolean
+          require_comment_on_status_submitted?: boolean
           require_comment_on_test?: boolean
           require_comment_on_type?: boolean
           require_comment_on_urgency?: boolean
@@ -1630,10 +1648,19 @@ export type Database = {
           require_comment_on_owner?: boolean
           require_comment_on_progress?: boolean
           require_comment_on_status?: boolean
+          require_comment_on_status_approved?: boolean
+          require_comment_on_status_cab_review?: boolean
+          require_comment_on_status_cancelled?: boolean
           require_comment_on_status_closed?: boolean
+          require_comment_on_status_draft?: boolean
+          require_comment_on_status_failed?: boolean
           require_comment_on_status_implemented?: boolean
           require_comment_on_status_in_progress?: boolean
+          require_comment_on_status_in_review?: boolean
+          require_comment_on_status_needs_information?: boolean
+          require_comment_on_status_rejected?: boolean
           require_comment_on_status_scheduled?: boolean
+          require_comment_on_status_submitted?: boolean
           require_comment_on_test?: boolean
           require_comment_on_type?: boolean
           require_comment_on_urgency?: boolean
