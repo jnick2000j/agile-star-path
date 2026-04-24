@@ -215,6 +215,7 @@ export default function ProjectDetails() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("workpackages");
   const [brief, setBrief] = useState({
     background: "",
     objectives: "",
@@ -545,7 +546,7 @@ export default function ProjectDetails() {
         />
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="workpackages" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <QuickActionTabs
             items={[
               { value: "workpackages", label: "Work Packages", icon: Package, count: workPackages.length },
