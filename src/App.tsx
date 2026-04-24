@@ -84,6 +84,12 @@ import AIAdvisor from "./pages/AIAdvisor";
 import AIInsights from "./pages/AIInsights";
 import Knowledgebase from "./pages/Knowledgebase";
 import Automations from "./pages/Automations";
+import RFIs from "./pages/RFIs";
+import Submittals from "./pages/Submittals";
+import DailyLogs from "./pages/DailyLogs";
+import PunchList from "./pages/PunchList";
+import Engagements from "./pages/Engagements";
+import Retainers from "./pages/Retainers";
 import KnowledgebaseArticle from "./pages/KnowledgebaseArticle";
 import NotFound from "./pages/NotFound";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -178,6 +184,13 @@ const App = () => (
             <Route path="/knowledgebase" element={<ProtectedRoute><Knowledgebase /></ProtectedRoute>} />
             <Route path="/knowledgebase/:id" element={<ProtectedRoute><KnowledgebaseArticle /></ProtectedRoute>} />
             <Route path="/admin/automations" element={<ProtectedRoute><Automations /></ProtectedRoute>} />
+            {/* Industry vertical pages */}
+            <Route path="/construction/rfis" element={<ProtectedRoute><RFIs /></ProtectedRoute>} />
+            <Route path="/construction/submittals" element={<ProtectedRoute><Submittals /></ProtectedRoute>} />
+            <Route path="/construction/daily-logs" element={<ProtectedRoute><DailyLogs /></ProtectedRoute>} />
+            <Route path="/construction/punch-list" element={<ProtectedRoute><PunchList /></ProtectedRoute>} />
+            <Route path="/services/engagements" element={<ProtectedRoute><Engagements /></ProtectedRoute>} />
+            <Route path="/services/retainers" element={<ProtectedRoute><Retainers /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </PermissionsProvider>
