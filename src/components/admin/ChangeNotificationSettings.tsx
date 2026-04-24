@@ -39,6 +39,22 @@ const REQUIRE_ACTIVITY_FIELDS: Array<{ key: string; label: string; help: string 
   { key: "require_comment_on_comment", label: "General comments", help: "Free-form discussion comments must include text." },
 ];
 
+const REQUIRE_STATUS_FIELDS: Array<{ key: string; label: string; help: string }> = [
+  { key: "require_comment_on_status_draft", label: "→ Draft", help: "Reverting a change back to draft." },
+  { key: "require_comment_on_status_submitted", label: "→ Submitted", help: "Submitting the change for review." },
+  { key: "require_comment_on_status_in_review", label: "→ In review", help: "Moving into technical / business review." },
+  { key: "require_comment_on_status_cab_review", label: "→ CAB review", help: "Escalating to the Change Advisory Board." },
+  { key: "require_comment_on_status_needs_information", label: "→ Needs information", help: "Sending the request back for more detail." },
+  { key: "require_comment_on_status_approved", label: "→ Approved", help: "Approving the change for scheduling." },
+  { key: "require_comment_on_status_rejected", label: "→ Rejected", help: "Rejecting the change request." },
+  { key: "require_comment_on_status_scheduled", label: "→ Scheduled", help: "Scheduling the change implementation window." },
+  { key: "require_comment_on_status_in_progress", label: "→ In progress", help: "Starting implementation of the change." },
+  { key: "require_comment_on_status_implemented", label: "→ Implemented", help: "Marking the change as implemented." },
+  { key: "require_comment_on_status_closed", label: "→ Closed", help: "Closing the change record after PIR." },
+  { key: "require_comment_on_status_cancelled", label: "→ Cancelled", help: "Cancelling the change request." },
+  { key: "require_comment_on_status_failed", label: "→ Failed", help: "Marking the change as failed." },
+];
+
 const DEFAULTS: Record<string, boolean> = {
   notify_on_status_change: true,
   notify_on_type_change: false,
