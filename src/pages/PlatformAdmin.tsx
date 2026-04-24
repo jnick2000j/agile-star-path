@@ -23,6 +23,9 @@ import {
   Ban,
   RotateCcw,
   KeyRound,
+  Archive,
+  ArchiveRestore,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
@@ -37,8 +40,19 @@ import { PlatformAIProviderSettings } from "@/components/admin/PlatformAIProvide
 import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
-import { PSOnboardingWizard } from "@/components/admin/PSOnboardingWizard";
+import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface PlatformStats {
   totalOrgs: number;
