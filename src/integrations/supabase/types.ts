@@ -818,6 +818,306 @@ export type Database = {
           },
         ]
       }
+      automation_approvals: {
+        Row: {
+          assigned_to_role: string | null
+          assigned_to_user_id: string | null
+          context: Json
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision: string
+          decision_comment: string | null
+          description: string | null
+          due_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          module: string
+          organization_id: string
+          run_id: string
+          step_execution_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_role?: string | null
+          assigned_to_user_id?: string | null
+          context?: Json
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          decision_comment?: string | null
+          description?: string | null
+          due_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          module: string
+          organization_id: string
+          run_id: string
+          step_execution_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_role?: string | null
+          assigned_to_user_id?: string | null
+          context?: Json
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          decision_comment?: string | null
+          description?: string | null
+          due_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          module?: string
+          organization_id?: string
+          run_id?: string
+          step_execution_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_approvals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_approvals_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "automation_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_approvals_step_execution_id_fkey"
+            columns: ["step_execution_id"]
+            isOneToOne: false
+            referencedRelation: "automation_step_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_runs: {
+        Row: {
+          completed_at: string | null
+          context: Json
+          created_at: string
+          current_step_index: number
+          entity_id: string | null
+          entity_type: string | null
+          error_message: string | null
+          id: string
+          module: string
+          organization_id: string
+          started_at: string | null
+          status: string
+          step_count: number
+          trigger_event: string
+          trigger_payload: Json
+          triggered_by: string | null
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          context?: Json
+          created_at?: string
+          current_step_index?: number
+          entity_id?: string | null
+          entity_type?: string | null
+          error_message?: string | null
+          id?: string
+          module: string
+          organization_id: string
+          started_at?: string | null
+          status?: string
+          step_count?: number
+          trigger_event: string
+          trigger_payload?: Json
+          triggered_by?: string | null
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          context?: Json
+          created_at?: string
+          current_step_index?: number
+          entity_id?: string | null
+          entity_type?: string | null
+          error_message?: string | null
+          id?: string
+          module?: string
+          organization_id?: string
+          started_at?: string | null
+          status?: string
+          step_count?: number
+          trigger_event?: string
+          trigger_payload?: Json
+          triggered_by?: string | null
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_step_executions: {
+        Row: {
+          ai_model: string | null
+          ai_tokens: number | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input: Json | null
+          organization_id: string
+          output: Json | null
+          run_id: string
+          started_at: string | null
+          status: string
+          step_index: number
+          step_label: string | null
+          step_type: string
+        }
+        Insert: {
+          ai_model?: string | null
+          ai_tokens?: number | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json | null
+          organization_id: string
+          output?: Json | null
+          run_id: string
+          started_at?: string | null
+          status?: string
+          step_index: number
+          step_label?: string | null
+          step_type: string
+        }
+        Update: {
+          ai_model?: string | null
+          ai_tokens?: number | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json | null
+          organization_id?: string
+          output?: Json | null
+          run_id?: string
+          started_at?: string | null
+          status?: string
+          step_index?: number
+          step_label?: string | null
+          step_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_step_executions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_step_executions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "automation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_workflows: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          match_conditions: Json
+          module: string
+          name: string
+          organization_id: string
+          priority: number
+          steps: Json
+          tags: string[] | null
+          trigger_event: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          match_conditions?: Json
+          module: string
+          name: string
+          organization_id: string
+          priority?: number
+          steps?: Json
+          tags?: string[] | null
+          trigger_event: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          match_conditions?: Json
+          module?: string
+          name?: string
+          organization_id?: string
+          priority?: number
+          steps?: Json
+          tags?: string[] | null
+          trigger_event?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       benefit_measurements: {
         Row: {
           actual_value: number | null
