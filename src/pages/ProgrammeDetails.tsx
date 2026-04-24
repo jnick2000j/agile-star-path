@@ -772,6 +772,11 @@ export default function ProgrammeDetails() {
             {programme && <EntityTicketsCard scope="programme" entityId={programme.id} entityName={programme.name} />}
           </TabsContent>
 
+          {/* Changes Tab */}
+          <TabsContent value="changes">
+            {programme && <EntityChangesCard scope="programme" entityId={programme.id} entityName={programme.name} />}
+          </TabsContent>
+
           {/* Status Timeline Tab */}
           <TabsContent value="history">
             <Card>
