@@ -110,7 +110,7 @@ export default function PlatformAdmin() {
     try {
       // Fetch counts in parallel
       const [orgsRes, usersRes, progsRes, projsRes, prodsRes, subsRes, licsRes] = await Promise.all([
-        supabase.from("organizations").select("id, name, slug, created_at, is_suspended, suspension_kind, suspended_reason, industry_vertical"),
+        supabase.from("organizations").select("id, name, slug, created_at, is_suspended, suspension_kind, suspended_reason, industry_vertical, is_archived"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("archived", false),
         supabase.from("programmes").select("id", { count: "exact", head: true }),
         supabase.from("projects").select("id", { count: "exact", head: true }),
@@ -172,6 +172,7 @@ export default function PlatformAdmin() {
             license_deployment_mode: lic?.deployment_mode ?? null,
             license_customer_reference: lic?.customer_reference ?? null,
             industry_vertical: (org as any).industry_vertical ?? null,
+            is_archived: !!(org as any).is_archived,
           };
         })
       );
