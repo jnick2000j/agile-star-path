@@ -324,7 +324,39 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
       toast.error("Failed to delete task: " + error.message);
     },
   });
-  const updateCompletion = useMutation({
+
+  // Duplicate task mutation
+  const duplicateTask = useMutation({
+    mutationFn: async (task: Task) => {
+      const { error } = await supabase.from("tasks").insert({
+        name: `${task.name} (Copy)`,
+        description: task.description,
+        priority: task.priority,
+        status: "not_started" as const,
+        organization_id: task.organization_id,
+        created_by: user?.id,
+        project_id: task.project_id,
+        programme_id: task.programme_id,
+        product_id: task.product_id,
+        work_package_id: task.work_package_id,
+        assigned_to: task.assigned_to,
+        risk_id: task.risk_id,
+        issue_id: task.issue_id,
+        estimated_hours: task.estimated_hours,
+        planned_start: task.planned_start,
+        planned_end: task.planned_end,
+        completion_percentage: 0,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Task duplicated");
+    },
+    onError: (error: any) => {
+      toast.error("Failed to duplicate task: " + error.message);
+    },
+  });
     mutationFn: async ({ id, completion_percentage }: { id: string; completion_percentage: number }) => {
       const updateData: Record<string, unknown> = { completion_percentage };
       if (completion_percentage === 100) {
