@@ -16,7 +16,8 @@ type Step = "intent" | "org" | "invite" | "plan" | "done";
 export default function Onboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const isPlatformAdmin = userRole === "admin";
   const initialIntent = (searchParams.get("plan_kind") as Intent | null) || null;
   const [step, setStep] = useState<Step>(initialIntent ? "org" : "intent");
   const [intent, setIntent] = useState<Intent>(initialIntent || "ppm");
@@ -119,6 +120,13 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
+        {isPlatformAdmin && step !== "done" && (
+          <div className="flex justify-end mb-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+              Skip onboarding (Platform Admin)
+            </Button>
+          </div>
+        )}
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8 justify-center">
           {(["intent", "org", "invite", "plan", "done"] as Step[]).map((s, i, arr) => (
