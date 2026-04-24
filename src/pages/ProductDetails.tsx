@@ -619,6 +619,116 @@ export default function ProductDetails() {
             </Card>
           </TabsContent>
 
+          {/* Tasks Tab — grouped by Feature (workstreams) */}
+          <TabsContent value="tasks">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Linked Tasks</CardTitle>
+                    <CardDescription>
+                      Tasks linked to this product or any of its features. Group by feature to see parallel workstreams.
+                    </CardDescription>
+                  </div>
+                  <Button variant="outline" onClick={() => navigate("/tasks")}>
+                    <ListTodo className="h-4 w-4 mr-2" />
+                    Manage Tasks
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {tasks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ListTodo className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No tasks linked to this product yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {(() => {
+                      const taskStatusMap: Record<string, { label: string; className: string }> = {
+                        not_started: { label: "Not Started", className: "bg-muted text-muted-foreground" },
+                        in_progress: { label: "In Progress", className: "bg-warning/10 text-warning" },
+                        completed: { label: "Completed", className: "bg-success/10 text-success" },
+                        on_hold: { label: "On Hold", className: "bg-info/10 text-info" },
+                        cancelled: { label: "Cancelled", className: "bg-destructive/10 text-destructive" },
+                      };
+
+                      // Build groups: one per feature (in feature priority order), plus an
+                      // "Unassigned" group for tasks linked only at product level.
+                      const groups: Array<{ key: string; title: string; subtitle?: string; items: ProductTask[] }> = [];
+                      features.forEach((f) => {
+                        const items = tasks.filter((t) => t.feature_id === f.id);
+                        if (items.length > 0) {
+                          groups.push({
+                            key: `feat-${f.id}`,
+                            title: f.name,
+                            subtitle: featureStatusConfig[f.status]?.label ?? f.status,
+                            items,
+                          });
+                        }
+                      });
+                      const unassigned = tasks.filter((t) => !t.feature_id);
+                      if (unassigned.length > 0) {
+                        groups.push({
+                          key: "no-feature",
+                          title: "No Feature (Product-level)",
+                          subtitle: "Tasks linked directly to the product",
+                          items: unassigned,
+                        });
+                      }
+
+                      return groups.map((group) => (
+                        <div key={group.key} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Lightbulb className="h-4 w-4 text-primary" />
+                            <h4 className="font-semibold">{group.title}</h4>
+                            {group.subtitle && (
+                              <Badge variant="outline" className="text-xs">{group.subtitle}</Badge>
+                            )}
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              {group.items.length} task{group.items.length === 1 ? "" : "s"}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            {group.items.map((task) => {
+                              const taskStatus = taskStatusMap[task.status] ?? { label: task.status, className: "bg-muted text-muted-foreground" };
+                              return (
+                                <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                                  <div className="space-y-1 min-w-0">
+                                    <p className="font-medium truncate">{task.name}</p>
+                                    {task.description && (
+                                      <p className="text-sm text-muted-foreground line-clamp-1">{task.description}</p>
+                                    )}
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      {task.planned_start && task.planned_end && (
+                                        <span className="text-xs text-muted-foreground">
+                                          {format(new Date(task.planned_start), "MMM d")} – {format(new Date(task.planned_end), "MMM d, yyyy")}
+                                        </span>
+                                      )}
+                                      {task.story_points != null && (
+                                        <Badge variant="outline" className="text-xs">{task.story_points} pts</Badge>
+                                      )}
+                                      {task.completion_percentage != null && task.completion_percentage > 0 && (
+                                        <Badge variant="outline" className="text-xs">{task.completion_percentage}%</Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <Badge variant="secondary" className={cn("text-xs shrink-0", taskStatus.className)}>
+                                    {taskStatus.label}
+                                  </Badge>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Roadmap Tab */}
           <TabsContent value="roadmap">
             <Card>
