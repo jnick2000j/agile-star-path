@@ -231,32 +231,44 @@ export default function Helpdesk() {
                   <TableHead>Type</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>SLA</TableHead>
                   <TableHead>Reporter</TableHead>
                   <TableHead>Created</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
                 ) : filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
-                ) : filtered.map((t: any) => (
-                  <TableRow
-                    key={t.id}
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/support/tickets/${t.id}`)}
-                  >
-                    <TableCell className="font-mono text-xs">{t.reference_number ?? "—"}</TableCell>
-                    <TableCell className="font-medium">{t.subject}</TableCell>
-                    <TableCell><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? formatLabel(t.ticket_type)}</Badge></TableCell>
-                    <TableCell><Badge className={cn(PRIORITY_STYLES[t.priority])}>{formatLabel(t.priority)}</Badge></TableCell>
-                    <TableCell><Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge></TableCell>
-                    <TableCell className="text-sm">{t.reporter_name || t.reporter_email || "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {t.created_at ? format(new Date(t.created_at), "MMM d, yyyy") : "—"}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                  <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
+                ) : filtered.map((t: any) => {
+                  const sla = slaStateOf(t);
+                  const slaCfg = SLA_BADGE[sla];
+                  return (
+                    <TableRow
+                      key={t.id}
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/support/tickets/${t.id}`)}
+                    >
+                      <TableCell className="font-mono text-xs">{t.reference_number ?? "—"}</TableCell>
+                      <TableCell className="font-medium">{t.subject}</TableCell>
+                      <TableCell><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? formatLabel(t.ticket_type)}</Badge></TableCell>
+                      <TableCell><Badge className={cn(PRIORITY_STYLES[t.priority])}>{formatLabel(t.priority)}</Badge></TableCell>
+                      <TableCell><Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge></TableCell>
+                      <TableCell>
+                        {sla === "none" ? (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        ) : (
+                          <Badge className={cn("text-xs", slaCfg.cls)}>{slaCfg.label}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">{t.reporter_name || t.reporter_email || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {t.created_at ? format(new Date(t.created_at), "MMM d, yyyy") : "—"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
