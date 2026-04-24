@@ -1549,6 +1549,83 @@ export type Database = {
           },
         ]
       }
+      change_notification_settings: {
+        Row: {
+          created_at: string
+          id: string
+          notify_on_approval_decision: boolean
+          notify_on_comment: boolean
+          notify_on_impact_change: boolean
+          notify_on_implementation_note: boolean
+          notify_on_owner_change: boolean
+          notify_on_progress_note: boolean
+          notify_on_status_change: boolean
+          notify_on_test_result: boolean
+          notify_on_type_change: boolean
+          notify_on_urgency_change: boolean
+          organization_id: string
+          require_comment_on_impact: boolean
+          require_comment_on_owner: boolean
+          require_comment_on_status: boolean
+          require_comment_on_type: boolean
+          require_comment_on_urgency: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notify_on_approval_decision?: boolean
+          notify_on_comment?: boolean
+          notify_on_impact_change?: boolean
+          notify_on_implementation_note?: boolean
+          notify_on_owner_change?: boolean
+          notify_on_progress_note?: boolean
+          notify_on_status_change?: boolean
+          notify_on_test_result?: boolean
+          notify_on_type_change?: boolean
+          notify_on_urgency_change?: boolean
+          organization_id: string
+          require_comment_on_impact?: boolean
+          require_comment_on_owner?: boolean
+          require_comment_on_status?: boolean
+          require_comment_on_type?: boolean
+          require_comment_on_urgency?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notify_on_approval_decision?: boolean
+          notify_on_comment?: boolean
+          notify_on_impact_change?: boolean
+          notify_on_implementation_note?: boolean
+          notify_on_owner_change?: boolean
+          notify_on_progress_note?: boolean
+          notify_on_status_change?: boolean
+          notify_on_test_result?: boolean
+          notify_on_type_change?: boolean
+          notify_on_urgency_change?: boolean
+          organization_id?: string
+          require_comment_on_impact?: boolean
+          require_comment_on_owner?: boolean
+          require_comment_on_status?: boolean
+          require_comment_on_type?: boolean
+          require_comment_on_urgency?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_notification_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       change_requests: {
         Row: {
           approver_id: string | null
