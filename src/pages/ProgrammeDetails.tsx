@@ -36,6 +36,7 @@ import {
   LifeBuoy,
   Workflow,
   GitPullRequest,
+  Clock,
 } from "lucide-react";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
@@ -376,6 +377,14 @@ export default function ProgrammeDetails() {
             Back to Programs
           </Button>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/timesheets?programmeId=${programme.id}`)}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Log Time
+            </Button>
             <DocumentUpload
               entityType="program"
               entityId={programme.id}

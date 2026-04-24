@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { TaskAssignments } from "@/components/TaskAssignments";
 import {
   Dialog,
@@ -21,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Save, Trash2 } from "lucide-react";
+import { Save, Trash2, Clock } from "lucide-react";
 
 interface TaskData {
   id: string;
@@ -51,6 +52,7 @@ interface EditTaskDialogProps {
 
 export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskDialogProps) {
   const { currentOrganization } = useOrganization();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
@@ -420,9 +422,22 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
             <Button variant="destructive" size="sm" onClick={handleDelete}>
               <Trash2 className="h-4 w-4 mr-1" /> Delete
             </Button>
-            <Button onClick={handleSave} disabled={saving || !name}>
-              <Save className="h-4 w-4 mr-1" /> Save Changes
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (!task) return;
+                  onOpenChange(false);
+                  navigate(`/timesheets?taskId=${task.id}`);
+                }}
+                disabled={!task}
+              >
+                <Clock className="h-4 w-4 mr-1" /> Log Time
+              </Button>
+              <Button onClick={handleSave} disabled={saving || !name}>
+                <Save className="h-4 w-4 mr-1" /> Save Changes
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
