@@ -340,6 +340,73 @@ const aiWizards: AIWizardSpec[] = [
     { key: "issued_to", label: "Issued to", placeholder: "Person / company in charge" },
     { key: "adjacent_works", label: "Adjacent works / interactions", type: "textarea" },
   ]},
+
+  // ─── Professional Services & Consulting ─────────────────────────────────
+  { kind: "ps_sow_draft" as WizardKind, title: "SOW Draft", description: "Statement of Work with objectives, in/out scope, deliverables, acceptance criteria, fees, payment terms.", icon: FileSignature, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "engagement_name", label: "Engagement / project name", required: true, placeholder: "e.g. ERP Discovery Phase" },
+    { key: "pricing_model", label: "Pricing model", placeholder: "fixed_price / time_and_materials / milestone_based / retainer" },
+    { key: "objectives", label: "Engagement objectives", type: "textarea", required: true },
+    { key: "scope_summary", label: "Scope summary", type: "textarea", required: true },
+    { key: "constraints", label: "Constraints / assumptions", type: "textarea" },
+    { key: "fees", label: "Fees / budget envelope", placeholder: "e.g. $120k fixed; or $250/hr capped at $200k" },
+  ]},
+  { kind: "ps_msa_summary_draft" as WizardKind, title: "MSA Summary", description: "Plain-English summary of an MSA — liability cap, IP, confidentiality, notice, change control.", icon: ScrollText, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "msa_terms", label: "Paste key MSA clauses or talking points", type: "textarea", required: true },
+  ]},
+  { kind: "ps_change_order_draft" as WizardKind, title: "Engagement Change Order", description: "Client-ready change order: scope delta, fee impact, schedule impact, recommendation.", icon: FileEdit, category: "Pro Services" as any, fields: [
+    { key: "engagement", label: "Engagement / SOW reference", required: true },
+    { key: "change_summary", label: "What's changing", type: "textarea", required: true },
+    { key: "reason", label: "Why", type: "textarea", required: true },
+    { key: "fee_impact", label: "Fee impact", placeholder: "e.g. +$25k" },
+    { key: "time_impact", label: "Time impact", placeholder: "e.g. +2 weeks" },
+  ]},
+  { kind: "ps_proposal_exec_summary" as WizardKind, title: "Proposal Executive Summary", description: "Open a proposal with a sharp 1-page exec summary — problem, approach, why us, outcomes.", icon: Briefcase, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "client_problem", label: "Client's problem (in their words)", type: "textarea", required: true },
+    { key: "our_approach", label: "Our approach (one paragraph)", type: "textarea", required: true },
+    { key: "differentiators", label: "Why us — 3 bullets", type: "textarea" },
+    { key: "outcomes", label: "Outcomes the client will get", type: "textarea" },
+  ]},
+  { kind: "ps_engagement_kickoff" as WizardKind, title: "Engagement Kick-off Pack", description: "Kick-off agenda + RACI + governance cadence + risk pre-mortem for a new client engagement.", icon: Target, category: "Pro Services" as any, fields: [
+    { key: "engagement_name", label: "Engagement", required: true },
+    { key: "client_team", label: "Client team (names + roles)", type: "textarea", required: true },
+    { key: "our_team", label: "Our team (names + roles)", type: "textarea", required: true },
+    { key: "duration_weeks", label: "Duration (weeks)", placeholder: "e.g. 12" },
+  ]},
+  { kind: "ps_status_report" as WizardKind, title: "Client Status Report", description: "Weekly client-facing status: progress, decisions needed, risks, next week, hours used.", icon: Activity, category: "Pro Services" as any, fields: [
+    { key: "engagement_name", label: "Engagement", required: true },
+    { key: "week_of", label: "Week of (YYYY-MM-DD)", required: true },
+    { key: "raw_notes", label: "Raw notes from the team", type: "textarea", required: true },
+    { key: "hours_used_pct", label: "Hours used vs budget (%)", placeholder: "e.g. 42" },
+  ]},
+  { kind: "ps_qbr_pack" as WizardKind, title: "QBR Pack", description: "Quarterly Business Review pack — value delivered, KPIs, risks, roadmap, expansion ideas.", icon: TrendingUp, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "quarter", label: "Quarter (e.g. Q2 2026)", required: true },
+    { key: "outcomes_delivered", label: "Outcomes delivered this quarter", type: "textarea", required: true },
+    { key: "kpis", label: "KPIs (numbers)", type: "textarea" },
+    { key: "next_quarter_focus", label: "Next quarter focus", type: "textarea" },
+  ]},
+  { kind: "ps_wip_writeoff" as WizardKind, title: "WIP Write-off Memo", description: "Internal memo justifying a Work-in-Progress write-off — root cause, financial impact, controls.", icon: AlertOctagon, category: "Pro Services" as any, fields: [
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "amount", label: "Amount to write off", required: true, placeholder: "e.g. $18,500" },
+    { key: "reason", label: "Root cause", type: "textarea", required: true },
+    { key: "prevention", label: "What we'll change to prevent recurrence", type: "textarea" },
+  ]},
+  { kind: "ps_case_study_draft" as WizardKind, title: "Case Study Draft", description: "Sales-ready case study: client context, challenge, approach, results, quote.", icon: BookOpen, category: "Pro Services" as any, fields: [
+    { key: "client_name", label: "Client (or pseudonym)", required: true },
+    { key: "client_industry", label: "Industry", placeholder: "e.g. retail banking" },
+    { key: "challenge", label: "Challenge", type: "textarea", required: true },
+    { key: "approach", label: "Approach", type: "textarea", required: true },
+    { key: "results", label: "Results (with numbers)", type: "textarea", required: true },
+  ]},
+  { kind: "ps_csat_followup" as WizardKind, title: "CSAT Follow-up", description: "Empathetic follow-up email + internal action note from a low CSAT/NPS score.", icon: Smile, category: "Pro Services" as any, fields: [
+    { key: "client_contact", label: "Client contact name", required: true },
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "score", label: "Score given", placeholder: "e.g. CSAT 2/5, NPS 4" },
+    { key: "comment", label: "Their verbatim comment", type: "textarea" },
+  ]},
 ];
 
 const CREATE_CATEGORIES = ["all", "MSP", "PRINCE2", "Agile", "Product", "Governance", "Construction"] as const;
