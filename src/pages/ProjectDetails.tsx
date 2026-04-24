@@ -428,6 +428,14 @@ export default function ProjectDetails() {
             Back to Projects
           </Button>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("tickets")}>
+              <LifeBuoy className="h-4 w-4 mr-2" />
+              Tickets
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("changes")}>
+              <GitPullRequest className="h-4 w-4 mr-2" />
+              Changes
+            </Button>
             <DocumentUpload
               entityType="project"
               entityId={project.id}
