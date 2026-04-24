@@ -16,6 +16,8 @@ import {
   ScrollText, RotateCcw, CheckCircle2, Eye,
   GitMerge, Zap, RefreshCw, ClipboardCheck, Activity, BookOpen,
   LifeBuoy, AlertTriangle, Wrench, Smile, Clock,
+  HardHat, FileCheck, ClipboardList, BadgeAlert, KeyRound, Power,
+  PenTool, FileSignature, CalendarRange, FileEdit,
 } from "lucide-react";
 
 // ---------- CREATE wizards (template-driven entity creation) ----------
@@ -36,6 +38,16 @@ const createTemplates = [
   { type: "sprint_retro" as TemplateType, name: "Sprint Retrospective", category: "Agile", icon: "🔁", description: "Capture went-well / didn't-go-well / ideas and commit to 1-3 concrete actions.", creates: null },
   { type: "definition_of_done" as TemplateType, name: "Definition of Done", category: "Agile", icon: "✅", description: "Define code quality, testing, deployment, and acceptance criteria for your team.", creates: null },
   { type: "compliance_health_check" as TemplateType, name: "Compliance Health Check", category: "Governance", icon: "🛡️", description: "Walk through cadence, hygiene and linkage signals to gauge governance health for any scope.", creates: null },
+  // ─── Construction & Engineering guides (use AI Draft tab to generate the artefact) ───
+  { type: "compliance_health_check" as TemplateType, name: "RFI Workflow Guide", category: "Construction", icon: "📨", description: "Step through how to raise, route, track and close an RFI on a live site — with response SLAs and impact tagging.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Submittal Process Guide", category: "Construction", icon: "📑", description: "End-to-end submittal flow: spec section → vendor data → reviewer → approval codes → procurement release.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Permit to Work Setup", category: "Construction", icon: "🪪", description: "Stand up a Permit to Work regime: hot work, confined space, WAH, excavation, electrical isolation, lifting.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "RAMS Library Setup", category: "Construction", icon: "📋", description: "Build a Risk Assessment & Method Statement library for high-risk activities (CDM 2015 / ISO 45001 aligned).", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "NCR & CAPA Process", category: "Construction", icon: "🛑", description: "Open, investigate and close Non-Conformance Reports with root cause and corrective/preventive action.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Daily Site Log Routine", category: "Construction", icon: "📝", description: "Set up the superintendent daily log: weather, manpower, plant, deliveries, delays and works completed/planned.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Punch / Snag Walkdown", category: "Construction", icon: "✅", description: "Plan inspection walkdowns, capture snags by location/trade and drive them to verified closure for handover.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Change Order Workflow", category: "Construction", icon: "🔀", description: "Raise variations / compensation events with cost & time impact, contractual mechanism and approval routing.", creates: null },
+  { type: "compliance_health_check" as TemplateType, name: "Commissioning & Handover", category: "Construction", icon: "🏁", description: "Plan Cx test packs, witness points, O&M manuals, as-builts, training and the H&S file for Practical Completion.", creates: null },
 ];
 
 // ---------- DRAFT wizards (AI-generated documents) ----------
@@ -44,7 +56,7 @@ interface AIWizardSpec {
   title: string;
   description: string;
   icon: React.ElementType;
-  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk";
+  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk" | "Construction";
   fields: WizardField[];
 }
 
@@ -226,10 +238,102 @@ const aiWizards: AIWizardSpec[] = [
     { key: "ticket_types", label: "Ticket types in use", placeholder: "e.g. Incident, Service Request, Question, Problem" },
     { key: "constraints", label: "Constraints", type: "textarea", placeholder: "Vendor SLAs, contractual commitments, business hours" },
   ]},
+
+  // ─── Construction & Engineering ─────────────────────────────────────────
+  { kind: "con_rfi", title: "RFI (Request for Information)", description: "Draft a contractually defensible RFI with discipline, refs and impact analysis.", icon: MessageSquare, category: "Construction", fields: [
+    { key: "subject", label: "Subject", required: true, placeholder: "e.g. Clash between Level 2 ductwork and structural beam B-12" },
+    { key: "discipline", label: "Discipline", placeholder: "architectural / structural / mechanical / electrical / plumbing / civil / fire / facade" },
+    { key: "spec_section", label: "Spec Section", placeholder: "e.g. 23 31 13" },
+    { key: "drawing_ref", label: "Drawing Reference(s)", placeholder: "e.g. M-202 Rev C, S-105 Rev B" },
+    { key: "background", label: "Background / Context", type: "textarea", required: true, placeholder: "What was found, when, by whom" },
+    { key: "question", label: "Question(s)", type: "textarea", required: true, placeholder: "Single, specific question(s)" },
+    { key: "proposed_solution", label: "Proposed Solution (optional)", type: "textarea" },
+    { key: "response_due_days", label: "Response required (working days)", placeholder: "e.g. 5" },
+  ]},
+  { kind: "con_submittal_log", title: "Submittal Register Entry", description: "Submittal log entry + transmittal cover note with review codes and lead-time.", icon: FileCheck, category: "Construction", fields: [
+    { key: "spec_section", label: "Spec Section", required: true, placeholder: "e.g. 09 51 13 Acoustical Panel Ceilings" },
+    { key: "submittal_type", label: "Type", placeholder: "product_data / shop_drawing / sample / mock_up / calculation / cert" },
+    { key: "description", label: "Description", type: "textarea", required: true },
+    { key: "submitted_by", label: "Submitted By", placeholder: "Subcontractor / vendor" },
+    { key: "reviewer", label: "Reviewer (Ball-in-Court)", placeholder: "e.g. Architect, MEP Consultant" },
+    { key: "lead_time_weeks", label: "Procurement lead time (weeks)", placeholder: "e.g. 8" },
+    { key: "required_on_site", label: "Required On Site", placeholder: "YYYY-MM-DD" },
+  ]},
+  { kind: "con_method_statement", title: "Method Statement (RAMS)", description: "CDM 2015 / ISO 45001 RAMS with hazard table, controls and emergency arrangements.", icon: ScrollText, category: "Construction", fields: [
+    { key: "activity", label: "Activity", required: true, placeholder: "e.g. Erection of tower crane TC1" },
+    { key: "location", label: "Location / Area", placeholder: "e.g. North-east corner, Block A" },
+    { key: "duration", label: "Planned duration", placeholder: "e.g. 2 days" },
+    { key: "key_hazards", label: "Known hazards / context", type: "textarea", placeholder: "Adjacent live operations, public, overhead lines, etc." },
+    { key: "permits_required", label: "Permits anticipated", placeholder: "e.g. lifting operation, working at height" },
+    { key: "competency", label: "Competency requirements", placeholder: "e.g. CPCS slinger/signaller, appointed person" },
+  ]},
+  { kind: "con_ncr", title: "Non-Conformance Report (NCR)", description: "ISO 9001 NCR with 5-Whys root cause, disposition and CAPA.", icon: BadgeAlert, category: "Construction", fields: [
+    { key: "spec_ref", label: "Specification / Standard ref", required: true, placeholder: "e.g. BS EN 13670 §8.4" },
+    { key: "trade_party", label: "Trade / Party responsible", placeholder: "e.g. Concrete subcontractor" },
+    { key: "location", label: "Location", placeholder: "Grid / level / room" },
+    { key: "description", label: "Description of non-conformance", type: "textarea", required: true },
+    { key: "evidence", label: "Evidence (photos, tests, witnesses)", type: "textarea" },
+    { key: "severity_hint", label: "Suspected severity", placeholder: "minor / major / critical" },
+  ]},
+  { kind: "con_toolbox_talk", title: "Toolbox Talk", description: "10-minute site safety brief with hazards, controls and check questions.", icon: Megaphone, category: "Construction", fields: [
+    { key: "topic", label: "Topic", required: true, placeholder: "e.g. Working safely around mobile plant" },
+    { key: "site_context", label: "Site context (optional)", type: "textarea", placeholder: "Recent near-miss, current high-risk activities" },
+    { key: "audience", label: "Audience", placeholder: "e.g. all trades, ground works only" },
+  ]},
+  { kind: "con_daily_log", title: "Daily Site Log Narrative", description: "Polished daily log from raw superintendent notes — manpower, deliveries, delays.", icon: ClipboardList, category: "Construction", fields: [
+    { key: "log_date", label: "Date", required: true, placeholder: "YYYY-MM-DD" },
+    { key: "weather", label: "Weather AM / PM / temp", placeholder: "e.g. cloudy AM, rain PM, 12°C" },
+    { key: "raw_notes", label: "Raw notes (anything goes)", type: "textarea", required: true, placeholder: "Trades on site, deliveries, inspections, delays, permits, events..." },
+  ]},
+  { kind: "con_change_order", title: "Change Order / Variation", description: "NEC4 CE / JCT VO / AIA G701 with cost build-up and programme impact.", icon: FileEdit, category: "Construction", fields: [
+    { key: "title", label: "Change title", required: true, placeholder: "e.g. Additional fire-rated partition to Level 3 plant room" },
+    { key: "originator", label: "Originator", placeholder: "client / designer / contractor / site_condition" },
+    { key: "contract_form", label: "Contract form", placeholder: "NEC4 / JCT D&B / FIDIC Red / AIA A201" },
+    { key: "description", label: "Description of change", type: "textarea", required: true },
+    { key: "reason", label: "Reason / justification", type: "textarea", required: true },
+    { key: "cost_breakdown", label: "Known costs (rough)", type: "textarea", placeholder: "Labour, plant, materials, sub-contract, prelims, OH&P" },
+    { key: "time_impact", label: "Time impact (days)", placeholder: "e.g. 7 working days on critical path" },
+  ]},
+  { kind: "con_commissioning_pack", title: "Commissioning Test Pack", description: "Cx pack: pre-commissioning checks, static & dynamic tests, witnessing & sign-off.", icon: Power, category: "Construction", fields: [
+    { key: "system", label: "System", required: true, placeholder: "e.g. Chilled water system CHW-01" },
+    { key: "boundaries", label: "System boundaries", type: "textarea", placeholder: "Where does this system start/end" },
+    { key: "drawings_specs", label: "Reference drawings & specs", type: "textarea" },
+    { key: "performance_criteria", label: "Performance / acceptance criteria", type: "textarea", required: true },
+    { key: "witnessing", label: "Witnessing required", placeholder: "Contractor / Consultant / Client" },
+  ]},
+  { kind: "con_handover_register", title: "Handover / O&M Register", description: "PC handover deliverables: O&Ms, as-builts, certs, warranties, training, H&S file.", icon: KeyRound, category: "Construction", fields: [
+    { key: "project_type", label: "Project type", required: true, placeholder: "e.g. Commercial office fit-out, residential new-build" },
+    { key: "systems", label: "Key systems / disciplines", type: "textarea", placeholder: "List the building systems requiring handover" },
+    { key: "client_requirements", label: "Client-specific requirements", type: "textarea", placeholder: "e.g. Soft Landings BG 6, BIM COBie drop, CAFM upload" },
+    { key: "pc_date", label: "Target Practical Completion", placeholder: "YYYY-MM-DD" },
+  ]},
+  { kind: "con_subcontractor_scope", title: "Subcontractor Scope of Works", description: "Tender scope: inclusions, exclusions, interfaces, programme & commercial terms.", icon: FileSignature, category: "Construction", fields: [
+    { key: "package_title", label: "Package title", required: true, placeholder: "e.g. P-205 Mechanical Services" },
+    { key: "trade", label: "Trade", placeholder: "e.g. MEP, structural steel, fitout joinery" },
+    { key: "inclusions", label: "Known inclusions", type: "textarea", required: true },
+    { key: "exclusions", label: "Known exclusions", type: "textarea" },
+    { key: "key_milestones", label: "Key milestones / dates", type: "textarea" },
+    { key: "contract_form", label: "Sub-contract form", placeholder: "NEC4 sub / JCT sub / DOM-A / bespoke" },
+  ]},
+  { kind: "con_lookahead_plan", title: "3-Week Look-Ahead", description: "Weekly look-ahead by area: activities, constraints, resources, risks, milestones.", icon: CalendarRange, category: "Construction", fields: [
+    { key: "project_status", label: "Where the project is now", type: "textarea", required: true, placeholder: "Current phase, areas active, behind/ahead vs baseline" },
+    { key: "active_areas", label: "Active areas / work faces", type: "textarea", placeholder: "e.g. Level 2 partitions, basement waterproofing, roof plant" },
+    { key: "known_constraints", label: "Known constraints", type: "textarea", placeholder: "Late info, material lead-times, permits, inspections" },
+    { key: "milestones_in_window", label: "Milestones in window", type: "textarea" },
+  ]},
+  { kind: "con_permit_to_work", title: "Permit to Work", description: "Issue a complete Permit to Work with controls, isolations and rescue plan.", icon: ShieldCheck, category: "Construction", fields: [
+    { key: "permit_type", label: "Permit type", required: true, placeholder: "hot_work / confined_space / working_at_height / excavation / electrical_isolation / lifting_operation / live_traffic" },
+    { key: "activity", label: "Activity description", type: "textarea", required: true },
+    { key: "location", label: "Location (with grid ref)", placeholder: "e.g. Level 4, Grid C-7 to D-9" },
+    { key: "valid_from", label: "Valid from", placeholder: "YYYY-MM-DD HH:MM" },
+    { key: "valid_to", label: "Valid to", placeholder: "YYYY-MM-DD HH:MM" },
+    { key: "issued_to", label: "Issued to", placeholder: "Person / company in charge" },
+    { key: "adjacent_works", label: "Adjacent works / interactions", type: "textarea" },
+  ]},
 ];
 
-const CREATE_CATEGORIES = ["all", "MSP", "PRINCE2", "Agile", "Product", "Governance"] as const;
-const AI_CATEGORIES = ["all", "Document", "Strategy", "Governance", "Helper", "Change Mgmt", "Helpdesk"] as const;
+const CREATE_CATEGORIES = ["all", "MSP", "PRINCE2", "Agile", "Product", "Governance", "Construction"] as const;
+const AI_CATEGORIES = ["all", "Document", "Strategy", "Governance", "Helper", "Change Mgmt", "Helpdesk", "Construction"] as const;
 
 export default function Wizards() {
   const [searchParams, setSearchParams] = useSearchParams();
