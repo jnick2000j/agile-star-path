@@ -191,8 +191,18 @@ export default function ChangeManagementDetail() {
     enabled: !!currentOrganization?.id,
   });
 
-  const requiresComment = (field: string): boolean => {
+  const requiresComment = (field: string, toValue?: any): boolean => {
     if (!notifSettings) return false;
+    if (field === "status" && typeof toValue === "string") {
+      const perStatusKey: Record<string, string> = {
+        scheduled: "require_comment_on_status_scheduled",
+        in_progress: "require_comment_on_status_in_progress",
+        implemented: "require_comment_on_status_implemented",
+        closed: "require_comment_on_status_closed",
+      };
+      const perKey = perStatusKey[toValue];
+      if (perKey && (notifSettings as any)[perKey]) return true;
+    }
     const key = REQUIRE_FIELD_MAP[field];
     return key ? !!(notifSettings as any)[key] : false;
   };
