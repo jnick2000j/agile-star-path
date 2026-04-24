@@ -889,26 +889,13 @@ export default function ChangeManagementDetail() {
               Change {pendingChange ? (FIELD_LABELS[pendingChange.field] ?? pendingChange.field) : ""}?
             </DialogTitle>
             <DialogDescription>
-              {pendingChange && requiresComment(pendingChange.field)
+              {pendingChange && requiresComment(pendingChange.field, pendingChange.to)
                 ? "An explanatory comment is required for this change. It will be recorded on the activity timeline and emailed to stakeholders."
                 : "Add a short note explaining the reason for this change. It will be recorded on the activity timeline."}
-            </DialogDescription>
-          </DialogHeader>
-          {pendingChange && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Badge variant="outline">{formatVal(pendingChange.field, pendingChange.from)}</Badge>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                <Badge className={cn(
-                  pendingChange.field === "status" && STATUS_STYLES[pendingChange.to],
-                )}>
-                  {formatVal(pendingChange.field, pendingChange.to)}
-                </Badge>
-              </div>
-              <Textarea
+...
                 rows={4}
                 placeholder={
-                  requiresComment(pendingChange.field)
+                  requiresComment(pendingChange.field, pendingChange.to)
                     ? "A comment is required — explain why this is changing"
                     : "Why is this changing? (optional but recommended)"
                 }
