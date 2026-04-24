@@ -190,7 +190,7 @@ export default function Timesheets() {
     if (!user || !currentOrganization) return;
     setLoading(true);
     try {
-      const [mineRes, approvalsRes, progRes, projRes, prodRes, taskRes, profRes, accessRes] =
+      const [mineRes, approvalsRes, progRes, projRes, prodRes, taskRes, ticketRes, profRes, accessRes] =
         await Promise.all([
           supabase
             .from("timesheets")
@@ -228,6 +228,13 @@ export default function Timesheets() {
             .select("id, name")
             .eq("organization_id", currentOrganization.id)
             .order("name"),
+          supabase
+            .from("helpdesk_tickets")
+            .select("id, subject, reference_number")
+            .eq("organization_id", currentOrganization.id)
+            .not("status", "in", "(closed,cancelled)")
+            .order("created_at", { ascending: false })
+            .limit(500),
           supabase.from("profiles").select("user_id, full_name, email"),
           supabase
             .from("user_organization_access")
