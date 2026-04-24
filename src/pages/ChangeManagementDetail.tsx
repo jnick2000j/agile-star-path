@@ -895,8 +895,8 @@ export default function ChangeManagementDetail() {
               Change {pendingChange ? (FIELD_LABELS[pendingChange.field] ?? pendingChange.field) : ""}?
             </DialogTitle>
             <DialogDescription>
-              {pendingChange && requiresComment(pendingChange.field)
-                ? "An explanatory comment is required for this change. It will be recorded on the activity timeline and emailed to stakeholders."
+              {pendingChange && requiresComment(pendingChange.field, pendingChange.to)
+                ? "An update note is required for this change. It will be recorded on the activity timeline and emailed to stakeholders."
                 : "Add a short note explaining the reason for this change. It will be recorded on the activity timeline."}
             </DialogDescription>
           </DialogHeader>
