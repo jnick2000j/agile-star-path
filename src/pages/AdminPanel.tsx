@@ -50,6 +50,8 @@ import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplian
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
+import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
+import { SLAPoliciesManager } from "@/components/helpdesk/SLAPoliciesManager";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
