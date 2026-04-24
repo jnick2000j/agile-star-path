@@ -567,7 +567,10 @@ export default function ChangeManagementDetail() {
                 {canPostProgress && (() => {
                   const required = requiresActivityComment(progressKind);
                   const hasText = !!progressText.trim();
-                  const blocked = required && !hasText;
+                  const hasFiles = pendingFiles.length > 0;
+                  // When admin requires comment, accept either text OR attachments as evidence.
+                  const blocked = required && !hasText && !hasFiles;
+                  const emptyPost = !hasText && !hasFiles;
                   const kindLabel = PROGRESS_KINDS.find(k => k.key === progressKind)?.label ?? progressKind;
                   return (
                     <Card className={cn(
@@ -581,14 +584,14 @@ export default function ChangeManagementDetail() {
                         </div>
                         {required ? (
                           <Badge className="bg-destructive/10 text-destructive border-destructive/30 text-xs">
-                            Comment required for {kindLabel}
+                            Comment or attachment required for {kindLabel}
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="text-xs">Comment optional</Badge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Implementers, owners and requesters can record progress, test results or general notes against this change.
+                        Implementers, owners and requesters can record progress, test results or general notes against this change. Attach screenshots, logs or test reports as supporting evidence.
                       </p>
                       <div className="flex gap-2">
                         <Select value={progressKind} onValueChange={setProgressKind}>
@@ -606,7 +609,7 @@ export default function ChangeManagementDetail() {
                           {required && <span className="text-destructive font-semibold">*</span>}
                           {required && (
                             <span className="text-muted-foreground font-normal">
-                              (required by your organisation for {kindLabel.toLowerCase()})
+                              (required for {kindLabel.toLowerCase()} — text or an attachment)
                             </span>
                           )}
                         </Label>
@@ -617,7 +620,7 @@ export default function ChangeManagementDetail() {
                           className={cn(blocked && "border-destructive focus-visible:ring-destructive")}
                           placeholder={
                             required
-                              ? `A written comment is required for ${kindLabel.toLowerCase()}`
+                              ? `Describe ${kindLabel.toLowerCase()} or attach evidence below`
                               : "Describe progress, test outcomes, blockers, or context for the team… (optional)"
                           }
                           value={progressText}
@@ -625,18 +628,85 @@ export default function ChangeManagementDetail() {
                         />
                         {blocked && (
                           <p className="text-xs text-destructive">
-                            Add a comment before posting — your administrator requires written detail for this update type.
+                            Add a comment or attach a file before posting — your administrator requires evidence for this update type.
                           </p>
                         )}
                       </div>
+
+                      {/* Attachments picker */}
+                      <div className="space-y-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          multiple
+                          className="hidden"
+                          onChange={handleAddFiles}
+                          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.log,.json,.zip"
+                        />
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploadingAttachments}
+                            className="gap-2"
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            Attach files or screenshots
+                          </Button>
+                          {pendingFiles.length > 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              {pendingFiles.length} file{pendingFiles.length === 1 ? "" : "s"} ready
+                            </span>
+                          )}
+                        </div>
+                        {pendingFiles.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {pendingFiles.map((f, idx) => {
+                              const isImg = f.type.startsWith("image/");
+                              const Icon = isImg ? ImageIcon : FileText;
+                              return (
+                                <div
+                                  key={`${f.name}-${idx}`}
+                                  className="flex items-center gap-2 bg-muted/60 rounded-md pl-2 pr-1 py-1 text-xs"
+                                >
+                                  <Icon className="h-3.5 w-3.5 text-primary" />
+                                  <span className="max-w-[180px] truncate">{f.name}</span>
+                                  <span className="text-muted-foreground">
+                                    {(f.size / 1024).toFixed(0)} KB
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5"
+                                    onClick={() => removePendingFile(idx)}
+                                    disabled={uploadingAttachments}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex justify-end">
                         <Button
                           size="sm"
                           onClick={submitProgress}
-                          disabled={blocked}
-                          title={blocked ? "Add a comment to post this update" : undefined}
+                          disabled={blocked || emptyPost || uploadingAttachments}
+                          title={
+                            blocked
+                              ? "Add a comment or attachment to post this update"
+                              : emptyPost
+                                ? "Add a comment or attachment"
+                                : undefined
+                          }
                         >
-                          Post update
+                          {uploadingAttachments ? "Posting…" : "Post update"}
                         </Button>
                       </div>
                     </Card>
