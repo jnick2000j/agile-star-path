@@ -131,12 +131,13 @@ function ManagePacksTab({ verticals, onChange }: { verticals: any[]; onChange: (
                 onCheckedChange={(checked) => toggleActive.mutate({ id: v.id, is_active: checked })}
               />
             </div>
-            {!v.is_seed && (
+            {v.id !== "technology" && (
               <Button
                 variant="ghost"
                 size="icon"
+                title="Delete vertical pack"
                 onClick={() => {
-                  if (confirm(`Delete "${v.name}"? Organizations using it will fall back to the default vertical.`)) {
+                  if (confirm(`Delete "${v.name}"? Organizations using it will fall back to the default Technology vertical.`)) {
                     deletePack.mutate(v.id);
                   }
                 }}
