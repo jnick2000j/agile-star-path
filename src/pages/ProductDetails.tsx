@@ -35,6 +35,7 @@ import {
   LifeBuoy,
   Workflow,
   GitPullRequest,
+  ListTodo,
 } from "lucide-react";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
