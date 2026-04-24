@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
 
-export type VerticalId = "it_infrastructure" | "software_saas" | "construction" | "professional_services";
+export type VerticalId = "technology" | "construction" | "professional_services" | string;
 
 export interface VerticalConfig {
   id: VerticalId;
@@ -16,10 +16,10 @@ export interface VerticalConfig {
 }
 
 const FALLBACK: VerticalConfig = {
-  id: "it_infrastructure",
-  name: "IT & Infrastructure",
+  id: "technology",
+  name: "Technology",
   description: null,
-  icon: "Server",
+  icon: "Cpu",
   enabled_modules: [],
   terminology_overrides: {},
   default_dashboards: [],
@@ -28,7 +28,7 @@ const FALLBACK: VerticalConfig = {
 
 /**
  * Returns the active industry vertical config for the current organization.
- * Falls back to it_infrastructure for platform admins viewing "Global".
+ * Falls back to the technology vertical for platform admins viewing "Global".
  */
 export function useVertical() {
   const { currentOrganization } = useOrganization();
@@ -50,7 +50,7 @@ export function useVertical() {
           .eq("id", currentOrganization.id)
           .maybeSingle();
 
-        const vid = (org?.industry_vertical as VerticalId) || "it_infrastructure";
+        const vid = (org?.industry_vertical as VerticalId) || "technology";
 
         const { data: vConfig } = await supabase
           .from("industry_verticals")
