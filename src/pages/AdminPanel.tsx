@@ -285,6 +285,7 @@ export default function AdminPanel() {
           <TabsTrigger value="access">Access Control</TabsTrigger>
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
           <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
+          <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
