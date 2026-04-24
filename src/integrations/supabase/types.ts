@@ -2695,6 +2695,119 @@ export type Database = {
           },
         ]
       }
+      helpdesk_catalog_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          list_id: string
+          metadata: Json
+          name: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          list_id: string
+          metadata?: Json
+          name: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          list_id?: string
+          metadata?: Json
+          name?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_catalog_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_catalog_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_catalog_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_catalog_lists: {
+        Row: {
+          allow_multiple: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          organization_id: string
+          required_for_types: string[]
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          allow_multiple?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          organization_id: string
+          required_for_types?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          allow_multiple?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          organization_id?: string
+          required_for_types?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_catalog_lists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_email_log: {
         Row: {
           body_html: string | null
@@ -2918,6 +3031,62 @@ export type Database = {
           },
           {
             foreignKeyName: "helpdesk_ticket_activity_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_ticket_catalog_items: {
+        Row: {
+          catalog_item_id: string
+          created_at: string
+          created_by: string | null
+          list_id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          catalog_item_id: string
+          created_at?: string
+          created_by?: string | null
+          list_id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          catalog_item_id?: string
+          created_at?: string
+          created_by?: string | null
+          list_id?: string
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_catalog_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_catalog_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_catalog_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_catalog_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_catalog_items_ticket_id_fkey"
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "helpdesk_tickets"
@@ -8488,6 +8657,7 @@ export type Database = {
         Args: { _scope_id: string; _scope_type: string; _user_id: string }
         Returns: boolean
       }
+      helpdesk_sla_sweep_breaches: { Args: never; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_org_manager_of: {
         Args: { _caller: string; _target_user: string }
