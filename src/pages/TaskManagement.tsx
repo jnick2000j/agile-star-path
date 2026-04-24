@@ -55,6 +55,8 @@ import {
   ListTree,
   MessageSquarePlus,
   Trash2,
+  Copy,
+  Repeat,
 } from "lucide-react";
 import {
   AlertDialog,
