@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import {
   BarChart3, PieChart, Download, FileText,
   Sparkles, Send, Loader2, Copy, RotateCcw, Save, CalendarClock,
-  BookOpen, Filter,
+  BookOpen, Filter, LayoutGrid, Layers, FolderKanban, Package,
+  LifeBuoy, GitBranch,
 } from "lucide-react";
 import { Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, Legend } from "recharts";
 import { toast } from "@/components/ui/use-toast";
