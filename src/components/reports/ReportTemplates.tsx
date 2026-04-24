@@ -1,9 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  FileText, Shield, BarChart3, Users, Layers, 
+import {
+  FileText, Shield, BarChart3, Users, Layers,
   CheckCircle2, AlertTriangle, TrendingUp, Calendar,
-  Target, Zap, Clock, ListChecks, Milestone
+  Target, Zap, Clock, ListChecks, Milestone,
+  LifeBuoy, Headphones, GitBranch, ShieldAlert, Gauge, Workflow,
 } from "lucide-react";
 
 export interface ReportTemplate {
@@ -11,7 +12,7 @@ export interface ReportTemplate {
   title: string;
   description: string;
   query: string;
-  category: "prince2" | "msp" | "agile" | "product" | "general";
+  category: "prince2" | "msp" | "agile" | "product" | "general" | "change" | "helpdesk";
   icon: React.ElementType;
 }
 
