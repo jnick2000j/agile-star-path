@@ -200,7 +200,8 @@ async function buildNotification(admin: ReturnType<typeof createClient>, payload
       break;
     }
     case "helpdesk_workflow_pending": {
-      const name = entityName || payload.extra?.ticket_reference || "ticket approval";
+      const ticketRef = typeof payload.extra?.ticket_reference === "string" ? payload.extra.ticket_reference : null;
+      const name = entityName || ticketRef || "ticket approval";
       title ||= `Approval needed: ${name}`;
       message ||= `${actorName} requested your approval for ${name}.`;
       emailSubject = title;
@@ -210,7 +211,8 @@ async function buildNotification(admin: ReturnType<typeof createClient>, payload
     }
     case "helpdesk_workflow_decision": {
       const approved = payload.decision === "approved";
-      const name = entityName || payload.extra?.ticket_reference || "ticket approval";
+      const ticketRef = typeof payload.extra?.ticket_reference === "string" ? payload.extra.ticket_reference : null;
+      const name = entityName || ticketRef || "ticket approval";
       title ||= approved ? `Approval completed: ${name}` : `Approval rejected: ${name}`;
       message ||= approved
         ? `${actorName} approved ${name}.`
