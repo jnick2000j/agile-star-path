@@ -54,11 +54,14 @@ interface EditTaskDialogProps {
 
 export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskDialogProps) {
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [status, setStatus] = useState("not_started");
+  const [originalStatus, setOriginalStatus] = useState("not_started");
+  const [statusChangeNote, setStatusChangeNote] = useState("");
   const [plannedStart, setPlannedStart] = useState("");
   const [plannedEnd, setPlannedEnd] = useState("");
   const [estimatedHours, setEstimatedHours] = useState("");
