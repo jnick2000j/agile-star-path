@@ -129,6 +129,8 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [recurringOpen, setRecurringOpen] = useState(false);
+  const [recurringSeed, setRecurringSeed] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
