@@ -135,6 +135,32 @@ export default function ChangeManagementDetail() {
     enabled: !!id,
   });
 
+  const activityIds = useMemo(() => (activity as any[]).map((a) => a.id), [activity]);
+
+  const { data: activityAttachments = [] } = useQuery({
+    queryKey: ["cm-activity-attachments", id, activityIds.length],
+    queryFn: async () => {
+      if (!activityIds.length) return [];
+      const { data } = await supabase
+        .from("documents")
+        .select("id, name, file_path, file_size, mime_type, entity_id, created_at")
+        .eq("entity_type", "change_activity")
+        .in("entity_id", activityIds);
+      return data ?? [];
+    },
+    enabled: !!id && activityIds.length > 0,
+  });
+
+  const attachmentsByActivity = useMemo(() => {
+    const map = new Map<string, any[]>();
+    for (const a of activityAttachments as any[]) {
+      const arr = map.get(a.entity_id) ?? [];
+      arr.push(a);
+      map.set(a.entity_id, arr);
+    }
+    return map;
+  }, [activityAttachments]);
+
   const { data: orgUsers = [] } = useQuery({
     queryKey: ["org-users-min", currentOrganization?.id],
     queryFn: async () => {
