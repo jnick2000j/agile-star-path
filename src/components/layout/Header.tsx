@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe, Sparkles, CreditCard, KeyRound, Receipt, Loader2 } from "lucide-react";
+import { HelpCircle, Settings, Shield, ChevronDown, LogOut, Palette, User, Globe, Sparkles, CreditCard, KeyRound, Receipt, Loader2, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -7,7 +8,7 @@ import { OrganizationSelector } from "@/components/OrganizationSelector";
 import { RegionBadge } from "@/components/RegionBadge";
 import { AICreditsMeter } from "@/components/billing/AICreditsMeter";
 import { AskSupportDialog } from "@/components/AskSupportDialog";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -30,6 +31,8 @@ interface HeaderProps {
 
 export function Header({ title, subtitle }: HeaderProps) {
   const { user, signOut, userRole, userProfile } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
   const { currentOrganization } = useOrganization();
   const { isLicenseMode } = useDeploymentMode();
   const navigate = useNavigate();
@@ -129,7 +132,7 @@ export function Header({ title, subtitle }: HeaderProps) {
         </div>
         <RegionBadge />
 
-        <ThemeToggle />
+        
 
         <Button
           variant="outline"
@@ -192,6 +195,14 @@ export function Header({ title, subtitle }: HeaderProps) {
                 <Shield className="h-4 w-4" />
                 Security
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              onClick={toggleTheme}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {isDark ? "Light mode" : "Dark mode"}
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/billing" className="flex items-center gap-2 cursor-pointer">
