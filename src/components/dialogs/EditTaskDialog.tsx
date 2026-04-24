@@ -369,7 +369,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
             </div>
             <div className="space-y-2">
               <Label>Product</Label>
-              <Select value={productId || "none"} onValueChange={(v) => setProductId(v === "none" ? "" : v)}>
+              <Select value={productId || "none"} onValueChange={(v) => { setProductId(v === "none" ? "" : v); setFeatureId(""); }}>
                 <SelectTrigger><SelectValue placeholder="No product" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">No Product</SelectItem>
