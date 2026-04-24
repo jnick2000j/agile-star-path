@@ -22,6 +22,7 @@ import {
   Sparkles,
   LifeBuoy,
   GitBranch,
+  Workflow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -82,7 +83,14 @@ export function Sidebar() {
     { label: "Timesheets", icon: Clock, href: "/timesheets" },
     { label: "Governance", icon: Shield, href: "/prince2" },
     { label: "Change Management", icon: GitBranch, href: "/change-management" },
-    { label: "Helpdesk", icon: LifeBuoy, href: "/support" },
+    {
+      label: "Helpdesk",
+      icon: LifeBuoy,
+      children: [
+        { label: "Tickets", href: "/support" },
+        { label: "Workflows", href: "/support/workflows" },
+      ],
+    },
     { label: "Knowledgebase", icon: BookOpen, href: "/knowledgebase" },
     { label: "Registers", icon: ClipboardList, href: "/registers" },
     {
