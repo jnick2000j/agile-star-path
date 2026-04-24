@@ -442,6 +442,8 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label>Sprint</Label>
             <Select value={sprintId || "none"} onValueChange={(v) => setSprintId(v === "none" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder="No sprint" /></SelectTrigger>
               <SelectContent>
