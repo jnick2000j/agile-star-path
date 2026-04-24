@@ -551,7 +551,7 @@ export default function ProjectDetails() {
               { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
-            className="grid-cols-12 sm:grid-cols-12 md:grid-cols-12 lg:grid-cols-12"
+            />
           />
 
           {/* Work Packages Tab */}

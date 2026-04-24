@@ -484,7 +484,7 @@ export default function ProgrammeDetails() {
               { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Timeline", icon: History },
             ]}
-            className="grid-cols-14 sm:grid-cols-14 md:grid-cols-14 lg:grid-cols-14"
+            />
           />
 
           {/* Linked Projects Tab */}

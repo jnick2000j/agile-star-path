@@ -473,7 +473,7 @@ export default function ProductDetails() {
               { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
-            className="grid-cols-10 sm:grid-cols-10 md:grid-cols-10 lg:grid-cols-10"
+            />
           />
 
           {/* Features Tab */}
