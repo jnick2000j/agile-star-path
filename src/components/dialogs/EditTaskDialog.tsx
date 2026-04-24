@@ -453,6 +453,15 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
               />
             </div>
           </div>
+
+          <div className="border-t pt-4">
+            <TaskComments
+              taskId={task.id}
+              organizationId={currentOrganization?.id}
+              currentCompletion={(task as any).completion_percentage ?? 0}
+            />
+          </div>
+
           <div className="flex justify-between pt-2">
             <Button variant="destructive" size="sm" onClick={handleDelete}>
               <Trash2 className="h-4 w-4 mr-1" /> Delete
