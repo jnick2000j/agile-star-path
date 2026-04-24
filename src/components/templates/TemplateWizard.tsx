@@ -1805,15 +1805,13 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
         toast.success("Retainer set up!");
         navigate("/retainers");
       } else if (entityType === "csat") {
-        // CSAT capture lives in csat_responses; needs a survey first — keep it simple by storing notes on the engagement.
+        // Lightweight CSAT capture stored as an update against the engagement/project.
         const note = `CSAT ${formData.csat_score}/5${formData.nps_score ? `, NPS ${formData.nps_score}` : ""}\nRespondent: ${formData.respondent_name || "—"}\nWent well: ${formData.what_went_well || "—"}\nImprove: ${formData.what_to_improve || "—"}`;
         const { error } = await supabase.from("entity_updates").insert({
           entity_type: "project",
           entity_id: formData.project_id,
           organization_id: formData.organization_id,
-          update_type: "csat",
-          summary: `CSAT ${formData.csat_score}/5 from ${formData.respondent_name || "client"}`,
-          details: note,
+          update_text: `[CSAT] ${note}`,
           created_by: user.id,
         });
         if (error) throw error;
@@ -1835,7 +1833,7 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
         toast.success("Deliverable created!");
         navigate("/work-packages");
       } else if (entityType === "vertical_record") {
-        // Generic vertical entity record — find the matching vertical_entity and insert a record.
+        // Generic vertical entity record — find the matching vertical_entity by slug.
         const slugByTemplate: Record<string, string> = {
           con_permit_to_work_form: "permits_to_work",
           con_toolbox_talk_form: "toolbox_talks",
@@ -1852,21 +1850,26 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
             .from("vertical_entities")
             .select("id")
             .eq("slug", slug)
-            .eq("organization_id", formData.organization_id || null as any)
             .maybeSingle();
-          // Fall back to a global definition if the org doesn't have one.
           const veId = ve?.id ?? null;
           if (veId) {
+            const titleField = (formData.title as string) || (formData.topic as string) || (formData.opportunity_name as string) || (formData.client_name as string) || templateName;
             const { error } = await supabase.from("vertical_entity_records").insert({
-              vertical_entity_id: veId,
+              entity_id: veId,
               organization_id: formData.organization_id,
-              data: formData,
+              title: titleField,
+              data: formData as any,
               status: "open",
+              priority: (formData.priority as string) || "medium",
+              due_date: (formData.due_date as string) || (formData.date_required as string) || null,
+              project_id: (formData.project_id as string) || null,
               created_by: user.id,
             });
             if (error) throw error;
+            toast.success(`${templateName} captured.`);
+          } else {
+            toast.message(`Install the vertical pack to enable “${templateName}” records.`);
           }
-          toast.success(`${getEntityLabel(entityType)} captured.`);
         } else {
           toast.success("Captured.");
         }
