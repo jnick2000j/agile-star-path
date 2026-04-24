@@ -161,11 +161,13 @@ export function Header({ title, subtitle }: HeaderProps) {
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-64">
             <div className="px-2 py-1.5">
               <p className="text-sm font-medium">{getDisplayName()}</p>
               <p className="text-xs text-muted-foreground capitalize">{userRole?.replace("_", " ") || "User"}</p>
             </div>
+            <DropdownMenuSeparator />
+            <AICreditsMeter variant="menu" hideWhenEmpty />
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
