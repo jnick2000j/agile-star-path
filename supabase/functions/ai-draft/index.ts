@@ -61,7 +61,20 @@ type WizardKind =
   | "hd_kb_article"
   | "hd_major_incident_comms"
   | "hd_csat_followup"
-  | "hd_sla_policy_draft";
+  | "hd_sla_policy_draft"
+  // Construction & Engineering wizards
+  | "con_rfi"
+  | "con_submittal_log"
+  | "con_method_statement"
+  | "con_ncr"
+  | "con_toolbox_talk"
+  | "con_daily_log"
+  | "con_change_order"
+  | "con_commissioning_pack"
+  | "con_handover_register"
+  | "con_subcontractor_scope"
+  | "con_lookahead_plan"
+  | "con_permit_to_work";
 
 interface WizardRequest {
   kind: "wizard";
@@ -152,6 +165,31 @@ const WIZARD_SYSTEM_PROMPTS: Record<WizardKind, string> = {
     "You are a service-desk supervisor following up on a LOW CSAT score. Draft: (1) Empathetic email to the customer acknowledging the experience, summarising the ticket, asking for specific feedback, and offering a call, (2) Internal coaching note for the agent (what went well, what to improve, suggested KB to study), (3) Process improvement candidate if a systemic issue is suspected.",
   hd_sla_policy_draft:
     "You are an ITSM consultant drafting an SLA POLICY for a service desk. For each ticket type (Incident, Service Request, Question, Problem) and each priority (P1-P4), recommend: Response target, Resolution target, Business hours vs 24×7, Pause-clock conditions (pending customer, vendor, scheduled), Escalation thresholds (50%, 75%, 100%), Breach handling, Reporting cadence. Output as a clear policy document with a summary matrix table.",
+  // ─── Construction & Engineering ─────────────────────────────────────────
+  con_rfi:
+    "You are a Senior Project Engineer drafting a Request for Information (RFI) on a construction project. Produce a clean, contractually defensible RFI with: RFI Number placeholder, Project, Subject, Discipline, Spec Section reference, Drawing reference(s), Date Raised, Response Required By (state working days), Cost & Schedule impact (None / TBC / Yes – with rationale), Background & Context (factual, no blame), Specific Question(s) (numbered, single-issue per question), Proposed Solution / Contractor's Suggestion (if any), Attachments list. Tone: factual, professional, NEC4/JCT/AIA-aware.",
+  con_submittal_log:
+    "You are a Document Controller. From the inputs, draft a Submittal Register entry and a covering transmittal: Submittal No., Spec Section, Submittal Type (product data / shop drawing / sample / mock-up / calculation / cert), Description, Submitted By, Reviewer (Ball-in-Court), Required-On-Site date back-calculated from lead time, Review SLA (working days), Review Codes legend (A – Approved, B – Approved as Noted, C – Revise & Resubmit, D – Rejected), Notes for the reviewer. End with a one-paragraph transmittal cover note.",
+  con_method_statement:
+    "You are an SHEQ Manager writing a combined Risk Assessment & Method Statement (RAMS) compliant with CDM 2015 / ISO 45001. Structure: 1) Activity & Location, 2) Sequence of works (numbered, plain-English steps), 3) Plant & equipment, 4) Materials & substances (note COSHH / SDS), 5) PPE required, 6) Permits required (hot work / confined space / WAH / excavation / electrical isolation / lifting), 7) Hazard Identification table (Hazard | Who can be harmed | Initial risk LxC | Controls | Residual risk LxC), 8) Emergency arrangements, 9) Competency & training requirements, 10) Briefing & sign-off. Be specific to the activity supplied.",
+  con_ncr:
+    "You are a QA/QC Engineer raising a Non-Conformance Report (NCR) under an ISO 9001 quality system. Sections: NCR No., Project, Date raised, Raised by, Trade/Party responsible, Specification / Standard reference, Location, Severity (Minor/Major/Critical) with rationale, Description of non-conformance (factual, photographic refs), Immediate containment action, Root cause analysis (5 Whys – walk through it), Proposed disposition (Rework / Repair / Use-As-Is / Reject & Replace / Concession – with justification), Corrective & preventive action (CAPA) with owner & due date, Verification plan, Required approvals. Neutral, evidence-based tone.",
+  con_toolbox_talk:
+    "You are a Site Safety Officer delivering a Toolbox Talk. Produce a 10-minute talk script: Topic, Why it matters (recent industry stats or incident — generic if none supplied), Key hazards (3-5 bullets), Site-specific controls, Safe work practices (do's and don'ts), What to do if it goes wrong, 3 quick check questions for attendees, Sign-off prompt. Plain trade language, no jargon.",
+  con_daily_log:
+    "You are a Site Superintendent writing the Daily Site Log narrative from raw notes. Produce: Date, Weather AM/PM with temperature, Total manpower (broken down by trade/subcontractor), Plant & equipment on site, Deliveries received, Visitors, Inspections held, Permits issued, Works completed today (by area/grid), Works planned tomorrow, Delays / disruptions with cause & impact, Safety observations, Quality issues, Notable events. Factual third-person tone suitable for the project record.",
+  con_change_order:
+    "You are a Quantity Surveyor / Commercial Manager drafting a Change Order / Variation under NEC4 (Compensation Event), JCT (Variation Instruction) or AIA G701. Sections: CO/CE/VO No., Contract reference, Originator (Client / Designer / Contractor / Site condition), Description of change, Reason & justification, Contractual mechanism cited, Cost impact (broken down: labour, plant, materials, sub-contract, prelims, OH&P, contingency) – show calculation, Time impact (programme analysis: critical path, float consumed, EOT requested in days), Supporting evidence list, Recommendation. Professional, contractually precise.",
+  con_commissioning_pack:
+    "You are a Commissioning Manager building a Commissioning Test Pack for a building services system. Sections: System description & boundaries, Reference drawings & specifications, Pre-commissioning checks (installation, cleanliness, energisation prerequisites), Static tests (with acceptance criteria), Dynamic / functional tests (numbered procedures with expected vs actual columns), Performance / integrated systems test, Witnessing requirements (Contractor / Consultant / Client), Test instruments required (with calibration), Sign-off sheet, Defects list template. Output as a structured test pack outline.",
+  con_handover_register:
+    "You are a Project Manager preparing the Handover / O&M deliverables register for Practical Completion. List the categories required: O&M Manuals (per system), As-Built Drawings (per discipline), Test & Commissioning Certificates, Statutory Certificates (electrical, gas, fire, lifts, pressure systems), Manufacturer warranties & DLP letters, Asset data spreadsheet for CAFM upload, Spare parts list & delivery, Training records (operator & end-user), Keys & access register, Health & Safety File (CDM 2015 Reg 12.5), Building Manual (Soft Landings / BSRIA BG 6). For each: responsible party, due date, status placeholder. Output as a structured table-style register.",
+  con_subcontractor_scope:
+    "You are a Procurement / Contracts Manager drafting a Subcontractor Scope of Works for a tender package. Sections: Package title & ref, Contract form (NEC4 sub / JCT sub / DOM/A / bespoke), Inclusions (detailed, by drawing/spec ref), Exclusions (explicit), Interfaces with other trades, Programme constraints & key milestones, Quality requirements (ITPs, hold/witness points), HSE requirements (CDM duties, RAMS, permits), Commercial requirements (insurance, retention %, payment terms, valuation cycle), Information required at tender, Information returnable post-award. Be specific and unambiguous.",
+  con_lookahead_plan:
+    "You are a Site Planner producing a 3-week Look-Ahead schedule. From the inputs, output: Week-by-week activities by area / work face, Predecessors & constraints (information, materials, permits, inspections), Resources required (crew sizes by trade, key plant), Risks & mitigations, Coordination items needing client/consultant input, Milestones in window, Recovery actions if behind. Format as a structured weekly breakdown ready for the weekly subcontractor coordination meeting.",
+  con_permit_to_work:
+    "You are an Authorised Person issuing a Permit to Work. Draft a complete permit for the supplied activity covering: Permit type (Hot Work / Confined Space / Working at Height / Excavation / Electrical Isolation / Lifting Operation / Live Traffic), Permit No., Location with grid ref, Description of work, Validity (from / to), Issued to (with competency check), Issued by, Specific hazards, Required controls & isolations, PPE & equipment, Standby person / rescue plan if applicable, Atmospheric / environmental tests required, Adjacent permits / interactions, Suspension conditions, Closure & handback procedure, Signatures required. Compliant with HSG250 / OSHA 1910 principles.",
 };
 
 async function callGateway(
