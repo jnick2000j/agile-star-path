@@ -23,8 +23,11 @@ import {
   LifeBuoy,
   GitBranch,
   Workflow,
+  HardHat,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useVertical } from "@/hooks/useVertical";
 
 interface NavItem {
   label: string;
