@@ -54,7 +54,6 @@ export function VerticalPacksManager() {
       <Tabs defaultValue="manage" className="space-y-4">
         <TabsList>
           <TabsTrigger value="manage"><Package className="h-4 w-4 mr-2" /> Manage Packs</TabsTrigger>
-          <TabsTrigger value="orgs"><Building2 className="h-4 w-4 mr-2" /> Organizations</TabsTrigger>
           <TabsTrigger value="wizard"><Wand2 className="h-4 w-4 mr-2" /> Create Vertical</TabsTrigger>
           <TabsTrigger value="seeds"><Sparkles className="h-4 w-4 mr-2" /> Starter Packs</TabsTrigger>
           <TabsTrigger value="entities"><Plus className="h-4 w-4 mr-2" /> Custom Entities</TabsTrigger>
@@ -62,9 +61,6 @@ export function VerticalPacksManager() {
 
         <TabsContent value="manage">
           <ManagePacksTab verticals={verticals} onChange={refetch} />
-        </TabsContent>
-        <TabsContent value="orgs">
-          <OrgAssignmentTab verticals={verticals.filter((v: any) => v.is_active)} />
         </TabsContent>
         <TabsContent value="wizard">
           <CreateVerticalWizard onCreated={refetch} />
