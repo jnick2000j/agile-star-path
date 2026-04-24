@@ -48,7 +48,7 @@ import { RoleTypesManager } from "@/components/admin/RoleTypesManager";
 import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
-import { OrgVerticalManager } from "@/components/admin/OrgVerticalManager";
+import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
 
@@ -596,7 +596,7 @@ export default function AdminPanel() {
           <AIProviderSettings />
         </TabsContent>
         <TabsContent value="verticals">
-          <OrgVerticalManager />
+          <VerticalPacksManager />
         </TabsContent>
       </Tabs>
     </AppLayout>

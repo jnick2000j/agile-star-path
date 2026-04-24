@@ -4272,6 +4272,7 @@ export type Database = {
           icon: string | null
           id: string
           is_active: boolean
+          is_seed: boolean
           name: string
           sort_order: number
           terminology_overrides: Json
@@ -4286,6 +4287,7 @@ export type Database = {
           icon?: string | null
           id: string
           is_active?: boolean
+          is_seed?: boolean
           name: string
           sort_order?: number
           terminology_overrides?: Json
@@ -4300,6 +4302,7 @@ export type Database = {
           icon?: string | null
           id?: string
           is_active?: boolean
+          is_seed?: boolean
           name?: string
           sort_order?: number
           terminology_overrides?: Json
@@ -5595,7 +5598,15 @@ export type Database = {
           suspension_kind?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_industry_vertical_fkey"
+            columns: ["industry_vertical"]
+            isOneToOne: false
+            referencedRelation: "industry_verticals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permission_modules: {
         Row: {
@@ -9383,6 +9394,138 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vertical_entities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_status_options: string[]
+          description: string | null
+          fields: Json
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_plural: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          vertical_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_status_options?: string[]
+          description?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_plural: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          vertical_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_status_options?: string[]
+          description?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_plural?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          vertical_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vertical_entities_vertical_id_fkey"
+            columns: ["vertical_id"]
+            isOneToOne: false
+            referencedRelation: "industry_verticals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vertical_entity_records: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          data: Json
+          due_date: string | null
+          entity_id: string
+          id: string
+          organization_id: string
+          priority: string | null
+          project_id: string | null
+          record_number: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          due_date?: string | null
+          entity_id: string
+          id?: string
+          organization_id: string
+          priority?: string | null
+          project_id?: string | null
+          record_number?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          due_date?: string | null
+          entity_id?: string
+          id?: string
+          organization_id?: string
+          priority?: string | null
+          project_id?: string | null
+          record_number?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vertical_entity_records_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "vertical_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vertical_entity_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vertical_entity_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

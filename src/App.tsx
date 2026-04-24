@@ -90,6 +90,8 @@ import DailyLogs from "./pages/DailyLogs";
 import PunchList from "./pages/PunchList";
 import Engagements from "./pages/Engagements";
 import Retainers from "./pages/Retainers";
+import VerticalEntityRegister from "./pages/VerticalEntityRegister";
+import VerticalsDocs from "./pages/VerticalsDocs";
 import KnowledgebaseArticle from "./pages/KnowledgebaseArticle";
 import NotFound from "./pages/NotFound";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -191,6 +193,8 @@ const App = () => (
             <Route path="/construction/punch-list" element={<ProtectedRoute><PunchList /></ProtectedRoute>} />
             <Route path="/services/engagements" element={<ProtectedRoute><Engagements /></ProtectedRoute>} />
             <Route path="/services/retainers" element={<ProtectedRoute><Retainers /></ProtectedRoute>} />
+            <Route path="/verticals/docs" element={<ProtectedRoute><VerticalsDocs /></ProtectedRoute>} />
+            <Route path="/verticals/:slug" element={<ProtectedRoute><VerticalEntityRegister /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </PermissionsProvider>
