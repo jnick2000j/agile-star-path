@@ -40,6 +40,7 @@ interface NavItem {
 export function Sidebar() {
   const location = useLocation();
   const { user, userRole } = useAuth();
+  const { hasModule, term } = useVertical();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [hasStakeholderAccess, setHasStakeholderAccess] = useState(false);
 
