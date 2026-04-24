@@ -55,7 +55,7 @@ export async function triggerCSATForClosedTicket(ticket: {
   const expires = new Date();
   expires.setDate(expires.getDate() + 30);
 
-  let responseId = existing?.id;
+  let finalToken = token;
   if (!existing) {
     const { data: inserted, error: insErr } = await supabase
       .from("csat_responses")
@@ -67,26 +67,21 @@ export async function triggerCSATForClosedTicket(ticket: {
         expires_at: expires.toISOString(),
         sent_at: new Date().toISOString(),
       })
-      .select("id, token")
+      .select("token")
       .single();
     if (insErr || !inserted) return;
-    responseId = inserted.id;
+    finalToken = inserted.token;
   } else {
-    await supabase
+    const { data: row } = await supabase
       .from("csat_responses")
       .update({ sent_at: new Date().toISOString() })
-      .eq("id", existing.id);
+      .eq("id", existing.id)
+      .select("token")
+      .single();
+    if (row) finalToken = row.token;
   }
 
-  // Build survey URL
-  const surveyUrl = `${window.location.origin}/csat/${existing?.id ? "" : token}`;
-  // We want token in URL, not id. Re-read.
-  const { data: row } = await supabase
-    .from("csat_responses")
-    .select("token")
-    .eq("id", responseId!)
-    .maybeSingle();
-  const finalUrl = `${window.location.origin}/csat/${row?.token ?? token}`;
+  const finalUrl = `${window.location.origin}/csat/${finalToken}`;
 
   // Send notification (best-effort)
   await supabase.functions.invoke("helpdesk-notify", {
