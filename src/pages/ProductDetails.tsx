@@ -298,7 +298,7 @@ export default function ProductDetails() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchProduct(), fetchFeatures(), fetchDependencies(), fetchStatusHistory()]);
+    await Promise.all([fetchProduct(), fetchFeatures(), fetchTasks(), fetchDependencies(), fetchStatusHistory()]);
     setLoading(false);
   };
 
