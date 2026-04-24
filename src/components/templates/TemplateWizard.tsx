@@ -1820,12 +1820,12 @@ export function TemplateWizard({ open, onOpenChange, templateType, templateName 
         // Deliverables are tracked as work packages in the project module.
         const { error } = await supabase.from("work_packages").insert({
           name: formData.name,
-          description: [formData.description || "", formData.acceptance_criteria ? `\n\nAcceptance criteria:\n${formData.acceptance_criteria}` : ""].join(""),
+          description: formData.description || null,
+          deliverables: formData.acceptance_criteria || null,
           project_id: formData.project_id || null,
-          priority: formData.priority || "medium",
-          status: "not_started",
-          start_date: formData.start_date || null,
-          end_date: formData.end_date || null,
+          status: "pending",
+          target_start: formData.start_date || null,
+          target_end: formData.end_date || null,
           organization_id: formData.organization_id,
           created_by: user.id,
         });
