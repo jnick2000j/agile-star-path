@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
@@ -41,6 +42,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
   const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
 
   const handleOpen = (newOpen: boolean) => {
@@ -82,15 +84,26 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
     if (open) fetchData();
   }, [open]);
 
+  // Pre-fill organization with the current active organization when dialog opens
+  useEffect(() => {
+    if (open && currentOrganization?.id && !formData.organization_id) {
+      setFormData((f) => ({ ...f, organization_id: currentOrganization.id }));
+    }
+  }, [open, currentOrganization?.id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!formData.organization_id) {
+      toast.error("Please select an organization");
+      return;
+    }
 
     setLoading(true);
     try {
       const { data: created, error } = await supabase.from("products").insert({
         ...formData,
-        organization_id: formData.organization_id || null,
+        organization_id: formData.organization_id,
         programme_id: formData.programme_id || null,
         project_id: formData.project_id && formData.project_id !== "none" ? formData.project_id : null,
         launch_date: formData.launch_date || null,
@@ -173,13 +186,12 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
               />
             </div>
             <div>
-              <Label htmlFor="organization">Organization</Label>
-              <Select value={formData.organization_id || "none"} onValueChange={(v) => setFormData({ ...formData, organization_id: v === "none" ? "" : v })}>
+              <Label htmlFor="organization">Organization *</Label>
+              <Select value={formData.organization_id} onValueChange={(v) => setFormData({ ...formData, organization_id: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select organization" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
                   ))}

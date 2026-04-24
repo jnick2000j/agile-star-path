@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
 
   const handleOpen = (newOpen: boolean) => {
@@ -58,6 +60,13 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
     };
     if (open) fetchOrganizations();
   }, [open]);
+
+  // Pre-fill organization with the current active organization when dialog opens
+  useEffect(() => {
+    if (open && currentOrganization?.id && !formData.organization_id) {
+      setFormData((f) => ({ ...f, organization_id: currentOrganization.id }));
+    }
+  }, [open, currentOrganization?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
