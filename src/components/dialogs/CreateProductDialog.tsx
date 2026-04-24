@@ -103,7 +103,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
     try {
       const { data: created, error } = await supabase.from("products").insert({
         ...formData,
-        organization_id: formData.organization_id || null,
+        organization_id: formData.organization_id,
         programme_id: formData.programme_id || null,
         project_id: formData.project_id && formData.project_id !== "none" ? formData.project_id : null,
         launch_date: formData.launch_date || null,
