@@ -74,6 +74,25 @@ Deno.serve(async (req) => {
     decision_comment: comment ?? null,
   }).eq("id", approval_id);
 
+  const { data: run } = await admin.from("helpdesk_workflow_runs").select("triggered_by, ticket_id, organization_id").eq("id", approval.run_id).maybeSingle();
+
+  await fetch(`${SUPABASE_URL}/functions/v1/notification-dispatcher`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+    body: JSON.stringify({
+      event_type: "helpdesk_workflow_decision",
+      recipient_user_id: run?.triggered_by ?? null,
+      actor_user_id: u.user.id,
+      organization_id: approval.organization_id,
+      helpdesk_approval_id: approval_id,
+      entity_type: "helpdesk_ticket",
+      entity_id: run?.ticket_id ?? approval.ticket_id ?? null,
+      decision,
+      decision_comment: comment ?? null,
+      link: "/support/workflows",
+    }),
+  }).catch((e) => console.error("helpdesk workflow decision notification failed", e));
+
   if (decision === "approved") {
     // Resume the run
     await fetch(`${SUPABASE_URL}/functions/v1/helpdesk-workflow-runner/run/${approval.run_id}/resume`, {

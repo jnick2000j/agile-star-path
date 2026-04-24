@@ -334,6 +334,23 @@ async function executeStep(
         .select("id")
         .single();
       if (error) return { status: "failed", output: { error: error.message } };
+      if (approval?.id && (config.approver_user_id || ctx.run.triggered_by)) {
+        await fetch(`${SUPABASE_URL}/functions/v1/notification-dispatcher`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+          body: JSON.stringify({
+            event_type: "helpdesk_workflow_pending",
+            recipient_user_id: config.approver_user_id ?? ctx.run.triggered_by,
+            actor_user_id: ctx.run.triggered_by ?? null,
+            organization_id: ctx.run.organization_id,
+            helpdesk_approval_id: approval.id,
+            entity_type: "helpdesk_ticket",
+            entity_id: ctx.ticket?.id ?? null,
+            link: "/support/workflows",
+            extra: { ticket_reference: ctx.ticket?.reference_number ?? ctx.ticket?.subject ?? null },
+          }),
+        }).catch((e) => console.error("helpdesk pending approval notification failed", e));
+      }
       return { status: "awaiting_approval", output: { approval_id: approval.id }, pause: { approvalId: approval.id } };
     }
 

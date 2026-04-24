@@ -305,6 +305,30 @@ export function ApprovalTriadPanel({
         })
         .eq("id", id);
       if (error) throw error;
+
+      const recipients = approvals
+        .filter((row) => row.id !== id && row.reviewer_id !== user?.id)
+        .map((row) => row.reviewer_id);
+      if (ownerId && ownerId !== user?.id) recipients.push(ownerId);
+      notifiers.forEach((row) => { if (row.user_id !== user?.id) recipients.push(row.user_id); });
+
+      await supabase.functions.invoke("notification-dispatcher", {
+        body: {
+          event_type: "workflow_decision",
+          recipient_user_ids: Array.from(new Set(recipients)),
+          actor_user_id: user?.id,
+          organization_id: organizationId ?? null,
+          entity_type: entityType,
+          entity_id: entityId,
+          workflow_approval_id: id,
+          approval_role: approvals.find((row) => row.id === id)?.approval_role ?? null,
+          decision,
+          decision_comment: comments || conditions || null,
+          link: window.location.href,
+        },
+      }).catch((notifyError) => {
+        console.error("workflow decision notification failed", notifyError);
+      });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey });

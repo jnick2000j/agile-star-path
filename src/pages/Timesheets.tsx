@@ -542,6 +542,20 @@ export default function Timesheets() {
       toast.error(error.message);
       return;
     }
+    await supabase.functions.invoke("notification-dispatcher", {
+      body: {
+        event_type: "timesheet_submitted",
+        recipient_user_id: submitApproverId,
+        actor_user_id: user?.id,
+        organization_id: currentOrganization?.id ?? null,
+        timesheet_id: data.id,
+        timesheet_reference: data.reference_number ?? `${data.period_start} to ${data.period_end}`,
+        timesheet_status: "submitted",
+        link: "/timesheets",
+      },
+    }).catch((notifyError) => {
+      console.error("timesheet submission notification failed", notifyError);
+    });
     setSelectedSheet(data as Timesheet);
     setMySheets((s) => s.map((x) => (x.id === data.id ? (data as Timesheet) : x)));
     setSubmitOpen(false);
@@ -578,6 +592,21 @@ export default function Timesheets() {
       toast.error(error.message);
       return;
     }
+    await supabase.functions.invoke("notification-dispatcher", {
+      body: {
+        event_type: "timesheet_decision",
+        recipient_user_id: selectedSheet.user_id,
+        actor_user_id: user?.id,
+        organization_id: currentOrganization?.id ?? null,
+        timesheet_id: data.id,
+        timesheet_reference: data.reference_number ?? `${data.period_start} to ${data.period_end}`,
+        decision: decisionAction === "approve" ? "approved" : "rejected",
+        decision_comment: decisionNotes.trim() || null,
+        link: "/timesheets",
+      },
+    }).catch((notifyError) => {
+      console.error("timesheet decision notification failed", notifyError);
+    });
     setSelectedSheet(data as Timesheet);
     setApprovalSheets((s) => s.map((x) => (x.id === data.id ? (data as Timesheet) : x)));
     setDecisionOpen(false);
