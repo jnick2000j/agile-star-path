@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, Rocket, Check, ArrowRight, ArrowLeft, Mail, Headphones, GitBranch, Layers, HardHat, Briefcase, Server, Code2 } from "lucide-react";
+import { Building2, Users, Rocket, Check, ArrowRight, ArrowLeft, Mail, Headphones, GitBranch, Layers, HardHat, Briefcase, Cpu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 type Intent = "ppm" | "helpdesk" | "itsm";
-type Vertical = "it_infrastructure" | "software_saas" | "construction" | "professional_services";
+type Vertical = "technology" | "construction" | "professional_services";
 type Step = "intent" | "vertical" | "org" | "invite" | "plan" | "done";
 
 export default function Onboarding() {
@@ -22,7 +22,7 @@ export default function Onboarding() {
   const initialIntent = (searchParams.get("plan_kind") as Intent | null) || null;
   const [step, setStep] = useState<Step>(initialIntent ? "vertical" : "intent");
   const [intent, setIntent] = useState<Intent>(initialIntent || "ppm");
-  const [vertical, setVertical] = useState<Vertical>("it_infrastructure");
+  const [vertical, setVertical] = useState<Vertical>("technology");
   const [loading, setLoading] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [orgId, setOrgId] = useState<string | null>(null);
@@ -196,8 +196,7 @@ export default function Onboarding() {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
-                { id: "it_infrastructure" as Vertical, icon: Server, title: "IT & Infrastructure", desc: "ITSM, Helpdesk, Change Management, infra projects" },
-                { id: "software_saas" as Vertical, icon: Code2, title: "Software & SaaS", desc: "Agile, sprints, roadmap, feature pipeline" },
+                { id: "technology" as Vertical, icon: Cpu, title: "Technology", desc: "IT, Infra, Software & SaaS — programmes, products, projects, sprints, ITSM, helpdesk" },
                 { id: "construction" as Vertical, icon: HardHat, title: "Construction & Engineering", desc: "RFIs, submittals, daily logs, punch lists" },
                 { id: "professional_services" as Vertical, icon: Briefcase, title: "Professional Services", desc: "Engagements, retainers, billable hours" },
               ].map(({ id, icon: Icon, title, desc }) => (

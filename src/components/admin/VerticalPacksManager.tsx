@@ -189,7 +189,7 @@ function OrgAssignmentTab({ verticals }: { verticals: any[] }) {
             <div className="text-xs text-muted-foreground">{org.slug}</div>
           </div>
           <Select
-            value={org.industry_vertical || "it_infrastructure"}
+            value={org.industry_vertical || "technology"}
             onValueChange={(v) => updateVertical.mutate({ orgId: org.id, verticalId: v })}
           >
             <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
