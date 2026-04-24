@@ -71,6 +71,8 @@ export function OrgOnboardingWizard({
   hideOrgPicker,
   onSuccess,
 }: Props) {
+  const { userRole } = useAuth();
+  const isPlatformAdmin = userRole === "admin";
   const [step, setStep] = useState<Step>("org");
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
