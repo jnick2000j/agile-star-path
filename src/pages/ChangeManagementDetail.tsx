@@ -22,6 +22,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AutomationsTab } from "@/components/automations/AutomationsTab";
 
 const STATUS_OPTIONS = ["draft","submitted","in_review","cab_review","needs_information","approved","rejected","scheduled","in_progress","implemented","closed","cancelled","failed"];
 const STATUS_STYLES: Record<string, string> = {
@@ -494,6 +495,7 @@ export default function ChangeManagementDetail() {
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="approvals">Approvals ({approvals.length})</TabsTrigger>
                 <TabsTrigger value="activity">Activity ({activity.length})</TabsTrigger>
+                <TabsTrigger value="automations">Automations</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
@@ -809,6 +811,10 @@ export default function ChangeManagementDetail() {
                     );
                   })}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="automations">
+                <AutomationsTab module="change" entityId={change.id} entityType="change" />
               </TabsContent>
             </Tabs>
           </div>
