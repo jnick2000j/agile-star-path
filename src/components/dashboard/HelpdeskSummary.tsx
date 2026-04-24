@@ -97,7 +97,7 @@ export function HelpdeskSummary() {
               {data.recent.map((t: any) => (
                 <li key={t.id}>
                   <Link
-                    to={`/support/${t.id}`}
+                    to={`/support/tickets/${t.id}`}
                     className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/50 transition-colors group"
                   >
                     <Badge

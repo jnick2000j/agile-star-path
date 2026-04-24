@@ -50,9 +50,9 @@ export function StatusIndicators() {
   });
 
   const groups: EntityGroup[] = [
-    { label: "Programmes", icon: <Layers className="h-4 w-4" />, items: data?.programmes || [], basePath: "/programmes" },
-    { label: "Projects", icon: <FolderKanban className="h-4 w-4" />, items: data?.projects || [], basePath: "/projects" },
-    { label: "Products", icon: <Package className="h-4 w-4" />, items: data?.products || [], basePath: "/products" },
+    { label: "Programmes", icon: <Layers className="h-4 w-4" />, items: data?.programmes || [], basePath: "/programmes/details" },
+    { label: "Projects", icon: <FolderKanban className="h-4 w-4" />, items: data?.projects || [], basePath: "/projects/details" },
+    { label: "Products", icon: <Package className="h-4 w-4" />, items: data?.products || [], basePath: "/products/details" },
   ];
 
   if (isLoading) {
@@ -84,7 +84,7 @@ export function StatusIndicators() {
                   {group.items.map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => navigate(`${group.basePath}/${item.id}`)}
+                      onClick={() => navigate(`${group.basePath}?id=${item.id}`)}
                       className="flex items-center gap-2 w-full text-left rounded-md px-2 py-1 hover:bg-accent/50 transition-colors group"
                     >
                       <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", healthColor[item.health] || "bg-muted-foreground")} />
