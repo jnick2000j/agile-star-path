@@ -1,9 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  FileText, Shield, BarChart3, Users, Layers, 
+import {
+  FileText, Shield, BarChart3, Users, Layers,
   CheckCircle2, AlertTriangle, TrendingUp, Calendar,
-  Target, Zap, Clock, ListChecks, Milestone
+  Target, Zap, Clock, ListChecks, Milestone,
+  LifeBuoy, Headphones, GitBranch, ShieldAlert, Gauge, Workflow,
 } from "lucide-react";
 
 export interface ReportTemplate {
@@ -11,7 +12,7 @@ export interface ReportTemplate {
   title: string;
   description: string;
   query: string;
-  category: "prince2" | "msp" | "agile" | "product" | "general";
+  category: "prince2" | "msp" | "agile" | "product" | "general" | "change" | "helpdesk";
   icon: React.ElementType;
 }
 
@@ -219,11 +220,119 @@ export const reportTemplates: ReportTemplate[] = [
   },
   {
     key: "general-change",
-    title: "Change Control Report",
-    description: "Summary of all change requests and their impact.",
-    query: "Generate a Change Control Report covering: change requests by status, impact analysis (cost, time, quality), approved changes and their implementation status, pending decisions, rejected changes with rationale, and change trend analysis.",
+    title: "Project Change Control Report",
+    description: "Summary of all project change requests and their impact.",
+    query: "Generate a Project Change Control Report covering: project change_requests by status, impact analysis (cost, time, quality), approved changes and their implementation status, pending decisions, rejected changes with rationale, and change trend analysis.",
     category: "general",
     icon: Clock,
+  },
+
+  // ITIL Change Management Reports
+  {
+    key: "cm-pipeline",
+    title: "Change Pipeline Status",
+    description: "Live view of all changes by stage with risk and impact breakdown.",
+    query: "Generate a Change Management Pipeline Report from changeManagement.requests covering: counts by status (draft, submitted, in_review, approved, scheduled, in_progress, implemented, closed, rejected), distribution by change_type (standard / normal / emergency), impact × urgency risk matrix, average risk_score, top 10 highest-risk in-flight changes with owner and planned window, and any changes overdue against their planned_end_at.",
+    category: "change",
+    icon: GitBranch,
+  },
+  {
+    key: "cm-cab",
+    title: "Change Advisory Board (CAB) Pack",
+    description: "Briefing pack of changes awaiting CAB review with full context.",
+    query: "Generate a CAB briefing pack of all changeManagement.requests in status 'submitted' or 'in_review'. For each: reference_number, title, change_type, requested_by, owner, planned window, downtime_required + downtime_minutes, impact, urgency, risk_score, affected_services, business_justification, summary of implementation_plan and rollback_plan, related_ticket_id, and outstanding required approvals from changeManagement.approvals. End with a recommended approval order based on risk and dependencies.",
+    category: "change",
+    icon: Users,
+  },
+  {
+    key: "cm-emergency",
+    title: "Emergency Change Review",
+    description: "Post-implementation review of emergency changes for governance.",
+    query: "Generate an Emergency Change Review Report. From changeManagement.requests where change_type='emergency', show: reference_number, title, raised_at vs planned_start_at (lead time), actual_start_at and actual_end_at, business_justification, downtime taken, status outcome, related_ticket_id and any post-implementation activity events. Highlight emergencies that bypassed normal approval, recurring emergency themes by affected_services, and recommendations to reduce future emergencies.",
+    category: "change",
+    icon: ShieldAlert,
+  },
+  {
+    key: "cm-success-rate",
+    title: "Change Success & Failure Rate",
+    description: "KPI report on successful vs failed/rolled-back changes over time.",
+    query: "Generate a Change Success Rate KPI report from changeManagement.requests and changeManagement.activity. Compute: total closed/implemented changes, success rate (status='implemented' or 'closed' with no rollback activity), failed change rate (any 'rolled_back' or 'failed' activity events or status='rejected' after implementation), mean time to implement (created_at → actual_end_at), trend by month, breakdown by change_type and by impact level, and the top contributing teams/owners. Provide ITIL-style commentary and recommendations.",
+    category: "change",
+    icon: TrendingUp,
+  },
+  {
+    key: "cm-approvals",
+    title: "Approval Lead Time Report",
+    description: "How long approvals take by approver, kind, and change type.",
+    query: "Generate an Approval Lead Time report using changeManagement.approvals joined with changeManagement.requests. For each approval_kind, show: number of approvals, mean and median time from change created_at to decided_at, approval rate vs rejection rate, count of changes still awaiting decision, and top 5 longest pending approvals with reference_number and age in days. Highlight bottlenecks.",
+    category: "change",
+    icon: Workflow,
+  },
+  {
+    key: "cm-downtime",
+    title: "Downtime & Risk Exposure",
+    description: "Planned downtime, risk score and affected services across changes.",
+    query: "Generate a Downtime & Risk Exposure report from changeManagement.requests. List upcoming changes (planned_start_at >= today) where downtime_required is true with: reference_number, title, planned window, downtime_minutes, affected_services, impact, urgency and risk_score. Aggregate total planned downtime minutes by week and by affected service, flag overlapping windows and high-risk concentrations.",
+    category: "change",
+    icon: Clock,
+  },
+
+  // Helpdesk / Service Desk Reports
+  {
+    key: "hd-sla-attainment",
+    title: "SLA Attainment Report",
+    description: "Response and resolution SLA performance across ticket types.",
+    query: "Generate an SLA Attainment report from helpdesk.tickets. For each ticket_type and priority compute: total tickets, response SLA met % (sla_response_breached=false among tickets with first_response_at), resolution SLA met % (sla_resolution_breached=false among resolved tickets), breach counts, mean response time (created_at → first_response_at) and mean resolution time (created_at → resolved_at), excluding paused time (sla_paused_seconds). Surface top breaches and at-risk in-flight tickets.",
+    category: "helpdesk",
+    icon: Gauge,
+  },
+  {
+    key: "hd-volume-trend",
+    title: "Ticket Volume & Trend Report",
+    description: "Inbound volume, backlog and trend analysis across the service desk.",
+    query: "Generate a Ticket Volume & Trend report from helpdesk.tickets. Show daily/weekly inbound, resolved and backlog counts for the last 30 and 90 days, distribution by ticket_type (Support, Incident, Service Request, Question, Problem), distribution by priority, top 10 requesting teams and assignees, and a leading-indicators section flagging unusual spikes by type.",
+    category: "helpdesk",
+    icon: BarChart3,
+  },
+  {
+    key: "hd-incident",
+    title: "Incident Management Report",
+    description: "Incident KPIs aligned with ITIL incident management.",
+    query: "Generate an ITIL Incident Management report from helpdesk.tickets where ticket_type='incident'. Cover: incidents by priority, MTTA (mean time to first_response_at), MTTR (mean time to resolved_at), reopened incidents, top recurring incident themes by subject, breach rate vs SLA, escalations, and links to related change_requests when impact looks change-induced.",
+    category: "helpdesk",
+    icon: AlertTriangle,
+  },
+  {
+    key: "hd-service-requests",
+    title: "Service Request Fulfilment",
+    description: "Service request throughput, fulfilment time and backlog.",
+    query: "Generate a Service Request Fulfilment report from helpdesk.tickets where ticket_type='service_request'. Cover: requests created, fulfilled, in progress, mean fulfilment time, fulfilment SLA attainment, top requested catalog items (helpdesk.catalogLists), team workload and aged requests > 14 days. Recommend automation candidates.",
+    category: "helpdesk",
+    icon: ListChecks,
+  },
+  {
+    key: "hd-problem",
+    title: "Problem Management Report",
+    description: "Problems, root causes and known errors with linked incidents.",
+    query: "Generate an ITIL Problem Management report from helpdesk.tickets where ticket_type='problem'. Cover: open problems, problem age, problems by priority, root-cause themes, count of related incidents per problem, problems linked to changeManagement.requests, and recommended permanent fixes.",
+    category: "helpdesk",
+    icon: ShieldAlert,
+  },
+  {
+    key: "hd-csat",
+    title: "Customer Satisfaction (CSAT) Report",
+    description: "CSAT trend by team, type and priority with verbatims.",
+    query: "Generate a CSAT report using csat_rating in helpdesk.tickets. Show overall CSAT %, trend by week, breakdown by ticket_type, priority, assignee and team_id, lowest-scoring tickets with subject, and any patterns linking low CSAT to SLA breaches or reopened tickets.",
+    category: "helpdesk",
+    icon: Headphones,
+  },
+  {
+    key: "hd-agent-workload",
+    title: "Agent Workload Report",
+    description: "Open ticket load, throughput and aging by assignee.",
+    query: "Generate an Agent Workload report from helpdesk.tickets. Per assignee_id show: open tickets, tickets resolved in the last 7/30 days, average resolution time, breach count, current backlog age distribution and CSAT. Highlight assignees with workload > 1.5× team average and recommend rebalancing.",
+    category: "helpdesk",
+    icon: LifeBuoy,
   },
 ];
 
@@ -232,6 +341,8 @@ const categoryLabels: Record<string, { label: string; color: string }> = {
   msp: { label: "MSP", color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" },
   agile: { label: "Agile", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
   product: { label: "Product", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
+  change: { label: "Change Mgmt", color: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" },
+  helpdesk: { label: "Helpdesk", color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200" },
   general: { label: "General", color: "bg-muted text-muted-foreground" },
 };
 

@@ -76,6 +76,12 @@ serve(async (req) => {
       { data: exceptions },
       { data: lessonsLearned },
       { data: stakeholders },
+      { data: helpdeskTickets },
+      { data: helpdeskSlaPolicies },
+      { data: helpdeskCatalogLists },
+      { data: cmRequests },
+      { data: cmApprovals },
+      { data: cmActivity },
     ] = await Promise.all([
       supabase.from("programmes").select("*"),
       supabase.from("projects").select("*"),
@@ -89,6 +95,26 @@ serve(async (req) => {
       supabase.from("exceptions").select("*"),
       supabase.from("lessons_learned").select("*"),
       supabase.from("stakeholders").select("*"),
+      supabase.from("helpdesk_tickets").select(
+        "id, reference_number, subject, ticket_type, status, priority, requester_id, assignee_id, team_id, " +
+        "created_at, updated_at, first_response_at, resolved_at, closed_at, " +
+        "sla_response_due_at, sla_resolution_due_at, sla_response_breached, sla_resolution_breached, " +
+        "sla_paused_at, sla_paused_seconds, csat_rating, programme_id, project_id, product_id"
+      ).order("created_at", { ascending: false }).limit(500),
+      supabase.from("helpdesk_sla_policies").select("*"),
+      supabase.from("helpdesk_catalog_lists").select("id, key, name, is_active"),
+      supabase.from("change_management_requests").select(
+        "id, reference_number, title, status, change_type, impact, urgency, risk_score, " +
+        "owner_id, requested_by, planned_start_at, planned_end_at, actual_start_at, actual_end_at, " +
+        "downtime_required, downtime_minutes, programme_id, project_id, product_id, related_ticket_id, " +
+        "created_at, updated_at"
+      ).order("created_at", { ascending: false }).limit(500),
+      supabase.from("change_management_approvals").select(
+        "id, change_id, approval_kind, decision, decided_at, sequence, required"
+      ).limit(2000),
+      supabase.from("change_management_activity").select(
+        "id, change_id, event_type, created_at"
+      ).order("created_at", { ascending: false }).limit(500),
     ]);
 
     const portfolioContext = JSON.stringify({
@@ -104,11 +130,25 @@ serve(async (req) => {
       exceptions: exceptions || [],
       lessonsLearned: lessonsLearned || [],
       stakeholders: stakeholders || [],
+      helpdesk: {
+        tickets: helpdeskTickets || [],
+        slaPolicies: helpdeskSlaPolicies || [],
+        catalogLists: helpdeskCatalogLists || [],
+      },
+      changeManagement: {
+        requests: cmRequests || [],
+        approvals: cmApprovals || [],
+        activity: cmActivity || [],
+      },
     });
 
-    const systemPrompt = `You are an expert portfolio and programme management report analyst. You have access to all data from a programme/project management platform. Generate detailed, professional reports based on the user's natural language query.
+    const systemPrompt = `You are an expert portfolio, programme, service-management and change-management report analyst. You have access to all data from a unified PPM + ITSM platform. Generate detailed, professional reports based on the user's natural language query.
 
-The platform manages programmes, projects, products, risks, issues, benefits, milestones, tasks, change requests, exceptions, lessons learned, and stakeholders.
+The platform manages programmes, projects, products, risks, issues, benefits, milestones, tasks, project change requests, exceptions, lessons learned, stakeholders, helpdesk tickets (with SLA timers and breach tracking) and ITIL-style change management requests (with approvals, impact/urgency scoring and implementation activity).
+
+When asked about service desk performance, lean on helpdesk.tickets — calculate SLA attainment from sla_response_breached / sla_resolution_breached, average resolution time from created_at→resolved_at, distributions by ticket_type, priority, status, team and CSAT.
+
+When asked about change management, lean on changeManagement.requests, approvals and activity — break down by change_type (standard/normal/emergency), status pipeline, impact × urgency risk matrix, downtime exposure, approval lead time and post-implementation review status.
 
 Current portfolio data:
 ${portfolioContext}
