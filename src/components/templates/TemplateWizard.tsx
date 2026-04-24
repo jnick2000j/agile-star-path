@@ -740,6 +740,585 @@ const getWizardSteps = (templateType: TemplateType, orgs: Organization[], progra
           ],
         },
       ];
+
+    // ─── Construction & Engineering ────────────────────────────────────────
+    case "con_rfi_form":
+      return [
+        {
+          title: "RFI Basics",
+          description: "Identify the project and the question.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, placeholder: "Select project", options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "subject", label: "Subject", type: "text", required: true, placeholder: "e.g. Clash between L2 ductwork and beam B-12" },
+            { key: "discipline", label: "Discipline", type: "select", options: [
+              { value: "architectural", label: "Architectural" },
+              { value: "structural", label: "Structural" },
+              { value: "mechanical", label: "Mechanical" },
+              { value: "electrical", label: "Electrical" },
+              { value: "plumbing", label: "Plumbing" },
+              { value: "civil", label: "Civil" },
+              { value: "fire", label: "Fire / Life Safety" },
+              { value: "facade", label: "Façade" },
+            ]},
+          ],
+        },
+        {
+          title: "Question & Refs",
+          description: "Spec / drawing references and the actual question.",
+          fields: [
+            { key: "spec_section", label: "Spec Section", type: "text", placeholder: "e.g. 23 31 13" },
+            { key: "drawing_ref", label: "Drawing Reference(s)", type: "text", placeholder: "e.g. M-202 Rev C" },
+            { key: "question", label: "Question", type: "textarea", required: true, placeholder: "One specific question — keep it answerable", fullWidth: true },
+            { key: "proposed_solution", label: "Proposed solution (optional)", type: "textarea", fullWidth: true },
+          ],
+        },
+        {
+          title: "Routing & SLA",
+          description: "Who needs to answer and by when.",
+          fields: [
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "low", label: "Low" }, { value: "medium", label: "Medium" }, { value: "high", label: "High" }, { value: "critical", label: "Critical" },
+            ]},
+            { key: "due_date", label: "Response due", type: "date" },
+          ],
+        },
+      ];
+
+    case "con_submittal_form":
+      return [
+        {
+          title: "Submittal Basics",
+          description: "What is being submitted and against which spec.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "title", label: "Title", type: "text", required: true, placeholder: "e.g. Acoustic ceiling tile data sheet" },
+            { key: "spec_section", label: "Spec Section", type: "text", placeholder: "e.g. 09 51 13" },
+            { key: "submittal_type", label: "Type", type: "select", options: [
+              { value: "product_data", label: "Product data" },
+              { value: "shop_drawing", label: "Shop drawing" },
+              { value: "sample", label: "Sample" },
+              { value: "mock_up", label: "Mock-up" },
+              { value: "calculation", label: "Calculation" },
+              { value: "manufacturer_cert", label: "Manufacturer cert" },
+            ]},
+          ],
+        },
+        {
+          title: "Description & Timing",
+          description: "Detail and required-on-site date.",
+          fields: [
+            { key: "description", label: "Description", type: "textarea", fullWidth: true, placeholder: "What is included, lead time considerations" },
+            { key: "due_date", label: "Reviewer due date", type: "date", helpText: "Back-calculate from required-on-site minus procurement lead time" },
+          ],
+        },
+      ];
+
+    case "con_daily_log_form":
+      return [
+        {
+          title: "Day & Site",
+          description: "When and where.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "log_date", label: "Date", type: "date", required: true },
+            { key: "weather", label: "Weather AM / PM", type: "text", placeholder: "e.g. cloudy AM, rain PM, 12°C" },
+            { key: "crew_count", label: "Total manpower on site", type: "number", placeholder: "e.g. 42" },
+            { key: "hours_worked", label: "Crew-hours worked", type: "number", placeholder: "e.g. 336" },
+          ],
+        },
+        {
+          title: "Activity",
+          description: "Works performed, delays, visitors.",
+          fields: [
+            { key: "work_performed", label: "Work performed today", type: "textarea", required: true, fullWidth: true, placeholder: "By trade / area / grid" },
+            { key: "delays", label: "Delays / disruptions", type: "textarea", fullWidth: true, placeholder: "Cause, area affected, impact (hours/days)" },
+            { key: "safety_incidents", label: "Safety observations / incidents", type: "textarea", fullWidth: true },
+            { key: "visitors", label: "Visitors / inspections", type: "textarea", fullWidth: true },
+            { key: "notes", label: "Other notes", type: "textarea", fullWidth: true },
+          ],
+        },
+      ];
+
+    case "con_punch_item_form":
+      return [
+        {
+          title: "Defect / Snag",
+          description: "What was found and where.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "description", label: "Description", type: "textarea", required: true, fullWidth: true, placeholder: "What's wrong / what needs doing" },
+            { key: "location", label: "Location (level / room / grid)", type: "text", placeholder: "e.g. L2-203, Grid C-7" },
+            { key: "trade", label: "Trade responsible", type: "text", placeholder: "e.g. M&E sub, plasterer, joiner" },
+          ],
+        },
+        {
+          title: "Priority & Closeout",
+          description: "Severity and target close.",
+          fields: [
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "low", label: "Low" }, { value: "medium", label: "Medium" }, { value: "high", label: "High" }, { value: "critical", label: "Critical (blocks PC)" },
+            ]},
+            { key: "due_date", label: "Target close date", type: "date" },
+          ],
+        },
+      ];
+
+    case "con_change_order_form":
+      return [
+        {
+          title: "Change Summary",
+          description: "What's changing and why.",
+          fields: [
+            orgField,
+            { key: "title", label: "Change title", type: "text", required: true, placeholder: "e.g. Add fire-rated partition to L3 plant room" },
+            { key: "description", label: "Description", type: "textarea", required: true, fullWidth: true },
+            { key: "change_type", label: "Type", type: "select", required: true, options: [
+              { value: "scope", label: "Scope" }, { value: "schedule", label: "Schedule" }, { value: "budget", label: "Budget" }, { value: "quality", label: "Quality" },
+            ]},
+            { key: "reason", label: "Reason / contractual mechanism", type: "textarea", fullWidth: true, placeholder: "NEC4 CE, JCT VO, AIA G701, site condition…" },
+          ],
+        },
+        {
+          title: "Cost & Time Impact",
+          description: "Quantify the impact.",
+          fields: [
+            { key: "cost_impact", label: "Cost impact (currency)", type: "number", placeholder: "e.g. 12500" },
+            { key: "time_impact_days", label: "Time impact (working days on critical path)", type: "number", placeholder: "e.g. 7" },
+            { key: "impact_summary", label: "Summary for the change board", type: "textarea", fullWidth: true },
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "low", label: "Low" }, { value: "medium", label: "Medium" }, { value: "high", label: "High" }, { value: "critical", label: "Critical" },
+            ]},
+            { key: "date_required", label: "Decision required by", type: "date" },
+            ...entityParentFields(false),
+          ],
+        },
+      ];
+
+    case "con_permit_to_work_form":
+      return [
+        {
+          title: "Permit Details",
+          description: "Type, location and validity.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "permit_type", label: "Permit type", type: "select", required: true, options: [
+              { value: "hot_work", label: "Hot work" },
+              { value: "confined_space", label: "Confined space" },
+              { value: "working_at_height", label: "Working at height" },
+              { value: "excavation", label: "Excavation" },
+              { value: "electrical_isolation", label: "Electrical isolation" },
+              { value: "lifting_operation", label: "Lifting operation" },
+              { value: "live_traffic", label: "Live traffic management" },
+            ]},
+            { key: "activity", label: "Activity description", type: "textarea", required: true, fullWidth: true },
+            { key: "location", label: "Location (with grid)", type: "text", placeholder: "e.g. L4 Grid C-7 to D-9" },
+          ],
+        },
+        {
+          title: "Validity & Controls",
+          description: "When and under what controls.",
+          fields: [
+            { key: "valid_from", label: "Valid from", type: "date" },
+            { key: "valid_to", label: "Valid to", type: "date" },
+            { key: "issued_to", label: "Issued to (person / company)", type: "text" },
+            { key: "controls", label: "Required controls / isolations / PPE", type: "textarea", fullWidth: true },
+            { key: "rescue_plan", label: "Standby / rescue plan", type: "textarea", fullWidth: true },
+          ],
+        },
+      ];
+
+    case "con_toolbox_talk_form":
+      return [
+        {
+          title: "Talk Setup",
+          description: "Topic and audience.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "topic", label: "Topic", type: "text", required: true, placeholder: "e.g. Working safely around mobile plant" },
+            { key: "log_date", label: "Date delivered", type: "date" },
+            { key: "audience", label: "Audience / trades", type: "text", placeholder: "e.g. all trades, ground workers only" },
+          ],
+        },
+        {
+          title: "Content & Sign-off",
+          description: "Key messages and attendance.",
+          fields: [
+            { key: "key_messages", label: "Key messages / hazards / controls", type: "textarea", required: true, fullWidth: true },
+            { key: "questions_asked", label: "Check questions asked", type: "textarea", fullWidth: true },
+            { key: "attendees", label: "Attendees (names or count)", type: "textarea", fullWidth: true },
+          ],
+        },
+      ];
+
+    case "con_ncr_form":
+      return [
+        {
+          title: "Non-Conformance",
+          description: "What was found, against which standard.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "title", label: "NCR title", type: "text", required: true, placeholder: "Short factual summary" },
+            { key: "description", label: "Description of non-conformance", type: "textarea", required: true, fullWidth: true },
+            { key: "spec_ref", label: "Specification / standard reference", type: "text", placeholder: "e.g. BS EN 13670 §8.4" },
+            { key: "trade_party", label: "Trade / party responsible", type: "text" },
+            { key: "location", label: "Location", type: "text", placeholder: "Grid / level / room" },
+          ],
+        },
+        {
+          title: "Severity & CAPA",
+          description: "Disposition and corrective action.",
+          fields: [
+            { key: "priority", label: "Severity", type: "select", required: true, options: [
+              { value: "low", label: "Minor" }, { value: "medium", label: "Major" }, { value: "high", label: "Critical" },
+            ]},
+            { key: "disposition", label: "Proposed disposition", type: "select", options: [
+              { value: "rework", label: "Rework" },
+              { value: "repair", label: "Repair" },
+              { value: "use_as_is", label: "Use as-is (concession)" },
+              { value: "reject_replace", label: "Reject & replace" },
+            ]},
+            { key: "root_cause", label: "Root cause (5 Whys)", type: "textarea", fullWidth: true },
+            { key: "capa", label: "Corrective & preventive action (CAPA)", type: "textarea", fullWidth: true },
+            { key: "due_date", label: "Target close date", type: "date" },
+          ],
+        },
+      ];
+
+    case "con_handover_checklist":
+      return [
+        {
+          title: "Handover Scope",
+          description: "What's being handed over.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Project / Site", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "title", label: "Handover package title", type: "text", required: true, placeholder: "e.g. Block A — Practical Completion" },
+            { key: "pc_date", label: "Target Practical Completion", type: "date" },
+            { key: "client_requirements", label: "Client-specific requirements", type: "textarea", fullWidth: true, placeholder: "Soft Landings BG6, BIM COBie drop, CAFM upload…" },
+          ],
+        },
+        {
+          title: "Deliverables Checklist",
+          description: "Standard PC deliverables to verify.",
+          fields: [
+            { key: "om_manuals", label: "O&M manuals collated?", type: "select", options: [
+              { value: "no", label: "Not started" }, { value: "in_progress", label: "In progress" }, { value: "yes", label: "Complete" },
+            ]},
+            { key: "as_built", label: "As-built drawings status", type: "select", options: [
+              { value: "no", label: "Not started" }, { value: "in_progress", label: "In progress" }, { value: "yes", label: "Complete" },
+            ]},
+            { key: "test_certs", label: "Test & commissioning certs collected?", type: "select", options: [
+              { value: "no", label: "No" }, { value: "partial", label: "Partial" }, { value: "yes", label: "Yes" },
+            ]},
+            { key: "warranties", label: "Warranties / DLP letters collected?", type: "select", options: [
+              { value: "no", label: "No" }, { value: "partial", label: "Partial" }, { value: "yes", label: "Yes" },
+            ]},
+            { key: "hs_file", label: "H&S File (CDM Reg 12.5) ready?", type: "select", options: [
+              { value: "no", label: "No" }, { value: "in_progress", label: "In progress" }, { value: "yes", label: "Yes" },
+            ]},
+            { key: "training", label: "Operator / end-user training delivered?", type: "select", options: [
+              { value: "no", label: "No" }, { value: "scheduled", label: "Scheduled" }, { value: "yes", label: "Done" },
+            ]},
+            { key: "notes", label: "Outstanding items / notes", type: "textarea", fullWidth: true },
+          ],
+        },
+      ];
+
+    // ─── Professional Services & Consulting ────────────────────────────────
+    case "ps_engagement_setup":
+      return [
+        {
+          title: "Client & Engagement",
+          description: "Identify the client and engagement type.",
+          fields: [
+            orgField,
+            { key: "client_name", label: "Client name", type: "text", required: true, placeholder: "e.g. Acme Corp" },
+            { key: "engagement_code", label: "Engagement code", type: "text", required: true, placeholder: "e.g. ACME-2026-001" },
+            { key: "engagement_type", label: "Engagement type", type: "select", required: true, options: [
+              { value: "time_and_materials", label: "Time & Materials (T&M)" },
+              { value: "fixed_price", label: "Fixed Price" },
+              { value: "retainer", label: "Retainer" },
+              { value: "milestone_based", label: "Milestone-based" },
+            ]},
+            { key: "account_manager", label: "Account manager / partner", type: "text", placeholder: "Name of lead" },
+          ],
+        },
+        {
+          title: "Commercials & Timeline",
+          description: "Contract value and dates.",
+          fields: [
+            { key: "contract_value", label: "Contract value", type: "number", placeholder: "e.g. 250000" },
+            { key: "start_date", label: "Start date", type: "date" },
+            { key: "end_date", label: "End date", type: "date" },
+            { key: "notes", label: "Scope summary / notes", type: "textarea", fullWidth: true, placeholder: "One-paragraph engagement summary, key outcomes" },
+          ],
+        },
+      ];
+
+    case "ps_sow_form":
+      return [
+        {
+          title: "SOW Header",
+          description: "Tie the Statement of Work to a client engagement.",
+          fields: [
+            orgField,
+            { key: "title", label: "SOW title", type: "text", required: true, placeholder: "e.g. SOW-001 — Discovery Phase" },
+            { key: "client_name", label: "Client name", type: "text", required: true },
+            { key: "msa_reference", label: "Parent MSA reference", type: "text", placeholder: "e.g. MSA-Acme-2025" },
+            { key: "engagement_type", label: "Pricing model", type: "select", required: true, options: [
+              { value: "fixed_price", label: "Fixed Price" },
+              { value: "time_and_materials", label: "Time & Materials" },
+              { value: "milestone_based", label: "Milestone-based" },
+              { value: "retainer", label: "Retainer" },
+            ]},
+          ],
+        },
+        {
+          title: "Scope, Deliverables & Acceptance",
+          description: "What's in / out of scope, what gets delivered, how it's accepted.",
+          fields: [
+            { key: "objectives", label: "Engagement objectives", type: "textarea", required: true, fullWidth: true, placeholder: "What outcomes will this SOW deliver?" },
+            { key: "in_scope", label: "In scope", type: "textarea", fullWidth: true },
+            { key: "out_of_scope", label: "Out of scope", type: "textarea", fullWidth: true },
+            { key: "deliverables", label: "Deliverables (with acceptance criteria)", type: "textarea", required: true, fullWidth: true, placeholder: "1. Discovery report — accepted when…\n2. Solution blueprint — accepted when…" },
+            { key: "assumptions", label: "Assumptions & dependencies", type: "textarea", fullWidth: true },
+          ],
+        },
+        {
+          title: "Commercials",
+          description: "Fees, expenses, payment.",
+          fields: [
+            { key: "contract_value", label: "Total fees", type: "number", placeholder: "e.g. 120000" },
+            { key: "expense_policy", label: "Expense policy", type: "textarea", fullWidth: true, placeholder: "e.g. Billed at cost + 10%, pre-approval > $500" },
+            { key: "payment_terms", label: "Payment terms", type: "text", placeholder: "e.g. Net 30, monthly invoice" },
+            { key: "start_date", label: "Start date", type: "date" },
+            { key: "end_date", label: "End date", type: "date" },
+          ],
+        },
+      ];
+
+    case "ps_msa_summary":
+      return [
+        {
+          title: "MSA Identification",
+          description: "Master Services Agreement basics.",
+          fields: [
+            orgField,
+            { key: "title", label: "MSA title", type: "text", required: true, placeholder: "e.g. MSA — Acme Corp 2026" },
+            { key: "client_name", label: "Client legal entity", type: "text", required: true },
+            { key: "effective_date", label: "Effective date", type: "date" },
+            { key: "term_years", label: "Term (years)", type: "number", placeholder: "e.g. 3" },
+          ],
+        },
+        {
+          title: "Key Terms",
+          description: "The terms PMs need at a glance.",
+          fields: [
+            { key: "liability_cap", label: "Liability cap", type: "text", placeholder: "e.g. Fees paid in last 12 months" },
+            { key: "ip_terms", label: "IP ownership", type: "select", options: [
+              { value: "client_owns", label: "Client owns deliverables" },
+              { value: "consultant_owns", label: "Consultant owns, client licensed" },
+              { value: "joint", label: "Joint ownership" },
+            ]},
+            { key: "confidentiality", label: "Confidentiality term", type: "text", placeholder: "e.g. 5 years post-termination" },
+            { key: "notice_period", label: "Termination notice period", type: "text", placeholder: "e.g. 60 days" },
+            { key: "summary", label: "Anything else PMs should know", type: "textarea", fullWidth: true },
+          ],
+        },
+      ];
+
+    case "ps_change_order_form":
+      return [
+        {
+          title: "Engagement Change",
+          description: "Identify the engagement and the change.",
+          fields: [
+            orgField,
+            { key: "title", label: "Change title", type: "text", required: true, placeholder: "e.g. Add second integration to scope" },
+            { key: "client_name", label: "Client", type: "text", required: true },
+            { key: "sow_reference", label: "Original SOW reference", type: "text" },
+            { key: "change_type", label: "Type", type: "select", required: true, options: [
+              { value: "scope", label: "Scope expansion" },
+              { value: "schedule", label: "Schedule" },
+              { value: "budget", label: "Budget / fees" },
+              { value: "team", label: "Team / staffing" },
+            ]},
+            { key: "description", label: "What's changing", type: "textarea", required: true, fullWidth: true },
+            { key: "reason", label: "Why", type: "textarea", fullWidth: true },
+          ],
+        },
+        {
+          title: "Impact",
+          description: "Cost, time and team impact.",
+          fields: [
+            { key: "cost_impact", label: "Fee impact", type: "number", placeholder: "e.g. 25000" },
+            { key: "time_impact_days", label: "Schedule impact (working days)", type: "number" },
+            { key: "impact_summary", label: "Summary", type: "textarea", fullWidth: true },
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "low", label: "Low" }, { value: "medium", label: "Medium" }, { value: "high", label: "High" },
+            ]},
+            { key: "date_required", label: "Client decision required by", type: "date" },
+            ...entityParentFields(false),
+          ],
+        },
+      ];
+
+    case "ps_deliverable_form":
+      return [
+        {
+          title: "Deliverable",
+          description: "What's being produced.",
+          fields: [
+            orgField,
+            { key: "name", label: "Deliverable name", type: "text", required: true, placeholder: "e.g. Discovery Report v1.0" },
+            { key: "project_id", label: "Engagement / Project", type: "select", placeholder: "Which engagement?", options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "description", label: "Description", type: "textarea", fullWidth: true },
+          ],
+        },
+        {
+          title: "Acceptance & Dates",
+          description: "How will it be accepted?",
+          fields: [
+            { key: "acceptance_criteria", label: "Acceptance criteria", type: "textarea", required: true, fullWidth: true, placeholder: "Specific, testable criteria the client will sign against" },
+            { key: "start_date", label: "Drafting starts", type: "date" },
+            { key: "end_date", label: "Target submission to client", type: "date" },
+            { key: "priority", label: "Priority", type: "select", options: [
+              { value: "low", label: "Low" }, { value: "medium", label: "Medium" }, { value: "high", label: "High" }, { value: "critical", label: "Critical" },
+            ]},
+          ],
+        },
+      ];
+
+    case "ps_retainer_setup":
+      return [
+        {
+          title: "Retainer Period",
+          description: "Client and period covered.",
+          fields: [
+            orgField,
+            { key: "client_name", label: "Client", type: "text", required: true },
+            { key: "period_start", label: "Period start", type: "date", required: true },
+            { key: "period_end", label: "Period end", type: "date", required: true },
+            { key: "monthly_value", label: "Monthly retainer value", type: "number", placeholder: "e.g. 15000" },
+          ],
+        },
+        {
+          title: "Hours & Rules",
+          description: "Allocation and rollover.",
+          fields: [
+            { key: "hours_allocated", label: "Hours allocated this period", type: "number", required: true, placeholder: "e.g. 80" },
+            { key: "rollover_allowed", label: "Rollover allowed?", type: "select", options: [
+              { value: "true", label: "Yes — unused hours roll forward" },
+              { value: "false", label: "No — use it or lose it" },
+            ]},
+            { key: "notes", label: "Scope of services covered by retainer", type: "textarea", fullWidth: true, placeholder: "What is in vs out of the retainer (advisory, BAU support, escalations…)" },
+          ],
+        },
+      ];
+
+    case "ps_timesheet_entry":
+      return [
+        {
+          title: "Timesheet Setup",
+          description: "Reference the engagement and period.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Engagement / Project", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "period", label: "Period (e.g. wk of YYYY-MM-DD)", type: "text", required: true, placeholder: "e.g. wk of 2026-04-20" },
+            { key: "billable", label: "Billable?", type: "select", options: [
+              { value: "yes", label: "Billable" }, { value: "no", label: "Non-billable" },
+            ]},
+          ],
+        },
+        {
+          title: "Time Detail",
+          description: "Hours by activity.",
+          fields: [
+            { key: "hours", label: "Total hours", type: "number", required: true, placeholder: "e.g. 36.5" },
+            { key: "activity_summary", label: "Activity summary", type: "textarea", required: true, fullWidth: true, placeholder: "Bullets: what was worked on, deliverable refs" },
+            { key: "rate_card", label: "Applicable rate card", type: "text", placeholder: "e.g. Senior Consultant — $250/hr" },
+          ],
+        },
+      ];
+
+    case "ps_csat_capture":
+      return [
+        {
+          title: "Survey Setup",
+          description: "Which engagement and respondent.",
+          fields: [
+            orgField,
+            { key: "project_id", label: "Engagement / Project", type: "select", required: true, options: projects.map(p => ({ value: p.id, label: p.name })) },
+            { key: "respondent_name", label: "Respondent", type: "text", placeholder: "Name + role" },
+            { key: "survey_date", label: "Survey date", type: "date" },
+          ],
+        },
+        {
+          title: "Scores",
+          description: "Capture the scores.",
+          fields: [
+            { key: "csat_score", label: "CSAT (1-5)", type: "select", required: true, options: [
+              { value: "1", label: "1 — Very dissatisfied" },
+              { value: "2", label: "2 — Dissatisfied" },
+              { value: "3", label: "3 — Neutral" },
+              { value: "4", label: "4 — Satisfied" },
+              { value: "5", label: "5 — Very satisfied" },
+            ]},
+            { key: "nps_score", label: "NPS (0-10)", type: "number", placeholder: "0-10" },
+            { key: "what_went_well", label: "What went well", type: "textarea", fullWidth: true },
+            { key: "what_to_improve", label: "What to improve", type: "textarea", fullWidth: true },
+            { key: "would_recommend", label: "Would recommend?", type: "select", options: [
+              { value: "promoter", label: "Promoter (9-10)" },
+              { value: "passive", label: "Passive (7-8)" },
+              { value: "detractor", label: "Detractor (0-6)" },
+            ]},
+          ],
+        },
+      ];
+
+    case "ps_bid_no_bid":
+      return [
+        {
+          title: "Opportunity",
+          description: "Basic facts about the lead.",
+          fields: [
+            orgField,
+            { key: "client_name", label: "Prospective client", type: "text", required: true },
+            { key: "opportunity_name", label: "Opportunity name", type: "text", required: true, placeholder: "e.g. Acme — ERP modernisation" },
+            { key: "estimated_value", label: "Estimated fee value", type: "text", placeholder: "e.g. $750k" },
+            { key: "submission_deadline", label: "Proposal deadline", type: "date" },
+          ],
+        },
+        {
+          title: "Decision Factors",
+          description: "Score the bid/no-bid factors.",
+          fields: [
+            { key: "strategic_fit", label: "Strategic fit (1-5)", type: "select", options: [
+              { value: "1", label: "1 — None" }, { value: "2", label: "2" }, { value: "3", label: "3" }, { value: "4", label: "4" }, { value: "5", label: "5 — Perfect fit" },
+            ]},
+            { key: "win_probability", label: "Win probability (%)", type: "number", placeholder: "0-100" },
+            { key: "delivery_risk", label: "Delivery risk", type: "select", options: [
+              { value: "low", label: "Low" }, { value: "medium", label: "Medium" }, { value: "high", label: "High" },
+            ]},
+            { key: "team_availability", label: "Team availability", type: "select", options: [
+              { value: "available", label: "Team available" },
+              { value: "stretched", label: "Stretched but possible" },
+              { value: "unavailable", label: "Will need to hire / sub" },
+            ]},
+            { key: "decision", label: "Recommendation", type: "select", required: true, options: [
+              { value: "bid", label: "Bid" }, { value: "no_bid", label: "No-Bid" }, { value: "qualify_more", label: "Qualify further" },
+            ]},
+            { key: "rationale", label: "Rationale (one paragraph)", type: "textarea", required: true, fullWidth: true },
+          ],
+        },
+      ];
   }
 };
 
