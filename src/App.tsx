@@ -84,7 +84,6 @@ import AIInsights from "./pages/AIInsights";
 import Knowledgebase from "./pages/Knowledgebase";
 import KnowledgebaseArticle from "./pages/KnowledgebaseArticle";
 import NotFound from "./pages/NotFound";
-import CSATResponse from "./pages/CSATResponse";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
