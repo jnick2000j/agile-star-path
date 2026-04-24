@@ -268,19 +268,52 @@ export default function HelpdeskTicketDetail() {
               </TabsContent>
               <TabsContent value="activity" className="space-y-2">
                 {activity.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}
-                {activity.map((a: any) => (
-                  <div key={a.id} className="flex gap-3 text-sm border-l-2 border-muted pl-3">
-                    <div className="flex-1">
-                      <p className="font-medium">{a.event_type.replace(/_/g, " ")}</p>
-                      {a.from_value && a.to_value && (
-                        <p className="text-xs text-muted-foreground">
-                          {JSON.stringify(a.from_value)} → {JSON.stringify(a.to_value)}
-                        </p>
-                      )}
+                {activity.map((a: any) => {
+                  const renderValue = (v: any): string => {
+                    if (v === null || v === undefined || v === "") return "—";
+                    if (typeof v === "object") {
+                      const vals = Object.values(v).filter(x => x !== null && x !== undefined && x !== "");
+                      if (vals.length === 0) return "—";
+                      return vals.map(x => {
+                        if (x === null || x === undefined) return "—";
+                        if (typeof x === "object") return JSON.stringify(x);
+                        const s = String(x);
+                        // If looks like a UUID, try to resolve to a user name
+                        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) {
+                          const u = (orgUsers as any[]).find(o => o.user_id === s);
+                          return u ? (u.full_name || u.email || s) : s;
+                        }
+                        return formatLabel(s);
+                      }).join(", ");
+                    }
+                    return formatLabel(String(v));
+                  };
+                  const actor = (orgUsers as any[]).find(o => o.user_id === a.actor_user_id);
+                  const actorName = actor ? (actor.full_name || actor.email) : (a.actor_user_id ? "Unknown user" : "System");
+                  const eventLabel = formatLabel(a.event_type.replace(/_changed$/, "").replace(/_/g, " ")) +
+                    (a.event_type.endsWith("_changed") ? " changed" : "");
+                  return (
+                    <div key={a.id} className="flex gap-3 text-sm border-l-2 border-muted pl-3 py-2">
+                      <div className="flex-1 space-y-1">
+                        <p className="font-medium">{eventLabel}</p>
+                        <p className="text-xs text-muted-foreground">by {actorName}</p>
+                        {(a.from_value || a.to_value) && (
+                          <div className="flex items-center gap-2 text-xs">
+                            {a.from_value && (
+                              <Badge variant="outline" className="text-xs font-normal">{renderValue(a.from_value)}</Badge>
+                            )}
+                            {a.from_value && a.to_value && <span className="text-muted-foreground">→</span>}
+                            {a.to_value && (
+                              <Badge variant="secondary" className="text-xs font-normal">{renderValue(a.to_value)}</Badge>
+                            )}
+                          </div>
+                        )}
+                        {a.notes && <p className="text-xs text-muted-foreground italic">{a.notes}</p>}
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{format(new Date(a.created_at), "PPp")}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{format(new Date(a.created_at), "PPp")}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </TabsContent>
             </Tabs>
           </div>
