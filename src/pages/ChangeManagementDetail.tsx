@@ -455,49 +455,84 @@ export default function ChangeManagementDetail() {
 
               <TabsContent value="activity" className="space-y-4">
                 {/* Implementer / owner comment composer */}
-                {canPostProgress && (
-                  <Card className="p-4 space-y-3 border-primary/30">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-primary" />
-                      <h4 className="font-medium">Post an update</h4>
-                      {requiresActivityComment(progressKind) && (
-                        <Badge variant="outline" className="text-xs">Comment required</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Implementers, owners and requesters can record progress, test results or general notes against this change.
-                    </p>
-                    <div className="flex gap-2">
-                      <Select value={progressKind} onValueChange={setProgressKind}>
-                        <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {PROGRESS_KINDS.map(k => (
-                            <SelectItem key={k.key} value={k.key}>{k.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Textarea
-                      rows={3}
-                      placeholder={
-                        requiresActivityComment(progressKind)
-                          ? "A written comment is required by your organisation for this update type"
-                          : "Describe progress, test outcomes, blockers, or context for the team… (optional)"
-                      }
-                      value={progressText}
-                      onChange={(e) => setProgressText(e.target.value)}
-                    />
-                    <div className="flex justify-end">
-                      <Button
-                        size="sm"
-                        onClick={submitProgress}
-                        disabled={requiresActivityComment(progressKind) && !progressText.trim()}
-                      >
-                        Post update
-                      </Button>
-                    </div>
-                  </Card>
-                )}
+                {canPostProgress && (() => {
+                  const required = requiresActivityComment(progressKind);
+                  const hasText = !!progressText.trim();
+                  const blocked = required && !hasText;
+                  const kindLabel = PROGRESS_KINDS.find(k => k.key === progressKind)?.label ?? progressKind;
+                  return (
+                    <Card className={cn(
+                      "p-4 space-y-3 border",
+                      blocked ? "border-destructive/50" : "border-primary/30",
+                    )}>
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4 text-primary" />
+                          <h4 className="font-medium">Post an update</h4>
+                        </div>
+                        {required ? (
+                          <Badge className="bg-destructive/10 text-destructive border-destructive/30 text-xs">
+                            Comment required for {kindLabel}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">Comment optional</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Implementers, owners and requesters can record progress, test results or general notes against this change.
+                      </p>
+                      <div className="flex gap-2">
+                        <Select value={progressKind} onValueChange={setProgressKind}>
+                          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {PROGRESS_KINDS.map(k => (
+                              <SelectItem key={k.key} value={k.key}>{k.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs flex items-center gap-1">
+                          Comment
+                          {required && <span className="text-destructive font-semibold">*</span>}
+                          {required && (
+                            <span className="text-muted-foreground font-normal">
+                              (required by your organisation for {kindLabel.toLowerCase()})
+                            </span>
+                          )}
+                        </Label>
+                        <Textarea
+                          rows={3}
+                          aria-required={required}
+                          aria-invalid={blocked}
+                          className={cn(blocked && "border-destructive focus-visible:ring-destructive")}
+                          placeholder={
+                            required
+                              ? `A written comment is required for ${kindLabel.toLowerCase()}`
+                              : "Describe progress, test outcomes, blockers, or context for the team… (optional)"
+                          }
+                          value={progressText}
+                          onChange={(e) => setProgressText(e.target.value)}
+                        />
+                        {blocked && (
+                          <p className="text-xs text-destructive">
+                            Add a comment before posting — your administrator requires written detail for this update type.
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          size="sm"
+                          onClick={submitProgress}
+                          disabled={blocked}
+                          title={blocked ? "Add a comment to post this update" : undefined}
+                        >
+                          Post update
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })()}
 
 
                 {activity.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}
