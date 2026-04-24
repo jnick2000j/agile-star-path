@@ -35,9 +35,11 @@ import {
   MessageSquarePlus,
   LifeBuoy,
   Workflow,
+  GitPullRequest,
 } from "lucide-react";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
+import { EntityChangesCard } from "@/components/changeMgmt/EntityChangesCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
@@ -201,6 +203,7 @@ export default function ProgrammeDetails() {
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("projects");
 
   const fetchProgramme = async () => {
     if (!programmeId) return;
@@ -373,6 +376,14 @@ export default function ProgrammeDetails() {
             Back to Programs
           </Button>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("tickets")}>
+              <LifeBuoy className="h-4 w-4 mr-2" />
+              Tickets
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("changes")}>
+              <GitPullRequest className="h-4 w-4 mr-2" />
+              Changes
+            </Button>
             <DocumentUpload
               entityType="program"
               entityId={programme.id}
@@ -466,7 +477,7 @@ export default function ProgrammeDetails() {
         </div>
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="projects" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <QuickActionTabs
             items={[
               { value: "projects", label: "Projects", icon: FolderKanban, count: projects.length },
@@ -481,6 +492,7 @@ export default function ProgrammeDetails() {
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "tickets", label: "Tickets", icon: LifeBuoy },
+              { value: "changes", label: "Changes", icon: GitPullRequest },
               { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Timeline", icon: History },
             ]}
@@ -758,6 +770,11 @@ export default function ProgrammeDetails() {
           {/* Tickets Tab */}
           <TabsContent value="tickets">
             {programme && <EntityTicketsCard scope="programme" entityId={programme.id} entityName={programme.name} />}
+          </TabsContent>
+
+          {/* Changes Tab */}
+          <TabsContent value="changes">
+            {programme && <EntityChangesCard scope="programme" entityId={programme.id} entityName={programme.name} />}
           </TabsContent>
 
           {/* Status Timeline Tab */}

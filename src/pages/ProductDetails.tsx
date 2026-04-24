@@ -34,9 +34,11 @@ import {
   Users,
   LifeBuoy,
   Workflow,
+  GitPullRequest,
 } from "lucide-react";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
+import { EntityChangesCard } from "@/components/changeMgmt/EntityChangesCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
@@ -165,6 +167,7 @@ export default function ProductDetails() {
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("features");
 
   const fetchProduct = async () => {
     if (!productId) return;
@@ -337,6 +340,14 @@ export default function ProductDetails() {
             Back to Products
           </Button>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("tickets")}>
+              <LifeBuoy className="h-4 w-4 mr-2" />
+              Tickets
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("changes")}>
+              <GitPullRequest className="h-4 w-4 mr-2" />
+              Changes
+            </Button>
             <DocumentUpload
               entityType="product"
               entityId={product.id}
@@ -459,7 +470,7 @@ export default function ProductDetails() {
         />
 
         {/* Tabs for different sections */}
-        <Tabs defaultValue="features" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <QuickActionTabs
             items={[
               { value: "features", label: "Features", icon: Lightbulb, count: features.length },
@@ -470,6 +481,7 @@ export default function ProductDetails() {
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "tickets", label: "Tickets", icon: LifeBuoy },
+              { value: "changes", label: "Changes", icon: GitPullRequest },
               { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
@@ -729,6 +741,11 @@ export default function ProductDetails() {
           {/* Tickets Tab */}
           <TabsContent value="tickets">
             {product && <EntityTicketsCard scope="product" entityId={product.id} entityName={product.name} />}
+          </TabsContent>
+
+          {/* Changes Tab */}
+          <TabsContent value="changes">
+            {product && <EntityChangesCard scope="product" entityId={product.id} entityName={product.name} />}
           </TabsContent>
 
           {/* Status Timeline Tab */}

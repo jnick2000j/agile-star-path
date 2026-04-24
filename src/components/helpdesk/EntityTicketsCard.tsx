@@ -86,7 +86,7 @@ export function EntityTicketsCard({ scope, entityId, entityName }: EntityTickets
               </TableHeader>
               <TableBody>
                 {tickets.map((t: any) => (
-                  <TableRow key={t.id} className="cursor-pointer" onClick={() => navigate(`/support/${t.id}`)}>
+                  <TableRow key={t.id} className="cursor-pointer" onClick={() => navigate(`/support/tickets/${t.id}`)}>
                     <TableCell className="font-mono text-xs">{t.reference_number ?? "—"}</TableCell>
                     <TableCell className="max-w-xs truncate">{t.subject}</TableCell>
                     <TableCell>
