@@ -18,6 +18,7 @@ import {
   LifeBuoy, AlertTriangle, Wrench, Smile, Clock,
   HardHat, FileCheck, ClipboardList, BadgeAlert, KeyRound, Power,
   PenTool, FileSignature, CalendarRange, FileEdit,
+  Handshake, FileSpreadsheet, RefreshCcw, UserPlus, Hourglass, Wallet, MessageCircleHeart, Award, BookMarked,
 } from "lucide-react";
 
 // ---------- CREATE wizards (template-driven entity creation) ----------
@@ -56,7 +57,7 @@ interface AIWizardSpec {
   title: string;
   description: string;
   icon: React.ElementType;
-  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk" | "Construction";
+  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk" | "Construction" | "Pro Services";
   fields: WizardField[];
 }
 
@@ -330,10 +331,110 @@ const aiWizards: AIWizardSpec[] = [
     { key: "issued_to", label: "Issued to", placeholder: "Person / company in charge" },
     { key: "adjacent_works", label: "Adjacent works / interactions", type: "textarea" },
   ]},
+
+  // ─── Professional Services & Consulting ─────────────────────────────────
+  { kind: "ps_proposal", title: "Client Proposal", description: "Win-themed client proposal with approach, team, pricing model and risks.", icon: FileSpreadsheet, category: "Pro Services", fields: [
+    { key: "client", label: "Client", required: true },
+    { key: "situation", label: "Client situation / brief", type: "textarea", required: true, placeholder: "What did the client say they need? Pain points, drivers, ambition." },
+    { key: "service_line", label: "Service line", placeholder: "strategy / transformation / technology / data / change / managed services" },
+    { key: "indicative_value", label: "Indicative deal value", placeholder: "e.g. £350k" },
+    { key: "pricing_model", label: "Preferred pricing model", placeholder: "fixed-fee / T&M / capped T&M / outcome-based" },
+    { key: "duration", label: "Indicative duration", placeholder: "e.g. 14 weeks" },
+    { key: "differentiators", label: "Why us (3-4 themes)", type: "textarea" },
+  ]},
+  { kind: "ps_sow", title: "Statement of Work (SOW)", description: "Full SOW under an MSA: scope, deliverables, acceptance, fees, governance, RACI.", icon: FileSignature, category: "Pro Services", fields: [
+    { key: "client", label: "Client", required: true },
+    { key: "msa_ref", label: "Parent MSA reference" },
+    { key: "engagement_name", label: "Engagement name", required: true },
+    { key: "objectives", label: "Objectives", type: "textarea", required: true },
+    { key: "scope_in", label: "In scope", type: "textarea", required: true },
+    { key: "scope_out", label: "Out of scope (explicit)", type: "textarea" },
+    { key: "deliverables", label: "Key deliverables", type: "textarea", required: true },
+    { key: "pricing_model", label: "Pricing model", placeholder: "fixed_fee / time_materials / capped_tm / milestone / retainer / outcome_based" },
+    { key: "fees", label: "Fees / payment milestones", type: "textarea" },
+    { key: "duration", label: "Start & end dates" },
+    { key: "key_personnel", label: "Key personnel (named)", type: "textarea" },
+  ]},
+  { kind: "ps_msa_summary", title: "MSA Terms Summary", description: "One-page MSA summary for the engagement team — caps, IP, GDPR, termination.", icon: BookMarked, category: "Pro Services", fields: [
+    { key: "client", label: "Client", required: true },
+    { key: "msa_text", label: "Paste key MSA clauses (or summary notes)", type: "textarea", required: true },
+    { key: "jurisdiction", label: "Governing law / jurisdiction", placeholder: "e.g. England & Wales" },
+  ]},
+  { kind: "ps_change_order", title: "Change Order (PS)", description: "SOW change order with scope/fee/schedule impact and approvals.", icon: FileEdit, category: "Pro Services", fields: [
+    { key: "sow_ref", label: "Parent SOW ref", required: true },
+    { key: "reason", label: "Reason category", placeholder: "scope_change / additional_request / schedule_change / rate_change / rework / client_delay" },
+    { key: "description", label: "Description of change", type: "textarea", required: true },
+    { key: "effort_hours", label: "Estimated effort (hrs)", placeholder: "e.g. 120" },
+    { key: "fee_impact", label: "Fee impact", placeholder: "e.g. +£24,000" },
+    { key: "schedule_impact", label: "Schedule impact (days)", placeholder: "e.g. 10 working days" },
+  ]},
+  { kind: "ps_engagement_kickoff", title: "Engagement Kickoff Pack", description: "Internal briefing + client kickoff outline + first-30-days plan.", icon: Handshake, category: "Pro Services", fields: [
+    { key: "engagement", label: "Engagement name", required: true },
+    { key: "client", label: "Client", required: true },
+    { key: "objectives", label: "Engagement objectives", type: "textarea", required: true },
+    { key: "team", label: "Core team (roles)", type: "textarea" },
+    { key: "duration", label: "Duration & key milestones", placeholder: "e.g. 14 weeks; M1 Discovery, M2 Design, M3 Pilot" },
+    { key: "ways_of_working", label: "Ways of working / governance cadence", type: "textarea" },
+    { key: "known_risks", label: "Known risks / sensitivities", type: "textarea" },
+  ]},
+  { kind: "ps_status_report", title: "Weekly Status Report", description: "Concise client-ready status with RAG, deliverables, decisions, burn.", icon: MessageSquare, category: "Pro Services", fields: [
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "period", label: "Period covered", placeholder: "e.g. Week ending 28 Apr 2026" },
+    { key: "rag", label: "Overall RAG", placeholder: "green / amber / red" },
+    { key: "raw_notes", label: "Raw notes (anything goes)", type: "textarea", required: true, placeholder: "Progress, deliverables, blockers, decisions needed, hours burn..." },
+  ]},
+  { kind: "ps_deliverable_acceptance", title: "Deliverable Acceptance Pack", description: "Cover note + acceptance form mapping deliverable to acceptance criteria.", icon: PackageCheck, category: "Pro Services", fields: [
+    { key: "deliverable_ref", label: "Deliverable ref", required: true },
+    { key: "title", label: "Deliverable title", required: true },
+    { key: "sow_clause", label: "SOW clause / acceptance criteria", type: "textarea", required: true },
+    { key: "summary", label: "What is being submitted (summary)", type: "textarea", required: true },
+    { key: "fee_milestone", label: "Linked fee milestone", placeholder: "e.g. Milestone 3 — £85,000" },
+    { key: "review_window_days", label: "Review window (working days)", placeholder: "e.g. 10" },
+  ]},
+  { kind: "ps_qa_review", title: "Internal QA Review", description: "Partner-style QA review with rating, findings and sign-off conditions.", icon: ClipboardCheck, category: "Pro Services", fields: [
+    { key: "deliverable", label: "Deliverable", required: true },
+    { key: "client", label: "Client" },
+    { key: "deliverable_summary", label: "Deliverable summary / contents", type: "textarea", required: true },
+    { key: "areas_of_concern", label: "Specific areas to scrutinise", type: "textarea", placeholder: "e.g. financial model assumptions, recommendation defensibility" },
+  ]},
+  { kind: "ps_resource_plan", title: "Resource Plan", description: "Demand by role/week, gaps, named recommendations and margin impact.", icon: UserPlus, category: "Pro Services", fields: [
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "duration_weeks", label: "Duration (weeks)", placeholder: "e.g. 14" },
+    { key: "demand_summary", label: "Demand by role (rough)", type: "textarea", required: true, placeholder: "e.g. 1x Partner 10%, 1x SM 50%, 2x Consultant 100%, 1x Analyst 80%" },
+    { key: "constraints", label: "Constraints", type: "textarea", placeholder: "Holidays, key-person risk, ramp-up, location" },
+    { key: "sow_pricing", label: "SOW pricing (for margin check)", placeholder: "e.g. fixed-fee £350k" },
+  ]},
+  { kind: "ps_wip_writeoff_memo", title: "WIP Write-Off Memo", description: "Internal memo: WIP balance, root cause, lessons and approval routing.", icon: Hourglass, category: "Pro Services", fields: [
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "wip_balance", label: "WIP balance", placeholder: "e.g. £42,000" },
+    { key: "proposed_writeoff", label: "Proposed write-off", placeholder: "e.g. £18,000 (43%)" },
+    { key: "category", label: "Category", placeholder: "over-run / scope-not-charged / efficiency / billing-dispute / goodwill / strategic-investment" },
+    { key: "context", label: "Context & root cause (factual)", type: "textarea", required: true },
+  ]},
+  { kind: "ps_post_engagement_review", title: "Post-Engagement Review", description: "What worked, what didn't, root causes, reusable assets, follow-on pipeline.", icon: RotateCcw, category: "Pro Services", fields: [
+    { key: "engagement", label: "Engagement", required: true },
+    { key: "client", label: "Client" },
+    { key: "summary", label: "Engagement summary", type: "textarea", required: true, placeholder: "Objectives, scope, duration, team, fees, margin actual vs target" },
+    { key: "highlights", label: "Highlights / what went well", type: "textarea" },
+    { key: "issues", label: "Issues / what didn't", type: "textarea" },
+  ]},
+  { kind: "ps_csat_followup", title: "Low CSAT/NPS Follow-up", description: "Empathetic client email + recovery plan + renewal-risk mitigation.", icon: MessageCircleHeart, category: "Pro Services", fields: [
+    { key: "client", label: "Client", required: true },
+    { key: "score", label: "Score & scale", placeholder: "e.g. NPS 2 (out of 10)" },
+    { key: "verbatim", label: "Client verbatim feedback", type: "textarea", required: true },
+    { key: "engagement_context", label: "Engagement context", type: "textarea" },
+  ]},
+  { kind: "ps_case_study", title: "Client Case Study", description: "Outcome-led case study draft (subject to client approval).", icon: Award, category: "Pro Services", fields: [
+    { key: "client", label: "Client (or 'anonymise')", required: true },
+    { key: "challenge", label: "Challenge", type: "textarea", required: true },
+    { key: "approach", label: "Approach (protect IP)", type: "textarea", required: true },
+    { key: "results", label: "Quantified results", type: "textarea", required: true, placeholder: "Financial / time / quality / risk" },
+    { key: "team_duration", label: "Team & duration", placeholder: "e.g. 6 consultants, 14 weeks" },
+  ]},
 ];
 
-const CREATE_CATEGORIES = ["all", "MSP", "PRINCE2", "Agile", "Product", "Governance", "Construction"] as const;
-const AI_CATEGORIES = ["all", "Document", "Strategy", "Governance", "Helper", "Change Mgmt", "Helpdesk", "Construction"] as const;
+const CREATE_CATEGORIES = ["all", "MSP", "PRINCE2", "Agile", "Product", "Governance", "Construction", "Pro Services"] as const;
+const AI_CATEGORIES = ["all", "Document", "Strategy", "Governance", "Helper", "Change Mgmt", "Helpdesk", "Construction", "Pro Services"] as const;
 
 export default function Wizards() {
   const [searchParams, setSearchParams] = useSearchParams();
