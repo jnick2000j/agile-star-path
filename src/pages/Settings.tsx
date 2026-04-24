@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StakeholderAccessSettings from "@/components/admin/StakeholderAccessSettings";
-import { OrgVerticalCard } from "@/components/settings/OrgVerticalCard";
+
 import { 
   Save, 
   Bell,
@@ -60,9 +60,6 @@ export default function Settings() {
                 Save Changes
               </Button>
             </div>
-          </div>
-          <div className="mt-6">
-            <OrgVerticalCard />
           </div>
         </TabsContent>
 

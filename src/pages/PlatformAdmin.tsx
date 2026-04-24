@@ -35,6 +35,8 @@ import { OrgSuspensionDialog } from "@/components/admin/OrgSuspensionDialog";
 import { SuspensionHistory } from "@/components/admin/SuspensionHistory";
 import { PlatformAIProviderSettings } from "@/components/admin/PlatformAIProviderSettings";
 import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
+import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
+import { OrgVerticalManager } from "@/components/admin/OrgVerticalManager";
 
 interface PlatformStats {
   totalOrgs: number;
@@ -190,6 +192,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="ai">AI &amp; Credits</TabsTrigger>
           <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
+          <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
@@ -357,6 +360,11 @@ export default function PlatformAdmin() {
 
         <TabsContent value="sso">
           <PlatformSSOQueue />
+        </TabsContent>
+
+        <TabsContent value="verticals" className="space-y-6">
+          <VerticalPacksManager />
+          <OrgVerticalManager />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">
