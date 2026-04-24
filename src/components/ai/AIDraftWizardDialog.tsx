@@ -417,6 +417,7 @@ export function AIDraftWizardDialog({
                   <ChatBubble role="assistant" content="" typing />
                 )}
               </div>
+              </div>
             </ScrollArea>
 
             {!inDraftMode && (
