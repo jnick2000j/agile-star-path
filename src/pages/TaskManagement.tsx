@@ -357,6 +357,8 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
       toast.error("Failed to duplicate task: " + error.message);
     },
   });
+
+  const updateCompletion = useMutation({
     mutationFn: async ({ id, completion_percentage }: { id: string; completion_percentage: number }) => {
       const updateData: Record<string, unknown> = { completion_percentage };
       if (completion_percentage === 100) {
