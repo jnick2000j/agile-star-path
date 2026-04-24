@@ -256,6 +256,12 @@ export default function Timesheets() {
           name: t.name,
         })),
       );
+      setTickets(
+        ((ticketRes.data || []) as Array<{ id: string; subject: string; reference_number: string | null }>).map((t) => ({
+          id: t.id,
+          name: t.reference_number ? `${t.reference_number} — ${t.subject}` : t.subject,
+        })),
+      );
 
       const orgUserIds = new Set(
         ((accessRes.data || []) as Array<{ user_id: string }>).map((r) => r.user_id),
