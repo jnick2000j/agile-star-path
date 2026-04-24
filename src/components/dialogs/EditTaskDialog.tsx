@@ -223,11 +223,26 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
     if (error) {
       toast.error("Failed to update task");
       console.error(error);
-    } else {
-      toast.success("Task updated");
-      onOpenChange(false);
-      onUpdate();
+      setSaving(false);
+      return;
     }
+
+    // If status changed, record a status-change comment (with optional note).
+    if (status !== originalStatus && user && currentOrganization?.id) {
+      const { error: cErr } = await supabase.from("task_comments").insert({
+        task_id: task.id,
+        organization_id: currentOrganization.id,
+        author_id: user.id,
+        previous_status: originalStatus as any,
+        new_status: status as any,
+        body: statusChangeNote.trim() || null,
+      });
+      if (cErr) console.error("Failed to record status change comment", cErr);
+    }
+
+    toast.success("Task updated");
+    onOpenChange(false);
+    onUpdate();
     setSaving(false);
   };
 
