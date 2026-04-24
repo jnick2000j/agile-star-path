@@ -87,6 +87,7 @@ interface Entry {
   project_id: string | null;
   product_id: string | null;
   task_id: string | null;
+  ticket_id: string | null;
   description: string | null;
   hours_mon: number;
   hours_tue: number;
