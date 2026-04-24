@@ -806,6 +806,8 @@ export const SEED_PACKS: SeedPack[] = [
       },
     ],
   },
+  {
+    id: "healthcare",
     name: "Healthcare",
     description: "Clinical projects, compliance and patient initiatives",
     icon: "Stethoscope",
