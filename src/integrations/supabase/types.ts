@@ -8532,6 +8532,53 @@ export type Database = {
           },
         ]
       }
+      task_comments: {
+        Row: {
+          author_id: string
+          body: string | null
+          completion_percentage: number | null
+          created_at: string
+          id: string
+          new_status: Database["public"]["Enums"]["task_status"] | null
+          organization_id: string
+          previous_status: Database["public"]["Enums"]["task_status"] | null
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          completion_percentage?: number | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["task_status"] | null
+          organization_id: string
+          previous_status?: Database["public"]["Enums"]["task_status"] | null
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          completion_percentage?: number | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["task_status"] | null
+          organization_id?: string
+          previous_status?: Database["public"]["Enums"]["task_status"] | null
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           actual_end: string | null

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TaskAssignments } from "@/components/TaskAssignments";
+import { TaskComments } from "@/components/TaskComments";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +43,7 @@ interface TaskData {
   work_package_id: string | null;
   risk_id: string | null;
   issue_id: string | null;
+  completion_percentage?: number | null;
 }
 
 interface EditTaskDialogProps {
@@ -52,11 +55,14 @@ interface EditTaskDialogProps {
 
 export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskDialogProps) {
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [status, setStatus] = useState("not_started");
+  const [originalStatus, setOriginalStatus] = useState("not_started");
+  const [statusChangeNote, setStatusChangeNote] = useState("");
   const [plannedStart, setPlannedStart] = useState("");
   const [plannedEnd, setPlannedEnd] = useState("");
   const [estimatedHours, setEstimatedHours] = useState("");
@@ -170,6 +176,8 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       setDescription(task.description || "");
       setPriority(task.priority);
       setStatus(task.status);
+      setOriginalStatus(task.status);
+      setStatusChangeNote("");
       setPlannedStart(task.planned_start || "");
       setPlannedEnd(task.planned_end || "");
       setEstimatedHours(task.estimated_hours?.toString() || "");
@@ -216,11 +224,26 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
     if (error) {
       toast.error("Failed to update task");
       console.error(error);
-    } else {
-      toast.success("Task updated");
-      onOpenChange(false);
-      onUpdate();
+      setSaving(false);
+      return;
     }
+
+    // If status changed, record a status-change comment (with optional note).
+    if (status !== originalStatus && user && currentOrganization?.id) {
+      const { error: cErr } = await supabase.from("task_comments").insert({
+        task_id: task.id,
+        organization_id: currentOrganization.id,
+        author_id: user.id,
+        previous_status: originalStatus as any,
+        new_status: status as any,
+        body: statusChangeNote.trim() || null,
+      });
+      if (cErr) console.error("Failed to record status change comment", cErr);
+    }
+
+    toast.success("Task updated");
+    onOpenChange(false);
+    onUpdate();
     setSaving(false);
   };
 
@@ -237,7 +260,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
@@ -286,6 +309,19 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
               />
             </div>
           </div>
+          {status !== originalStatus && (
+            <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
+              <Label className="text-xs">
+                Comment for status change ({originalStatus.replace(/_/g, " ")} → {status.replace(/_/g, " ")})
+              </Label>
+              <Textarea
+                value={statusChangeNote}
+                onChange={(e) => setStatusChangeNote(e.target.value)}
+                placeholder="Optional — why is the status changing?"
+                rows={2}
+              />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Program</Label>
@@ -418,6 +454,15 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
               />
             </div>
           </div>
+
+          <div className="border-t pt-4">
+            <TaskComments
+              taskId={task.id}
+              organizationId={currentOrganization?.id}
+              currentCompletion={(task as any).completion_percentage ?? 0}
+            />
+          </div>
+
           <div className="flex justify-between pt-2">
             <Button variant="destructive" size="sm" onClick={handleDelete}>
               <Trash2 className="h-4 w-4 mr-1" /> Delete
