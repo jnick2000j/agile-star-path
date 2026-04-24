@@ -60,7 +60,18 @@ export type WizardKind =
   | "con_handover_register"
   | "con_subcontractor_scope"
   | "con_lookahead_plan"
-  | "con_permit_to_work";
+  | "con_permit_to_work"
+  // Professional Services & Consulting wizards
+  | "ps_sow_draft"
+  | "ps_msa_summary_draft"
+  | "ps_change_order_draft"
+  | "ps_proposal_exec_summary"
+  | "ps_engagement_kickoff"
+  | "ps_status_report"
+  | "ps_qbr_pack"
+  | "ps_wip_writeoff"
+  | "ps_case_study_draft"
+  | "ps_csat_followup";
 
 export interface WizardField {
   key: string;
