@@ -261,17 +261,25 @@ export default function ChangeManagementDetail() {
     from_value?: any;
     to_value?: any;
     notes?: string | null;
-  }) => {
-    if (!change) return;
-    await supabase.from("change_management_activity").insert({
-      change_id: change.id,
-      organization_id: change.organization_id,
-      actor_user_id: user?.id ?? null,
-      event_type: payload.event_type,
-      from_value: payload.from_value ?? null,
-      to_value: payload.to_value ?? null,
-      notes: payload.notes ?? null,
-    });
+  }): Promise<string | null> => {
+    if (!change) return null;
+    const { data, error } = await supabase
+      .from("change_management_activity")
+      .insert({
+        change_id: change.id,
+        organization_id: change.organization_id,
+        actor_user_id: user?.id ?? null,
+        event_type: payload.event_type,
+        from_value: payload.from_value ?? null,
+        to_value: payload.to_value ?? null,
+        notes: payload.notes ?? null,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      console.warn("activity insert failed", error);
+      return null;
+    }
     // Fire-and-forget email + in-app notification dispatch
     void fireActivityNotification(
       payload.event_type,
@@ -279,6 +287,7 @@ export default function ChangeManagementDetail() {
       payload.to_value ?? null,
       payload.notes ?? null,
     );
+    return data?.id ?? null;
   };
 
   const persistFieldChange = async (field: string, value: any, comment?: string | null) => {
@@ -327,19 +336,90 @@ export default function ChangeManagementDetail() {
     await persistFieldChange(field, to, comment);
   };
 
+  const handleAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    const MAX = 25 * 1024 * 1024; // 25MB
+    const accepted: File[] = [];
+    for (const f of files) {
+      if (f.size > MAX) {
+        toast.error(`${f.name} is too large (25MB max)`);
+        continue;
+      }
+      accepted.push(f);
+    }
+    setPendingFiles((prev) => [...prev, ...accepted]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removePendingFile = (idx: number) => {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const uploadAttachmentsForActivity = async (activityId: string) => {
+    if (!change || !user || pendingFiles.length === 0) return;
+    for (const file of pendingFiles) {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `change_activity/${activityId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
+      const { error: upErr } = await supabase.storage.from("documents").upload(filePath, file);
+      if (upErr) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+      const { error: dbErr } = await supabase.from("documents").insert({
+        name: file.name,
+        file_path: filePath,
+        file_size: file.size,
+        mime_type: file.type,
+        entity_type: "change_activity",
+        entity_id: activityId,
+        uploaded_by: user.id,
+      });
+      if (dbErr) {
+        toast.error(`Failed to record ${file.name}`);
+      }
+    }
+  };
+
   const submitProgress = async () => {
     const required = requiresActivityComment(progressKind);
-    if (required && !progressText.trim()) {
+    const hasFiles = pendingFiles.length > 0;
+    if (required && !progressText.trim() && !hasFiles) {
       toast.error("A comment is required for this update type");
       return;
     }
-    await writeActivity({
-      event_type: progressKind,
-      notes: progressText.trim() || null,
-    });
-    setProgressText("");
-    toast.success("Comment posted");
-    qc.invalidateQueries({ queryKey: ["cm-activity", id] });
+    if (!progressText.trim() && !hasFiles) {
+      toast.error("Add a comment or attach a file before posting");
+      return;
+    }
+    setUploadingAttachments(true);
+    try {
+      const activityId = await writeActivity({
+        event_type: progressKind,
+        notes: progressText.trim() || null,
+      });
+      if (activityId && hasFiles) {
+        await uploadAttachmentsForActivity(activityId);
+      }
+      setProgressText("");
+      setPendingFiles([]);
+      toast.success(hasFiles ? "Update posted with attachments" : "Update posted");
+      qc.invalidateQueries({ queryKey: ["cm-activity", id] });
+      qc.invalidateQueries({ queryKey: ["cm-activity-attachments", id] });
+    } finally {
+      setUploadingAttachments(false);
+    }
+  };
+
+  const downloadAttachment = async (doc: { file_path: string; name: string }) => {
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .createSignedUrl(doc.file_path, 3600);
+    if (error || !data?.signedUrl) {
+      toast.error("Failed to generate download link");
+      return;
+    }
+    window.open(data.signedUrl, "_blank");
   };
 
   const addApproval = async () => {
