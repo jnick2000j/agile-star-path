@@ -282,7 +282,11 @@ Deno.serve(async (req: Request) => {
     } else if (body.kind === "wizard") {
       model = WIZARD_MODEL;
       system = WIZARD_SYSTEM_PROMPTS[body.wizard] + langDirective;
-      userPrompt = `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nProduce the document in clean Markdown.`;
+      const isJsonWizard =
+        body.wizard === "hd_major_incident_pack" || body.wizard === "hd_ticket_triage";
+      userPrompt = isJsonWizard
+        ? `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nReturn STRICT JSON only — no markdown fences, no commentary.`
+        : `Inputs:\n${JSON.stringify(body.inputs, null, 2)}\n\nProduce the document in clean Markdown.`;
       actionType = `wizard:${body.wizard}`;
       targetField = body.wizard;
     } else {
