@@ -507,6 +507,17 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
           </Select>
         </div>
 
+        <Button
+          variant="outline"
+          onClick={() => {
+            setRecurringSeed(null);
+            setRecurringOpen(true);
+          }}
+        >
+          <Repeat className="h-4 w-4 mr-2" />
+          Recurring Tasks
+        </Button>
+
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>
