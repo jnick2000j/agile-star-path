@@ -31,7 +31,23 @@ export type WizardKind =
   | "stakeholder_map"
   | "lessons_digest"
   | "sprint_retro_summary"
-  | "definition_of_ready";
+  | "definition_of_ready"
+  // Change Management (ITIL 4) wizards
+  | "cm_normal_change"
+  | "cm_standard_change"
+  | "cm_emergency_change"
+  | "cm_rollback_plan"
+  | "cm_cab_pack"
+  | "cm_post_implementation_review"
+  | "cm_impact_assessment"
+  // Helpdesk / Service Management wizards
+  | "hd_incident_writeup"
+  | "hd_problem_record"
+  | "hd_service_request"
+  | "hd_kb_article"
+  | "hd_major_incident_comms"
+  | "hd_csat_followup"
+  | "hd_sla_policy_draft";
 
 export interface WizardField {
   key: string;

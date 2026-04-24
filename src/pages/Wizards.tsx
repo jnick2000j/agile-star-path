@@ -14,6 +14,8 @@ import {
   FileText, Briefcase, Target, TrendingUp, GitBranch, AlertOctagon,
   MessageSquare, ListChecks, Megaphone, ShieldCheck, Flame, Users,
   ScrollText, RotateCcw, CheckCircle2, Eye,
+  GitMerge, Zap, RefreshCw, ClipboardCheck, Activity, BookOpen,
+  LifeBuoy, AlertTriangle, Wrench, Smile, Clock,
 } from "lucide-react";
 
 // ---------- CREATE wizards (template-driven entity creation) ----------
@@ -42,7 +44,7 @@ interface AIWizardSpec {
   title: string;
   description: string;
   icon: React.ElementType;
-  category: "Document" | "Helper" | "Governance" | "Strategy";
+  category: "Document" | "Helper" | "Governance" | "Strategy" | "Change Mgmt" | "Helpdesk";
   fields: WizardField[];
 }
 
@@ -137,10 +139,97 @@ const aiWizards: AIWizardSpec[] = [
   { kind: "definition_of_ready", title: "Definition of Ready", description: "Tailored DoR checklist for your team's user stories.", icon: CheckCircle2, category: "Helper", fields: [
     { key: "team_context", label: "Team context", type: "textarea", required: true, placeholder: "Stack, story shape, dependencies" },
   ]},
+
+  // ─── Change Management (ITIL 4) ─────────────────────────────────────────
+  { kind: "cm_normal_change", title: "Normal Change Record", description: "Full ITIL 4 normal change record ready for CAB review — with risk score, plan, rollback and approvals.", icon: GitMerge, category: "Change Mgmt", fields: [
+    { key: "title", label: "Change title", required: true, placeholder: "e.g. Upgrade payment gateway to v3" },
+    { key: "reason", label: "Business reason", type: "textarea", required: true },
+    { key: "scope", label: "Scope & affected services / CIs", type: "textarea", required: true },
+    { key: "implementer", label: "Implementer / team", placeholder: "e.g. Platform Ops" },
+    { key: "downtime", label: "Expected downtime", placeholder: "e.g. 30 min off-peak" },
+    { key: "window", label: "Preferred change window", placeholder: "e.g. Sat 02:00-04:00 UTC" },
+  ]},
+  { kind: "cm_standard_change", title: "Standard Change Template", description: "Pre-authorised, repeatable standard-change template for the change catalog.", icon: Zap, category: "Change Mgmt", fields: [
+    { key: "title", label: "Standard change title", required: true, placeholder: "e.g. Add user to Okta group" },
+    { key: "trigger", label: "Trigger / when used", type: "textarea", required: true },
+    { key: "frequency", label: "Expected frequency", placeholder: "e.g. ~10/week" },
+    { key: "tooling", label: "Tooling involved", placeholder: "e.g. Okta admin console, Terraform" },
+  ]},
+  { kind: "cm_emergency_change", title: "Emergency Change", description: "Fast-track E-CAB change to restore service or prevent imminent harm.", icon: AlertTriangle, category: "Change Mgmt", fields: [
+    { key: "title", label: "Emergency change title", required: true },
+    { key: "trigger_incident", label: "Trigger incident reference", placeholder: "e.g. INC-1234" },
+    { key: "impact", label: "Current business impact", type: "textarea", required: true },
+    { key: "proposed_action", label: "Proposed action", type: "textarea", required: true },
+  ]},
+  { kind: "cm_rollback_plan", title: "Rollback Plan", description: "Tested rollback plan with detection criteria and recovery time objective.", icon: RefreshCw, category: "Change Mgmt", fields: [
+    { key: "change_summary", label: "Change being rolled back from", type: "textarea", required: true },
+    { key: "deploy_steps", label: "Deploy steps (so we can reverse them)", type: "textarea", required: true },
+    { key: "data_changes", label: "Data / schema changes involved", type: "textarea", placeholder: "e.g. migration adds column X" },
+    { key: "rto", label: "Target RTO", placeholder: "e.g. 15 minutes" },
+  ]},
+  { kind: "cm_cab_pack", title: "CAB Meeting Pack", description: "Forward schedule of change + per-change one-pagers + recommendations.", icon: ClipboardCheck, category: "Change Mgmt", fields: [
+    { key: "period", label: "CAB period covered", required: true, placeholder: "e.g. week of 28 Apr 2026" },
+    { key: "changes", label: "Changes on the agenda (one per line: ref — title — type — owner)", type: "textarea", required: true },
+    { key: "carryovers", label: "Carry-overs / open PIRs", type: "textarea" },
+  ]},
+  { kind: "cm_post_implementation_review", title: "Post-Implementation Review", description: "ITIL PIR capturing outcome, variance, lessons and CMDB updates.", icon: Activity, category: "Change Mgmt", fields: [
+    { key: "change_ref", label: "Change reference", required: true },
+    { key: "outcome", label: "Outcome", placeholder: "Successful / Successful-with-issues / Failed / Backed-out" },
+    { key: "what_happened", label: "What actually happened", type: "textarea", required: true },
+    { key: "incidents", label: "Incidents caused (if any)", type: "textarea" },
+  ]},
+  { kind: "cm_impact_assessment", title: "Impact Assessment", description: "Score affected services, downtime exposure, dependencies and recommended classification.", icon: ShieldCheck, category: "Change Mgmt", fields: [
+    { key: "title", label: "Proposed change title", required: true },
+    { key: "description", label: "Description", type: "textarea", required: true },
+    { key: "services", label: "Services / systems touched", type: "textarea", required: true },
+    { key: "user_population", label: "Users affected", placeholder: "e.g. all internal staff (~3,000)" },
+  ]},
+
+  // ─── Helpdesk / Service Management ──────────────────────────────────────
+  { kind: "hd_incident_writeup", title: "Incident Ticket Write-up", description: "Turn raw user input into a clean, prioritised incident ticket.", icon: LifeBuoy, category: "Helpdesk", fields: [
+    { key: "raw_report", label: "Raw user report", type: "textarea", required: true, placeholder: "Paste what the user said (email, chat, call notes)" },
+    { key: "service", label: "Affected service / app", placeholder: "e.g. Salesforce, VPN" },
+    { key: "user_count", label: "How many users affected", placeholder: "e.g. 1, team of 12, all of finance" },
+  ]},
+  { kind: "hd_problem_record", title: "Problem Record", description: "Open a problem record from a cluster of related incidents (root-cause investigation).", icon: Wrench, category: "Helpdesk", fields: [
+    { key: "title", label: "Problem title", required: true },
+    { key: "incident_refs", label: "Linked incident references", type: "textarea", required: true },
+    { key: "pattern", label: "Observed pattern / frequency", type: "textarea", required: true },
+    { key: "current_workaround", label: "Current workaround (if any)", type: "textarea" },
+  ]},
+  { kind: "hd_service_request", title: "Service Request", description: "Standardised service request that can become a catalog item.", icon: ListChecks, category: "Helpdesk", fields: [
+    { key: "title", label: "Request title", required: true, placeholder: "e.g. New laptop for joiner" },
+    { key: "requester", label: "Requester / beneficiary", placeholder: "name + role" },
+    { key: "justification", label: "Business justification", type: "textarea", required: true },
+    { key: "required_by", label: "Required by", placeholder: "YYYY-MM-DD" },
+  ]},
+  { kind: "hd_kb_article", title: "Knowledge-Base Article (KCS)", description: "Capture a resolved ticket as a reusable KB article in KCS format.", icon: BookOpen, category: "Helpdesk", fields: [
+    { key: "problem", label: "Problem (as the user types it)", required: true },
+    { key: "environment", label: "Environment / applies to", placeholder: "e.g. Windows 11, Outlook desktop" },
+    { key: "resolution_notes", label: "How it was resolved", type: "textarea", required: true },
+    { key: "audience", label: "Audience", placeholder: "internal / customer-facing" },
+  ]},
+  { kind: "hd_major_incident_comms", title: "Major Incident Comms", description: "Coordinated status-page + internal + executive comms for a P1.", icon: Megaphone, category: "Helpdesk", fields: [
+    { key: "service", label: "Affected service", required: true },
+    { key: "impact", label: "Customer impact", type: "textarea", required: true },
+    { key: "what_we_know", label: "What we currently know", type: "textarea", required: true },
+    { key: "next_update", label: "Next update at", placeholder: "e.g. in 30 minutes" },
+  ]},
+  { kind: "hd_csat_followup", title: "Low CSAT Follow-up", description: "Empathetic customer email + agent coaching note + process candidate.", icon: Smile, category: "Helpdesk", fields: [
+    { key: "ticket_ref", label: "Ticket reference", required: true },
+    { key: "ticket_summary", label: "Ticket summary", type: "textarea", required: true },
+    { key: "csat_comment", label: "Customer's CSAT comment", type: "textarea" },
+    { key: "agent", label: "Agent name (for coaching note)" },
+  ]},
+  { kind: "hd_sla_policy_draft", title: "SLA Policy Draft", description: "Recommend response/resolution targets per ticket type and priority.", icon: Clock, category: "Helpdesk", fields: [
+    { key: "service_context", label: "Service desk context", type: "textarea", required: true, placeholder: "Coverage hours, team size, ticket volume, customer expectations" },
+    { key: "ticket_types", label: "Ticket types in use", placeholder: "e.g. Incident, Service Request, Question, Problem" },
+    { key: "constraints", label: "Constraints", type: "textarea", placeholder: "Vendor SLAs, contractual commitments, business hours" },
+  ]},
 ];
 
 const CREATE_CATEGORIES = ["all", "MSP", "PRINCE2", "Agile", "Product", "Governance"] as const;
-const AI_CATEGORIES = ["all", "Document", "Strategy", "Governance", "Helper"] as const;
+const AI_CATEGORIES = ["all", "Document", "Strategy", "Governance", "Helper", "Change Mgmt", "Helpdesk"] as const;
 
 export default function Wizards() {
   const [searchParams, setSearchParams] = useSearchParams();

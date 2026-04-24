@@ -450,6 +450,33 @@ const productManagementPrinciples = [
   { title: "Strategic Alignment", description: "Product work must align with company vision and strategy. Ensure every initiative connects to broader business objectives and creates strategic value." },
 ];
 
+// ITIL 4 / industry-standard Change Enablement principles
+const changeManagementPrinciples = [
+  { title: "Focus on Value (ITIL 4)", description: "Every change must be assessed against the value it delivers to customers, users and the business. Reject or rework changes that cannot articulate a clear benefit." },
+  { title: "Start Where You Are", description: "Reuse existing tooling, processes and CAB structures wherever possible. Don't replace what works — instrument and improve it incrementally." },
+  { title: "Progress Iteratively With Feedback", description: "Break large transformations into small, reversible changes. Each release feeds back into risk scoring, success-rate metrics and CAB decisions." },
+  { title: "Collaborate and Promote Visibility", description: "Changes touch many teams. Maintain a transparent forward-schedule of change (FSC), publish CAB outcomes, and make blackout windows visible to everyone." },
+  { title: "Risk-Based Authorisation", description: "Standard, Normal and Emergency changes have different approval paths. Pre-authorise low-risk standard changes; route high-impact ones to CAB or ECAB." },
+  { title: "Plan for Reversal", description: "No change is approved without a tested rollback plan. Document recovery time objective (RTO) and the criteria that trigger a rollback." },
+  { title: "Separation of Duties", description: "The requester, implementer, approver and verifier should not be the same person. Enforce this in workflow to satisfy audit (SOX, ISO 20000, ISO 27001)." },
+  { title: "Post-Implementation Review (PIR)", description: "Every significant or failed change is reviewed for outcome, lessons and CMDB accuracy. Feed findings back into the standard-change catalog." },
+  { title: "Measure and Improve", description: "Track change success rate, lead time to authorise, % emergency changes, and incidents caused by change. Use trends to drive continual improvement." },
+];
+
+// ITIL 4 / HDI / ISO 20000 service-management principles for the helpdesk
+const helpdeskPrinciples = [
+  { title: "Single Point of Contact (SPOC)", description: "The service desk is the one channel users contact for incidents, requests, questions and problems — across web portal, email, chat and phone." },
+  { title: "Shift-Left & Self-Service", description: "Resolve as many issues as possible at the lowest tier. Surface knowledge-base articles in the ticket form, deflect via portal, and only escalate when needed." },
+  { title: "Categorise Tickets by Type", description: "Use standard ITIL types — Incident (unplanned outage), Service Request (something new), Problem (root cause behind incidents), and Question — each with its own SLA." },
+  { title: "SLA & OLA Discipline", description: "Set explicit response and resolution targets per priority and ticket type. Pause the clock on customer-pending states. Track breach trends and at-risk tickets." },
+  { title: "Priority = Impact × Urgency", description: "Use a 4×4 priority matrix. P1 outages bypass standard queueing; low-impact requests follow normal flow. Re-prioritise as new information arrives." },
+  { title: "Incident vs Problem vs Change", description: "Restore service first (Incident), find the root cause separately (Problem), and only then raise a controlled fix (Change). Never blur the three workflows." },
+  { title: "Knowledge-Centred Service (KCS)", description: "Every resolved ticket is a knowledge candidate. Capture the fix in the KB at point of resolution, link it back, and reuse it on future tickets." },
+  { title: "Customer Satisfaction (CSAT)", description: "Survey at resolution. A ticket isn't truly closed until the customer confirms — and CSAT trends drive coaching, staffing and process changes." },
+  { title: "Continual Service Improvement", description: "Review MTTR, first-contact resolution, backlog age, top categories and CSAT every cycle. Convert recurring incidents into Problems and standard requests into the catalog." },
+  { title: "Audit Trail & Accountability", description: "Every state change, comment, attachment, escalation and SLA pause is logged with actor and timestamp — required for ISO 20000, SOC 2 and internal audit." },
+];
+
 interface Template {
   name: string;
   category: string;
@@ -1272,7 +1299,7 @@ export default function Documentation() {
         </TabsContent>
 
         <TabsContent value="principles" className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {/* PRINCE2 Principles */}
             <div className="metric-card">
               <div className="flex items-center gap-3 mb-4">
@@ -1362,6 +1389,56 @@ export default function Documentation() {
               <Accordion type="single" collapsible className="w-full">
                 {productManagementPrinciples.map((principle, index) => (
                   <AccordionItem key={index} value={`pm-${index}`}>
+                    <AccordionTrigger className="text-sm text-left">
+                      {principle.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground">
+                      {principle.description}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Change Management Principles (ITIL 4 Change Enablement) */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                  <GitMerge className="h-5 w-5 text-destructive" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Change Management</h3>
+                  <p className="text-sm text-muted-foreground">ITIL 4 · ISO 20000 · ISO 27001</p>
+                </div>
+              </div>
+              <Accordion type="single" collapsible className="w-full">
+                {changeManagementPrinciples.map((principle, index) => (
+                  <AccordionItem key={index} value={`cm-${index}`}>
+                    <AccordionTrigger className="text-sm text-left">
+                      {principle.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground">
+                      {principle.description}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Helpdesk / Service Management Principles (ITIL 4 + HDI) */}
+            <div className="metric-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
+                  <Megaphone className="h-5 w-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Helpdesk &amp; Service Mgmt</h3>
+                  <p className="text-sm text-muted-foreground">ITIL 4 · HDI · KCS</p>
+                </div>
+              </div>
+              <Accordion type="single" collapsible className="w-full">
+                {helpdeskPrinciples.map((principle, index) => (
+                  <AccordionItem key={index} value={`hd-${index}`}>
                     <AccordionTrigger className="text-sm text-left">
                       {principle.title}
                     </AccordionTrigger>
