@@ -9419,6 +9419,20 @@ export type Database = {
         Returns: string
       }
       get_ai_credit_status: { Args: { _org_id: string }; Returns: Json }
+      get_csat_by_token: {
+        Args: { _token: string }
+        Returns: {
+          comment: string
+          expires_at: string
+          follow_up_answer: string
+          id: string
+          organization_id: string
+          rating: number
+          responded_at: string
+          sent_at: string
+          ticket_id: string
+        }[]
+      }
       get_deployment_mode: { Args: { _org_id: string }; Returns: string }
       get_effective_ai_provider: { Args: { _org_id?: string }; Returns: Json }
       get_effective_retention_days: {

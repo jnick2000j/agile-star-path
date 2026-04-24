@@ -107,8 +107,37 @@ Deno.serve(async (req) => {
       const body = formatEvents(events!, exp.format);
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (exp.auth_header_name && exp.auth_secret_name) {
+        if (!isAllowedSecretName(exp.auth_secret_name)) {
+          await admin.from("siem_export_log").insert({
+            exporter_id: exp.id,
+            organization_id: exp.organization_id,
+            event_count: 0,
+            status: "failure",
+            http_status: 0,
+            response_body: `Refused: secret name "${exp.auth_secret_name}" is not in the allowlist (must start with SIEM_).`,
+            duration_ms: 0,
+          });
+          results.push({ exporter_id: exp.id, status: "failure", events: 0, error: "secret_name_not_allowed" });
+          continue;
+        }
         const secret = Deno.env.get(exp.auth_secret_name);
         if (secret) headers[exp.auth_header_name] = secret;
+      }
+
+      // SSRF guard: block private/loopback/link-local destinations
+      const urlCheck = validateEndpointUrl(exp.endpoint_url);
+      if (!urlCheck.ok) {
+        await admin.from("siem_export_log").insert({
+          exporter_id: exp.id,
+          organization_id: exp.organization_id,
+          event_count: 0,
+          status: "failure",
+          http_status: 0,
+          response_body: `Refused endpoint: ${urlCheck.reason}`,
+          duration_ms: 0,
+        });
+        results.push({ exporter_id: exp.id, status: "failure", events: 0, error: urlCheck.reason });
+        continue;
       }
 
       const start = Date.now();
@@ -187,4 +216,79 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+// Allowlist: org-admins may only reference Deno env vars whose name starts with "SIEM_".
+// This blocks exfiltration of platform secrets like SUPABASE_SERVICE_ROLE_KEY,
+// LOVABLE_API_KEY, STRIPE_*, etc., via a malicious exporter row.
+function isAllowedSecretName(name: string): boolean {
+  if (!name || typeof name !== "string") return false;
+  if (name.length > 128) return false;
+  if (!/^[A-Z][A-Z0-9_]*$/.test(name)) return false;
+  return name.startsWith("SIEM_");
+}
+
+// SSRF guard: only allow http(s) URLs to public hostnames. Reject loopback,
+// private RFC1918 ranges, link-local, and metadata service IPs to stop an
+// org-admin from pivoting through this function to internal infrastructure.
+function validateEndpointUrl(rawUrl: string): { ok: true } | { ok: false; reason: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return { ok: false, reason: "endpoint_url is not a valid URL" };
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return { ok: false, reason: "endpoint_url must use http or https" };
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (!host) return { ok: false, reason: "endpoint_url missing host" };
+
+  // Block obvious loopback / metadata hostnames.
+  const blockedHostnames = new Set([
+    "localhost",
+    "ip6-localhost",
+    "ip6-loopback",
+    "metadata.google.internal",
+  ]);
+  if (blockedHostnames.has(host)) {
+    return { ok: false, reason: "endpoint_url targets a blocked hostname" };
+  }
+  if (host.endsWith(".localhost") || host.endsWith(".internal") || host.endsWith(".local")) {
+    return { ok: false, reason: "endpoint_url targets a blocked TLD" };
+  }
+
+  // If the host is a literal IP, block private/loopback/link-local/CGNAT/metadata ranges.
+  const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const [a, b] = [parseInt(ipv4[1], 10), parseInt(ipv4[2], 10)];
+    if (
+      a === 10 ||
+      a === 127 ||
+      a === 0 ||
+      (a === 169 && b === 254) || // link-local + AWS/GCP metadata 169.254.169.254
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127) || // CGNAT
+      a >= 224 // multicast / reserved
+    ) {
+      return { ok: false, reason: "endpoint_url targets a private or reserved IPv4 range" };
+    }
+  }
+
+  // IPv6 literals come wrapped in [...]; reject loopback/link-local/unique-local.
+  if (host.startsWith("[") || host.includes(":")) {
+    const v6 = host.replace(/^\[|\]$/g, "").toLowerCase();
+    if (
+      v6 === "::1" ||
+      v6 === "::" ||
+      v6.startsWith("fe80:") ||
+      v6.startsWith("fc") ||
+      v6.startsWith("fd")
+    ) {
+      return { ok: false, reason: "endpoint_url targets a private or reserved IPv6 range" };
+    }
+  }
+
+  return { ok: true };
 }
