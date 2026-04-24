@@ -144,6 +144,20 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
     enabled: open && !!projectId,
   });
 
+  const { data: featuresList = [] } = useQuery({
+    queryKey: ["features-for-task", productId],
+    queryFn: async () => {
+      if (!productId) return [];
+      const { data } = await supabase
+        .from("product_features")
+        .select("id, name, status")
+        .eq("product_id", productId)
+        .order("name");
+      return data || [];
+    },
+    enabled: open && !!productId,
+  });
+
   const { data: risks = [] } = useQuery({
     queryKey: ["risks-for-task", currentOrganization?.id],
     queryFn: async () => {
