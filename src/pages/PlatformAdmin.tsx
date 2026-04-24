@@ -332,7 +332,7 @@ export default function PlatformAdmin() {
                   </TableRow>
                 ) : (
                   orgs.map((org) => (
-                    <TableRow key={org.id} className={org.is_suspended ? "bg-destructive/5" : undefined}>
+                    <TableRow key={org.id} className={org.is_archived ? "opacity-60" : org.is_suspended ? "bg-destructive/5" : undefined}>
                       <TableCell>
                         <div>
                           <p className="font-medium">{org.name}</p>
