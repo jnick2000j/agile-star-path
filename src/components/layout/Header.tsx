@@ -15,6 +15,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "sonner";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,6 +149,8 @@ export function Header({ title, subtitle }: HeaderProps) {
         </Button>
 
         <AskSupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
+
+        <NotificationBell />
 
         {/* Quick link to Support inside menu too */}
 

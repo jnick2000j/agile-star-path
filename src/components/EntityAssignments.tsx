@@ -92,9 +92,24 @@ export function EntityAssignments({
         assigned_by: user?.id,
       });
       if (error) throw error;
+      await supabase.functions.invoke("notification-dispatcher", {
+        body: {
+          event_type: "entity_assignment",
+          recipient_user_id: selectedUserId,
+          actor_user_id: user?.id,
+          organization_id: organizationId ?? null,
+          entity_type: entityType,
+          entity_id: entityId,
+          assignment_role: selectedRole,
+          link: `/${entityType === "programme" ? "programmes" : entityType === "project" ? "projects" : "products"}/details?id=${entityId}`,
+        },
+      }).catch((notifyError) => {
+        console.error("entity assignment notification failed", notifyError);
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity-assignments", entityType, entityId] });
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread"] });
       setSelectedUserId("");
       toast({ title: "User assigned" });
     },
@@ -110,6 +125,20 @@ export function EntityAssignments({
         .delete()
         .eq("id", assignmentId);
       if (error) throw error;
+      await supabase.functions.invoke("notification-dispatcher", {
+        body: {
+          event_type: "entity_assignment",
+          recipient_user_id: selectedUserId,
+          actor_user_id: user?.id,
+          organization_id: organizationId ?? null,
+          entity_type: entityType,
+          entity_id: entityId,
+          assignment_role: selectedRole,
+          link: `/${entityType === "programme" ? "programmes" : entityType === "project" ? "projects" : "products"}/details?id=${entityId}`,
+        },
+      }).catch((notifyError) => {
+        console.error("entity assignment notification failed", notifyError);
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity-assignments", entityType, entityId] });

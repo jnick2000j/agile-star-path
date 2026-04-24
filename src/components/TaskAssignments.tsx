@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -101,8 +101,22 @@ export function TaskAssignments({
     enabled: !!(projectId || programmeId || productId || organizationId),
   });
 
-  const assignedUserIds = new Set(assignments.map((a: any) => a.user_id));
+  const assignedUserIds = useMemo(() => new Set(assignments.map((a: any) => a.user_id)), [assignments]);
   const availableUsers = entityUsers.filter((u) => !assignedUserIds.has(u.user_id));
+
+  const taskDetails = useQuery({
+    queryKey: ["task-details-for-notify", taskId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("id, name, project_id, programme_id, product_id")
+        .eq("id", taskId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!taskId,
+  });
 
   const addAssignment = useMutation({
     mutationFn: async () => {
@@ -115,9 +129,30 @@ export function TaskAssignments({
         assigned_by: user?.id,
       });
       if (error) throw error;
+
+      const taskData = taskDetails.data;
+      await supabase.functions.invoke("notification-dispatcher", {
+        body: {
+          event_type: "task_assignment",
+          recipient_user_id: selectedUserId,
+          actor_user_id: user?.id,
+          organization_id: organizationId ?? null,
+          task_id: taskId,
+          task_name: taskData?.name ?? null,
+          entity_type: "task",
+          entity_id: taskId,
+          project_id: taskData?.project_id ?? projectId ?? null,
+          programme_id: taskData?.programme_id ?? programmeId ?? null,
+          product_id: taskData?.product_id ?? productId ?? null,
+          link: `/tasks`,
+        },
+      }).catch((notifyError) => {
+        console.error("task assignment notification failed", notifyError);
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["task-assignments", taskId] });
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread"] });
       setSelectedUserId("");
       toast({ title: "User assigned to task" });
     },
