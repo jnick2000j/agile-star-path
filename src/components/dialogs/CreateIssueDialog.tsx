@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { EntitySelector } from "@/components/EntitySelector";
+import { dispatchAutomation } from "@/lib/automations";
 
 interface CreateIssueDialogProps {
   onSuccess?: () => void;
@@ -41,7 +42,7 @@ export function CreateIssueDialog({ onSuccess }: CreateIssueDialogProps) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("issues").insert({
+      const { data: created, error } = await supabase.from("issues").insert({
         title: formData.title,
         description: formData.description || null,
         programme_id: formData.programme_id || null,
@@ -55,9 +56,21 @@ export function CreateIssueDialog({ onSuccess }: CreateIssueDialogProps) {
         organization_id: currentOrganization?.id,
         created_by: user.id,
         owner_id: user.id,
-      });
+      }).select("id, organization_id").single();
 
       if (error) throw error;
+
+      if (created?.organization_id) {
+        dispatchAutomation({
+          organization_id: created.organization_id,
+          module: "issue",
+          trigger_event: "created",
+          entity_type: "issue",
+          entity_id: created.id,
+          payload: { ...formData },
+          triggered_by: user.id,
+        });
+      }
 
       toast.success("Issue created successfully");
       setOpen(false);

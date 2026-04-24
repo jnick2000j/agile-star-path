@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { EntitySelector } from "@/components/EntitySelector";
+import { dispatchAutomation } from "@/lib/automations";
 
 interface CreateBenefitDialogProps {
   onSuccess?: () => void;
@@ -43,7 +44,7 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("benefits").insert({
+      const { data: created, error } = await supabase.from("benefits").insert({
         name: formData.name,
         description: formData.description || null,
         programme_id: formData.programme_id || null,
@@ -60,9 +61,21 @@ export function CreateBenefitDialog({ onSuccess }: CreateBenefitDialogProps) {
         created_by: user.id,
         owner_id: user.id,
         realization: 0,
-      });
+      }).select("id, organization_id").single();
 
       if (error) throw error;
+
+      if (created?.organization_id) {
+        dispatchAutomation({
+          organization_id: created.organization_id,
+          module: "benefit",
+          trigger_event: "created",
+          entity_type: "benefit",
+          entity_id: created.id,
+          payload: { ...formData },
+          triggered_by: user.id,
+        });
+      }
 
       toast.success("Benefit created successfully");
       setOpen(false);

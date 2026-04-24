@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
+import { dispatchAutomation } from "@/lib/automations";
 
 interface CreateProjectDialogProps {
   onSuccess?: () => void;
@@ -69,7 +70,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("projects").insert({
+      const { data: created, error } = await supabase.from("projects").insert({
         ...formData,
         programme_id: formData.programme_id || null,
         organization_id: formData.organization_id || null,
@@ -77,9 +78,21 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
         end_date: formData.end_date || null,
         created_by: user.id,
         manager_id: user.id,
-      });
+      }).select("id, organization_id").single();
 
       if (error) throw error;
+
+      if (created?.organization_id) {
+        dispatchAutomation({
+          organization_id: created.organization_id,
+          module: "project",
+          trigger_event: "created",
+          entity_type: "project",
+          entity_id: created.id,
+          payload: { ...formData },
+          triggered_by: user.id,
+        });
+      }
 
       toast.success("Project created successfully");
       setOpen(false);

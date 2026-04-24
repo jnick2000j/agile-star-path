@@ -33,7 +33,9 @@ import {
   MessageSquarePlus,
   Users,
   LifeBuoy,
+  Workflow,
 } from "lucide-react";
+import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -468,9 +470,10 @@ export default function ProductDetails() {
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "tickets", label: "Tickets", icon: LifeBuoy },
+              { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
-            className="grid-cols-9 sm:grid-cols-9 md:grid-cols-9 lg:grid-cols-9"
+            className="grid-cols-10 sm:grid-cols-10 md:grid-cols-10 lg:grid-cols-10"
           />
 
           {/* Features Tab */}
@@ -888,6 +891,10 @@ export default function ProductDetails() {
               entityId={product.id}
               organizationId={product.organization_id}
             />
+          </TabsContent>
+
+          <TabsContent value="automations">
+            <AutomationsTab module="product" entityId={product.id} entityType="product" />
           </TabsContent>
         </Tabs>
       </div>

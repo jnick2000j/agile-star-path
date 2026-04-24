@@ -113,6 +113,7 @@ export function Sidebar() {
         { label: "AI Approvals", href: "/ai-approvals" },
       ],
     },
+    { label: "Automations", icon: Workflow, href: "/admin/automations" },
   ];
 
   const toggleExpand = (label: string) => {

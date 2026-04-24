@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Workflow, Activity, CheckCircle2, XCircle, Clock, Loader2, ChevronUp, ChevronDown, Pencil } from "lucide-react";
+import { Plus, Trash2, Workflow, Activity, CheckCircle2, XCircle, Clock, Loader2, ChevronUp, ChevronDown, Pencil, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -26,6 +26,7 @@ import {
   decideApproval,
   type AutomationModule,
 } from "@/lib/automations";
+import { AUTOMATION_TEMPLATES, type AutomationTemplate } from "@/lib/automationTemplates";
 
 const STATUS_ICON: Record<string, JSX.Element> = {
   pending: <Clock className="h-4 w-4 text-muted-foreground" />,
@@ -50,6 +51,7 @@ export default function Automations() {
   const [moduleFilter, setModuleFilter] = useState<string>(searchParams.get("module") || "all");
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
 
   // Open builder if ?new=1
   useEffect(() => {
@@ -171,6 +173,27 @@ export default function Automations() {
     }
   };
 
+  const installTemplate = async (tpl: AutomationTemplate) => {
+    if (!currentOrganization?.id) return;
+    const { error } = await supabase.from("automation_workflows").insert({
+      organization_id: currentOrganization.id,
+      module: tpl.module,
+      name: tpl.name,
+      description: tpl.description,
+      trigger_event: tpl.trigger_event,
+      match_conditions: tpl.match_conditions || [],
+      steps: tpl.steps,
+      is_active: false,
+      priority: tpl.priority ?? 100,
+      category: tpl.category || null,
+      created_by: user?.id,
+      updated_by: user?.id,
+    });
+    if (error) return toast.error(error.message);
+    toast.success(`Installed "${tpl.name}" — review & enable it`);
+    qc.invalidateQueries({ queryKey: ["automations-workflows"] });
+  };
+
   return (
     <AppLayout title="AI Automations" subtitle="Program AI-driven workflows across every module">
       <div className="space-y-4">
@@ -185,18 +208,23 @@ export default function Automations() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => {
-            setEditing({
-              module: moduleFilter !== "all" ? moduleFilter : "project",
-              name: "", description: "",
-              trigger_event: "created",
-              match_conditions: [], steps: [],
-              is_active: true, priority: 100,
-            });
-            setEditorOpen(true);
-          }}>
-            <Plus className="h-4 w-4 mr-2" /> New Automation
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setTemplatesOpen(true)}>
+              <Sparkles className="h-4 w-4 mr-2" /> Templates
+            </Button>
+            <Button onClick={() => {
+              setEditing({
+                module: moduleFilter !== "all" ? moduleFilter : "project",
+                name: "", description: "",
+                trigger_event: "created",
+                match_conditions: [], steps: [],
+                is_active: true, priority: 100,
+              });
+              setEditorOpen(true);
+            }}>
+              <Plus className="h-4 w-4 mr-2" /> New Automation
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="workflows">
@@ -336,6 +364,42 @@ export default function Automations() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditorOpen(false)}>Cancel</Button>
             <Button onClick={saveWorkflow}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Starter templates */}
+      <Dialog open={templatesOpen} onOpenChange={setTemplatesOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Starter Automation Templates</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Install a prebuilt workflow with one click. It will be created as inactive — review the steps, then enable it.
+          </p>
+          <div className="grid gap-3 mt-2">
+            {AUTOMATION_TEMPLATES.map((tpl) => (
+              <Card key={tpl.key} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-semibold">{tpl.name}</h4>
+                      <Badge variant="outline">{AUTOMATION_MODULES.find(m => m.key === tpl.module)?.label || tpl.module}</Badge>
+                      <Badge variant="secondary">{tpl.trigger_event.replace(/_/g, " ")}</Badge>
+                      {tpl.category && <Badge variant="outline" className="text-xs">{tpl.category}</Badge>}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{tpl.description}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{tpl.steps.length} steps</p>
+                  </div>
+                  <Button size="sm" onClick={() => installTemplate(tpl)}>
+                    <Plus className="h-4 w-4 mr-1" /> Install
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTemplatesOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

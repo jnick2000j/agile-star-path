@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
+import { dispatchAutomation } from "@/lib/automations";
 
 interface CreateProductDialogProps {
   onSuccess?: () => void;
@@ -87,7 +88,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("products").insert({
+      const { data: created, error } = await supabase.from("products").insert({
         ...formData,
         organization_id: formData.organization_id || null,
         programme_id: formData.programme_id || null,
@@ -95,9 +96,21 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
         launch_date: formData.launch_date || null,
         created_by: user.id,
         product_owner_id: user.id,
-      });
+      }).select("id, organization_id").single();
 
       if (error) throw error;
+
+      if (created?.organization_id) {
+        dispatchAutomation({
+          organization_id: created.organization_id,
+          module: "product",
+          trigger_event: "created",
+          entity_type: "product",
+          entity_id: created.id,
+          payload: { ...formData },
+          triggered_by: user.id,
+        });
+      }
 
       toast.success("Product created successfully");
       setOpen(false);

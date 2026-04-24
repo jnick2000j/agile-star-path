@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
+import { dispatchAutomation } from "@/lib/automations";
 
 interface CreateProgrammeDialogProps {
   onSuccess?: () => void;
@@ -64,7 +65,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("programmes").insert({
+      const { data: created, error } = await supabase.from("programmes").insert({
         name: formData.name,
         description: formData.description || null,
         status: formData.status,
@@ -78,9 +79,21 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
         created_by: user.id,
         manager_id: user.id,
         progress: 0,
-      });
+      }).select("id, organization_id").single();
 
       if (error) throw error;
+
+      if (created?.organization_id) {
+        dispatchAutomation({
+          organization_id: created.organization_id,
+          module: "programme",
+          trigger_event: "created",
+          entity_type: "programme",
+          entity_id: created.id,
+          payload: { ...formData },
+          triggered_by: user.id,
+        });
+      }
 
       toast.success("Program created successfully");
       setOpen(false);

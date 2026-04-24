@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { dispatchAutomation } from "@/lib/automations";
 
 interface Props {
   open: boolean;
@@ -73,7 +74,7 @@ export function CreateChangeDialog({ open, onOpenChange, onCreated }: Props) {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("change_management_requests").insert({
+    const { data: created, error } = await supabase.from("change_management_requests").insert({
       organization_id: currentOrganization.id,
       title: form.title.trim(),
       description: form.description || null,
@@ -93,11 +94,22 @@ export function CreateChangeDialog({ open, onOpenChange, onCreated }: Props) {
       owner_id: user?.id ?? null,
       created_by: user?.id ?? null,
       status: "draft" as any,
-    });
+    }).select("id").single();
     setSubmitting(false);
     if (error) {
       toast.error("Failed: " + error.message);
       return;
+    }
+    if (created?.id) {
+      dispatchAutomation({
+        organization_id: currentOrganization.id,
+        module: "change",
+        trigger_event: "created",
+        entity_type: "change",
+        entity_id: created.id,
+        payload: { ...form },
+        triggered_by: user?.id,
+      });
     }
     toast.success("Change request created");
     onOpenChange(false);
