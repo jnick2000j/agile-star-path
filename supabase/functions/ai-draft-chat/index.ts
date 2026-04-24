@@ -9,6 +9,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateResidency } from "../_shared/residency.ts";
 import { consumeAiCredits } from "../_shared/credits.ts";
+import { WIZARD_SYSTEM_PROMPTS, type WizardKind } from "../_shared/wizard-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,9 +26,7 @@ interface ChatMessage {
 }
 
 interface RequestBody {
-  wizard: string;
-  /** Domain-specific system prompt for the wizard (sourced from ai-draft prompts). */
-  system_prompt: string;
+  wizard: WizardKind;
   /** Friendly title shown in the chat (e.g. "Statement of Work"). */
   title: string;
   /** Hint of fields the AI should make sure to capture before producing a draft. */
