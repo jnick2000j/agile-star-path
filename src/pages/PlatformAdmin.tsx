@@ -81,6 +81,7 @@ export default function PlatformAdmin() {
   const [loading, setLoading] = useState(true);
   const [suspensionTarget, setSuspensionTarget] = useState<OrgOverview | null>(null);
   const [verticalTarget, setVerticalTarget] = useState<OrgOverview | null>(null);
+  const [psOnboardingOpen, setPsOnboardingOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -378,6 +379,17 @@ export default function PlatformAdmin() {
         </TabsContent>
 
         <TabsContent value="verticals" className="space-y-6">
+          <div className="flex items-center justify-between gap-3 rounded-lg border bg-card p-4">
+            <div>
+              <h3 className="text-base font-semibold flex items-center gap-2">
+                <Briefcase className="h-4 w-4" /> Professional Services Onboarding
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Configure an account for PS&amp;C — terminology, modules, dashboards and starter content.
+              </p>
+            </div>
+            <Button onClick={() => setPsOnboardingOpen(true)}>Launch wizard</Button>
+          </div>
           <VerticalPacksManager />
         </TabsContent>
 
@@ -401,6 +413,12 @@ export default function PlatformAdmin() {
         onOpenChange={(o) => !o && setVerticalTarget(null)}
         organization={verticalTarget}
         onSuccess={() => { setVerticalTarget(null); fetchData(); }}
+      />
+
+      <PSOnboardingWizard
+        open={psOnboardingOpen}
+        onOpenChange={setPsOnboardingOpen}
+        onSuccess={() => fetchData()}
       />
     </AppLayout>
   );
