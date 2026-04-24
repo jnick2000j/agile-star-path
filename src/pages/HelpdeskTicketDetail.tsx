@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageSquare, Activity, Save } from "lucide-react";
+import { ArrowLeft, MessageSquare, Activity, Save, PauseCircle, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ import { cn, formatLabel } from "@/lib/utils";
 import { SLAStatus } from "@/components/helpdesk/SLAStatus";
 import { KBAssistant } from "@/components/kb/KBAssistant";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
+import { CatalogSummary } from "@/components/helpdesk/CatalogPicker";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -201,7 +202,20 @@ export default function HelpdeskTicketDetail() {
                     {ticket.created_at && ` · ${format(new Date(ticket.created_at), "PPp")}`}
                   </p>
                 </div>
-                <Badge className={cn(STATUS_STYLES[ticket.status])}>{formatLabel(ticket.status)}</Badge>
+                <div className="flex items-center gap-2">
+                  {(ticket as any).sla_paused_at ? (
+                    <Badge variant="outline" className="gap-1 bg-muted text-muted-foreground">
+                      <PauseCircle className="h-3 w-3" /> SLA Paused
+                    </Badge>
+                  ) : (
+                    !["resolved","closed","cancelled"].includes(ticket.status) && (
+                      <Badge variant="outline" className="gap-1 bg-success/10 text-success border-success/30">
+                        <PlayCircle className="h-3 w-3" /> SLA Active
+                      </Badge>
+                    )
+                  )}
+                  <Badge className={cn(STATUS_STYLES[ticket.status])}>{formatLabel(ticket.status)}</Badge>
+                </div>
               </div>
               <p className="whitespace-pre-wrap text-sm">{ticket.description || <span className="text-muted-foreground">No description</span>}</p>
             </Card>
@@ -317,7 +331,14 @@ export default function HelpdeskTicketDetail() {
               responseBreached={(ticket as any).sla_response_breached ?? false}
               resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
               status={ticket.status}
+              pausedAt={(ticket as any).sla_paused_at}
+              pausedSeconds={(ticket as any).sla_paused_seconds}
             />
+
+            <Card className="p-4 space-y-2">
+              <h3 className="font-semibold">Catalog</h3>
+              <CatalogSummary ticketId={ticket.id} />
+            </Card>
 
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
