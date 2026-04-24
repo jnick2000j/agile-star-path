@@ -45,6 +45,7 @@ export function CreateTicketDialog({
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>({});
   const [form, setForm] = useState({
     subject: "",
     description: "",
@@ -104,7 +105,7 @@ export function CreateTicketDialog({
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("helpdesk_tickets").insert({
+    const { data: created, error } = await supabase.from("helpdesk_tickets").insert({
       organization_id: currentOrganization.id,
       subject: form.subject.trim(),
       description: form.description.trim() || null,
@@ -118,18 +119,30 @@ export function CreateTicketDialog({
       programme_id: form.programme_id || null,
       project_id: form.project_id || null,
       product_id: form.product_id || null,
-    });
-    setSubmitting(false);
-    if (error) {
-      toast.error("Failed to create ticket: " + error.message);
+    }).select("id").single();
+    if (error || !created) {
+      setSubmitting(false);
+      toast.error("Failed to create ticket: " + (error?.message ?? "unknown error"));
       return;
     }
+    try {
+      await saveTicketCatalogSelection(
+        created.id,
+        currentOrganization.id,
+        catalogSelection,
+        user?.id,
+      );
+    } catch (e: any) {
+      toast.warning("Ticket created, but catalog links failed: " + (e?.message ?? "unknown"));
+    }
+    setSubmitting(false);
     toast.success("Ticket created");
     onOpenChange(false);
     setForm({
       subject: "", description: "", ticket_type: "support", priority: "medium",
       category: "", programme_id: "", project_id: "", product_id: "",
     });
+    setCatalogSelection({});
     onCreated?.();
   };
 
@@ -224,6 +237,15 @@ export function CreateTicketDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          <div className="space-y-2 pt-2 border-t">
+            <Label className="text-sm font-semibold">Catalog tags</Label>
+            <CatalogPicker
+              value={catalogSelection}
+              onChange={setCatalogSelection}
+              ticketType={form.ticket_type}
+              compact
+            />
           </div>
         </div>
         <DialogFooter>
