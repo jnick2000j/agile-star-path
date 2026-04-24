@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Workflow, Activity, CheckCircle2, XCircle, Clock, Loader2, ChevronUp, ChevronDown, Pencil } from "lucide-react";
+import { Plus, Trash2, Workflow, Activity, CheckCircle2, XCircle, Clock, Loader2, ChevronUp, ChevronDown, Pencil, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -26,6 +26,7 @@ import {
   decideApproval,
   type AutomationModule,
 } from "@/lib/automations";
+import { AUTOMATION_TEMPLATES, type AutomationTemplate } from "@/lib/automationTemplates";
 
 const STATUS_ICON: Record<string, JSX.Element> = {
   pending: <Clock className="h-4 w-4 text-muted-foreground" />,
@@ -50,6 +51,7 @@ export default function Automations() {
   const [moduleFilter, setModuleFilter] = useState<string>(searchParams.get("module") || "all");
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
 
   // Open builder if ?new=1
   useEffect(() => {
@@ -185,18 +187,23 @@ export default function Automations() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => {
-            setEditing({
-              module: moduleFilter !== "all" ? moduleFilter : "project",
-              name: "", description: "",
-              trigger_event: "created",
-              match_conditions: [], steps: [],
-              is_active: true, priority: 100,
-            });
-            setEditorOpen(true);
-          }}>
-            <Plus className="h-4 w-4 mr-2" /> New Automation
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setTemplatesOpen(true)}>
+              <Sparkles className="h-4 w-4 mr-2" /> Templates
+            </Button>
+            <Button onClick={() => {
+              setEditing({
+                module: moduleFilter !== "all" ? moduleFilter : "project",
+                name: "", description: "",
+                trigger_event: "created",
+                match_conditions: [], steps: [],
+                is_active: true, priority: 100,
+              });
+              setEditorOpen(true);
+            }}>
+              <Plus className="h-4 w-4 mr-2" /> New Automation
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="workflows">
