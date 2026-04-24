@@ -65,6 +65,11 @@ export default function Reports() {
   // Main tab
   const [mainTab, setMainTab] = useState("builder");
 
+  // Analytics scope toggle
+  const [analyticsScope, setAnalyticsScope] = useState<
+    "portfolio" | "programs" | "projects" | "products" | "helpdesk" | "change"
+  >("portfolio");
+
   // Fetch real data
   const { data: programmes = [] } = useQuery({
     queryKey: ["programmes-stats"],
@@ -469,95 +474,166 @@ export default function Reports() {
 
         {/* Analytics Tab */}
         <TabsContent value="analytics" className="space-y-6">
-          {/* Quick Actions */}
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => {
-              const txt = `Program Portfolio Report\nGenerated: ${new Date().toLocaleDateString()}\n\nSummary:\n- Total Programs: ${programmes.length}\n- Total Projects: ${projects.length}\n- Open Risks: ${risks.filter(r => r.status === "open").length}\n- Benefits Tracked: ${benefits.length}\n\nProgram Status:\n${programmes.map(p => `- ${p.name}: ${p.status} (${p.progress}% complete)`).join("\n")}`;
-              const blob = new Blob([txt], { type: "text/plain" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url; a.download = `portfolio-report-${new Date().toISOString().split("T")[0]}.txt`; a.click();
-              URL.revokeObjectURL(url);
-              toast({ title: "Downloaded", description: "Quick report exported." });
-            }}>
-              <FileText className="h-4 w-4" /> Quick Report
-            </Button>
-            <Button variant="outline" className="gap-2" onClick={() => {
-              const exportData = { exportedAt: new Date().toISOString(), programmes, projects, risks, benefits };
-              const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url; a.download = `portfolio-data-${new Date().toISOString().split("T")[0]}.json`; a.click();
-              URL.revokeObjectURL(url);
-              toast({ title: "Exported", description: "All portfolio data exported as JSON." });
-            }}>
-              <Download className="h-4 w-4" /> Export All Data
-            </Button>
+          {/* Scope switcher */}
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="inline-flex items-center gap-1 rounded-lg border bg-muted/40 p-1 flex-wrap">
+              {([
+                { key: "portfolio", label: "Portfolio", icon: LayoutGrid },
+                { key: "programs",  label: "Programs",  icon: Layers },
+                { key: "projects",  label: "Projects",  icon: FolderKanban },
+                { key: "products",  label: "Products",  icon: Package },
+                { key: "helpdesk",  label: "Helpdesk",  icon: LifeBuoy },
+                { key: "change",    label: "Change Mgmt", icon: GitBranch },
+              ] as const).map((s) => {
+                const Icon = s.icon;
+                const active = analyticsScope === s.key;
+                return (
+                  <button
+                    key={s.key}
+                    onClick={() => setAnalyticsScope(s.key)}
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+                const exportData = {
+                  exportedAt: new Date().toISOString(),
+                  scope: analyticsScope,
+                  programmes, projects, products, risks, benefits,
+                  helpdeskTickets, cmRequests,
+                };
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `${analyticsScope}-data-${new Date().toISOString().split("T")[0]}.json`; a.click();
+                URL.revokeObjectURL(url);
+                toast({ title: "Exported", description: "Analytics data exported as JSON." });
+              }}>
+                <Download className="h-3.5 w-3.5" /> Export
+              </Button>
+              <Button size="sm" className="gap-2" onClick={() => {
+                const scopeQueries: Record<typeof analyticsScope, { q: string; t: string }> = {
+                  portfolio: { q: "Generate an executive portfolio overview across programmes, projects, products, helpdesk and change management.", t: "Portfolio Overview" },
+                  programs:  { q: "Generate a detailed programme portfolio analysis including health, tranches, benefits, and stakeholders.", t: "Programmes Analytics" },
+                  projects:  { q: "Generate a project portfolio analysis covering health, schedule, risk, milestones and resourcing.", t: "Projects Analytics" },
+                  products:  { q: "Generate a product portfolio analysis covering roadmap, backlog, RICE prioritisation and KPIs.", t: "Products Analytics" },
+                  helpdesk:  { q: "Generate a service desk performance report covering volume, SLA attainment, MTTR, CSAT and incident/problem trends.", t: "Helpdesk Analytics" },
+                  change:    { q: "Generate a change management report covering pipeline, risk profile, success rate, downtime exposure and approval lead times.", t: "Change Management Analytics" },
+                };
+                const sel = scopeQueries[analyticsScope];
+                setMainTab("builder");
+                handleGenerateAIReport(sel.q, sel.t);
+              }}>
+                <Sparkles className="h-3.5 w-3.5" /> AI Report on This View
+              </Button>
+            </div>
           </div>
 
-          {/* Status Overview */}
-          <StatusIndicators />
-
-          {/* Charts Grid */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="metric-card">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Risk Distribution</h3>
-                <PieChart className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div className="h-[250px]">
-                {resourceAllocation.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPie>
-                      <Pie data={resourceAllocation} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
-                        {resourceAllocation.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} />
-                      <Legend />
-                    </RechartsPie>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    No risk data available.
+          {analyticsScope === "portfolio" && (
+            <>
+              <StatusIndicators />
+              <div className="grid gap-6 lg:grid-cols-3">
+                <div className="metric-card">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Risk Distribution</h3>
+                    <PieChart className="h-5 w-5 text-muted-foreground" />
                   </div>
-                )}
-              </div>
-            </div>
+                  <div className="h-[250px]">
+                    {resourceAllocation.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsPie>
+                          <Pie data={resourceAllocation} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
+                            {resourceAllocation.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} />
+                          <Legend />
+                        </RechartsPie>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-muted-foreground">
+                        No risk data available.
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-            <div className="metric-card lg:col-span-2">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Portfolio Summary</h3>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div className="p-4 rounded-lg bg-primary/10 text-center">
-                  <p className="text-3xl font-bold text-primary">{programmes.length}</p>
-                  <p className="text-sm text-muted-foreground">Programs</p>
-                </div>
-                <div className="p-4 rounded-lg bg-success/10 text-center">
-                  <p className="text-3xl font-bold text-success">{projects.length}</p>
-                  <p className="text-sm text-muted-foreground">Projects</p>
-                </div>
-                <div className="p-4 rounded-lg bg-accent/10 text-center">
-                  <p className="text-3xl font-bold text-accent-foreground">{products.length}</p>
-                  <p className="text-sm text-muted-foreground">Products</p>
-                </div>
-                <div className="p-4 rounded-lg bg-secondary/10 text-center">
-                  <p className="text-3xl font-bold text-secondary-foreground">{tasks.length}</p>
-                  <p className="text-sm text-muted-foreground">Tasks</p>
-                </div>
-                <div className="p-4 rounded-lg bg-warning/10 text-center">
-                  <p className="text-3xl font-bold text-warning">{risks.filter(r => r.status === "open").length}</p>
-                  <p className="text-sm text-muted-foreground">Open Risks</p>
-                </div>
-                <div className="p-4 rounded-lg bg-info/10 text-center">
-                  <p className="text-3xl font-bold text-info">{benefits.length}</p>
-                  <p className="text-sm text-muted-foreground">Benefits</p>
+                <div className="metric-card lg:col-span-2">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Portfolio Summary</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                    <ScopeStat label="Programs"    value={programmes.length}                                    tone="primary" />
+                    <ScopeStat label="Projects"    value={projects.length}                                      tone="success" />
+                    <ScopeStat label="Products"    value={products.length}                                      tone="accent" />
+                    <ScopeStat label="Tasks"       value={tasks.length}                                         tone="secondary" />
+                    <ScopeStat label="Open Risks"  value={risks.filter(r => r.status === "open").length}        tone="warning" />
+                    <ScopeStat label="Benefits"    value={benefits.length}                                      tone="info" />
+                    <ScopeStat label="Tickets"     value={helpdeskTickets.length}                               tone="info" />
+                    <ScopeStat label="Changes"     value={cmRequests.length}                                    tone="warning" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
+
+          {analyticsScope === "programs" && (
+            <ScopePanel
+              title="Programmes"
+              stats={[
+                { label: "Total",    value: programmes.length, tone: "primary" },
+                { label: "Active",   value: programmes.filter(p => p.status === "active").length, tone: "success" },
+                { label: "On Hold",  value: programmes.filter(p => p.status === "on_hold").length, tone: "warning" },
+                { label: "Closed",  value: programmes.filter(p => p.status === "closed").length, tone: "muted" },
+                { label: "Avg Progress", value: `${Math.round(programmes.reduce((a, p) => a + (p.progress ?? 0), 0) / Math.max(1, programmes.length))}%`, tone: "info" },
+              ]}
+              breakdown={statusBreakdown(programmes)}
+            />
+          )}
+
+          {analyticsScope === "projects" && (
+            <ScopePanel
+              title="Projects"
+              stats={[
+                { label: "Total",       value: projects.length, tone: "primary" },
+                { label: "On Track",    value: projects.filter((p: any) => p.health === "green" || p.health === "on_track").length, tone: "success" },
+                { label: "At Risk",     value: projects.filter((p: any) => p.health === "amber" || p.health === "at_risk").length, tone: "warning" },
+                { label: "Off Track",   value: projects.filter((p: any) => p.health === "red" || p.health === "off_track").length, tone: "destructive" },
+              ]}
+              breakdown={countBy(projects, (p: any) => p.health || "unknown")}
+            />
+          )}
+
+          {analyticsScope === "products" && (
+            <ScopePanel
+              title="Products"
+              stats={[
+                { label: "Total",    value: products.length,                                  tone: "primary" },
+                { label: "Features", value: tasks.length,                                     tone: "info" },
+                { label: "Benefits", value: benefits.length,                                  tone: "success" },
+              ]}
+              breakdown={{}}
+            />
+          )}
+
+          {analyticsScope === "helpdesk" && (
+            <HelpdeskAnalytics tickets={helpdeskTickets} />
+          )}
+
+          {analyticsScope === "change" && (
+            <ChangeAnalytics changes={cmRequests} />
+          )}
         </TabsContent>
       </Tabs>
 
