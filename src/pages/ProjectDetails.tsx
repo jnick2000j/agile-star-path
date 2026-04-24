@@ -559,6 +559,7 @@ export default function ProjectDetails() {
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
               { value: "tickets", label: "Tickets", icon: LifeBuoy },
+              { value: "changes", label: "Changes", icon: GitPullRequest },
               { value: "automations", label: "Automations", icon: Workflow },
               { value: "history", label: "Status Timeline", icon: History },
             ]}
@@ -958,6 +959,11 @@ export default function ProjectDetails() {
           {/* Tickets Tab */}
           <TabsContent value="tickets">
             {project && <EntityTicketsCard scope="project" entityId={project.id} entityName={project.name} />}
+          </TabsContent>
+
+          {/* Changes Tab */}
+          <TabsContent value="changes">
+            {project && <EntityChangesCard scope="project" entityId={project.id} entityName={project.name} />}
           </TabsContent>
 
           {/* Status Timeline Tab */}
