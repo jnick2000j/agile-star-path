@@ -28,6 +28,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
   const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
