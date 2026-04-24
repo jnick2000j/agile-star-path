@@ -104,7 +104,7 @@ export function CreateTicketDialog({
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("helpdesk_tickets").insert({
+    const { data: created, error } = await supabase.from("helpdesk_tickets").insert({
       organization_id: currentOrganization.id,
       subject: form.subject.trim(),
       description: form.description.trim() || null,
@@ -118,11 +118,21 @@ export function CreateTicketDialog({
       programme_id: form.programme_id || null,
       project_id: form.project_id || null,
       product_id: form.product_id || null,
-    });
+    }).select("id").single();
     setSubmitting(false);
     if (error) {
       toast.error("Failed to create ticket: " + error.message);
       return;
+    }
+    // Dispatch workflows for ticket_created
+    if (created?.id) {
+      const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
+      dispatchHelpdeskWorkflow({
+        organization_id: currentOrganization.id,
+        trigger_event: "ticket_created",
+        ticket_id: created.id,
+        triggered_by: user?.id,
+      });
     }
     toast.success("Ticket created");
     onOpenChange(false);

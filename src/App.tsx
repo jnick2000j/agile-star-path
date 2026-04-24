@@ -66,6 +66,7 @@ import CheckoutReturn from "./pages/CheckoutReturn";
 import Support from "./pages/Support";
 import Helpdesk from "./pages/Helpdesk";
 import HelpdeskTicketDetail from "./pages/HelpdeskTicketDetail";
+import HelpdeskWorkflows from "./pages/HelpdeskWorkflows";
 import SupportPortal from "./pages/SupportPortal";
 import MyTickets from "./pages/MyTickets";
 import ChangeManagement from "./pages/ChangeManagement";
@@ -159,6 +160,7 @@ const App = () => (
             <Route path="/support/portal" element={<ProtectedRoute><SupportPortal /></ProtectedRoute>} />
             <Route path="/support/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
             <Route path="/support/tickets/:id" element={<ProtectedRoute><HelpdeskTicketDetail /></ProtectedRoute>} />
+            <Route path="/support/workflows" element={<ProtectedRoute><HelpdeskWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
             <Route path="/change-management/my-changes" element={<ProtectedRoute><MyChanges /></ProtectedRoute>} />

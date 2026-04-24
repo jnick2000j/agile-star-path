@@ -138,6 +138,21 @@ export default function HelpdeskTicketDetail() {
         body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: value } },
       }).catch(() => {});
     }
+    // Dispatch workflows
+    const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
+    const event =
+      field === "status" ? "status_changed" :
+      field === "assignee_id" ? "assigned" :
+      field === "priority" ? "priority_changed" : null;
+    if (event) {
+      dispatchHelpdeskWorkflow({
+        organization_id: ticket.organization_id,
+        trigger_event: event as any,
+        ticket_id: ticket.id,
+        triggered_by: user?.id,
+        payload: { from: prev, to: value, field },
+      });
+    }
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-activity", id] });
@@ -173,6 +188,15 @@ export default function HelpdeskTicketDetail() {
         },
       }).catch(() => {});
     }
+    // Dispatch workflows for reply / internal note
+    const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
+    dispatchHelpdeskWorkflow({
+      organization_id: ticket.organization_id,
+      trigger_event: internal ? "internal_note_added" : "replied",
+      ticket_id: ticket.id,
+      triggered_by: user?.id,
+      payload: { body: reply.trim() },
+    });
     toast.success("Reply added");
     qc.invalidateQueries({ queryKey: ["helpdesk-comments", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });

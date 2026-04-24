@@ -3459,6 +3459,371 @@ export type Database = {
           },
         ]
       }
+      helpdesk_workflow_approvals: {
+        Row: {
+          assigned_to_role: string | null
+          assigned_to_user_id: string | null
+          context: Json
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision: string
+          decision_comment: string | null
+          description: string | null
+          due_at: string | null
+          id: string
+          organization_id: string
+          run_id: string
+          step_execution_id: string | null
+          ticket_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_role?: string | null
+          assigned_to_user_id?: string | null
+          context?: Json
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          decision_comment?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          organization_id: string
+          run_id: string
+          step_execution_id?: string | null
+          ticket_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_role?: string | null
+          assigned_to_user_id?: string | null
+          context?: Json
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          decision_comment?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          organization_id?: string
+          run_id?: string
+          step_execution_id?: string | null
+          ticket_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_workflow_approvals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflow_approvals_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_workflow_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflow_approvals_step_execution_id_fkey"
+            columns: ["step_execution_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_workflow_step_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflow_approvals_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_workflow_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_workflow_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_workflow_runs: {
+        Row: {
+          completed_at: string | null
+          context: Json
+          created_at: string
+          current_step_index: number
+          error_message: string | null
+          id: string
+          organization_id: string
+          started_at: string
+          status: string
+          step_count: number
+          ticket_id: string | null
+          trigger_event: string
+          trigger_payload: Json
+          triggered_by: string | null
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          context?: Json
+          created_at?: string
+          current_step_index?: number
+          error_message?: string | null
+          id?: string
+          organization_id: string
+          started_at?: string
+          status?: string
+          step_count?: number
+          ticket_id?: string | null
+          trigger_event: string
+          trigger_payload?: Json
+          triggered_by?: string | null
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          context?: Json
+          created_at?: string
+          current_step_index?: number
+          error_message?: string | null
+          id?: string
+          organization_id?: string
+          started_at?: string
+          status?: string
+          step_count?: number
+          ticket_id?: string | null
+          trigger_event?: string
+          trigger_payload?: Json
+          triggered_by?: string | null
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_workflow_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflow_runs_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflow_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_workflow_step_executions: {
+        Row: {
+          ai_model: string | null
+          ai_tokens: number | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input: Json
+          organization_id: string
+          output: Json
+          run_id: string
+          started_at: string | null
+          status: string
+          step_index: number
+          step_label: string | null
+          step_type: string
+        }
+        Insert: {
+          ai_model?: string | null
+          ai_tokens?: number | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json
+          organization_id: string
+          output?: Json
+          run_id: string
+          started_at?: string | null
+          status?: string
+          step_index: number
+          step_label?: string | null
+          step_type: string
+        }
+        Update: {
+          ai_model?: string | null
+          ai_tokens?: number | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json
+          organization_id?: string
+          output?: Json
+          run_id?: string
+          started_at?: string | null
+          status?: string
+          step_index?: number
+          step_label?: string | null
+          step_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_workflow_step_executions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflow_step_executions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_workflow_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_workflows: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          failure_count: number
+          id: string
+          is_enabled: boolean
+          last_run_at: string | null
+          match_conditions: Json
+          name: string
+          organization_id: string
+          run_count: number
+          steps: Json
+          success_count: number
+          trigger_config: Json
+          trigger_event: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          failure_count?: number
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          match_conditions?: Json
+          name: string
+          organization_id: string
+          run_count?: number
+          steps?: Json
+          success_count?: number
+          trigger_config?: Json
+          trigger_event: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          failure_count?: number
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          match_conditions?: Json
+          name?: string
+          organization_id?: string
+          run_count?: number
+          steps?: Json
+          success_count?: number
+          trigger_config?: Json
+          trigger_event?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_workflows_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_workflow_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       issues: {
         Row: {
           created_at: string
@@ -8820,8 +9185,16 @@ export type Database = {
       }
       helpdesk_sla_sweep_breaches: { Args: never; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_helpdesk_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_manager_of: {
         Args: { _caller: string; _target_user: string }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_org_suspended: { Args: { _org_id: string }; Returns: boolean }
