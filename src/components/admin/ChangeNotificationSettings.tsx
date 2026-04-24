@@ -75,6 +75,19 @@ const DEFAULTS: Record<string, boolean> = {
   require_comment_on_test: true,
   require_comment_on_implementation: true,
   require_comment_on_comment: false,
+  require_comment_on_status_draft: false,
+  require_comment_on_status_submitted: false,
+  require_comment_on_status_in_review: false,
+  require_comment_on_status_cab_review: false,
+  require_comment_on_status_needs_information: true,
+  require_comment_on_status_approved: false,
+  require_comment_on_status_rejected: true,
+  require_comment_on_status_scheduled: false,
+  require_comment_on_status_in_progress: false,
+  require_comment_on_status_implemented: false,
+  require_comment_on_status_closed: false,
+  require_comment_on_status_cancelled: true,
+  require_comment_on_status_failed: true,
 };
 
 export function ChangeNotificationSettings() {
