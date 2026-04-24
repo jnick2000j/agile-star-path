@@ -32,6 +32,13 @@ const REQUIRE_FIELDS: Array<{ key: string; label: string }> = [
   { key: "require_comment_on_owner", label: "Owner reassignment" },
 ];
 
+const REQUIRE_ACTIVITY_FIELDS: Array<{ key: string; label: string; help: string }> = [
+  { key: "require_comment_on_progress", label: "Progress updates", help: "Implementer must include detail when posting a progress note." },
+  { key: "require_comment_on_test", label: "Test results", help: "Verification or rollback test outcomes need a written result." },
+  { key: "require_comment_on_implementation", label: "Implementation notes", help: "Notes captured during execution must include detail." },
+  { key: "require_comment_on_comment", label: "General comments", help: "Free-form discussion comments must include text." },
+];
+
 const DEFAULTS: Record<string, boolean> = {
   notify_on_status_change: true,
   notify_on_type_change: false,
