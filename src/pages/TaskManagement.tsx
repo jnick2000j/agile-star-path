@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -122,6 +123,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -865,6 +867,15 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                             title="Create recurring tasks from this"
                           >
                             <Repeat className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => navigate(`/timesheets?taskId=${task.id}`)}
+                            title="Log time on this task"
+                          >
+                            <Clock className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
