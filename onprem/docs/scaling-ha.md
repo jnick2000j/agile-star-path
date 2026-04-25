@@ -222,23 +222,59 @@ We ship a reference Patroni compose file at
 Failover is automatic and typically completes in **20–40 seconds**.
 Point the app tier at the HAProxy VIP, not at any individual node.
 
-### 4.3 Storage HA
+### 4.3 Storage — when (and why) you need object storage
 
-| Backend           | HA story                                                  |
-|-------------------|-----------------------------------------------------------|
-| Local FS (default)| Not HA. Single host only.                                 |
-| AWS S3            | Inherently HA (11 9s durability).                         |
-| MinIO distributed | ≥ 4 nodes, erasure-coded, survives `(N/2)-1` node loss.   |
-| Ceph RGW          | HA via Ceph cluster. Heavier to operate.                  |
+> **"S3" in this guide means any S3-compatible object store** — AWS S3,
+> on-prem **MinIO**, **Ceph RGW**, Wasabi, Backblaze B2, etc. AWS itself
+> is **never required**. For air-gapped sites the standard answer is
+> MinIO running on your own hardware.
+
+You do **not** need object storage for the app to function. The default
+`STORAGE_DRIVER=file` writes uploads to the `storage-data` Docker volume
+on the app VM and works at every tier. You should switch to object
+storage when **any** of the following becomes true:
+
+| Reason | Triggered when |
+|--------|----------------|
+| **Multi-host app tier** | You add a second app host (Topology B+). A local volume on Host 1 is invisible to Host 2 — uploads would 404 on whichever host didn't receive them. |
+| **Disk growth** | Uploads are unbounded user content (attachments, KB files, helpdesk evidence). Past a few hundred GB you don't want them sharing a disk with Postgres / logs / images. |
+| **Backup pain** | Snapshotting / `tar`-ing a 500 GB+ volume is slow and fragile. Object stores give you versioning, lifecycle rules, and cross-region replication for free. |
+| **Durability / HA** | A local volume dies with its host. Object stores are inherently durable (AWS S3 = 11 nines; MinIO erasure-coded across ≥ 4 nodes survives `(N/2)-1` node loss). |
+| **Compliance** | WORM / object-lock / legal-hold requirements are trivial on S3-compatible stores, hard on a Docker volume. |
+
+**Backend options and their HA story:**
+
+| Backend            | HA story                                                  | Good fit for                |
+|--------------------|-----------------------------------------------------------|-----------------------------|
+| Local FS (default) | Not HA. Single host only.                                 | Eval / Small / Medium       |
+| AWS S3             | Inherently HA (11 9s durability).                         | Cloud-hosted on-prem        |
+| MinIO distributed  | ≥ 4 nodes, erasure-coded, survives `(N/2)-1` node loss.   | Air-gapped / on-prem HA     |
+| Ceph RGW           | HA via Ceph cluster. Heavier to operate.                  | Existing Ceph users         |
+
+**Tier guidance:**
+
+- Eval / Small / Medium → `STORAGE_DRIVER=file` is fine.
+- **Large (A1, ≤ 1,200 users)** → local FS still works; switch only if
+  you're approaching the disk-growth or backup-pain thresholds above.
+- **Large (A2, 1,200–2,000 users)** → recommended (uploads on the app
+  VM make backup and DR meaningfully harder).
+- **Topology B / C** → **required** (multi-host app tier).
 
 Set in `.env`:
 
 ```bash
 STORAGE_DRIVER=s3
-STORAGE_S3_ENDPOINT=https://minio.internal:9000
+STORAGE_S3_ENDPOINT=https://minio.internal:9000   # omit for AWS S3
 STORAGE_S3_BUCKET=taskmaster
 STORAGE_S3_REGION=us-east-1
+STORAGE_S3_ACCESS_KEY=...
+STORAGE_S3_SECRET_KEY=...
 ```
+
+> **Migration:** moving from `file` to `s3` mid-life is a one-time
+> `aws s3 sync` (or `mc mirror` for MinIO) of the `storage-data` volume
+> into the bucket, then a config swap and rolling restart. No DB
+> migration is needed — `storage` records keep the same object paths.
 
 ### 4.4 Realtime
 

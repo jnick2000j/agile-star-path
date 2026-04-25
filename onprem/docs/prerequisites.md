@@ -7,14 +7,19 @@
 > `edge` or `web` container. The question at each tier is only whether
 > that container runs on the **same VM** as the rest of the stack, or
 > on its **own VM**.
+>
+> **"S3" below = any S3-compatible object store** (AWS S3, on-prem
+> **MinIO**, Ceph RGW, Wasabi, etc.). AWS itself is never required.
+> See [scaling-ha.md §4.3](./scaling-ha.md#43-storage--when-and-why-you-need-object-storage)
+> for why and when to switch off the local-disk default.
 
-| Tier      | Users     | vCPU | RAM   | Disk  | Postgres placement                         | Notes                       |
-|-----------|-----------|------|-------|-------|--------------------------------------------|-----------------------------|
-| Eval      | <10       | 2    | 4 GB  | 20 GB | Same VM, same compose stack                | Bundled Ollama disabled     |
-| Small     | 10–100    | 4    | 8 GB  | 50 GB | Same VM, same compose stack                | External SMTP, no local LLM |
-| Medium    | 100–500   | 8    | 16 GB | 200 GB| Same VM, same compose stack                | Add Ollama on a 2nd GPU host|
-| Large (A1)| 500–1,200 | 16   | 32 GB | 500 GB| **Same VM**, same compose stack (co-located)| Single-VM ceiling — see note |
-| Large (A2)| 1,200–2,000| app: 12 / 24 GB; db: 8 / 32 GB | 100 GB app + 500 GB db | **Separate VM** for Postgres (still single node, no replica) | Recommended above ~1,200 users; required for Large + S3 + heavy AI use |
+| Tier      | Users     | vCPU | RAM   | Disk  | Postgres placement                         | Uploads (default → recommended)        |
+|-----------|-----------|------|-------|-------|--------------------------------------------|----------------------------------------|
+| Eval      | <10       | 2    | 4 GB  | 20 GB | Same VM, same compose stack                | Local FS                               |
+| Small     | 10–100    | 4    | 8 GB  | 50 GB | Same VM, same compose stack                | Local FS                               |
+| Medium    | 100–500   | 8    | 16 GB | 200 GB| Same VM, same compose stack                | Local FS (S3 if uploads are heavy)     |
+| Large (A1)| 500–1,200 | 16   | 32 GB | 500 GB| **Same VM**, same compose stack (co-located)| Local FS works; S3 if uploads > ~200 GB|
+| Large (A2)| 1,200–2,000| app: 12 / 24 GB; db: 8 / 32 GB | 100 GB app + 500 GB db | **Separate VM** for Postgres (still single node, no replica) | **S3 recommended** (simpler backup/DR) |
 
 **Why split into A1 vs A2?** At the lower end of "Large" (≤ ~1,200 users)
 co-locating Postgres on the same VM is fine — it's one `docker compose up`
