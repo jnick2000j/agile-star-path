@@ -341,6 +341,15 @@ export default function Timesheets() {
     if (!user || !currentOrganization) return;
     // Wait until lookups have loaded so logTimeFor sees mySheets.
     if (loading) return;
+    // Authorization check: if a taskId is provided via URL, ensure the user
+    // is allowed to log time on it. This protects against URL-tampering.
+    if (taskId && !canLogOnTaskId(taskId)) {
+      toast.error("You're not allowed to log time on this task");
+      const next = new URLSearchParams(searchParams);
+      ["ticketId", "taskId", "projectId", "programmeId", "productId"].forEach((k) => next.delete(k));
+      setSearchParams(next, { replace: true });
+      return;
+    }
     logTimeFor({
       ticket_id: tid,
       task_id: taskId,
