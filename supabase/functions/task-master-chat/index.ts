@@ -221,6 +221,89 @@ New → Assigned → In Progress → Pending (customer/vendor — pauses SLA) �
 
 **Catalogs (admin-managed)** — Applications, Services, IT Service Teams, Hardware, Locations, etc. Admins manage these via Admin Panel → Helpdesk → Catalogs; items appear as dropdowns on the ticket form and can be marked required per ticket type.
 
+### Helpdesk (full module)
+- **Where**: **Helpdesk** in the sidebar (agent view), **My Tickets** (requester view), **Support Portal** (external link for stakeholders).
+- **Creating tickets**: Helpdesk → "New Ticket". Choose type (Incident / Service Request / Problem / Question / Support), priority, category, and link to an Application/Service/Team from the catalogs. Attachments are supported.
+- **AI Ticket Intake**: an AI chat that asks the user clarifying questions and converts the conversation into a properly-categorised ticket with suggested priority and KB suggestions.
+- **Ticket detail page** (`/helpdesk/tickets/:id`): conversation thread (public + internal notes), assignment, status workflow, SLA timer with pause/resume, linked KB articles, related tickets, and audit history.
+- **Inbound email**: tickets can be opened by emailing the org's helpdesk address (handled by the `helpdesk-inbound-email` edge function). Replies on the email thread appear as ticket comments.
+- **SLA Policies**: Admin Panel → Helpdesk → SLA Policies. Define response/resolution targets per priority and ticket type. SLA timers pause on "Pending — Customer/Vendor" states. Breach risk surfaces on the ticket and in dashboards.
+- **Workflows**: **Helpdesk → Workflows**. Visual editor for triage automations — triggers (created, assigned, status changed, SLA at risk), conditions, actions (assign team, set priority, post comment, send notification, request approval). Workflow approvals fire `notify-workflow-assignment` and the approver decides via `helpdesk-workflow-approve`. Use the **Approval Triad Panel** on the ticket to track Technical / Business / Security approvers.
+- **CSAT**: customers receive a survey on resolution; scores power the helpdesk dashboard.
+
+### Knowledge Base (KB)
+- **Where**: **Knowledgebase** in the sidebar.
+- **Authoring**: KB articles support markdown with attached files. Use **KB Article Dialog** to create or edit. Articles can be tagged, scoped (org-wide vs team), and linked to tickets/changes.
+- **Bulk upload**: PDF/DOCX/MD via **KB Upload Dialog** → ingested by `kb-ingest-upload` and chunk-embedded by `kb-embed` for semantic search.
+- **Semantic search**: `kb-search` returns the most relevant chunks. Used by the **KB Assistant** widget and inline **KB Inline Suggestions** on tickets.
+- **Ticket suggestions**: when an agent opens a ticket, `kb-suggest-for-ticket` recommends the top 3 articles likely to resolve it (Shift-Left / KCS).
+
+### Timesheets
+- **Where**: **Timesheets** in the sidebar.
+- **Weekly grid**: each row links to a Programme, Project, Product, Task, or Helpdesk Ticket and records hours for Mon–Sun. Totals are computed live.
+- **Workflow**: Draft → Submitted (with submitter signature) → Approved / Rejected (with approver signature). PDF export is available at every stage; "Email PDF" sends via the `email-timesheet` edge function.
+- **Log Time icon**: every task in **Tasks** has a Clock icon that jumps to Timesheets and pre-fills the current week with an entry for that task. Visible only to users allowed to log time on that task (admins/managers, the task assignee, or anyone in `task_assignments`).
+- **Restriction setting** (new): admins can toggle **Settings → General → Timesheet restrictions → "Restrict time logging to assigned tasks only"**. When ON, non-admins can only log time against tasks they're assigned to. A database trigger enforces this server-side, so URL tampering can't bypass it.
+- **Per-entity opt-in**: programmes, projects and products only appear in the picker when their **timesheets_enabled** flag is on (set on the entity detail page).
+
+### Automations (cross-module rules)
+- **Where**: **Automations** in the sidebar.
+- **Builder**: trigger → conditions → actions, with templated starters (e.g. "Notify on high-impact risk", "Reopen ticket after 7 days of no reply", "Auto-assign milestone owner"). Saved automations run via the `automation-runner` edge function on a schedule and on event hooks.
+- **Approvals**: actions that mutate critical data require approval; approvers act through `automation-approve`. AI Approvals page lists pending items.
+
+### Construction & site-management modules (industry verticals)
+These appear when the org's **industry vertical** includes construction-style workflows.
+- **Daily Logs** — per-site daily diary (weather, manpower, equipment, deliveries, incidents, photos).
+- **RFIs** — Request for Information register: question, distribution list, due date, response, status.
+- **Submittals** — formal submission tracking (shop drawings, samples, product data) with reviewer workflow.
+- **Punch List** — close-out snag list with location, trade, severity, photos, sign-off.
+- **Vertical Entity Register** — generic register for vertical-specific entities; configurable columns per industry pack.
+- **Verticals Docs** — methodology guidance for the active vertical (Construction, Healthcare, FinServ, Public Sector, etc.). Switch vertical from Admin Panel → Organization → Industry vertical.
+
+### Engagements & Retainers (services delivery)
+- **Engagements** — track client-facing engagements with start/end, billing model, status, and linked programmes/projects.
+- **Retainers** — recurring blocks of time/budget. Burn-down charts compare allocated vs. consumed (sourced from approved timesheets).
+
+### Stakeholder & Support Portals (external users)
+- **Stakeholder Portal** (`/stakeholder-portal`): read-only dashboards for invited external stakeholders; access scoped per Stakeholder Access Settings (Settings → Stakeholder Access).
+- **Support Portal** (`/support-portal`): self-service ticket submission, KB browsing, and "My Tickets" for end-users without full platform access.
+- **Change Control Portal** (`/change-control-portal`): public-facing change calendar / forward schedule of change.
+
+### Notifications & dispatch
+- **In-app** via the bell (badge in header). Page: **Notifications**.
+- **Email** via `notification-dispatcher`. Centralised event types: task assigned, task updated, timesheet submitted/decision, workflow assignment, change activity, milestone change, org suspension, SSO request.
+- **Per-user preferences**: Profile → Notification Preferences (mute by event, choose channels).
+
+### Authentication & access (production-grade)
+- **MFA** — Profile → Security → "Enable MFA". TOTP enrolment via `mfa-manage` edge function. Admins can require MFA org-wide (Settings → Security).
+- **SSO** — Admin Panel → SSO. **SAML** via `register-tenant-saml`, **OIDC** via `register-tenant-oidc`. New tenant requests land in the **Platform SSO Queue** for platform admins; users are notified via `notify-sso-request`.
+- **SCIM 2.0** — `/scim/v2` endpoints (handled by `scim-v2`) for IdP-driven user provisioning. Generate tokens in the SCIM Tokens card.
+- **Session management** — **session-manage** lets users see and revoke active sessions.
+
+### Billing, plans & add-ons
+- **Pricing** (`/pricing`, `/helpdesk-pricing`, `/itsm-pricing`): public catalog. Cloud customers check out via `create-checkout` (Stripe embedded). Portal management via `create-portal-session`. Webhooks land in `payments-webhook`.
+- **Add-ons Catalog** (`/addons`): purchasable add-ons (extra AI credit packs, ITSM, premium connectors). Admins manage credit packs via `manage-ai-credit-packs`.
+- **AI Credits Meter** in the header shows remaining credits. **Credit history** is on the Billing page.
+- **License mode** — on-prem / hybrid installs hide Stripe and use license entitlements (`useDeploymentMode`). A "Managed via license" notice replaces checkout buttons.
+
+### Onboarding
+- **Org Onboarding Wizard** runs on first login for a new org (or re-runnable from **Settings → General → Run setup wizard**). Captures org name, branding, vertical, default plan, sample data toggle, and invites the first teammates.
+- **Sample data** can be loaded per vertical to give users something to explore.
+
+### Task ↔ Feature linkage (recent)
+Tasks can now be linked to **Features** (Product backlog) in addition to projects/programmes/products/work packages, so multiple workstreams can deliver against the same feature. Set the link in the **New / Edit Task** dialog under "Linked entity → Feature". Use the Tasks tab on a Feature to see all its workstreams.
+
+### Approval Triads (governance)
+For change records, helpdesk workflows, and AI drafts requiring sign-off, the **Approval Triad Panel** shows three slots — Technical, Business, Security. Each approver receives a notification, signs in the panel, and the record advances when all required slots are signed. Used in Helpdesk Workflows and Change Management.
+
+### Reporting / scheduled jobs
+- `check-update-reminders` — hourly, sends due/overdue update reminders.
+- `check-notifications` — hourly, evaluates triggers and dispatches in-app/email alerts.
+- `summarize-weekly-report` + `send-weekly-report` — weekly summary emails to assigned leads.
+- `siem-export` — SIEM-friendly audit log feed for enterprise customers.
+- `export-audit-log` — admin-triggered audit log export (CSV / JSON).
+- `verify-domain` — email-domain ownership verification for white-labelled emails.
+
 ## Wizards You Can Recommend (Wizards page → Draft with AI tab)
 
 When a user asks how to *create* one of these artefacts, recommend the matching wizard and tell them to open **Wizards → Draft with AI**:
