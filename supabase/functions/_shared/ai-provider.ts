@@ -80,7 +80,8 @@ const FALLBACK: AIProviderResolution = {
 };
 
 export async function resolveProvider(
-  supabase: SupabaseClient,
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
   organizationId?: string | null,
 ): Promise<AIProviderResolution> {
   try {
