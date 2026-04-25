@@ -13,13 +13,21 @@
 > See [scaling-ha.md §4.3](./scaling-ha.md#43-storage--when-and-why-you-need-object-storage)
 > for why and when to switch off the local-disk default.
 
-| Tier      | Users     | vCPU | RAM   | Disk  | Postgres placement                         | Uploads (default → recommended)        |
-|-----------|-----------|------|-------|-------|--------------------------------------------|----------------------------------------|
-| Eval      | <10       | 2    | 4 GB  | 20 GB | Same VM, same compose stack                | Local FS                               |
-| Small     | 10–100    | 4    | 8 GB  | 50 GB | Same VM, same compose stack                | Local FS                               |
-| Medium    | 100–500   | 8    | 16 GB | 200 GB| Same VM, same compose stack                | Local FS (S3 if uploads are heavy)     |
-| Large (A1)| 500–1,200 | 16   | 32 GB | 500 GB| **Same VM**, same compose stack (co-located)| Local FS works; S3 if uploads > ~200 GB|
-| Large (A2)| 1,200–2,000| app: 12 / 24 GB; db: 8 / 32 GB | 100 GB app + 500 GB db | **Separate VM** for Postgres (still single node, no replica) | **S3 recommended** (simpler backup/DR) |
+> **AI features are NOT gated by tier.** Every tier supports the full
+> AI feature set (Ask the Task Master, drafting, summarisation, KB
+> semantic search, ticket suggestions, risk insights, etc.). What
+> changes by tier is **where the LLM runs** — bundled Ollama on the
+> same VM, Ollama on a separate GPU host, or an external provider
+> (OpenAI / Azure / Anthropic / any OpenAI-compatible endpoint).
+> See [ai-provider.md](./ai-provider.md) for the per-tier guidance.
+
+| Tier      | Users     | vCPU | RAM   | Disk  | Postgres placement                         | Uploads (default → recommended)        | LLM placement (default)                          |
+|-----------|-----------|------|-------|-------|--------------------------------------------|----------------------------------------|--------------------------------------------------|
+| Eval      | <10       | 2    | 4 GB  | 20 GB | Same VM, same compose stack                | Local FS                               | **External provider** (bundled Ollama disabled — host too small) |
+| Small     | 10–100    | 4    | 8 GB  | 50 GB | Same VM, same compose stack                | Local FS                               | External provider, or shared internal Ollama     |
+| Medium    | 100–500   | 8    | 16 GB | 200 GB| Same VM, same compose stack                | Local FS (S3 if uploads are heavy)     | External provider, or **Ollama on a 2nd GPU host** |
+| Large (A1)| 500–1,200 | 16   | 32 GB | 500 GB| **Same VM**, same compose stack (co-located)| Local FS works; S3 if uploads > ~200 GB| Ollama on same VM if it has a GPU, else dedicated GPU host / external |
+| Large (A2)| 1,200–2,000| app: 12 / 24 GB; db: 8 / 32 GB | 100 GB app + 500 GB db | **Separate VM** for Postgres (still single node, no replica) | **S3 recommended** (simpler backup/DR) | Dedicated GPU host(s) for Ollama, or external provider |
 
 **Why split into A1 vs A2?** At the lower end of "Large" (≤ ~1,200 users)
 co-locating Postgres on the same VM is fine — it's one `docker compose up`

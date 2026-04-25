@@ -4,6 +4,25 @@ On-prem installs default to a **local Ollama** running in the same Compose
 stack. You can switch to OpenAI, Azure OpenAI, Anthropic, or any
 OpenAI-compatible endpoint at any time.
 
+> **AI features are available at every tier.** What changes by tier is
+> only **where the model runs** — locally inside the Compose stack, on a
+> separate GPU host, or via an external provider. No AI feature
+> (Ask the Task Master, drafting, summarisation, KB semantic search,
+> ticket suggestions, risk insights, etc.) is gated by deployment size.
+
+## Choosing a provider by tier
+
+| Tier        | Bundled Ollama (in compose)       | Recommended setup                                              |
+|-------------|-----------------------------------|----------------------------------------------------------------|
+| Eval        | Disabled (host too small)         | External provider (OpenAI / Azure / Anthropic) **or** point at an existing internal Ollama |
+| Small       | Possible with a 3B model on CPU, but slow | External provider, or shared internal Ollama                   |
+| Medium      | Works with 7B–8B on CPU if you have the RAM; **GPU strongly recommended** | Add Ollama on a 2nd GPU host *or* use an external provider |
+| Large (A1)  | Works on the same VM if it has a GPU | Dedicated GPU host for Ollama, or external provider           |
+| Large (A2)+ | Run Ollama on its own VM(s)       | GPU pool behind LB (see [scaling-ha.md §4.5](./scaling-ha.md#45-ai--ollama)) |
+
+If the install host has no GPU and you don't want to provision one, use an
+external provider — every AI feature works identically.
+
 ## Local Ollama (default)
 
 The `ollama` service in `docker-compose.yml` runs in the `ollama` profile.
