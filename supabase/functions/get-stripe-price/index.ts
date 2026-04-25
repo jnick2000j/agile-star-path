@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { isStripeAvailable, licenseModeBlockedResponse } from "../_shared/license.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
