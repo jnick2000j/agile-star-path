@@ -341,6 +341,109 @@ const aiWizards: AIWizardSpec[] = [
     { key: "adjacent_works", label: "Adjacent works / interactions", type: "textarea" },
   ]},
 
+  // ─── Construction: Bid / RFP / Pursuit Lifecycle ───────────────────────
+  { kind: "con_bid_no_bid", title: "Bid / No-Bid Decision Pack", description: "Defensible go/no-go: scoring matrix, Pwin, pursuit cost vs expected value, recommendation.", icon: Scale, category: "Construction", fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "opportunity_name", label: "Opportunity", required: true },
+    { key: "estimated_value", label: "Estimated value", placeholder: "e.g. £45M" },
+    { key: "delivery_method", label: "Delivery method", placeholder: "design_build / cm_at_risk / framework / etc." },
+    { key: "context", label: "What we know — client, competition, complexity, capacity", type: "textarea", required: true },
+  ]},
+  { kind: "con_rfp_response_plan", title: "RFP Response Plan", description: "Decode the RFP, build compliance matrix, response outline, win strategy and pursuit schedule.", icon: ClipboardCheck, category: "Construction", fields: [
+    { key: "rfp_reference", label: "RFP / Tender ref", required: true },
+    { key: "submission_deadline", label: "Submission deadline", placeholder: "YYYY-MM-DD" },
+    { key: "evaluation_criteria", label: "Evaluation criteria & weightings", type: "textarea", required: true },
+    { key: "submission_requirements", label: "Submission requirements (page limits, format, portal)", type: "textarea" },
+    { key: "team_available", label: "Team available", type: "textarea" },
+  ]},
+  { kind: "con_executive_summary", title: "Bid Executive Summary", description: "Client-centric 1–2 page exec summary with win themes, proof points and commercial confidence.", icon: FileText, category: "Construction", fields: [
+    { key: "client_name", label: "Client", required: true },
+    { key: "project_name", label: "Project", required: true },
+    { key: "client_drivers", label: "Client drivers (in their words)", type: "textarea", required: true },
+    { key: "win_themes", label: "Win themes (3)", type: "textarea", required: true },
+    { key: "proof_points", label: "Proof points (past projects, KPIs)", type: "textarea" },
+  ]},
+  { kind: "con_technical_proposal_section", title: "Technical Proposal Section", description: "Draft a single proposal section that lands win themes, with proof points and risk mitigation.", icon: FileEdit, category: "Construction", fields: [
+    { key: "section_title", label: "Section title", required: true, placeholder: "e.g. Methodology" },
+    { key: "weighting_pct", label: "Evaluation weighting %", placeholder: "e.g. 25" },
+    { key: "page_limit", label: "Page limit", placeholder: "e.g. 4" },
+    { key: "win_themes", label: "Win themes to land", type: "textarea", required: true },
+    { key: "client_hot_buttons", label: "Client hot buttons", type: "textarea" },
+  ]},
+  { kind: "con_clarification_log", title: "Tender Clarifications Log", description: "Numbered clarifications to send to the client, with working assumptions and impact.", icon: MessageSquare, category: "Construction", fields: [
+    { key: "rfp_reference", label: "RFP ref", required: true },
+    { key: "questions", label: "Ambiguities / questions to raise", type: "textarea", required: true },
+    { key: "submission_deadline", label: "Submission deadline" },
+  ]},
+  { kind: "con_estimate_basis", title: "Basis of Estimate (BoE)", description: "Defensible BoE: pricing approach, assumptions, exclusions, contingency, cash-flow profile.", icon: ClipboardList, category: "Construction", fields: [
+    { key: "estimate_ref", label: "Estimate reference", required: true },
+    { key: "total_bid_price", label: "Total bid price" },
+    { key: "pricing_approach", label: "Pricing approach", placeholder: "lump_sum / target_cost / unit_rate" },
+    { key: "key_assumptions", label: "Key assumptions", type: "textarea", required: true },
+    { key: "key_risks", label: "Key risks priced", type: "textarea" },
+  ]},
+  { kind: "con_pqq_response", title: "PQQ / SQ Response", description: "PAS 91 / Selection Questionnaire response: financials, insurances, HSE, quality, case studies.", icon: BadgeCheck, category: "Construction", fields: [
+    { key: "client_name", label: "Issuing client / framework", required: true },
+    { key: "lots_applying_for", label: "Lots / categories", type: "textarea" },
+    { key: "company_strengths", label: "Strengths & accreditations to highlight", type: "textarea", required: true },
+  ]},
+  { kind: "con_cover_letter_bid", title: "Bid Cover Letter", description: "One-page director-signed cover letter with offer, validity, qualifications, win-theme.", icon: FileSignature, category: "Construction", fields: [
+    { key: "tender_ref", label: "Tender reference", required: true },
+    { key: "client_contact", label: "Client contact (named)", required: true },
+    { key: "headline_offer", label: "Headline commercial offer", required: true, placeholder: "e.g. £42.6M lump sum, 78 weeks" },
+    { key: "qualifications", label: "Bid qualifications / alternatives (optional)", type: "textarea" },
+    { key: "win_theme", label: "Win theme to land", type: "textarea" },
+  ]},
+  { kind: "con_post_tender_clarifications", title: "Post-Tender Clarifications", description: "Responsive but scope-protecting answers to client clarifications during evaluation.", icon: MessageSquare, category: "Construction", fields: [
+    { key: "tender_ref", label: "Tender ref", required: true },
+    { key: "client_questions", label: "Client questions (paste)", type: "textarea", required: true },
+    { key: "bid_summary", label: "Brief bid summary for context", type: "textarea" },
+  ]},
+  { kind: "con_win_loss_review", title: "Win / Loss Review", description: "Post-decision debrief: client feedback, root causes, lessons, process improvements.", icon: TrendingUp, category: "Construction", fields: [
+    { key: "bid_reference", label: "Bid reference", required: true },
+    { key: "outcome", label: "Outcome", required: true, placeholder: "won / lost / no_decision" },
+    { key: "client_feedback", label: "Client feedback (if obtained)", type: "textarea" },
+    { key: "winner_and_price", label: "Winner & price (if known)" },
+    { key: "our_perspective", label: "Our team's perspective", type: "textarea", required: true },
+  ]},
+
+  // ─── Construction: Project Lifecycle ───────────────────────────────────
+  { kind: "con_preconstruction_plan", title: "Preconstruction Plan", description: "Bridge from contract award to start-on-site: design, permits, long-leads, mobilisation.", icon: HardHat, category: "Construction", fields: [
+    { key: "project_name", label: "Project", required: true },
+    { key: "contract_form", label: "Contract form", placeholder: "NEC4 / JCT D&B / FIDIC / AIA A102" },
+    { key: "start_on_site_target", label: "Target start on site" },
+    { key: "key_long_leads", label: "Known long-lead items", type: "textarea" },
+    { key: "key_approvals", label: "Outstanding approvals/permits", type: "textarea" },
+  ]},
+  { kind: "con_mobilisation_plan", title: "4-Week Mobilisation Plan", description: "Week-by-week mobilisation: kickoff, site setup, F10, RAMS, Day-1 readiness checklist.", icon: CalendarRange, category: "Construction", fields: [
+    { key: "project_name", label: "Project", required: true },
+    { key: "site_possession_date", label: "Site possession date", required: true },
+    { key: "key_team", label: "Key team appointments", type: "textarea" },
+    { key: "first_activities", label: "First on-site activities", type: "textarea" },
+  ]},
+  { kind: "con_project_execution_plan", title: "Project Execution Plan (PEP)", description: "Authoritative PEP: scope, programme, cost, quality, HSE, design, info management, closeout.", icon: Briefcase, category: "Construction", fields: [
+    { key: "project_name", label: "Project", required: true },
+    { key: "client_name", label: "Client", required: true },
+    { key: "contract_value", label: "Contract value" },
+    { key: "contract_form", label: "Contract form" },
+    { key: "key_dates", label: "Key dates (start, milestones, PC)", type: "textarea" },
+    { key: "project_objectives", label: "Project objectives & success criteria", type: "textarea", required: true },
+  ]},
+  { kind: "con_stage_gate_review", title: "Stage-Gate Review Pack", description: "Phase-boundary review: outcomes vs plan, exit criteria, risks, recommendation Pass/Defer/Stop.", icon: GitBranch, category: "Construction", fields: [
+    { key: "gate_identity", label: "Which gate", required: true, placeholder: "e.g. RIBA 3→4 / GMP set / start on site / weather-tight" },
+    { key: "phase_outcomes", label: "Phase outcomes vs plan", type: "textarea", required: true },
+    { key: "exit_criteria_status", label: "Exit criteria status", type: "textarea", required: true },
+    { key: "outstanding_risks", label: "Outstanding risks", type: "textarea" },
+  ]},
+  { kind: "con_closeout_report", title: "Project Closeout Report", description: "Post-PC + DLP review: commercial, schedule, HSE, quality, lessons, asset handover.", icon: KeyRound, category: "Construction", fields: [
+    { key: "project_name", label: "Project", required: true },
+    { key: "final_account_value", label: "Final account value" },
+    { key: "pc_date", label: "Practical Completion date" },
+    { key: "dlp_end_date", label: "DLP end date" },
+    { key: "key_outcomes", label: "Key outcomes & metrics", type: "textarea", required: true },
+    { key: "lessons", label: "Lessons learned (themes)", type: "textarea" },
+  ]},
+
   // ─── Professional Services & Consulting ─────────────────────────────────
   { kind: "ps_sow_draft" as WizardKind, title: "SOW Draft", description: "Statement of Work with objectives, in/out scope, deliverables, acceptance criteria, fees, payment terms.", icon: FileSignature, category: "Pro Services" as any, fields: [
     { key: "client_name", label: "Client", required: true },
