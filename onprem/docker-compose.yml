@@ -33,14 +33,19 @@ services:
       timeout: 5s
       retries: 12
 
+  # `depends_on: db` is intentionally omitted on the services below.
+  # When DB_EMBEDDED=true, the `db` service starts in parallel and these
+  # services retry until it's healthy. When DB_EMBEDDED=false (A2 / B / C),
+  # there IS no `db` service in this compose file — Postgres is on a
+  # separate VM. POSTGRES_HOST defaults to `db` (the container name) at
+  # A1 and is overridden in `.env` to the DB VM's hostname at A2+.
+
   auth:
     image: ghcr.io/taskmaster/onprem-auth:${IMAGE_TAG:-latest}
     <<: *restart
-    depends_on:
-      db: { condition: service_healthy }
     environment:
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB}
       GOTRUE_JWT_SECRET: ${JWT_SECRET}
       GOTRUE_JWT_EXP: ${JWT_EXPIRY}
       GOTRUE_SITE_URL: ${PUBLIC_URL}
@@ -53,11 +58,9 @@ services:
   realtime:
     image: ghcr.io/taskmaster/onprem-realtime:${IMAGE_TAG:-latest}
     <<: *restart
-    depends_on:
-      db: { condition: service_healthy }
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
+      DB_HOST: ${POSTGRES_HOST:-db}
+      DB_PORT: ${POSTGRES_PORT:-5432}
       DB_NAME: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
@@ -66,12 +69,16 @@ services:
   storage:
     image: ghcr.io/taskmaster/onprem-storage:${IMAGE_TAG:-latest}
     <<: *restart
-    depends_on:
-      db: { condition: service_healthy }
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB}
       STORAGE_BACKEND: ${STORAGE_DRIVER}
       FILE_STORAGE_BACKEND_PATH: ${STORAGE_PATH}
+      # S3-compatible (only used when STORAGE_DRIVER=s3)
+      AWS_ACCESS_KEY_ID: ${STORAGE_S3_ACCESS_KEY:-}
+      AWS_SECRET_ACCESS_KEY: ${STORAGE_S3_SECRET_KEY:-}
+      AWS_DEFAULT_REGION: ${STORAGE_S3_REGION:-us-east-1}
+      GLOBAL_S3_BUCKET: ${STORAGE_S3_BUCKET:-}
+      GLOBAL_S3_ENDPOINT: ${STORAGE_S3_ENDPOINT:-}
       JWT_SECRET: ${JWT_SECRET}
     volumes:
       - storage-data:${STORAGE_PATH}
@@ -83,7 +90,6 @@ services:
     image: ghcr.io/taskmaster/onprem-edge:${IMAGE_TAG:-latest}
     <<: *restart
     depends_on:
-      db: { condition: service_healthy }
       auth: { condition: service_started }
     environment:
       SUPABASE_URL: http://kong:8000
