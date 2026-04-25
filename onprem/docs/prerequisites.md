@@ -2,19 +2,34 @@
 
 ## Host sizing (single-host topology)
 
-| Tier      | Users     | vCPU | RAM   | Disk  | Notes                                    |
-|-----------|-----------|------|-------|-------|------------------------------------------|
-| Eval      | <10       | 2    | 4 GB  | 20 GB | Bundled Ollama disabled                  |
-| Small     | 10–100    | 4    | 8 GB  | 50 GB | External SMTP, no local LLM              |
-| Medium    | 100–500   | 8    | 16 GB | 200 GB| Add Ollama on a 2nd GPU host             |
-| Large     | 500–2000  | 16   | 32 GB | 500 GB| Postgres on its own host; S3 for uploads |
+> **Container layout (always true):** Postgres runs in its **own
+> container** (`db` service in `docker-compose.yml`) — never inside the
+> `edge` or `web` container. The question at each tier is only whether
+> that container runs on the **same VM** as the rest of the stack, or
+> on its **own VM**.
 
-> **Beyond 2,000 users or need HA?** The single-host stack tops out
-> around 2,000 concurrent users and is **not** highly available. For
-> larger or HA deployments, split the app tier, move Postgres to its
-> own VM (or a Patroni cluster), and use S3-compatible object storage.
-> See [scaling-ha.md](./scaling-ha.md) for reference topologies,
-> per-tier sizing, and the operational checklist.
+| Tier      | Users     | vCPU | RAM   | Disk  | Postgres placement                         | Notes                       |
+|-----------|-----------|------|-------|-------|--------------------------------------------|-----------------------------|
+| Eval      | <10       | 2    | 4 GB  | 20 GB | Same VM, same compose stack                | Bundled Ollama disabled     |
+| Small     | 10–100    | 4    | 8 GB  | 50 GB | Same VM, same compose stack                | External SMTP, no local LLM |
+| Medium    | 100–500   | 8    | 16 GB | 200 GB| Same VM, same compose stack                | Add Ollama on a 2nd GPU host|
+| Large (A1)| 500–1,200 | 16   | 32 GB | 500 GB| **Same VM**, same compose stack (co-located)| Single-VM ceiling — see note |
+| Large (A2)| 1,200–2,000| app: 12 / 24 GB; db: 8 / 32 GB | 100 GB app + 500 GB db | **Separate VM** for Postgres (still single node, no replica) | Recommended above ~1,200 users; required for Large + S3 + heavy AI use |
+
+**Why split into A1 vs A2?** At the lower end of "Large" (≤ ~1,200 users)
+co-locating Postgres on the same VM is fine — it's one `docker compose up`
+and one host to operate. Past that point, Postgres and the app start
+competing for CPU and page cache, and you should move the `db` container
+to its own VM (`DB_EMBEDDED=false` + `POSTGRES_HOST=db.internal` in `.env`)
+**before** you reach 2,000 users. Both A1 and A2 are still **Topology A**
+(single app host, no HA).
+
+> **Beyond 2,000 users or need HA?** Even with Postgres on its own VM,
+> a single app host tops out around 2,000 concurrent users and is **not**
+> highly available. For larger or HA deployments, add app hosts behind
+> an L7 LB, add a Postgres replica (or move to a Patroni cluster), and
+> use S3-compatible object storage. See [scaling-ha.md](./scaling-ha.md)
+> for reference topologies, per-tier sizing, and the operational checklist.
 
 ### Quick sizing for scaled topologies
 

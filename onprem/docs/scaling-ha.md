@@ -38,19 +38,41 @@ simpler to operate, back up, and upgrade.
 We support three documented topologies. Pick the smallest one that meets
 your scale and availability targets.
 
-### 2.1 Topology A — Single host (default, ≤ 2,000 users)
+### 2.1 Topology A — Single app host (default, ≤ 2,000 users)
+
+Two co-located variants, both still "Topology A":
+
+**A1 — fully co-located (Eval / Small / Medium / Large ≤ ~1,200 users)**
 
 ```
                 ┌──────────────────────────────────┐
                 │  Host 1 (16 vCPU / 32 GB)        │
    Users ──► LB │  web · kong · auth · edge ·      │
                 │  realtime · storage · db · ollama│
+                │  (all containers, one VM)        │
                 └──────────────────────────────────┘
 ```
 
-- Everything in one `docker compose` stack.
-- Backups via nightly `pg_dump` + uploads tarball.
-- **Not** highly available — host failure = outage.
+**A2 — Postgres split off (Large, ~1,200–2,000 users)**
+
+```
+                ┌──────────────────────────────┐         ┌────────────────────────┐
+                │  App VM (12 vCPU / 24 GB)    │         │  DB VM (8 vCPU / 32 GB)│
+   Users ──► LB │  web · kong · auth · edge ·  │ ──────► │  db (Postgres 15)      │
+                │  realtime · storage · ollama │  5432   │  /var/lib/postgresql   │
+                └──────────────────────────────┘         └────────────────────────┘
+```
+
+In both A1 and A2:
+
+- Postgres always runs in its **own container** (`db` service). The
+  difference is only **which VM** that container runs on.
+- A2 is enabled by setting `DB_EMBEDDED=false` and pointing
+  `POSTGRES_HOST` at the DB VM in `.env`. The `db` container then runs
+  via a small `docker-compose.db.yml` on the DB VM (or you can use a
+  managed Postgres 15 service).
+- Backups via nightly `pg_dump` + uploads tarball (run on the DB VM in A2).
+- **Not** highly available — loss of either VM = outage.
 
 ### 2.2 Topology B — Split DB + horizontally scaled app tier (2k–10k users)
 
@@ -247,13 +269,14 @@ backoff via the `notification-dispatcher` edge function.
 ## 5. Sizing reference (extended)
 
 | Tier         | Users      | Topology | App hosts | DB                       | Storage       |
-|--------------|------------|----------|-----------|--------------------------|---------------|
-| Eval         | < 10       | A        | 1         | embedded                 | local FS      |
-| Small        | 10–100     | A        | 1         | embedded                 | local FS      |
-| Medium       | 100–500    | A        | 1         | embedded                 | local FS / S3 |
-| Large        | 500–2,000  | A        | 1 (16 vCPU)| **dedicated VM**        | S3            |
-| XL           | 2k–5k      | B        | 2         | dedicated + 1 replica    | S3 / MinIO    |
-| XXL          | 5k–10k     | B        | 3–4       | dedicated + 2 replicas + PgBouncer | S3 / MinIO |
+|--------------|------------|----------|-----------|--------------------------|--------------- |
+| Eval         | < 10       | A1       | 1         | container, **same VM**   | local FS      |
+| Small        | 10–100     | A1       | 1         | container, **same VM**   | local FS      |
+| Medium       | 100–500    | A1       | 1         | container, **same VM**   | local FS / S3 |
+| Large (low)  | 500–1,200  | A1       | 1 (16 vCPU)| container, **same VM**  | S3            |
+| Large (high) | 1,200–2,000| A2       | 1 (12 vCPU)| container, **own VM** (single node) | S3 |
+| XL           | 2k–5k      | B        | 2         | dedicated VM + 1 replica | S3 / MinIO    |
+| XXL          | 5k–10k     | B        | 3–4       | dedicated VM + 2 replicas + PgBouncer | S3 / MinIO |
 | HA / Multi-AZ| 10k+       | C        | 4+ across AZs | Patroni 3-node cluster | S3 multi-AZ  |
 
 Per-app-host sizing in Topology B/C: **8 vCPU / 16 GB / 50 GB**.
