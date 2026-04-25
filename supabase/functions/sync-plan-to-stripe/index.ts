@@ -1,7 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "npm:@supabase/supabase-js@2.95.0/cors";
-import { createClient } from "npm:@supabase/supabase-js@2.95.0";
+import { createClient } from "npm:@supabase/supabase-js@2.89.0";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { isStripeAvailable, licenseModeBlockedResponse } from "../_shared/license.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 /**
  * Sync a plan's prices to Stripe.
@@ -144,7 +150,7 @@ serve(async (req) => {
             limit: 100,
           });
           for (const s of subs.data) {
-            const item = s.items.data.find((i) => i.price.id === oldPrice.id);
+            const item = s.items.data.find((i: { price: { id: string }; id: string }) => i.price.id === oldPrice.id);
             if (!item) continue;
             await stripe.subscriptions.update(s.id, {
               items: [{ id: item.id, price: newPrice.id }],

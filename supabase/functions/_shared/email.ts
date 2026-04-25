@@ -18,7 +18,7 @@
 //   if (!res.ok) console.error(res.error);
 
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
-import { Resend } from "npm:resend@4.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -96,7 +96,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult
           filename: a.filename,
           content: a.content,
           encoding: "base64",
-          contentType: a.contentType,
+          contentType: a.contentType ?? "application/octet-stream",
         })),
       });
       await client.close();
