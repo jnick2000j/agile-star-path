@@ -6,9 +6,10 @@ Operator guide for self-hosted TaskMaster installations.
 
 1. [Architecture](./architecture.md) — services, edge functions, scheduled jobs, data flow
 2. [Prerequisites](./prerequisites.md) — host sizing, OS, network, TLS, optional inbound email
-   - Automated single-host setup: `sudo ./scripts/prereqs-single-host.sh`
-   - Automated multi-host setup: `sudo ./scripts/prereqs-multi-host.sh --role web|db|storage --peers <list>`
-3. [Install](./install.md) — first-time install walkthrough
+3. [Prerequisites install guide](./prereqs-install.md) — step-by-step directions for the automated prereq scripts (single-host & multi-host)
+   - Single-host: `sudo ./scripts/prereqs-single-host.sh`
+   - Multi-host:  `sudo ./scripts/prereqs-multi-host.sh --role web|db|storage --peers <list>`
+4. [Install](./install.md) — first-time install walkthrough
 4. [Upgrade](./upgrade.md) — versioned bundle workflow + rollback
 5. [Backup & Restore](./backup-restore.md) — DB + uploads + DR drills
 6. [License management](./license.md) — installing, rotating, revoking
