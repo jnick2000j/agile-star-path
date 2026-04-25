@@ -5549,6 +5549,7 @@ export type Database = {
           residency_enforcement: string
           residency_locked_at: string | null
           residency_locked_by: string | null
+          restrict_time_logging_to_assigned_tasks: boolean
           secondary_color: string | null
           slug: string
           suspended_at: string | null
@@ -5574,6 +5575,7 @@ export type Database = {
           residency_enforcement?: string
           residency_locked_at?: string | null
           residency_locked_by?: string | null
+          restrict_time_logging_to_assigned_tasks?: boolean
           secondary_color?: string | null
           slug: string
           suspended_at?: string | null
@@ -5599,6 +5601,7 @@ export type Database = {
           residency_enforcement?: string
           residency_locked_at?: string | null
           residency_locked_by?: string | null
+          restrict_time_logging_to_assigned_tasks?: boolean
           secondary_color?: string | null
           slug?: string
           suspended_at?: string | null
@@ -10070,6 +10073,10 @@ export type Database = {
       archive_organization: {
         Args: { _archive?: boolean; _org_id: string }
         Returns: undefined
+      }
+      can_user_log_time_on_task: {
+        Args: { _task_id: string; _user_id: string }
+        Returns: boolean
       }
       check_plan_limit: {
         Args: { _org_id: string; _resource_type: string }
