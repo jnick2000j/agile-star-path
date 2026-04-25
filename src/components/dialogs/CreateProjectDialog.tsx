@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { useVertical } from "@/hooks/useVertical";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { toast } from "sonner";
 import { dispatchAutomation } from "@/lib/automations";
@@ -30,6 +31,8 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
+  const { hasModule } = useVertical();
+  const isConstruction = hasModule("rfis");
   const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
