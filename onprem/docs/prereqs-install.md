@@ -268,7 +268,41 @@ S3_SECRET_KEY=<from bootstrap output>
 SMTP_HOST=...
 ```
 
-### Step 5 — Bring up the app stack on each web node
+### Step 5 — Provision TLS on each web node
+
+Run `provision-tls.sh` on **each** app/web node. Use the same `--domain`
+everywhere; if individual nodes also have their own internal hostnames,
+add them as `--san`.
+
+```bash
+# Public Let's Encrypt (each node temporarily binds :80 for the challenge)
+sudo ./scripts/provision-tls.sh --mode letsencrypt \
+    --domain taskmaster.example.com --email ops@example.com --renew
+
+# OR — TLS terminated at LB, internal traffic uses self-signed
+sudo ./scripts/provision-tls.sh --mode self-signed \
+    --domain taskmaster.example.com \
+    --san app1.internal --san app2.internal
+
+# OR — enterprise wildcard cert distributed to each node
+sudo ./scripts/provision-tls.sh --mode byo \
+    --domain taskmaster.example.com \
+    --cert /opt/secrets/wildcard.pem --key /opt/secrets/wildcard.key
+```
+
+> **TLS-terminating load balancer?** If your L7 LB (HAProxy, Nginx,
+> AWS ALB, F5) terminates TLS and re-encrypts to the backends, run
+> `--mode self-signed` on each web node and import the generated
+> `tls/ca.crt` into the LB's trust store. The public cert lives only
+> on the LB.
+
+> **MinIO TLS (storage node).** The storage role doesn't run the web
+> container, but MinIO itself needs a cert when used over HTTPS. Run
+> the same script on the storage VM — it produces certs in `./tls/`,
+> which `docker-compose.minio.yml` mounts at `/root/.minio/certs/`.
+> See [minio-cluster.md](./minio-cluster.md#tls).
+
+### Step 6 — Bring up the app stack on each web node
 
 ```bash
 cd /opt/taskmaster
