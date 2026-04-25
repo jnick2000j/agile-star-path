@@ -8,10 +8,16 @@ x-restart: &restart
 
 services:
   # -----------------------------------------------------------------
-  # Postgres + Supabase-compatible auth/realtime/storage layer
+  # Postgres (BUNDLED variant — used at A1 / Eval / Small / Medium)
+  #
+  # Skip this service entirely when DB_EMBEDDED=false (A2 / B / C):
+  # it runs in the `embedded-db` profile and is only started when that
+  # profile is active. The App VM then talks to a Postgres container
+  # on a separate DB VM (see onprem/docker-compose.db.yml).
   # -----------------------------------------------------------------
   db:
     image: ghcr.io/taskmaster/onprem-db:${IMAGE_TAG:-latest}
+    profiles: ["embedded-db"]
     <<: *restart
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
