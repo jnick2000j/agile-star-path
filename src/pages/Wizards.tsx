@@ -18,6 +18,7 @@ import {
   LifeBuoy, AlertTriangle, Wrench, Smile, Clock,
   HardHat, FileCheck, ClipboardList, BadgeAlert, KeyRound, Power,
   PenTool, FileSignature, CalendarRange, FileEdit,
+  Scale, BadgeCheck, TrendingUp,
 } from "lucide-react";
 
 // ---------- CREATE wizards (template-driven entity creation) ----------
