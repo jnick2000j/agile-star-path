@@ -195,6 +195,22 @@ export default function Timesheets() {
     return m;
   }, [orgUsers]);
 
+  // Whether the current user is allowed to log time on a given task id.
+  // Admins/managers always allowed; otherwise only when the org setting is off
+  // or the task is in the user's allowed set.
+  const canLogOnTaskId = (taskId: string | null | undefined) => {
+    if (!taskId) return true;
+    if (isOrgManager) return true;
+    if (!restrictTimeLogging) return true;
+    return allowedTaskIds.has(taskId);
+  };
+
+  // Tasks the user is allowed to pick in the entry editor.
+  const selectableTasks = useMemo(() => {
+    if (isOrgManager || !restrictTimeLogging) return tasksList;
+    return tasksList.filter((t) => allowedTaskIds.has(t.id));
+  }, [tasksList, isOrgManager, restrictTimeLogging, allowedTaskIds]);
+
   const fetchAll = async () => {
     if (!user || !currentOrganization) return;
     setLoading(true);
