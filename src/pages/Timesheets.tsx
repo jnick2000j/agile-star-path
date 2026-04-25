@@ -234,7 +234,7 @@ export default function Timesheets() {
             .order("name"),
           supabase
             .from("tasks")
-            .select("id, name")
+            .select("id, name, assigned_to")
             .eq("organization_id", currentOrganization.id)
             .order("name"),
           supabase
@@ -249,6 +249,15 @@ export default function Timesheets() {
             .from("user_organization_access")
             .select("user_id")
             .eq("organization_id", currentOrganization.id),
+          supabase
+            .from("organizations")
+            .select("restrict_time_logging_to_assigned_tasks")
+            .eq("id", currentOrganization.id)
+            .maybeSingle(),
+          supabase
+            .from("task_assignments")
+            .select("task_id")
+            .eq("user_id", user.id),
         ]);
 
       if (mineRes.error) throw mineRes.error;
