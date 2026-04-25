@@ -357,6 +357,9 @@ script — that IP must be included.
 | MinIO uploads fail with `403 Forbidden` | Bootstrap policy not attached | Check `docker logs minio-bootstrap` |
 | `chronyd` shows large offset | NTP blocked outbound | Allow UDP 123 outbound or point chrony at an internal NTP |
 | `install.sh` warns "<4GB RAM" | Under-provisioned VM | Resize before installing |
+| Browser shows "NET::ERR_CERT_AUTHORITY_INVALID" | Self-signed CA not imported on client | Distribute `tls/ca.crt` to the OS/browser trust store (see script output) |
+| `certbot: port 80 already in use` | Web container is bound to :80 | Script auto-stops it; if it fails, run `docker compose stop web` first |
+| Cert expired / not auto-renewing | `--renew` was not passed | Re-run `provision-tls.sh --mode letsencrypt … --renew` |
 
 ---
 
