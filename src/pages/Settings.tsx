@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StakeholderAccessSettings from "@/components/admin/StakeholderAccessSettings";
 import { OrgAdminDangerZone } from "@/components/admin/OrgAdminDangerZone";
+import { TimesheetRestrictionSettings } from "@/components/admin/TimesheetRestrictionSettings";
 
 import { 
   Save, 
@@ -61,6 +62,9 @@ export default function Settings() {
                 Save Changes
               </Button>
             </div>
+          </div>
+          <div className="mt-6">
+            <TimesheetRestrictionSettings />
           </div>
           <div className="mt-6">
             <OrgAdminDangerZone />
