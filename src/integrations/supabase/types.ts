@@ -6358,6 +6358,7 @@ export type Database = {
           manager_id: string | null
           name: string
           organization_id: string
+          programme_kind: string
           progress: number
           reference_number: string | null
           sponsor: string | null
@@ -6378,6 +6379,7 @@ export type Database = {
           manager_id?: string | null
           name: string
           organization_id: string
+          programme_kind?: string
           progress?: number
           reference_number?: string | null
           sponsor?: string | null
@@ -6398,6 +6400,7 @@ export type Database = {
           manager_id?: string | null
           name?: string
           organization_id?: string
+          programme_kind?: string
           progress?: number
           reference_number?: string | null
           sponsor?: string | null
@@ -6419,6 +6422,10 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_name: string | null
+          contract_currency: string | null
+          contract_form: string | null
+          contract_value: number | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -6431,13 +6438,22 @@ export type Database = {
           organization_id: string
           priority: string
           programme_id: string | null
+          project_kind: string
           reference_number: string | null
+          source_award_id: string | null
+          source_bid_id: string | null
+          source_opportunity_id: string | null
+          source_rfp_id: string | null
           stage: string
           start_date: string | null
           timesheets_enabled: boolean
           updated_at: string
         }
         Insert: {
+          client_name?: string | null
+          contract_currency?: string | null
+          contract_form?: string | null
+          contract_value?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -6450,13 +6466,22 @@ export type Database = {
           organization_id: string
           priority?: string
           programme_id?: string | null
+          project_kind?: string
           reference_number?: string | null
+          source_award_id?: string | null
+          source_bid_id?: string | null
+          source_opportunity_id?: string | null
+          source_rfp_id?: string | null
           stage?: string
           start_date?: string | null
           timesheets_enabled?: boolean
           updated_at?: string
         }
         Update: {
+          client_name?: string | null
+          contract_currency?: string | null
+          contract_form?: string | null
+          contract_value?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -6469,7 +6494,12 @@ export type Database = {
           organization_id?: string
           priority?: string
           programme_id?: string | null
+          project_kind?: string
           reference_number?: string | null
+          source_award_id?: string | null
+          source_bid_id?: string | null
+          source_opportunity_id?: string | null
+          source_rfp_id?: string | null
           stage?: string
           start_date?: string | null
           timesheets_enabled?: boolean
@@ -6488,6 +6518,34 @@ export type Database = {
             columns: ["programme_id"]
             isOneToOne: false
             referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_source_award_fk"
+            columns: ["source_award_id"]
+            isOneToOne: false
+            referencedRelation: "vertical_entity_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_source_bid_fk"
+            columns: ["source_bid_id"]
+            isOneToOne: false
+            referencedRelation: "vertical_entity_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_source_opportunity_fk"
+            columns: ["source_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "vertical_entity_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_source_rfp_fk"
+            columns: ["source_rfp_id"]
+            isOneToOne: false
+            referencedRelation: "vertical_entity_records"
             referencedColumns: ["id"]
           },
         ]
