@@ -40,6 +40,19 @@ docker compose logs --tail=100 edge  # recent errors from a service
 | "AI provider unreachable"                | Ollama not running or model not pulled | `docker compose exec ollama ollama pull llama3.1:8b`              |
 | Slow AI responses                        | Local model too large for host     | Switch to `llama3.1:8b` or use external provider                       |
 | "Insufficient credits" on a license install | License has finite `ai_credits_monthly` | Have a new license issued with `-1` (unlimited)                  |
+| KB search returns nothing                | Embedding model not pulled         | `docker compose exec ollama ollama pull nomic-embed-text` then re-index from Admin Panel → Knowledge Base |
+| Ask the Task Master loops or 500s        | Edge function out of memory        | `docker compose restart edge`; check `logs edge \| grep task-master`  |
+
+## Notifications, workflows & timesheets
+
+| Symptom                                  | Likely cause                       | Fix                                                                    |
+|------------------------------------------|------------------------------------|------------------------------------------------------------------------|
+| In-app bell shows nothing on assign      | `notification-dispatcher` failing  | `docker compose logs edge \| grep notification-dispatcher`             |
+| Email reminders never arrive             | SMTP misconfigured                 | See [smtp.md](./smtp.md); test with `docker compose exec edge deno run -A tools/smtp-test.ts` |
+| Helpdesk workflows "stuck"               | Workflow runner cron not ticking   | `docker compose ps`; restart `edge`; check `helpdesk_workflow_runs`    |
+| Inbound helpdesk email not creating tickets | Email gateway → webhook misconfigured | Verify your MX/Postmark/Sendgrid route POSTs to `/functions/v1/helpdesk-inbound-email` with the shared secret |
+| Timesheet user "can't log time on task"  | Org setting **restrict_time_logging_to_assigned_tasks** is ON | Either assign them in **task_assignments** / set `tasks.assigned_to`, or toggle the setting off in Settings → General |
+| Timesheet PDF email fails                | SMTP/Resend not reachable from `edge` | Check `email-timesheet` logs; verify `SMTP_FROM` is verified domain    |
 
 ## Backups not running
 

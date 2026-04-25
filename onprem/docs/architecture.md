@@ -47,3 +47,41 @@ By default, **zero** outbound traffic is required. When `ALLOW_OUTBOUND_TELEMETR
 - `edge` may submit anonymized health metrics
 
 This is configurable per-org in the Platform Admin UI.
+
+## Edge function surface
+
+The `edge` container hosts every function under `supabase/functions/*`.
+Operator-relevant groups:
+
+- **AI**: `task-master-chat`, `ai-advisor`, `ai-draft`, `ai-draft-chat`,
+  `ai-summarize`, `ai-insights-scan`, `ai-search`, `ai-translate`,
+  `ai-ticket-intake`, `risk-insights`.
+- **Helpdesk**: `helpdesk-inbound-email`, `helpdesk-notify`,
+  `helpdesk-workflow-runner`, `helpdesk-workflow-approve`.
+- **Knowledge Base**: `kb-ingest-upload`, `kb-embed`, `kb-search`,
+  `kb-suggest-for-ticket`.
+- **Notifications & reporting**: `notification-dispatcher`,
+  `check-notifications`, `check-update-reminders`, `notify-cm-activity`,
+  `notify-milestone-change`, `notify-org-suspension`, `notify-sso-request`,
+  `notify-workflow-assignment`, `summarize-weekly-report`,
+  `send-weekly-report`, `email-timesheet`.
+- **Auth & provisioning**: `mfa-manage`, `session-manage`, `send-invite`,
+  `manage-user`, `register-tenant-saml`, `register-tenant-oidc`, `scim-v2`.
+- **Compliance / audit**: `export-audit-log`, `siem-export`, `verify-domain`,
+  `generate-governance-report`, `generate-comms-pack`, `generate-report`.
+- **Automations**: `automation-runner`, `automation-approve`.
+- **Billing (hybrid only)**: `create-checkout`, `create-portal-session`,
+  `cancel-subscription`, `get-stripe-price`, `sync-plan-to-stripe`,
+  `payments-webhook`, `manage-ai-credit-packs`.
+
+## Scheduled jobs
+
+Cron is configured inside the `edge` container (see `supabase/config.toml`):
+
+| Cadence  | Function                                            |
+|----------|-----------------------------------------------------|
+| 1 min    | `automation-runner`, `helpdesk-workflow-runner`     |
+| Hourly   | `check-notifications`, `check-update-reminders`     |
+| Weekly   | `summarize-weekly-report` → `send-weekly-report`    |
+
+See [features.md](./features.md) for the per-module operator notes.
