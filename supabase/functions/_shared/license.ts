@@ -79,7 +79,8 @@ export function licenseModeBlockedResponse(
 /** Convenience helper for edge functions — returns true when the function should
  *  short-circuit (org is in license mode OR Stripe is not configured). */
 export async function shouldSkipStripe(
-  supabase: { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown }> },
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
   orgId: string | null | undefined,
 ): Promise<{ skip: boolean; reason: "license_mode" | "stripe_unavailable" | null }> {
   if (!isStripeAvailable()) return { skip: true, reason: "stripe_unavailable" };
