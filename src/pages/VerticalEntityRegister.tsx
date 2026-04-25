@@ -98,6 +98,48 @@ export default function VerticalEntityRegister() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  // Promote a pursuit-lifecycle record (Bid / Award / RFP / Opportunity)
+  // into a first-class delivery project, threading the source record id back.
+  const promote = useMutation({
+    mutationFn: async (record: any) => {
+      if (!promotionConfig || !currentOrganization?.id || !user) throw new Error("Missing context");
+      const d = (record.data || {}) as Record<string, any>;
+      const projectName =
+        d.opportunity_name || d.title || record.title || `${promotionConfig.kind} project`;
+      const insert: Record<string, any> = {
+        name: projectName,
+        description: `Promoted from ${slug?.replace(/-/g, " ")} ${record.record_number}`,
+        organization_id: currentOrganization.id,
+        stage: "initiating",
+        priority: "medium",
+        health: "green",
+        methodology: "Construction",
+        project_kind: promotionConfig.kind,
+        client_name: d.client_name || null,
+        contract_value: d.proposed_contract_value ?? d.contract_value ?? d.estimated_value ?? null,
+        contract_currency: d.currency || null,
+        contract_form: d.contract_form || null,
+        start_date: d.start_on_site || d.target_award_date || null,
+        end_date: d.completion_date || null,
+        created_by: user.id,
+        manager_id: user.id,
+        [promotionConfig.sourceField]: record.id,
+      };
+      const { data, error } = await supabase
+        .from("projects")
+        .insert(insert)
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data.id as string;
+    },
+    onSuccess: (projectId) => {
+      toast.success("Project created from pursuit record");
+      navigate(`/projects/${projectId}`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   if (entityLoading) {
     return <AppLayout title="Loading…"><div className="p-6 text-muted-foreground">Loading entity…</div></AppLayout>;
   }
