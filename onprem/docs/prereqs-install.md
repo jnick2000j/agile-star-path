@@ -313,7 +313,7 @@ docker compose -f docker-compose.yml --profile=app-only up -d
 The `app-only` profile excludes the `db` service (which now lives on
 `db.internal`) and the local-FS storage volume.
 
-### Step 6 — Front them with a load balancer
+### Step 7 — Front them with a load balancer
 
 Point your L4 or L7 LB at port 443 of each web node. Health-check path
 is `/functions/v1/health` (returns `{ok: true}` when the node can reach
