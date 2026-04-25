@@ -12,9 +12,11 @@ Operator guide for self-hosted TaskMaster installations.
 6. [License management](./license.md) — installing, rotating, revoking
 7. [AI provider configuration](./ai-provider.md) — Ollama, OpenAI, Azure, Anthropic, embedding models
 8. [SMTP configuration](./smtp.md) — required for invites, notifications, MFA, helpdesk
-9. [Features overview](./features.md) — every shipped module + the edge functions / cron jobs that back it
-10. [Scaling & HA](./scaling-ha.md) — going beyond 2,000 users, multi-host topologies, Patroni, multi-AZ
-11. [Troubleshooting](./troubleshooting.md) — common errors and fixes
+9. [Object storage](./object-storage.md) — local FS vs MinIO vs managed S3, decision matrix, IAM policy
+10. [Distributed MinIO cluster](./minio-cluster.md) — 4-node HA topology for Large A2
+11. [Features overview](./features.md) — every shipped module + the edge functions / cron jobs that back it
+12. [Scaling & HA](./scaling-ha.md) — going beyond 2,000 users, multi-host topologies, Patroni, multi-AZ
+13. [Troubleshooting](./troubleshooting.md) — common errors and fixes
 
 ### For release engineers (not operators)
 
