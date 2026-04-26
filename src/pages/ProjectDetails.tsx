@@ -215,6 +215,9 @@ export default function ProjectDetails() {
   const navigate = useNavigate();
   const projectId = searchParams.get("id");
 
+  const { vertical } = useVertical();
+  const isConstruction = vertical?.id === "construction";
+
   const [project, setProject] = useState<Project | null>(null);
   const [programName, setProgrammeName] = useState<string | null>(null);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
