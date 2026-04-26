@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.send-weekly-report]
 verify_jwt = true
 
+[functions.weekly-construction-report]
+verify_jwt = false
+
 [functions.get-stripe-price]
 verify_jwt = false
 
