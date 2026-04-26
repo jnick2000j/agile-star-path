@@ -567,6 +567,8 @@ export default function ProjectDetails() {
               { value: "products", label: "Products", icon: Layers, count: products.length },
               { value: "risks", label: "Risks", icon: AlertTriangle, count: risks.length },
               { value: "issues", label: "Issues", icon: AlertCircle, count: issues.length },
+              ...(isConstruction ? [{ value: "construction", label: "Construction", icon: HardHat }] : []),
+              { value: "traceability", label: "Traceability", icon: Network },
               { value: "brief", label: "Project Brief", icon: FileText },
               { value: "team", label: "Team", icon: Users },
               { value: "updates", label: "Updates", icon: MessageSquarePlus },
@@ -576,6 +578,17 @@ export default function ProjectDetails() {
               { value: "history", label: "Status Timeline", icon: History },
             ]}
           />
+
+          {isConstruction && project.organization_id && (
+            <TabsContent value="construction">
+              <ConstructionTab projectId={project.id} organizationId={project.organization_id} />
+            </TabsContent>
+          )}
+
+          <TabsContent value="traceability">
+            <ProjectTraceability project={project as any} />
+          </TabsContent>
+
 
           {/* Work Packages Tab */}
           <TabsContent value="workpackages">
