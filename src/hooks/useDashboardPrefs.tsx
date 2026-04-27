@@ -10,7 +10,7 @@ export interface DashboardPrefs {
 
 const DEFAULTS: DashboardPrefs = {
   default_tab: "my-work",
-  quick_actions: ["new-task", "new-project", "log-update", "raise-risk", "open-ticket"],
+  quick_actions: ["new-task", "log-time", "new-project", "log-update", "raise-risk", "open-ticket"],
   sidebar_favorites: [],
 };
 
