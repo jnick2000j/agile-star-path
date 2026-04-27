@@ -36,6 +36,7 @@ import {
 import { ConstructionTab } from "@/components/projects/ConstructionTab";
 import { ProjectTraceability } from "@/components/projects/ProjectTraceability";
 import { useVertical } from "@/hooks/useVertical";
+import { useTrackRecent } from "@/hooks/useRecents";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityTicketsCard } from "@/components/helpdesk/EntityTicketsCard";
 import { EntityChangesCard } from "@/components/changeMgmt/EntityChangesCard";
@@ -219,6 +220,14 @@ export default function ProjectDetails() {
   const isConstruction = vertical?.id === "construction";
 
   const [project, setProject] = useState<Project | null>(null);
+
+  useTrackRecent({
+    entityType: "project",
+    entityId: project?.id,
+    label: project?.name,
+    href: project ? `/projects/details?id=${project.id}` : undefined,
+    enabled: !!project,
+  });
   const [programName, setProgrammeName] = useState<string | null>(null);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
