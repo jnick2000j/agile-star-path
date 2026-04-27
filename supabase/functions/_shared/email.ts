@@ -150,11 +150,23 @@ export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult
             recipientEmail: to,
             idempotencyKey: idemKey,
             templateData: { subject, html: html || `<p>${text}</p>`, text },
-            // Allow caller to override subject:
             subject,
           },
         });
-        if (error) errors.push(`${to}: ${error.message}`);
+        if (error) {
+          const msg = (error.message || "").toLowerCase();
+          if (
+            msg.includes("not found") ||
+            msg.includes("non-2xx") ||
+            msg.includes("404")
+          ) {
+            errors.push(
+              `${to}: Lovable Emails is not set up for this project yet. Configure an email domain in Cloud → Emails, or switch to SMTP/Resend in Admin → Email settings.`,
+            );
+          } else {
+            errors.push(`${to}: ${error.message}`);
+          }
+        }
       }
       if (errors.length) return { ok: false, transport: "lovable", error: errors.join("; ") };
       return { ok: true, transport: "lovable" };
