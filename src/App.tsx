@@ -94,6 +94,7 @@ import VerticalEntityRegister from "./pages/VerticalEntityRegister";
 import VerticalsDocs from "./pages/VerticalsDocs";
 import KnowledgebaseArticle from "./pages/KnowledgebaseArticle";
 import NotFound from "./pages/NotFound";
+import Unsubscribe from "./pages/Unsubscribe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
@@ -195,6 +196,7 @@ const App = () => (
             <Route path="/services/retainers" element={<ProtectedRoute><Retainers /></ProtectedRoute>} />
             <Route path="/verticals/docs" element={<ProtectedRoute><VerticalsDocs /></ProtectedRoute>} />
             <Route path="/verticals/:slug" element={<ProtectedRoute><VerticalEntityRegister /></ProtectedRoute>} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </PermissionsProvider>
