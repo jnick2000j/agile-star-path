@@ -23,6 +23,7 @@ import {
   Wand2,
   Settings2,
   Plus,
+  Clock,
 } from "lucide-react";
 import { useDashboardPrefs } from "@/hooks/useDashboardPrefs";
 import { useVertical } from "@/hooks/useVertical";
@@ -38,6 +39,7 @@ interface QuickAction {
 
 const ALL_ACTIONS: QuickAction[] = [
   { key: "new-task", label: "New Task", icon: ListTodo, href: "/tasks?new=1", description: "Create a task and assign it." },
+  { key: "log-time", label: "Log Time", icon: Clock, href: "/timesheets?new=1", description: "Add or modify a timesheet entry." },
   { key: "new-project", label: "New Project", icon: FolderKanban, href: "/projects?new=1", description: "Start a new project." },
   { key: "new-programme", label: "New Programme", icon: Layers, href: "/programmes?new=1", description: "Start a new programme.", module: "programmes" },
   { key: "new-product", label: "New Product", icon: Package, href: "/products?new=1", description: "Add a product.", module: "products" },
