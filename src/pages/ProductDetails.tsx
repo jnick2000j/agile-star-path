@@ -49,6 +49,7 @@ import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { EntitySprintsTab } from "@/components/EntitySprintsTab";
 import { format } from "date-fns";
+import { useTrackRecent } from "@/hooks/useRecents";
 
 interface Product {
   id: string;
@@ -177,6 +178,14 @@ export default function ProductDetails() {
   const productId = searchParams.get("id");
 
   const [product, setProduct] = useState<Product | null>(null);
+
+  useTrackRecent({
+    entityType: "product",
+    entityId: product?.id,
+    label: product?.name,
+    href: product ? `/products/details?id=${product.id}` : undefined,
+    enabled: !!product,
+  });
   const [features, setFeatures] = useState<Feature[]>([]);
   const [tasks, setTasks] = useState<ProductTask[]>([]);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);

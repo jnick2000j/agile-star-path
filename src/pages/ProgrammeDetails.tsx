@@ -49,6 +49,7 @@ import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { EntitySprintsTab } from "@/components/EntitySprintsTab";
 import { format } from "date-fns";
+import { useTrackRecent } from "@/hooks/useRecents";
 
 interface Program {
   id: string;
@@ -197,6 +198,14 @@ export default function ProgrammeDetails() {
   const programmeId = searchParams.get("id");
 
   const [programme, setProgramme] = useState<Program | null>(null);
+
+  useTrackRecent({
+    entityType: "programme",
+    entityId: programme?.id,
+    label: programme?.name,
+    href: programme ? `/programmes/details?id=${programme.id}` : undefined,
+    enabled: !!programme,
+  });
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
