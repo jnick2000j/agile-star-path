@@ -1,49 +1,37 @@
 project_id = "lpsbudbighowwdmgdfyc"
 
-[functions.task-master-chat]
-verify_jwt = false
-
-[functions.send-weekly-report]
-verify_jwt = true
-
-[functions.weekly-construction-report]
-verify_jwt = false
-
-[functions.get-stripe-price]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.create-portal-session]
-verify_jwt = false
-
-[functions.payments-webhook]
-verify_jwt = false
-
-[functions.sync-plan-to-stripe]
-verify_jwt = false
-
-[functions.manage-ai-credit-packs]
-verify_jwt = false
-
-[functions.scim-v2]
-verify_jwt = false
-
-[functions.helpdesk-inbound-email]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
-
-[functions.send-transactional-email]
-verify_jwt = true
-
-[functions.preview-transactional-email]
-verify_jwt = false
-
-[functions.handle-email-unsubscribe]
-verify_jwt = false
-
-[functions.handle-email-suppression]
-verify_jwt = false
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.create-portal-session]
+    verify_jwt = false
+  [functions.get-stripe-price]
+    verify_jwt = false
+  [functions.handle-email-suppression]
+    verify_jwt = false
+  [functions.handle-email-unsubscribe]
+    verify_jwt = false
+  [functions.helpdesk-inbound-email]
+    verify_jwt = false
+  [functions.manage-ai-credit-packs]
+    verify_jwt = false
+  [functions.payments-webhook]
+    verify_jwt = false
+  [functions.preview-transactional-email]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.scim-v2]
+    verify_jwt = false
+  [functions.send-transactional-email]
+    verify_jwt = true
+  [functions.send-weekly-report]
+    verify_jwt = true
+  [functions.sync-plan-to-stripe]
+    verify_jwt = false
+  [functions.task-master-chat]
+    verify_jwt = false
+  [functions.weekly-construction-report]
+    verify_jwt = false
