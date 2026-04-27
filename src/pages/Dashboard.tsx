@@ -9,7 +9,7 @@ import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagement
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
 import { PinnedAndRecents } from "@/components/dashboard/PinnedAndRecents";
-import { PlanUsageBar } from "@/components/PlanUsageBar";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3 } from "lucide-react";
@@ -63,7 +63,6 @@ export default function Dashboard() {
 
   return (
     <AppLayout title="Dashboard" subtitle="Get a snapshot of your work and your portfolio">
-      <PlanUsageBar />
       {hasStakeholderAccess && (
         <div className="mb-6 flex justify-end">
           <Button asChild>
