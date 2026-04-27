@@ -9412,6 +9412,36 @@ export type Database = {
           },
         ]
       }
+      user_dashboard_prefs: {
+        Row: {
+          created_at: string
+          default_tab: string
+          id: string
+          quick_actions: Json
+          sidebar_favorites: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_tab?: string
+          id?: string
+          quick_actions?: Json
+          sidebar_favorites?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_tab?: string
+          id?: string
+          quick_actions?: Json
+          sidebar_favorites?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_mfa_factors: {
         Row: {
           created_at: string
@@ -9548,6 +9578,39 @@ export type Database = {
           },
         ]
       }
+      user_pinned_entities: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          href: string
+          id: string
+          label: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          href: string
+          id?: string
+          label: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          href?: string
+          id?: string
+          label?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_product_access: {
         Row: {
           access_level: string
@@ -9643,6 +9706,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_recent_entities: {
+        Row: {
+          entity_id: string | null
+          entity_type: string
+          href: string
+          id: string
+          label: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          entity_id?: string | null
+          entity_type: string
+          href: string
+          id?: string
+          label: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          entity_id?: string | null
+          entity_type?: string
+          href?: string
+          id?: string
+          label?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
