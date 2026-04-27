@@ -94,6 +94,7 @@ import VerticalEntityRegister from "./pages/VerticalEntityRegister";
 import VerticalsDocs from "./pages/VerticalsDocs";
 import KnowledgebaseArticle from "./pages/KnowledgebaseArticle";
 import NotFound from "./pages/NotFound";
+import Unsubscribe from "./pages/Unsubscribe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
