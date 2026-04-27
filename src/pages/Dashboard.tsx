@@ -9,6 +9,8 @@ import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagement
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
 import { PinnedAndRecents } from "@/components/dashboard/PinnedAndRecents";
+import { ActionInbox } from "@/components/dashboard/ActionInbox";
+import { QuickCreateBar } from "@/components/dashboard/QuickCreateBar";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
