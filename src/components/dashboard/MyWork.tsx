@@ -154,7 +154,7 @@ export function MyWork() {
                       to={`/change-management/${c.id}`}
                       className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors"
                     >
-                      <span className="text-sm truncate flex-1">{c.title}</span>
+                      <span className="text-sm truncate flex-1">{c.reference_number}</span>
                       <Badge variant="outline" className="text-xs font-normal shrink-0">{c.status}</Badge>
                     </Link>
                   ))}
