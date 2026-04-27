@@ -2922,6 +2922,48 @@ export type Database = {
           },
         ]
       }
+      email_settings: {
+        Row: {
+          active_transport: Database["public"]["Enums"]["email_transport"]
+          created_at: string
+          from_address: string | null
+          from_name: string | null
+          id: string
+          last_test_at: string | null
+          last_test_error: string | null
+          last_test_status: string | null
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active_transport?: Database["public"]["Enums"]["email_transport"]
+          created_at?: string
+          from_address?: string | null
+          from_name?: string | null
+          id?: string
+          last_test_at?: string | null
+          last_test_error?: string | null
+          last_test_status?: string | null
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active_transport?: Database["public"]["Enums"]["email_transport"]
+          created_at?: string
+          from_address?: string | null
+          from_name?: string | null
+          id?: string
+          last_test_at?: string | null
+          last_test_error?: string | null
+          last_test_status?: string | null
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       entity_assignments: {
         Row: {
           assigned_by: string | null
@@ -10712,6 +10754,7 @@ export type Database = {
         | "cancelled"
         | "failed"
       cm_urgency: "low" | "medium" | "high" | "critical"
+      email_transport: "lovable" | "smtp" | "resend"
       exception_status:
         | "raised"
         | "under_review"
@@ -10941,6 +10984,7 @@ export const Constants = {
         "failed",
       ],
       cm_urgency: ["low", "medium", "high", "critical"],
+      email_transport: ["lovable", "smtp", "resend"],
       exception_status: [
         "raised",
         "under_review",
