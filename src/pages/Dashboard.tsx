@@ -92,6 +92,8 @@ export default function Dashboard() {
 
         {/* MY WORK */}
         <TabsContent value="my-work" className="space-y-6 mt-6">
+          <QuickCreateBar />
+          <ActionInbox />
           <QuickActions />
           <MyWork />
           <PinnedAndRecents />
