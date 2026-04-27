@@ -25,9 +25,12 @@ import {
   Workflow,
   HardHat,
   Briefcase,
+  Star,
+  StarOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVertical } from "@/hooks/useVertical";
+import { useDashboardPrefs } from "@/hooks/useDashboardPrefs";
 
 interface NavItem {
   label: string;
