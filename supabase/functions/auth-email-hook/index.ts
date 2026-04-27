@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "thetaskmaster"
+const SITE_NAME = "The TaskMaster"
 const SENDER_DOMAIN = "notifications.taskmastersoftware.com"
 const ROOT_DOMAIN = "taskmastersoftware.com"
 const FROM_DOMAIN = "taskmastersoftware.com" // Domain shown in From address (may be root or sender subdomain)
