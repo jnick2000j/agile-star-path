@@ -167,10 +167,60 @@ export function Sidebar() {
   const isParentActive = (children?: { label: string; href: string }[]) =>
     children?.some((child) => location.pathname === child.href);
 
+  // Flat lookup of every navigable leaf (top-level links + children) so we can render Favorites.
+  const allLeaves: { label: string; href: string; icon: React.ElementType }[] = navigation.flatMap((item) => {
+    if (item.children) {
+      return item.children.map((c) => ({ label: c.label, href: c.href, icon: item.icon }));
+    }
+    if (item.href) return [{ label: item.label, href: item.href, icon: item.icon }];
+    return [];
+  });
+
+  const favoriteSet = new Set(prefs.sidebar_favorites);
+  const favorites = allLeaves.filter((l) => favoriteSet.has(l.href));
+
+  const toggleFavorite = (href: string) => {
+    const next = favoriteSet.has(href)
+      ? prefs.sidebar_favorites.filter((h) => h !== href)
+      : [...prefs.sidebar_favorites, href];
+    update({ sidebar_favorites: next });
+  };
+
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 pt-6">
+          {favorites.length > 0 && (
+            <div className="mb-3 pb-3 border-b border-sidebar-border">
+              <div className="flex items-center gap-1.5 px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                <Star className="h-3 w-3" /> Favorites
+              </div>
+              {favorites.map((fav) => (
+                <div key={fav.href} className="group relative">
+                  <Link
+                    to={fav.href}
+                    className={cn(
+                      "nav-link justify-between pr-9",
+                      isActive(fav.href) && "nav-link-active"
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      <fav.icon className="h-4 w-4" />
+                      <span className="truncate">{fav.label}</span>
+                    </span>
+                  </Link>
+                  <button
+                    onClick={() => toggleFavorite(fav.href)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-sidebar-foreground/40 hover:text-sidebar-foreground opacity-0 group-hover:opacity-100"
+                    title="Remove from favorites"
+                  >
+                    <StarOff className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {navigation.map((item) => (
             <div key={item.label}>
               {item.children ? (
@@ -196,40 +246,65 @@ export function Sidebar() {
                   {expandedItems.includes(item.label) && (
                     <div className="ml-8 mt-1 space-y-1">
                       {item.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          to={child.href}
-                          className={cn(
-                            "block px-3 py-2 text-sm rounded-md transition-colors",
-                            isActive(child.href)
-                              ? "bg-sidebar-accent text-sidebar-foreground"
-                              : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                          )}
-                        >
-                          {child.label}
-                        </Link>
+                        <div key={child.href} className="group relative">
+                          <Link
+                            to={child.href}
+                            className={cn(
+                              "block px-3 py-2 pr-8 text-sm rounded-md transition-colors",
+                              isActive(child.href)
+                                ? "bg-sidebar-accent text-sidebar-foreground"
+                                : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                            )}
+                          >
+                            {child.label}
+                          </Link>
+                          <button
+                            onClick={() => toggleFavorite(child.href)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-sidebar-foreground/30 hover:text-sidebar-foreground opacity-0 group-hover:opacity-100"
+                            title={favoriteSet.has(child.href) ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            {favoriteSet.has(child.href) ? (
+                              <Star className="h-3.5 w-3.5 fill-current" />
+                            ) : (
+                              <Star className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}
                 </>
               ) : (
-                <Link
-                  to={item.href!}
-                  className={cn(
-                    "nav-link justify-between",
-                    isActive(item.href!) && "nav-link-active"
-                  )}
-                >
-                  <span className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5" />
-                    {item.label}
-                  </span>
-                  {item.badge && item.badge > 0 ? (
-                    <span className="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">
-                      {item.badge > 99 ? "99+" : item.badge}
+                <div className="group relative">
+                  <Link
+                    to={item.href!}
+                    className={cn(
+                      "nav-link justify-between pr-9",
+                      isActive(item.href!) && "nav-link-active"
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
                     </span>
-                  ) : null}
-                </Link>
+                    {item.badge && item.badge > 0 ? (
+                      <span className="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    ) : null}
+                  </Link>
+                  <button
+                    onClick={() => toggleFavorite(item.href!)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-sidebar-foreground/30 hover:text-sidebar-foreground opacity-0 group-hover:opacity-100"
+                    title={favoriteSet.has(item.href!) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    {favoriteSet.has(item.href!) ? (
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                    ) : (
+                      <Star className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
               )}
             </div>
           ))}
