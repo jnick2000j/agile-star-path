@@ -73,11 +73,11 @@ export function ActionInbox() {
         .order("due_date", { ascending: true, nullsFirst: false })
         .limit(15);
 
-      const changesRes: any = await supabase
+      const changesRes: any = await (supabase as any)
         .from("change_requests")
         .select("id, reference_number, title, status")
         .eq("approver_id", user.id)
-        .in("status", ["submitted", "in_review", "pending_approval"])
+        .in("status", ["pending", "under_review", "needs_information"])
         .limit(15);
 
       const items: ApprovalItem[] = [
