@@ -67,7 +67,9 @@ serve(async (req) => {
       })
       .eq("organization_id", organizationId);
 
-    return json({ ok: result.ok, transport: result.transport, error: result.error }, result.ok ? 200 : 500);
+    // Return 200 even on send failure so the client receives the structured error
+    // (Supabase functions.invoke treats non-2xx as a generic error and hides our payload).
+    return json({ ok: result.ok, transport: result.transport, error: result.error }, 200);
   } catch (e) {
     console.error("send-test-email error", e);
     return json({ error: (e as Error).message }, 500);
