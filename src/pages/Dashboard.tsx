@@ -2,22 +2,27 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RiskSummary } from "@/components/dashboard/RiskSummary";
 import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
-import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
 import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
 import { HelpdeskUsageCard } from "@/components/dashboard/HelpdeskUsageCard";
 import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { MyWork } from "@/components/dashboard/MyWork";
+import { PinnedAndRecents } from "@/components/dashboard/PinnedAndRecents";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye } from "lucide-react";
+import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
+import { useDashboardPrefs } from "@/hooks/useDashboardPrefs";
 
 export default function Dashboard() {
   const { user, userRole } = useAuth();
+  const { prefs, update } = useDashboardPrefs();
   const [hasStakeholderAccess, setHasStakeholderAccess] = useState(false);
 
   useEffect(() => {
@@ -57,7 +62,7 @@ export default function Dashboard() {
   });
 
   return (
-    <AppLayout title="Dashboard" subtitle="Program portfolio overview">
+    <AppLayout title="Dashboard" subtitle="Get a snapshot of your work and your portfolio">
       <PlanUsageBar />
       {hasStakeholderAccess && (
         <div className="mb-6 flex justify-end">
@@ -69,56 +74,77 @@ export default function Dashboard() {
           </Button>
         </div>
       )}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
-        <MetricCard
-          title="Active Programs"
-          value={metrics?.activeProgrammes ?? 0}
-          icon={<Layers className="h-6 w-6" />}
-          iconColor="primary"
-        />
-        <MetricCard
-          title="Active Projects"
-          value={metrics?.activeProjects ?? 0}
-          icon={<FolderKanban className="h-6 w-6" />}
-          iconColor="info"
-        />
-        <MetricCard
-          title="Active Products"
-          value={metrics?.activeProducts ?? 0}
-          icon={<Package className="h-6 w-6" />}
-          iconColor="info"
-        />
-        <MetricCard
-          title="Open Risks"
-          value={metrics?.openRisks ?? 0}
-          icon={<AlertTriangle className="h-6 w-6" />}
-          iconColor="warning"
-        />
-        <MetricCard
-          title="Avg Benefit Realization"
-          value={`${metrics?.avgRealization ?? 0}%`}
-          icon={<Target className="h-6 w-6" />}
-          iconColor="success"
-        />
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 mb-8">
-        <RiskSummary />
-        <UpcomingMilestones />
-      </div>
+      <Tabs
+        value={prefs.default_tab}
+        onValueChange={(v) => update({ default_tab: v })}
+        className="space-y-6"
+      >
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="my-work" className="gap-2">
+            <User className="h-4 w-4" /> My Work
+          </TabsTrigger>
+          <TabsTrigger value="portfolio" className="gap-2">
+            <BarChart3 className="h-4 w-4" /> Portfolio
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid gap-6 lg:grid-cols-2 mb-8">
-        <HelpdeskSummary />
-        <ChangeManagementSummary />
-      </div>
+        {/* MY WORK */}
+        <TabsContent value="my-work" className="space-y-6 mt-6">
+          <QuickActions />
+          <MyWork />
+          <PinnedAndRecents />
+        </TabsContent>
 
-      <div className="mb-8">
-        <StatusIndicators />
-      </div>
+        {/* PORTFOLIO (the original dashboard) */}
+        <TabsContent value="portfolio" className="space-y-6 mt-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+            <MetricCard
+              title="Active Programs"
+              value={metrics?.activeProgrammes ?? 0}
+              icon={<Layers className="h-6 w-6" />}
+              iconColor="primary"
+            />
+            <MetricCard
+              title="Active Projects"
+              value={metrics?.activeProjects ?? 0}
+              icon={<FolderKanban className="h-6 w-6" />}
+              iconColor="info"
+            />
+            <MetricCard
+              title="Active Products"
+              value={metrics?.activeProducts ?? 0}
+              icon={<Package className="h-6 w-6" />}
+              iconColor="info"
+            />
+            <MetricCard
+              title="Open Risks"
+              value={metrics?.openRisks ?? 0}
+              icon={<AlertTriangle className="h-6 w-6" />}
+              iconColor="warning"
+            />
+            <MetricCard
+              title="Avg Benefit Realization"
+              value={`${metrics?.avgRealization ?? 0}%`}
+              icon={<Target className="h-6 w-6" />}
+              iconColor="success"
+            />
+          </div>
 
-      <div className="mb-8">
-        <HelpdeskUsageCard />
-      </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RiskSummary />
+            <UpcomingMilestones />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <HelpdeskSummary />
+            <ChangeManagementSummary />
+          </div>
+
+          <StatusIndicators />
+          <HelpdeskUsageCard />
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 }
