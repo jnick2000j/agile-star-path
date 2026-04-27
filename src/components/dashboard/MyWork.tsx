@@ -30,31 +30,33 @@ export function MyWork() {
   const { data, isLoading } = useQuery({
     queryKey: ["my-work", user?.id],
     enabled: !!user,
-    queryFn: async () => {
+    queryFn: async (): Promise<{
+      tasks: Array<{ id: string; name: string; planned_end: string | null }>;
+      risks: Array<{ id: string; title: string; impact: string }>;
+      changes: Array<{ id: string; reference_number: string; status: string }>;
+    }> => {
       if (!user) return { tasks: [], risks: [], changes: [] };
 
-      const [tasksRes, risksRes, changesRes] = await Promise.all([
-        supabase
-          .from("tasks")
-          .select("id, name, status, priority, planned_end, project_id")
-          .eq("assigned_to", user.id)
-          .not("status", "in", "(done,cancelled)")
-          .order("planned_end", { ascending: true, nullsFirst: false })
-          .limit(8),
-        supabase
-          .from("risks")
-          .select("id, title, impact, status, owner")
-          .eq("owner", user.id)
-          .in("status", ["open", "mitigating"])
-          .limit(5),
-        supabase
-          .from("change_requests")
-          .select("id, title, status, raised_by, created_at")
-          .eq("raised_by", user.id)
-          .not("status", "in", "(approved,rejected,closed)")
-          .order("created_at", { ascending: false })
-          .limit(5),
-      ]);
+      const tasksRes: any = await supabase
+        .from("tasks")
+        .select("id, name, planned_end")
+        .eq("assigned_to", user.id)
+        .not("status", "in", "(done,cancelled)")
+        .order("planned_end", { ascending: true, nullsFirst: false })
+        .limit(8);
+      const risksRes: any = await supabase
+        .from("risks")
+        .select("id, title, impact")
+        .eq("owner_id", user.id)
+        .in("status", ["open", "mitigating"])
+        .limit(5);
+      const changesRes: any = await supabase
+        .from("change_requests")
+        .select("id, reference_number, status")
+        .eq("raised_by", user.id)
+        .not("status", "in", "(approved,rejected,closed)")
+        .order("created_at", { ascending: false })
+        .limit(5);
 
       return {
         tasks: tasksRes.data || [],
