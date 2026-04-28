@@ -57,10 +57,15 @@ export function Header({ title, subtitle }: HeaderProps) {
           returnUrl: `${window.location.origin}/billing`,
         },
       });
-      if (error || !data?.url) throw new Error(error?.message || "Could not open billing portal. You may not have an active subscription yet.");
+      const errMsg = (data as any)?.error || error?.message;
+      if (errMsg?.toLowerCase().includes("no subscription")) {
+        toast.info("No active subscription yet. Visit Billing to choose a plan.");
+        return;
+      }
+      if (errMsg || !data?.url) throw new Error(errMsg || "Could not open billing portal");
       window.open(data.url, "_blank");
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || "Could not open billing portal");
     } finally {
       setOpeningPortal(false);
     }
