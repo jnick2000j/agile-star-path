@@ -129,22 +129,28 @@ export function QuickActions() {
           </div>
         ) : (
           <div className="flex gap-2 w-full">
-            {visible.map((a) => (
-              <Button
-                key={a.key}
-                asChild
-                variant="outline"
-                title={a.description}
-                className="flex-1 min-w-0 h-24 p-2 flex-col gap-1.5 hover:border-primary hover:text-primary whitespace-normal"
-              >
-                <Link to={a.href} className="flex flex-col items-center justify-center gap-1.5 w-full h-full">
-                  <a.icon className="h-5 w-5 shrink-0" />
-                  <span className="text-[11px] font-medium leading-tight text-center break-words w-full">
-                    {a.label}
-                  </span>
-                </Link>
-              </Button>
-            ))}
+            {visible.map((a) => {
+              const parts = a.label.split(" ");
+              const line1 = parts[0];
+              const line2 = parts.slice(1).join(" ");
+              return (
+                <Button
+                  key={a.key}
+                  asChild
+                  variant="outline"
+                  title={a.description}
+                  className="flex-1 min-w-0 h-24 p-2 flex-col gap-1.5 hover:border-primary hover:text-primary"
+                >
+                  <Link to={a.href} className="flex flex-col items-center justify-center gap-1.5 w-full h-full">
+                    <a.icon className="h-5 w-5 shrink-0" />
+                    <span className="text-[11px] font-medium leading-tight text-center w-full flex flex-col">
+                      <span>{line1}</span>
+                      <span className="min-h-[1em]">{line2 || "\u00A0"}</span>
+                    </span>
+                  </Link>
+                </Button>
+              );
+            })}
           </div>
         )}
       </CardContent>
