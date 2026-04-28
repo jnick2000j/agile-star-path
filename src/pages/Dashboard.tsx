@@ -11,6 +11,7 @@ import { MyWork } from "@/components/dashboard/MyWork";
 import { PinnedAndRecents } from "@/components/dashboard/PinnedAndRecents";
 import { ActionInbox } from "@/components/dashboard/ActionInbox";
 import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
+import { AskTaskMasterCard } from "@/components/dashboard/AskTaskMasterCard";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,7 @@ export default function Dashboard() {
         {/* MY WORK */}
         <TabsContent value="my-work" className="space-y-6 mt-6">
           <QuickActions />
+          <AskTaskMasterCard />
           <div className="grid gap-6 lg:grid-cols-2">
             <ActionInbox />
             <NotificationsCard />
