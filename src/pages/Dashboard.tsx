@@ -98,11 +98,11 @@ export default function Dashboard() {
         {/* MY WORK */}
         <TabsContent value="my-work" className="space-y-6 mt-6">
           <QuickActions />
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <MyWork />
             <ActionInbox />
             <NotificationsCard />
           </div>
-          <MyWork />
           <PinnedAndRecents />
         </TabsContent>
 
