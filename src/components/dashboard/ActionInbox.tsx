@@ -214,11 +214,11 @@ export function ActionInbox() {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <Inbox className="h-4 w-4" /> Action Inbox
-          {counts.all > 0 && <Badge variant="secondary" className="font-normal">{counts.all}</Badge>}
         </CardTitle>
+        {counts.all > 0 && <Badge variant="secondary" className="font-normal">{counts.all}</Badge>}
       </CardHeader>
       <CardContent>
         {isLoading ? (
