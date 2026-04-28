@@ -141,6 +141,8 @@ export default function Dashboard() {
             />
           </div>
 
+          <StatusIndicators />
+
           <div className="grid gap-6 lg:grid-cols-2">
             <RiskSummary />
             <UpcomingMilestones />
@@ -151,7 +153,6 @@ export default function Dashboard() {
             <ChangeManagementSummary />
           </div>
 
-          <StatusIndicators />
           <HelpdeskUsageCard />
         </TabsContent>
       </Tabs>
