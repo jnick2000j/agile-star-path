@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { OrganizationProvider } from "@/hooks/useOrganization";
 import { PermissionsProvider } from "@/hooks/usePermissions";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ModuleGate } from "@/components/billing/ModuleGate";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
