@@ -8,7 +8,7 @@ import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
-import { PinnedAndRecents } from "@/components/dashboard/PinnedAndRecents";
+
 import { ActionInbox } from "@/components/dashboard/ActionInbox";
 import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
 import { AskTaskMasterCard } from "@/components/dashboard/AskTaskMasterCard";
