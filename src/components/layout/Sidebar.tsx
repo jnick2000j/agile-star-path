@@ -31,6 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useVertical } from "@/hooks/useVertical";
 import { useDashboardPrefs } from "@/hooks/useDashboardPrefs";
+import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 
 interface NavItem {
   label: string;
@@ -44,6 +45,7 @@ export function Sidebar() {
   const location = useLocation();
   const { user, userRole } = useAuth();
   const { hasModule, term } = useVertical();
+  const { hasFeature, loading: featuresLoading, features } = usePlanFeatures();
   const { prefs, update } = useDashboardPrefs();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [hasStakeholderAccess, setHasStakeholderAccess] = useState(false);
@@ -154,8 +156,26 @@ export function Sidebar() {
     { label: "Automations", icon: Workflow, href: "/admin/automations", module: "automations" },
   ];
 
-  // Filter navigation by vertical's enabled modules. Items without a `module` key always show.
-  const navigation = allNavigation.filter((item) => !item.module || hasModule(item.module));
+  // Filter navigation by vertical's enabled modules + org-admin module toggles.
+  // Items without a `module` key always show. Module toggles default ON when not yet loaded
+  // or when no override exists, so the sidebar is never accidentally empty.
+  const moduleFeatureMap: Record<string, string> = {
+    programmes: "feature_module_programmes",
+    projects: "feature_module_projects",
+    products: "feature_module_products",
+  };
+  const isModuleEnabled = (moduleKey?: string) => {
+    if (!moduleKey) return true;
+    if (!hasModule(moduleKey)) return false;
+    const featureKey = moduleFeatureMap[moduleKey];
+    if (!featureKey) return true;
+    if (featuresLoading) return true;
+    const v = features[featureKey];
+    // default ON when undefined
+    if (v === undefined || v === null) return true;
+    return v === true || v === "true";
+  };
+  const navigation = allNavigation.filter((item) => isModuleEnabled(item.module));
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
