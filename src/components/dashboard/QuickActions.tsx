@@ -135,11 +135,13 @@ export function QuickActions() {
                 asChild
                 variant="outline"
                 title={a.description}
-                className="h-20 w-20 shrink-0 p-1.5 flex-col gap-1 hover:border-primary hover:text-primary"
+                className="h-24 w-24 shrink-0 p-2 flex-col gap-1.5 hover:border-primary hover:text-primary whitespace-normal"
               >
-                <Link to={a.href}>
-                  <a.icon className="h-5 w-5" />
-                  <span className="text-[11px] font-medium leading-tight text-center">{a.label}</span>
+                <Link to={a.href} className="flex flex-col items-center justify-center gap-1.5 w-full h-full">
+                  <a.icon className="h-5 w-5 shrink-0" />
+                  <span className="text-[11px] font-medium leading-tight text-center break-words w-full">
+                    {a.label}
+                  </span>
                 </Link>
               </Button>
             ))}
