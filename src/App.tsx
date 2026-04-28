@@ -121,21 +121,21 @@ const App = () => (
             <Route path="/billing/addons" element={<ProtectedRoute><AddonsCatalog /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/programmes" element={<ProtectedRoute><Programmes /></ProtectedRoute>} />
-            <Route path="/programmes/details" element={<ProtectedRoute><ProgrammeDetails /></ProtectedRoute>} />
-            <Route path="/programmes/blueprint" element={<ProtectedRoute><ProgrammeBlueprint /></ProtectedRoute>} />
-            <Route path="/programmes/tranches" element={<ProtectedRoute><ProgrammeTranches /></ProtectedRoute>} />
-            <Route path="/programmes/definition" element={<ProtectedRoute><ProgrammeDefinition /></ProtectedRoute>} />
-            <Route path="/programmes/success-plan" element={<ProtectedRoute><SuccessPlan /></ProtectedRoute>} />
-            <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-            <Route path="/projects/details" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
-            <Route path="/projects/briefs" element={<ProtectedRoute><ProjectBriefs /></ProtectedRoute>} />
-            <Route path="/projects/work-packages" element={<ProtectedRoute><WorkPackages /></ProtectedRoute>} />
-            <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-            <Route path="/products/details" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
-            <Route path="/products/roadmap" element={<ProtectedRoute><ProductRoadmap /></ProtectedRoute>} />
-            <Route path="/products/features" element={<ProtectedRoute><FeatureBacklog /></ProtectedRoute>} />
-            <Route path="/products/dependencies" element={<ProtectedRoute><FeatureDependencies /></ProtectedRoute>} />
+            <Route path="/programmes" element={<ProtectedRoute><ModuleGate feature="feature_module_programmes" title="Programmes" description="The Programmes module is disabled for this organization. An admin can re-enable it from Settings → General → Modules."><Programmes /></ModuleGate></ProtectedRoute>} />
+            <Route path="/programmes/details" element={<ProtectedRoute><ModuleGate feature="feature_module_programmes" title="Programmes" description="The Programmes module is disabled for this organization."><ProgrammeDetails /></ModuleGate></ProtectedRoute>} />
+            <Route path="/programmes/blueprint" element={<ProtectedRoute><ModuleGate feature="feature_module_programmes" title="Programmes" description="The Programmes module is disabled for this organization."><ProgrammeBlueprint /></ModuleGate></ProtectedRoute>} />
+            <Route path="/programmes/tranches" element={<ProtectedRoute><ModuleGate feature="feature_module_programmes" title="Programmes" description="The Programmes module is disabled for this organization."><ProgrammeTranches /></ModuleGate></ProtectedRoute>} />
+            <Route path="/programmes/definition" element={<ProtectedRoute><ModuleGate feature="feature_module_programmes" title="Programmes" description="The Programmes module is disabled for this organization."><ProgrammeDefinition /></ModuleGate></ProtectedRoute>} />
+            <Route path="/programmes/success-plan" element={<ProtectedRoute><ModuleGate feature="feature_module_programmes" title="Programmes" description="The Programmes module is disabled for this organization."><SuccessPlan /></ModuleGate></ProtectedRoute>} />
+            <Route path="/projects" element={<ProtectedRoute><ModuleGate feature="feature_module_projects" title="Projects" description="The Projects module is disabled for this organization. An admin can re-enable it from Settings → General → Modules."><Projects /></ModuleGate></ProtectedRoute>} />
+            <Route path="/projects/details" element={<ProtectedRoute><ModuleGate feature="feature_module_projects" title="Projects" description="The Projects module is disabled for this organization."><ProjectDetails /></ModuleGate></ProtectedRoute>} />
+            <Route path="/projects/briefs" element={<ProtectedRoute><ModuleGate feature="feature_module_projects" title="Projects" description="The Projects module is disabled for this organization."><ProjectBriefs /></ModuleGate></ProtectedRoute>} />
+            <Route path="/projects/work-packages" element={<ProtectedRoute><ModuleGate feature="feature_module_projects" title="Projects" description="The Projects module is disabled for this organization."><WorkPackages /></ModuleGate></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization. An admin can re-enable it from Settings → General → Modules."><Products /></ModuleGate></ProtectedRoute>} />
+            <Route path="/products/details" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><ProductDetails /></ModuleGate></ProtectedRoute>} />
+            <Route path="/products/roadmap" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><ProductRoadmap /></ModuleGate></ProtectedRoute>} />
+            <Route path="/products/features" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><FeatureBacklog /></ModuleGate></ProtectedRoute>} />
+            <Route path="/products/dependencies" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><FeatureDependencies /></ModuleGate></ProtectedRoute>} />
             <Route path="/planning/backlog" element={<ProtectedRoute><UnifiedBacklog /></ProtectedRoute>} />
             <Route path="/planning/sprints" element={<ProtectedRoute><SprintPlanning /></ProtectedRoute>} />
             <Route path="/registers" element={<ProtectedRoute><Registers /></ProtectedRoute>} />
