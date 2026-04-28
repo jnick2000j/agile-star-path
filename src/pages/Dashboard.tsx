@@ -77,6 +77,10 @@ export default function Dashboard() {
         </div>
       )}
 
+      <div className="mb-6">
+        <AskTaskMasterCard compact />
+      </div>
+
       <Tabs
         value={prefs.default_tab}
         onValueChange={(v) => update({ default_tab: v })}
