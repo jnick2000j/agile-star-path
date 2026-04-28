@@ -128,17 +128,18 @@ export function QuickActions() {
             No quick actions pinned. Click <span className="font-medium">Customize</span> to add some.
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {visible.map((a) => (
               <Button
                 key={a.key}
                 asChild
                 variant="outline"
-                className="h-auto flex-col gap-2 py-4 hover:border-primary hover:text-primary"
+                size="sm"
+                className="h-7 px-2.5 text-xs gap-1.5 hover:border-primary hover:text-primary"
               >
                 <Link to={a.href}>
-                  <a.icon className="h-5 w-5" />
-                  <span className="text-xs font-medium text-center leading-tight">{a.label}</span>
+                  <a.icon className="h-3.5 w-3.5" />
+                  <span className="font-medium">{a.label}</span>
                 </Link>
               </Button>
             ))}
