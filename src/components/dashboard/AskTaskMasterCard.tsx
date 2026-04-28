@@ -21,7 +21,7 @@ const GREETING: Msg = {
   content: "👋 Hi! I'm **the Task Master**. What do you want to do today? Pick a suggestion or type your own question.",
 };
 
-export function AskTaskMasterCard() {
+export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {}) {
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -127,44 +127,51 @@ export function AskTaskMasterCard() {
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Sparkles className="h-4 w-4 text-primary" />
+    <Card className={compact ? "p-3" : "p-6"}>
+      <div className={`flex items-center gap-2 ${compact ? "mb-2" : "mb-3"}`}>
+        <div className={`${compact ? "h-6 w-6" : "h-8 w-8"} rounded-lg bg-primary/10 flex items-center justify-center`}>
+          <Sparkles className={`${compact ? "h-3.5 w-3.5" : "h-4 w-4"} text-primary`} />
         </div>
-        <div>
-          <h3 className="font-semibold">Ask the Task Master</h3>
-          <p className="text-xs text-muted-foreground">Your AI guide to PRINCE2, MSP, Agile and the platform</p>
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-semibold ${compact ? "text-sm" : ""}`}>Ask the Task Master</h3>
+          {!compact && (
+            <p className="text-xs text-muted-foreground">Your AI guide to PRINCE2, MSP, Agile and the platform</p>
+          )}
         </div>
-      </div>
-
-      <div
-        ref={scrollRef}
-        className="h-64 overflow-y-auto rounded-md border bg-muted/20 p-3 space-y-3 mb-3"
-      >
-        {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-            <div
-              className={
-                m.role === "user"
-                  ? "max-w-[85%] rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
-                  : "max-w-[90%] rounded-lg bg-background border px-3 py-2 text-sm prose prose-sm dark:prose-invert prose-p:my-1 prose-ul:my-1 max-w-none"
-              }
-            >
-              {m.role === "assistant" ? (
-                <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
-              ) : (
-                m.content
-              )}
-            </div>
-          </div>
-        ))}
-        {streaming && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" /> Thinking…
-          </div>
+        {compact && (
+          <p className="text-xs text-muted-foreground hidden sm:block">What do you want to do today?</p>
         )}
       </div>
+
+      {(!compact || messages.length > 1) && (
+        <div
+          ref={scrollRef}
+          className={`${compact ? "max-h-48" : "h-64"} overflow-y-auto rounded-md border bg-muted/20 p-3 space-y-3 mb-3`}
+        >
+          {messages.map((m, i) => (
+            <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
+              <div
+                className={
+                  m.role === "user"
+                    ? "max-w-[85%] rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
+                    : "max-w-[90%] rounded-lg bg-background border px-3 py-2 text-sm prose prose-sm dark:prose-invert prose-p:my-1 prose-ul:my-1 max-w-none"
+                }
+              >
+                {m.role === "assistant" ? (
+                  <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
+                ) : (
+                  m.content
+                )}
+              </div>
+            </div>
+          ))}
+          {streaming && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" /> Thinking…
+            </div>
+          )}
+        </div>
+      )}
 
       {messages.length <= 1 && (
         <div className="flex flex-wrap gap-2 mb-3">
