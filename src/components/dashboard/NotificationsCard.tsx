@@ -94,17 +94,10 @@ export function NotificationsCard() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            Notifications
-          </CardTitle>
-          {unreadCount > 0 && (
-            <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
-              {unreadCount} new
-            </Badge>
-          )}
-        </div>
+        <CardTitle className="text-base font-semibold flex items-center gap-2">
+          <Bell className="h-4 w-4" />
+          Notifications
+        </CardTitle>
         <div className="flex items-center gap-1">
           {unreadCount > 0 && (
             <Button
@@ -123,9 +116,19 @@ export function NotificationsCard() {
               <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Link>
           </Button>
+          {notifications.length > 0 && (
+            <Badge variant="secondary" className="font-normal ml-1">
+              {notifications.length}
+            </Badge>
+          )}
+          {unreadCount > 0 && (
+            <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+              {unreadCount} new
+            </Badge>
+          )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 max-h-[180px] overflow-y-auto">
         {isLoading ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Loading…
