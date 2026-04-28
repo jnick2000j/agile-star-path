@@ -214,11 +214,11 @@ export function ActionInbox() {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <Inbox className="h-4 w-4" /> Action Inbox
-          {counts.all > 0 && <Badge variant="secondary" className="font-normal">{counts.all}</Badge>}
         </CardTitle>
+        {counts.all > 0 && <Badge variant="secondary" className="font-normal">{counts.all}</Badge>}
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -240,7 +240,7 @@ export function ActionInbox() {
             </TabsList>
 
             {(["all", "rfi", "submittal", "punch", "change"] as const).map((k) => (
-              <TabsContent key={k} value={k} className="space-y-2 mt-0">
+              <TabsContent key={k} value={k} className="space-y-2 mt-0 max-h-[240px] overflow-y-auto pr-1">
                 {filterByKind(k).map((item) => {
                   const meta = KIND_META[item.kind];
                   const overdue = item.due_date && isPast(new Date(item.due_date));
