@@ -76,15 +76,17 @@ export function MyWork() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           My Work
+        </CardTitle>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild className="h-8">
+            <Link to="/tasks">View all <ChevronRight className="h-3.5 w-3.5 ml-1" /></Link>
+          </Button>
           {totalCount > 0 && (
             <Badge variant="secondary" className="font-normal">{totalCount}</Badge>
           )}
-        </CardTitle>
-        <Button variant="ghost" size="sm" asChild className="h-8">
-          <Link to="/tasks">View all <ChevronRight className="h-3.5 w-3.5 ml-1" /></Link>
-        </Button>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 max-h-[160px] overflow-y-auto">
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-6 text-center">Loading…</div>
         ) : totalCount === 0 ? (
