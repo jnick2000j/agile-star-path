@@ -173,7 +173,7 @@ export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {
         </div>
       )}
 
-      {messages.length <= 1 && (
+      {messages.length <= 1 && !compact && (
         <div className="flex flex-wrap gap-2 mb-3">
           {SUGGESTIONS.map((s) => (
             <Button
