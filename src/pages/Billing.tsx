@@ -200,10 +200,15 @@ export default function Billing() {
           returnUrl: `${window.location.origin}/billing`,
         },
       });
-      if (error || !data?.url) throw new Error(error?.message || "Could not open portal");
+      const errMsg = (data as any)?.error || error?.message;
+      if (errMsg?.toLowerCase().includes("no subscription")) {
+        toast.info("No active subscription yet. Choose a plan to get started.");
+        return;
+      }
+      if (errMsg || !data?.url) throw new Error(errMsg || "Could not open portal");
       window.open(data.url, "_blank");
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error(e.message || "Could not open billing portal");
     } finally {
       setOpeningPortal(false);
     }
