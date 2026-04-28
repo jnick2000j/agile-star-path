@@ -103,7 +103,7 @@ export default function Dashboard() {
             <ActionInbox />
             <NotificationsCard />
           </div>
-          <PinnedAndRecents />
+          
         </TabsContent>
 
         {/* PORTFOLIO (the original dashboard) */}
