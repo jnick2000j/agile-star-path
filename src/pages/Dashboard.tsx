@@ -94,7 +94,6 @@ export default function Dashboard() {
         {/* MY WORK */}
         <TabsContent value="my-work" className="space-y-6 mt-6">
           <QuickActions />
-          <AskTaskMasterCard />
           <div className="grid gap-6 lg:grid-cols-2">
             <ActionInbox />
             <NotificationsCard />
