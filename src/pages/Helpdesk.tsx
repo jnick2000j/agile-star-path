@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket, Wrench } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket, Wrench, ToggleLeft } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import TicketIntake from "@/pages/TicketIntake";
 import EmailIntake from "@/pages/EmailIntake";
