@@ -153,8 +153,8 @@ Deno.serve(async (req) => {
       await supabase.from("kb_search_log").insert({
         organization_id: body.organization_id,
         query: body.query.slice(0, 500),
-        result_count: ranked.length,
-        source: body.context || "ai_suggest",
+        surface: body.context || "ai_suggest",
+        matched_article_ids: ranked.map((a) => a.id),
         ticket_id: body.ticket_id || null,
         user_id: claims.claims.sub,
       });
