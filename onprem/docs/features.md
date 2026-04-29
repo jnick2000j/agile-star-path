@@ -37,18 +37,23 @@ identical between cloud and on-prem builds.
 
 End-to-end ticket lifecycle aligned with ITIL 4 + HDI + KCS.
 
-| Capability         | Notes |
-|--------------------|-------|
-| Tickets            | Incident / Service Request / Problem / Question / Support |
-| AI Ticket Intake   | Conversation → categorised ticket, suggested KB articles |
-| SLA policies       | Response & resolution targets per priority/type; pause on customer-pending |
-| Helpdesk workflows | Visual rule editor: triggers → conditions → actions → approvals |
-| Approval triads    | Technical / Business / Security sign-off slots |
-| Inbound email      | Tickets/comments via the helpdesk email address |
-| CSAT               | Survey on resolution; feeds the dashboard |
+| Capability                | Notes |
+|---------------------------|-------|
+| Tickets                   | Incident / Service Request / Problem / Question / Support |
+| Sub-tickets / parent      | Drag & drop reparenting, bulk parent set, cascade delete with reparent |
+| AI Ticket Intake          | Conversation → categorised ticket, suggested KB articles |
+| SLA policies              | Response & resolution targets per priority/type; pause on customer-pending |
+| Helpdesk workflows        | Visual rule editor: triggers → conditions → actions → approvals |
+| Approval chains           | Sequential approvers, technical/business/security triad slots |
+| Inbound email             | Tickets/comments via the helpdesk email address |
+| Macros                    | Pre-canned replies and bulk-action templates |
+| CSAT                      | Survey on resolution; feeds the dashboard |
+| Service Requests tab      | Dedicated agent view filtered to service-request tickets |
+| Module toggles            | Per-org enable/disable for Problem Mgmt, CMDB, Service Catalog, Status Page, Major Incident Management |
 
 **Edge functions**: `helpdesk-inbound-email`, `helpdesk-notify`,
-`helpdesk-workflow-runner`, `helpdesk-workflow-approve`, `ai-ticket-intake`.
+`helpdesk-workflow-runner`, `helpdesk-workflow-approve`, `ai-ticket-intake`,
+`sla-escalation-engine`, `sla-escalation-scanner`.
 
 **Operator notes**:
 - Inbound email requires an SMTP gateway that can forward to the
@@ -57,6 +62,45 @@ End-to-end ticket lifecycle aligned with ITIL 4 + HDI + KCS.
   on-prem operators provide their own.
 - The workflow runner runs on Postgres triggers + a 1-minute cron tick. If
   workflows appear "stuck", check `docker compose logs edge | grep workflow`.
+- **Module toggles** are stored in `organization_module_toggles` and gate the
+  Problem, CMDB, Service Catalog, Status Page and Major Incident sidebar
+  entries. Org admins toggle modules from **Helpdesk → Admin → Modules**;
+  platform admins can override any org from **Platform Admin → Module
+  Toggles**. The same row drives the in-app sidebar visibility.
+
+---
+
+## Service Catalog (ITSM)
+
+Self-service ordering of standardised services with form fields, approval
+chains, sequential fulfillment tasks and notifications.
+
+| Capability                       | Notes |
+|----------------------------------|-------|
+| Categories                       | Color + lucide icon picker (Server, Printer, Laptop, Database, …) |
+| Catalog items                    | Name, description, default priority, cost (USD), SLA hours, active flag |
+| Custom request fields            | text, textarea, select, multiselect, number, checkbox, date, user-picker |
+| Approval policies                | None / Requester's manager / Specific users (sequential) |
+| Sequential fulfillment tasks     | Each item can predefine ordered tasks; on approval the first task spawns as a child ticket and the next is auto-spawned when the prior one is resolved/closed |
+| Per-task assignee                | Admin picks the assignee per task at the catalog item level |
+| Notifications                    | First approver notified on submission; next approver notified on advance; requester notified on final decision and on each fulfillment ticket creation |
+| Activity audit                   | `catalog_task_spawned`, approval decisions and submissions logged in `helpdesk_ticket_activity` |
+| Public browse                    | `/catalog` with category filter + icons |
+| Admin                            | `/catalog/admin` and Helpdesk → Admin → Service Catalog |
+
+**Tables**: `service_catalog_categories` (with `icon` column),
+`service_catalog_items`, `service_catalog_item_fields`,
+`service_catalog_item_tasks`, `service_catalog_request_data`,
+`service_catalog_request_approvals`.
+
+**DB function/trigger**: `helpdesk_spawn_next_catalog_task`,
+`trg_helpdesk_catalog_task_close` (fires on `helpdesk_tickets` resolved/closed).
+
+**Operator notes**:
+- The trigger is idempotent — it tracks `metadata->>catalog_task_id` on each
+  child ticket to determine the next step.
+- Approver lookups query `user_organization_access` then `profiles` (no
+  PostgREST FK between the two — fetch is performed in two steps).
 
 ---
 
