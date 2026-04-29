@@ -112,6 +112,7 @@ export function Sidebar() {
         { label: "SLA & Escalation", href: "/support/sla" },
         { label: "Analytics", href: "/support/analytics" },
         { label: "CSAT Surveys", href: "/support/csat" },
+        { label: "Intake Channels", href: "/support/intake" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },
