@@ -715,6 +715,156 @@ export type Database = {
           },
         ]
       }
+      asset_contracts: {
+        Row: {
+          auto_renew: boolean
+          contract_number: string | null
+          contract_type: string
+          cost: number | null
+          cost_currency: string | null
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          renewal_date: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          auto_renew?: boolean
+          contract_number?: string | null
+          contract_type?: string
+          cost?: number | null
+          cost_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          renewal_date?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          auto_renew?: boolean
+          contract_number?: string | null
+          contract_type?: string
+          cost?: number | null
+          cost_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          renewal_date?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
+      }
+      assets: {
+        Row: {
+          asset_tag: string
+          assigned_to_user_id: string | null
+          category: string
+          ci_id: string | null
+          created_at: string
+          created_by: string | null
+          department: string | null
+          end_of_life_at: string | null
+          id: string
+          location: string | null
+          manufacturer: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          purchase_cost: number | null
+          purchase_date: string | null
+          serial_number: string | null
+          status: string
+          updated_at: string
+          vendor: string | null
+          warranty_expires_at: string | null
+        }
+        Insert: {
+          asset_tag: string
+          assigned_to_user_id?: string | null
+          category?: string
+          ci_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          end_of_life_at?: string | null
+          id?: string
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          vendor?: string | null
+          warranty_expires_at?: string | null
+        }
+        Update: {
+          asset_tag?: string
+          assigned_to_user_id?: string | null
+          category?: string
+          ci_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          end_of_life_at?: string | null
+          id?: string
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          vendor?: string | null
+          warranty_expires_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "configuration_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log_retention_policies: {
         Row: {
           auto_purge_enabled: boolean
@@ -6123,6 +6273,54 @@ export type Database = {
           },
         ]
       }
+      license_assignments: {
+        Row: {
+          asset_id: string | null
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          license_id: string
+          notes: string | null
+          organization_id: string
+          user_id: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          license_id: string
+          notes?: string | null
+          organization_id: string
+          user_id?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          license_id?: string
+          notes?: string | null
+          organization_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_assignments_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_assignments_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "software_licenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       major_incident_tickets: {
         Row: {
           created_at: string
@@ -9765,6 +9963,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      software_licenses: {
+        Row: {
+          auto_renew: boolean
+          cost: number | null
+          cost_currency: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          license_key: string | null
+          license_type: string
+          name: string
+          notes: string | null
+          organization_id: string
+          purchase_date: string | null
+          software_name: string
+          status: string
+          total_seats: number
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          auto_renew?: boolean
+          cost?: number | null
+          cost_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          license_key?: string | null
+          license_type?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          purchase_date?: string | null
+          software_name: string
+          status?: string
+          total_seats?: number
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          auto_renew?: boolean
+          cost?: number | null
+          cost_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          license_key?: string | null
+          license_type?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          purchase_date?: string | null
+          software_name?: string
+          status?: string
+          total_seats?: number
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
       }
       sprints: {
         Row: {
