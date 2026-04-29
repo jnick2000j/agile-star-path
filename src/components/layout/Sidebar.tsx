@@ -113,6 +113,7 @@ export function Sidebar() {
         { label: "Analytics", href: "/support/analytics" },
         { label: "CSAT Surveys", href: "/support/csat" },
         { label: "Intake Channels", href: "/support/intake" },
+        { label: "Email-to-Ticket", href: "/support/email-intake" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },

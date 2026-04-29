@@ -91,6 +91,7 @@ import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
 import CSATDashboard from "./pages/CSATDashboard";
 import CSATSurvey from "./pages/CSATSurvey";
 import TicketIntake from "./pages/TicketIntake";
+import EmailIntake from "./pages/EmailIntake";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -213,6 +214,7 @@ const App = () => (
             <Route path="/support/csat" element={<ProtectedRoute><CSATDashboard /></ProtectedRoute>} />
             <Route path="/csat/:token" element={<CSATSurvey />} />
             <Route path="/support/intake" element={<ProtectedRoute><TicketIntake /></ProtectedRoute>} />
+            <Route path="/support/email-intake" element={<ProtectedRoute><EmailIntake /></ProtectedRoute>} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />

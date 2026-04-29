@@ -4447,6 +4447,71 @@ export type Database = {
           },
         ]
       }
+      helpdesk_email_inboxes: {
+        Row: {
+          auto_reply_body: string | null
+          auto_reply_enabled: boolean
+          auto_reply_subject: string | null
+          created_at: string
+          created_by: string | null
+          default_assignee_id: string | null
+          default_category: string | null
+          default_channel_id: string | null
+          default_priority: string
+          display_name: string | null
+          email_address: string
+          id: string
+          is_active: boolean
+          organization_id: string
+          spam_filter_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_reply_body?: string | null
+          auto_reply_enabled?: boolean
+          auto_reply_subject?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_category?: string | null
+          default_channel_id?: string | null
+          default_priority?: string
+          display_name?: string | null
+          email_address: string
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          spam_filter_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_reply_body?: string | null
+          auto_reply_enabled?: boolean
+          auto_reply_subject?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_category?: string | null
+          default_channel_id?: string | null
+          default_priority?: string
+          display_name?: string | null
+          email_address?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          spam_filter_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_email_inboxes_default_channel_id_fkey"
+            columns: ["default_channel_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_intake_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_email_log: {
         Row: {
           body_html: string | null
@@ -4512,6 +4577,92 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_email_messages: {
+        Row: {
+          attachments: Json
+          body_html: string | null
+          body_text: string | null
+          cc_emails: string[] | null
+          created_at: string
+          direction: string
+          error_message: string | null
+          from_email: string
+          from_name: string | null
+          id: string
+          in_reply_to: string | null
+          inbox_id: string | null
+          is_auto_reply: boolean
+          is_spam: boolean
+          message_id: string | null
+          organization_id: string
+          processing_status: string
+          raw_headers: Json | null
+          received_at: string
+          references_ids: string[] | null
+          subject: string | null
+          ticket_id: string | null
+          to_email: string | null
+        }
+        Insert: {
+          attachments?: Json
+          body_html?: string | null
+          body_text?: string | null
+          cc_emails?: string[] | null
+          created_at?: string
+          direction?: string
+          error_message?: string | null
+          from_email: string
+          from_name?: string | null
+          id?: string
+          in_reply_to?: string | null
+          inbox_id?: string | null
+          is_auto_reply?: boolean
+          is_spam?: boolean
+          message_id?: string | null
+          organization_id: string
+          processing_status?: string
+          raw_headers?: Json | null
+          received_at?: string
+          references_ids?: string[] | null
+          subject?: string | null
+          ticket_id?: string | null
+          to_email?: string | null
+        }
+        Update: {
+          attachments?: Json
+          body_html?: string | null
+          body_text?: string | null
+          cc_emails?: string[] | null
+          created_at?: string
+          direction?: string
+          error_message?: string | null
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          in_reply_to?: string | null
+          inbox_id?: string | null
+          is_auto_reply?: boolean
+          is_spam?: boolean
+          message_id?: string | null
+          organization_id?: string
+          processing_status?: string
+          raw_headers?: Json | null
+          received_at?: string
+          references_ids?: string[] | null
+          subject?: string | null
+          ticket_id?: string | null
+          to_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_email_messages_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_email_inboxes"
             referencedColumns: ["id"]
           },
         ]
