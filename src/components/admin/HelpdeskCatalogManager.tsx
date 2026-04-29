@@ -16,14 +16,14 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Tabs, TabsContent, TabsList, TabsTrigger,
-} from "@/components/ui/tabs";
+  Collapsible, CollapsibleContent, CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Plus, Trash2, Pencil, List as ListIcon, Server, AppWindow, Users, Laptop,
-  Wrench, Building, Briefcase,
+  Wrench, Building, Briefcase, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
