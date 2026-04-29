@@ -565,6 +565,13 @@ export default function Helpdesk() {
           onCreated={() => refetch()}
         />
 
+        <BulkParentDialog
+          open={bulkParentOpen}
+          onOpenChange={setBulkParentOpen}
+          selectedIds={Array.from(selectedIds)}
+          onConfirm={(parentId) => bulkReparent(parentId)}
+        />
+
         {isAdmin && (
           <Sheet open={catalogOpen} onOpenChange={setCatalogOpen}>
             <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
