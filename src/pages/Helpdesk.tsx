@@ -216,6 +216,12 @@ export default function Helpdesk() {
               </Select>
             </div>
             <div className="flex gap-2">
+              {isAdmin && (
+                <Button variant="outline" onClick={() => setCatalogOpen(true)}>
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Manage Catalog
+                </Button>
+              )}
               <Button variant="outline" onClick={() => navigate("/support/portal")}>
                 <Mail className="h-4 w-4 mr-2" />
                 Open Portal
