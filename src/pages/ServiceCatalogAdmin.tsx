@@ -69,12 +69,13 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
     enabled: !!currentOrganization?.id,
   });
 
-  const handleSaveCategory = async (form: { name: string; description: string; color: string }) => {
+  const handleSaveCategory = async (form: { name: string; description: string; color: string; icon: string | null }) => {
     if (!currentOrganization?.id) return;
     const payload = {
       name: form.name,
       description: form.description || null,
       color: form.color || "#64748b",
+      icon: form.icon || null,
     };
     const { error } = editingCategory
       ? await supabase.from("service_catalog_categories").update(payload).eq("id", editingCategory.id)
