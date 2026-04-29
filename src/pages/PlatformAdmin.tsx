@@ -40,6 +40,7 @@ import { PlatformAIProviderSettings } from "@/components/admin/PlatformAIProvide
 import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
+import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
