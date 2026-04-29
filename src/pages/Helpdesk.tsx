@@ -369,15 +369,17 @@ export default function Helpdesk() {
             ]}
           />
           <Tabs defaultValue="tickets" className="space-y-6">
-            <TabsList className="flex flex-wrap h-auto">
-              <TabsTrigger value="tickets" className="gap-1"><Ticket className="h-4 w-4" /> Tickets</TabsTrigger>
-              {isAdmin && <TabsTrigger value="catalog" className="gap-1"><Package className="h-4 w-4" /> Catalog</TabsTrigger>}
-              {isAdmin && <TabsTrigger value="intake" className="gap-1"><Globe className="h-4 w-4" /> Intake Channels</TabsTrigger>}
-              {isAdmin && <TabsTrigger value="email" className="gap-1"><AtSign className="h-4 w-4" /> Email-to-Ticket</TabsTrigger>}
-              {isAdmin && <TabsTrigger value="macros" className="gap-1"><FileText className="h-4 w-4" /> Macros</TabsTrigger>}
-              {isAdmin && <TabsTrigger value="sla" className="gap-1"><AlarmClock className="h-4 w-4" /> SLA Escalation</TabsTrigger>}
-              {isAdmin && <TabsTrigger value="approvals" className="gap-1"><ShieldCheck className="h-4 w-4" /> Approvals</TabsTrigger>}
-            </TabsList>
+            <div className="border-b overflow-x-auto">
+              <TabsList className="w-full h-auto p-0 bg-transparent justify-start gap-1 rounded-none">
+                <TabsTrigger value="tickets" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><Ticket className="h-4 w-4" /> Tickets</TabsTrigger>
+                {isAdmin && <TabsTrigger value="catalog" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><Package className="h-4 w-4" /> Catalog</TabsTrigger>}
+                {isAdmin && <TabsTrigger value="intake" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><Globe className="h-4 w-4" /> Intake Channels</TabsTrigger>}
+                {isAdmin && <TabsTrigger value="email" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><AtSign className="h-4 w-4" /> Email-to-Ticket</TabsTrigger>}
+                {isAdmin && <TabsTrigger value="macros" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><FileText className="h-4 w-4" /> Macros</TabsTrigger>}
+                {isAdmin && <TabsTrigger value="sla" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><AlarmClock className="h-4 w-4" /> SLA Escalation</TabsTrigger>}
+                {isAdmin && <TabsTrigger value="approvals" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><ShieldCheck className="h-4 w-4" /> Approvals</TabsTrigger>}
+              </TabsList>
+            </div>
 
             <TabsContent value="tickets" className="space-y-6 mt-0">
           {/* Stats */}
