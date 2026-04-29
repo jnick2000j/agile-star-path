@@ -88,6 +88,8 @@ import HelpMyTickets from "./pages/HelpMyTickets";
 import SLAManagement from "./pages/SLAManagement";
 import AssetManagement from "./pages/AssetManagement";
 import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
+import CSATDashboard from "./pages/CSATDashboard";
+import CSATSurvey from "./pages/CSATSurvey";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
