@@ -39,6 +39,7 @@ type ItemRow = {
   name: string;
   description: string | null;
   is_active: boolean;
+  parent_item_id: string | null;
   metadata?: {
     default_category?: string;
     default_priority?: string;
