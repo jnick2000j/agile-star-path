@@ -334,10 +334,45 @@ export default function Helpdesk() {
                   const sla = slaStateOf(t);
                   const slaCfg = SLA_BADGE[sla];
                   const isOpen = expanded[t.id] ?? true;
+                  const isDragging = dragId === t.id;
+                  const isDropTarget = dropTargetId === t.id && dragId && dragId !== t.id;
                   return (
                     <TableRow
                       key={t.id}
-                      className={cn("cursor-pointer", depth > 0 && "bg-muted/20")}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData("text/plain", t.id);
+                        setDragId(t.id);
+                      }}
+                      onDragEnd={() => {
+                        setDragId(null);
+                        setDropTargetId(null);
+                      }}
+                      onDragOver={(e) => {
+                        if (!dragId || dragId === t.id) return;
+                        // Block dropping onto own descendant
+                        if (descendantsOf(dragId).has(t.id)) return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        if (dropTargetId !== t.id) setDropTargetId(t.id);
+                      }}
+                      onDragLeave={() => {
+                        if (dropTargetId === t.id) setDropTargetId(null);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const draggedId = e.dataTransfer.getData("text/plain") || dragId;
+                        setDropTargetId(null);
+                        setDragId(null);
+                        if (draggedId && draggedId !== t.id) reparent(draggedId, t.id);
+                      }}
+                      className={cn(
+                        "cursor-pointer transition-colors",
+                        depth > 0 && "bg-muted/20",
+                        isDragging && "opacity-40",
+                        isDropTarget && "ring-2 ring-inset ring-primary bg-primary/5",
+                      )}
                       onClick={() => navigate(`/support/tickets/${t.id}`)}
                     >
                       <TableCell className="font-mono text-xs">
