@@ -497,6 +497,7 @@ export default function ChangeManagementDetail() {
                 <TabsTrigger value="approvals">Approvals ({approvals.length})</TabsTrigger>
                 <TabsTrigger value="activity">Activity ({activity.length})</TabsTrigger>
                 <TabsTrigger value="automations">Automations</TabsTrigger>
+                <TabsTrigger value="audit">Audit</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
