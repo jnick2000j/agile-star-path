@@ -22,6 +22,8 @@ import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
 import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
 import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
+import { BulkParentDialog } from "@/components/helpdesk/BulkParentDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn, formatLabel } from "@/lib/utils";
 import {
