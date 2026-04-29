@@ -1,10 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { AIIntakeChat } from "@/components/intake/AIIntakeChat";
 
 export default function PortalNewTicket() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const service = params.get("service");
+
+  const greeting = service
+    ? `Hi! You're requesting **${service}** from the Service Catalog. Tell me a bit about why you need it (e.g. who it's for, when, any specifics) and I'll draft the request for you.`
+    : "Hi! I can help you raise a support ticket or request a service (new equipment, access, software, etc.). In a sentence or two, what do you need?";
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
@@ -27,7 +33,7 @@ export default function PortalNewTicket() {
         intent="ticket"
         ticketRedirectBase="/portal/tickets"
         ticketSource="portal"
-        greeting="Hi! I can help you raise a support ticket or request a service (new equipment, access, software, etc.). In a sentence or two, what do you need?"
+        greeting={greeting}
       />
     </div>
   );
