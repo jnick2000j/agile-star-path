@@ -144,6 +144,7 @@ export default function Helpdesk() {
         description="Premium module: ticket portal, email intake, SLA tracking, and links to projects, programmes, and products."
       >
         <div className="space-y-6">
+          <HelpdeskBreadcrumbs />
           <ViewSwitcher
             current="console"
             tabs={[
