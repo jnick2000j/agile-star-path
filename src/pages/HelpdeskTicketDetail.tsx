@@ -16,7 +16,18 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageSquare, Activity, Save, Clock } from "lucide-react";
+import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,6 +67,36 @@ export default function HelpdeskTicketDetail() {
   const [internal, setInternal] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
   const [resolving, setResolving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { accessLevel } = useOrgAccessLevel();
+  const isAdmin = accessLevel === "admin";
+
+  const handleDelete = async () => {
+    if (!ticket) return;
+    setDeleting(true);
+    try {
+      // Reparent any sub-tickets to this ticket's parent (or null) so they aren't orphaned.
+      await supabase
+        .from("helpdesk_tickets")
+        .update({ parent_ticket_id: (ticket as any).parent_ticket_id ?? null })
+        .eq("parent_ticket_id", ticket.id);
+      const { error } = await supabase
+        .from("helpdesk_tickets")
+        .delete()
+        .eq("id", ticket.id);
+      if (error) {
+        toast.error("Delete failed: " + error.message);
+        return;
+      }
+      toast.success("Ticket deleted");
+      qc.invalidateQueries({ queryKey: ["helpdesk-tickets"] });
+      navigate("/support");
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
 
   const { data: ticket, isLoading } = useQuery({
     queryKey: ["helpdesk-ticket", id],
@@ -310,9 +351,21 @@ export default function HelpdeskTicketDetail() {
         <HelpdeskBreadcrumbs
           trail={[{ label: ticket.reference_number || ticket.subject || "Ticket" }]}
         />
-        <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Helpdesk
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Helpdesk
+          </Button>
+          {isAdmin && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteOpen(true)}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> Delete ticket
+            </Button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main */}
@@ -587,6 +640,37 @@ export default function HelpdeskTicketDetail() {
         submitting={resolving}
         onConfirm={handleConfirmResolve}
       />
+
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(open) => !deleting && setDeleteOpen(open)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {ticket.reference_number ?? "ticket"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes "{ticket.subject}" along with all comments,
+              activity, and attachments. Any sub-tickets will be moved up to this
+              ticket's parent (or to the top level). This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }

@@ -11,7 +11,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -86,6 +102,8 @@ export default function Helpdesk() {
       return next;
     });
   const clearSelection = () => setSelectedIds(new Set());
+  const [deleteTarget, setDeleteTarget] = useState<{ ids: string[]; label: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const { data: tickets = [], refetch, isLoading } = useQuery({
     queryKey: ["helpdesk-tickets", currentOrganization?.id, statusFilter, typeFilter],
@@ -259,7 +277,57 @@ export default function Helpdesk() {
     refetch();
   };
 
-  // Select-all helpers based on the currently visible (filtered) tickets.
+  // Delete tickets. Children of deleted tickets are reparented to the deleted
+  // ticket's own parent (or to top-level) so they remain visible.
+  const performDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const ids = deleteTarget.ids;
+      // Reparent children of each deleted ticket to that ticket's parent.
+      const parentMap = new Map<string, string | null>();
+      tickets.forEach((t: any) => parentMap.set(t.id, t.parent_ticket_id ?? null));
+      const reparentOps: PromiseLike<any>[] = [];
+      const grouped = new Map<string | null, string[]>();
+      tickets.forEach((t: any) => {
+        if (t.parent_ticket_id && ids.includes(t.parent_ticket_id) && !ids.includes(t.id)) {
+          // walk up until we find an ancestor not being deleted (or null)
+          let anc: string | null = parentMap.get(t.parent_ticket_id) ?? null;
+          while (anc && ids.includes(anc)) anc = parentMap.get(anc) ?? null;
+          const list = grouped.get(anc) ?? [];
+          list.push(t.id);
+          grouped.set(anc, list);
+        }
+      });
+      grouped.forEach((childIds, newParent) => {
+        reparentOps.push(
+          supabase
+            .from("helpdesk_tickets")
+            .update({ parent_ticket_id: newParent })
+            .in("id", childIds)
+            .then((r) => r),
+        );
+      });
+      if (reparentOps.length) await Promise.all(reparentOps);
+
+      const { error } = await supabase
+        .from("helpdesk_tickets")
+        .delete()
+        .in("id", ids);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success(
+        ids.length === 1 ? "Ticket deleted" : `${ids.length} tickets deleted`,
+      );
+      clearSelection();
+      setDeleteTarget(null);
+      refetch();
+    } finally {
+      setDeleting(false);
+    }
+  };
   const visibleIds = filtered.map((t: any) => t.id) as string[];
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
   const someVisibleSelected = visibleIds.some((id) => selectedIds.has(id));
@@ -416,6 +484,21 @@ export default function Helpdesk() {
                 <Button size="sm" onClick={() => setBulkParentOpen(true)}>
                   Set parent...
                 </Button>
+                {isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      const ids = Array.from(selectedIds);
+                      setDeleteTarget({
+                        ids,
+                        label: `${ids.length} ticket${ids.length === 1 ? "" : "s"}`,
+                      });
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={clearSelection}>
                   Clear
                 </Button>
@@ -444,13 +527,14 @@ export default function Helpdesk() {
                   <TableHead>SLA</TableHead>
                   <TableHead>Reporter</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
                 ) : filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
                 ) : flattened.map(({ ticket: t, depth, hasChildren }) => {
                   const sla = slaStateOf(t);
                   const slaCfg = SLA_BADGE[sla];
@@ -551,6 +635,33 @@ export default function Helpdesk() {
                       <TableCell className="text-sm text-muted-foreground">
                         {t.created_at ? format(new Date(t.created_at), "MMM d, yyyy") : "—"}
                       </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()} className="w-[50px]">
+                        {isAdmin && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Row actions</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onSelect={() =>
+                                  setDeleteTarget({
+                                    ids: [t.id],
+                                    label: t.reference_number
+                                      ? `${t.reference_number} — ${t.subject}`
+                                      : t.subject || "this ticket",
+                                  })
+                                }
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" /> Delete ticket
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -571,6 +682,35 @@ export default function Helpdesk() {
           selectedIds={Array.from(selectedIds)}
           onConfirm={(parentId) => bulkReparent(parentId)}
         />
+
+        <AlertDialog
+          open={!!deleteTarget}
+          onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {deleteTarget?.label}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes the ticket{deleteTarget && deleteTarget.ids.length > 1 ? "s" : ""}, along
+                with all comments, activity, and attachments. Any sub-tickets will be moved to the
+                parent above (or to the top level). This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  performDelete();
+                }}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {isAdmin && (
           <Sheet open={catalogOpen} onOpenChange={setCatalogOpen}>
