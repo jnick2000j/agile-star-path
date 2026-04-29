@@ -818,6 +818,23 @@ export default function ChangeManagementDetail() {
               <TabsContent value="automations">
                 <AutomationsTab module="change" entityId={change.id} entityType="change" />
               </TabsContent>
+
+              <TabsContent value="audit" className="space-y-4">
+                <EntityAuditTrail entityType="cm_request" entityId={change.id} title="Change Audit Trail" />
+                {approvals.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-muted-foreground">Approval audit history</h4>
+                    {approvals.map((a: any) => (
+                      <EntityAuditTrail
+                        key={a.id}
+                        entityType="cm_approval"
+                        entityId={a.id}
+                        title={`${a.approval_kind} approval — ${userLabel(a.approver_id)}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
           </div>
 
