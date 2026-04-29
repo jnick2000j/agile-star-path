@@ -50,6 +50,8 @@ export default function HelpdeskTicketDetail() {
   const qc = useQueryClient();
   const [reply, setReply] = useState("");
   const [internal, setInternal] = useState(false);
+  const [resolveOpen, setResolveOpen] = useState(false);
+  const [resolving, setResolving] = useState(false);
 
   const { data: ticket, isLoading } = useQuery({
     queryKey: ["helpdesk-ticket", id],
