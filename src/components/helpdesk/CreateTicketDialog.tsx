@@ -251,6 +251,7 @@ export function CreateTicketDialog({
               value={catalogSelection}
               onChange={setCatalogSelection}
               ticketType={form.ticket_type}
+              onItemAdded={handleCatalogItemAdded}
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
