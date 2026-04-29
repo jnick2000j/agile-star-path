@@ -3962,6 +3962,9 @@ export type Database = {
           reporter_name: string | null
           reporter_user_id: string | null
           resolution: string | null
+          resolution_code:
+            | Database["public"]["Enums"]["helpdesk_resolution_code"]
+            | null
           resolved_at: string | null
           sla_paused_at: string | null
           sla_paused_seconds: number
@@ -3998,6 +4001,9 @@ export type Database = {
           reporter_name?: string | null
           reporter_user_id?: string | null
           resolution?: string | null
+          resolution_code?:
+            | Database["public"]["Enums"]["helpdesk_resolution_code"]
+            | null
           resolved_at?: string | null
           sla_paused_at?: string | null
           sla_paused_seconds?: number
@@ -4034,6 +4040,9 @@ export type Database = {
           reporter_name?: string | null
           reporter_user_id?: string | null
           resolution?: string | null
+          resolution_code?:
+            | Database["public"]["Enums"]["helpdesk_resolution_code"]
+            | null
           resolved_at?: string | null
           sla_paused_at?: string | null
           sla_paused_seconds?: number
@@ -10903,6 +10912,14 @@ export type Database = {
         | "conditional"
         | "rejected"
         | "deferred"
+      helpdesk_resolution_code:
+        | "fixed"
+        | "not_fixed"
+        | "duplicate"
+        | "wont_fix"
+        | "cannot_reproduce"
+        | "known_error"
+        | "workaround_provided"
       helpdesk_ticket_priority: "low" | "medium" | "high" | "urgent"
       helpdesk_ticket_source:
         | "portal"
@@ -11134,6 +11151,15 @@ export const Constants = {
         "conditional",
         "rejected",
         "deferred",
+      ],
+      helpdesk_resolution_code: [
+        "fixed",
+        "not_fixed",
+        "duplicate",
+        "wont_fix",
+        "cannot_reproduce",
+        "known_error",
+        "workaround_provided",
       ],
       helpdesk_ticket_priority: ["low", "medium", "high", "urgent"],
       helpdesk_ticket_source: [
