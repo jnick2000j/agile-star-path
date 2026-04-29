@@ -484,6 +484,21 @@ export default function Helpdesk() {
                 <Button size="sm" onClick={() => setBulkParentOpen(true)}>
                   Set parent...
                 </Button>
+                {isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      const ids = Array.from(selectedIds);
+                      setDeleteTarget({
+                        ids,
+                        label: `${ids.length} ticket${ids.length === 1 ? "" : "s"}`,
+                      });
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={clearSelection}>
                   Clear
                 </Button>
