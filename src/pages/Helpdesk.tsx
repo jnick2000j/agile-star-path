@@ -139,6 +139,28 @@ export default function Helpdesk() {
     none: { label: "—", cls: "bg-transparent text-muted-foreground" },
   };
 
+  // Build a parent/child tree from the filtered set.
+  // Roots = tickets with no parent OR whose parent isn't in the visible filtered set.
+  const filteredIds = new Set(filtered.map((t: any) => t.id));
+  const childrenByParent: Record<string, any[]> = {};
+  filtered.forEach((t: any) => {
+    const p = t.parent_ticket_id;
+    if (p && filteredIds.has(p)) (childrenByParent[p] ||= []).push(t);
+  });
+  const roots = filtered.filter(
+    (t: any) => !t.parent_ticket_id || !filteredIds.has(t.parent_ticket_id),
+  );
+
+  type Row = { ticket: any; depth: number; hasChildren: boolean };
+  const flattened: Row[] = [];
+  const walk = (t: any, depth: number) => {
+    const kids = childrenByParent[t.id] ?? [];
+    flattened.push({ ticket: t, depth, hasChildren: kids.length > 0 });
+    const isOpen = expanded[t.id] ?? true;
+    if (isOpen && kids.length) kids.forEach((k) => walk(k, depth + 1));
+  };
+  roots.forEach((r) => walk(r, 0));
+
   return (
     <AppLayout title="Helpdesk" subtitle="Ticket-based support and service requests">
       <FeatureGate
