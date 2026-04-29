@@ -46,6 +46,7 @@ export default function MyTickets() {
   return (
     <AppLayout title="My Tickets" subtitle="Tickets you've raised">
       <div className="space-y-6 max-w-4xl">
+        <HelpdeskBreadcrumbs />
         <ViewSwitcher
           current="mine"
           tabs={[
