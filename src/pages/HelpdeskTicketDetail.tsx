@@ -42,6 +42,14 @@ import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/
 import { TicketAttachments } from "@/components/helpdesk/TicketAttachments";
 import { EntityAuditTrail } from "@/components/audit/EntityAuditTrail";
 import { ParentTicketPicker } from "@/components/helpdesk/ParentTicketPicker";
+import {
+  CatalogPicker,
+  CatalogSummary,
+  saveTicketCatalogSelection,
+  useTicketCatalogSelection,
+  type CatalogSelection,
+} from "@/components/helpdesk/CatalogPicker";
+
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -69,6 +77,39 @@ export default function HelpdeskTicketDetail() {
   const [resolving, setResolving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [catalogEditing, setCatalogEditing] = useState(false);
+  const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
+  const [catalogSaving, setCatalogSaving] = useState(false);
+  const { data: catalogSelection = {}, refetch: refetchCatalog } = useTicketCatalogSelection(id);
+
+  const startCatalogEdit = () => {
+    setCatalogDraft(catalogSelection);
+    setCatalogEditing(true);
+  };
+  const cancelCatalogEdit = () => {
+    setCatalogEditing(false);
+    setCatalogDraft({});
+  };
+  const saveCatalog = async () => {
+    if (!ticket) return;
+    setCatalogSaving(true);
+    try {
+      await saveTicketCatalogSelection(
+        ticket.id,
+        ticket.organization_id,
+        catalogDraft,
+        user?.id,
+      );
+      toast.success("Catalog selections updated");
+      setCatalogEditing(false);
+      await refetchCatalog();
+      qc.invalidateQueries({ queryKey: ["hd-ticket-catalog", ticket.id] });
+    } catch (e: any) {
+      toast.error("Save failed: " + (e?.message ?? "unknown error"));
+    } finally {
+      setCatalogSaving(false);
+    }
+  };
   const { accessLevel } = useOrgAccessLevel();
   const isAdmin = accessLevel === "admin";
 
@@ -585,6 +626,41 @@ export default function HelpdeskTicketDetail() {
                   </ul>
                 )}
               </div>
+            </Card>
+
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Catalog selections</h3>
+                {!catalogEditing ? (
+                  <Button size="sm" variant="outline" onClick={startCatalogEdit}>
+                    Edit
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelCatalogEdit}
+                      disabled={catalogSaving}
+                    >
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
+                      {catalogSaving ? "Saving..." : "Save"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {catalogEditing ? (
+                <CatalogPicker
+                  value={catalogDraft}
+                  onChange={setCatalogDraft}
+                  ticketType={ticket.ticket_type}
+                  compact
+                />
+              ) : (
+                <CatalogSummary ticketId={ticket.id} />
+              )}
             </Card>
 
             <Card className="p-4 space-y-2">
