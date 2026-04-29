@@ -94,6 +94,7 @@ import TicketIntake from "./pages/TicketIntake";
 import EmailIntake from "./pages/EmailIntake";
 import MacrosPage from "./pages/MacrosPage";
 import SLAEscalationRules from "./pages/SLAEscalationRules";
+import ApprovalChainsPage from "./pages/ApprovalChainsPage";
 import { CustomerPortalLayout } from "./components/portal/CustomerPortalLayout";
 import PortalDashboard from "./pages/portal/PortalDashboard";
 import PortalTicketList from "./pages/portal/PortalTicketList";
@@ -226,6 +227,7 @@ const App = () => (
             <Route path="/support/email-intake" element={<ProtectedRoute><EmailIntake /></ProtectedRoute>} />
             <Route path="/support/macros" element={<ProtectedRoute><MacrosPage /></ProtectedRoute>} />
             <Route path="/support/sla-escalation" element={<ProtectedRoute><SLAEscalationRules /></ProtectedRoute>} />
+            <Route path="/support/approvals" element={<ProtectedRoute><ApprovalChainsPage /></ProtectedRoute>} />
             <Route path="/portal" element={<ProtectedRoute><CustomerPortalLayout /></ProtectedRoute>}>
               <Route index element={<PortalDashboard />} />
               <Route path="tickets" element={<PortalTicketList />} />
