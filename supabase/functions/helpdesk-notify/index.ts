@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
 
   const { data: ticket, error: tErr } = await supabase
     .from("helpdesk_tickets")
-    .select("id, organization_id, reference_number, subject, priority, status, reporter_email, reporter_name, assignee_id")
+    .select("id, organization_id, reference_number, subject, priority, status, reporter_email, reporter_name, assignee_id, resolution, resolution_code")
     .eq("id", payload.ticket_id)
     .single();
 
