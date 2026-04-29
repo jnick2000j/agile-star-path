@@ -3,6 +3,8 @@ project_id = "lpsbudbighowwdmgdfyc"
 [functions]
   [functions.sla-escalation-engine]
     verify_jwt = false
+  [functions.helpdesk-report-runner]
+    verify_jwt = false
   [functions.auth-email-hook]
     verify_jwt = false
   [functions.create-checkout]
