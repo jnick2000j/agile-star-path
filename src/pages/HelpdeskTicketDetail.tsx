@@ -55,6 +55,7 @@ import { TicketProblemPanel } from "@/components/problems/TicketProblemPanel";
 import { TicketMajorIncidentPanel } from "@/components/major-incidents/TicketMajorIncidentPanel";
 import { TicketSLAPanel } from "@/components/sla/TicketSLAPanel";
 import { TicketCSATPanel } from "@/components/csat/TicketCSATPanel";
+import { KBSuggestionsPanel } from "@/components/kb/KBSuggestionsPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
