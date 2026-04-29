@@ -326,11 +326,15 @@ export function HelpdeskCatalogManager() {
                       </p>
                     ) : (
                       <ul className="divide-y">
-                        {listItems.map((item) => (
+                        {flattenTree(listItems).map(({ item, depth }) => (
                           <li
                             key={item.id}
-                            className="flex items-center gap-2 py-2 pl-10 pr-3 hover:bg-muted/40"
+                            className="flex items-center gap-2 py-2 pr-3 hover:bg-muted/40"
+                            style={{ paddingLeft: `${40 + depth * 20}px` }}
                           >
+                            {depth > 0 && (
+                              <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                            )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium truncate">{item.name}</span>
@@ -342,6 +346,15 @@ export function HelpdeskCatalogManager() {
                                 <p className="text-xs text-muted-foreground truncate">{item.description}</p>
                               )}
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openNewItem(l, item)}
+                              className="gap-1 text-xs h-7"
+                              title="Add child item"
+                            >
+                              <Plus className="h-3 w-3" /> Child
+                            </Button>
                             <Button variant="ghost" size="icon" onClick={() => editItem(item)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
