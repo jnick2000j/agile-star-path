@@ -187,6 +187,7 @@ export function HelpdeskCatalogManager() {
       description: editingItem.description?.trim() || null,
       is_active: editingItem.is_active ?? true,
       sort_order: editingItem.sort_order ?? 0,
+      metadata: editingItem.metadata ?? {},
     };
     let error;
     if (editingItem.id) {
