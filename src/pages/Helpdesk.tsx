@@ -379,6 +379,7 @@ export default function Helpdesk() {
             <div className="space-y-6">
               <div className="flex flex-wrap gap-2">
                 {[
+                  { key: "modules", label: "Modules", icon: ToggleLeft },
                   { key: "catalog", label: "Catalog", icon: Package },
                   { key: "intake", label: "Intake Channels", icon: Globe },
                   { key: "email", label: "Email-to-Ticket", icon: AtSign },
@@ -402,6 +403,15 @@ export default function Helpdesk() {
                 })}
               </div>
               <div className="border rounded-lg bg-card p-4">
+                {adminTab === "modules" && (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">Helpdesk Modules</h3>
+                      <p className="text-sm text-muted-foreground">Turn helpdesk sub-modules on or off for this organization. Disabled modules are hidden from the sidebar and navigation.</p>
+                    </div>
+                    <HelpdeskModuleToggles />
+                  </div>
+                )}
                 {adminTab === "catalog" && <ServiceCatalogAdmin embedded />}
                 {adminTab === "intake" && <TicketIntake embedded />}
                 {adminTab === "email" && <EmailIntake embedded />}
