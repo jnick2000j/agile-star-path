@@ -377,7 +377,7 @@ export default function Helpdesk() {
 
           {view === "admin" && isAdmin ? (
             <div className="space-y-6">
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-7 gap-2 w-full">
                 {[
                   { key: "modules", label: "Modules", icon: ToggleLeft },
                   { key: "catalog", label: "Catalog", icon: Package },
@@ -395,9 +395,10 @@ export default function Helpdesk() {
                       variant={active ? "default" : "outline"}
                       size="sm"
                       onClick={() => setAdminTab(b.key)}
-                      className="gap-2"
+                      className="w-full h-auto min-h-9 px-2 py-2 gap-2 flex items-center justify-center text-center whitespace-normal leading-tight"
                     >
-                      <Icon className="h-4 w-4" /> {b.label}
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="break-words">{b.label}</span>
                     </Button>
                   );
                 })}
