@@ -526,6 +526,8 @@ export default function SLAEscalationRules({ embedded = false }: { embedded?: bo
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </>
   );
+
+  return embedded ? body : <AppLayout title="SLA Escalation Engine">{body}</AppLayout>;
 }
