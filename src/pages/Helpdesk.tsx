@@ -169,6 +169,7 @@ export default function Helpdesk() {
 
   const stats = {
     open: tickets.filter((t: any) => ["new", "open", "pending"].includes(t.status)).length,
+    unassigned: tickets.filter((t: any) => !t.assignee_id && !["closed", "cancelled", "resolved"].includes(t.status)).length,
     urgent: tickets.filter((t: any) => t.priority === "urgent" && !["closed", "cancelled"].includes(t.status)).length,
     resolved: tickets.filter((t: any) => t.status === "resolved").length,
     total: tickets.length,
@@ -411,8 +412,9 @@ export default function Helpdesk() {
           ) : (
             <div className="space-y-6">
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <StatCard label="Open" value={stats.open} icon={<LifeBuoy className="h-4 w-4" />} />
+            <StatCard label="Unassigned" value={stats.unassigned} accent="warning" icon={<Inbox className="h-4 w-4" />} />
             <StatCard label="Urgent" value={stats.urgent} accent="destructive" />
             <StatCard label="Resolved" value={stats.resolved} accent="success" />
             <StatCard label="Total" value={stats.total} />
@@ -474,12 +476,6 @@ export default function Helpdesk() {
               </Select>
             </div>
             <div className="flex flex-wrap gap-2">
-              {isAdmin && (
-                <Button variant="outline" onClick={() => setCatalogOpen(true)}>
-                  <Settings2 className="h-4 w-4 mr-2" />
-                  Manage Catalog
-                </Button>
-              )}
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Ticket
@@ -783,7 +779,7 @@ export default function Helpdesk() {
   );
 }
 
-function StatCard({ label, value, icon, accent }: { label: string; value: number; icon?: React.ReactNode; accent?: "destructive" | "success" }) {
+function StatCard({ label, value, icon, accent }: { label: string; value: number; icon?: React.ReactNode; accent?: "destructive" | "success" | "warning" }) {
   return (
     <div className="border rounded-lg bg-card p-4">
       <div className="flex items-center justify-between">
@@ -794,6 +790,7 @@ function StatCard({ label, value, icon, accent }: { label: string; value: number
         "text-2xl font-semibold mt-1",
         accent === "destructive" && "text-destructive",
         accent === "success" && "text-success",
+        accent === "warning" && "text-warning",
       )}>{value}</p>
     </div>
   );
