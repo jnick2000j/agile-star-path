@@ -691,7 +691,6 @@ export default function Helpdesk() {
               </TableBody>
             </Table>
           </div>
-        </div>
             </TabsContent>
 
             {isAdmin && (
