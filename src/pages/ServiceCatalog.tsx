@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package, Settings2, Clock, ShieldCheck } from "lucide-react";
 import { RequestCatalogItemDialog } from "@/components/catalog/RequestCatalogItemDialog";
+import { CategoryIcon } from "@/components/catalog/CategoryIconPicker";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 
 export default function ServiceCatalog() {
