@@ -116,6 +116,35 @@ export default function HelpdeskTicketDetail() {
     enabled: !!currentOrganization?.id,
   });
 
+  const { data: childTickets = [] } = useQuery({
+    queryKey: ["helpdesk-child-tickets", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data } = await supabase
+        .from("helpdesk_tickets")
+        .select("id, reference_number, subject, status, priority")
+        .eq("parent_ticket_id", id)
+        .order("created_at", { ascending: true });
+      return data ?? [];
+    },
+    enabled: !!id,
+  });
+
+  const { data: parentTicket } = useQuery({
+    queryKey: ["helpdesk-parent-ticket", (ticket as any)?.parent_ticket_id],
+    queryFn: async () => {
+      const pid = (ticket as any)?.parent_ticket_id;
+      if (!pid) return null;
+      const { data } = await supabase
+        .from("helpdesk_tickets")
+        .select("id, reference_number, subject")
+        .eq("id", pid)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!(ticket as any)?.parent_ticket_id,
+  });
+
   const updateFields = async (fields: Record<string, any>, opts?: { skipResolveIntercept?: boolean }) => {
     if (!ticket) return;
     // Intercept status -> resolved unless explicitly skipped (e.g. from the ResolveTicketDialog)
