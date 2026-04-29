@@ -217,7 +217,7 @@ export function CreateTicketDialog({
             </div>
             <div className="space-y-2">
               <Label>Priority</Label>
-              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+              <Select value={form.priority} onValueChange={(v) => { setTouched((t) => ({ ...t, priority: true })); setForm({ ...form, priority: v }); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low</SelectItem>
