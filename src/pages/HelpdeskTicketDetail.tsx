@@ -211,11 +211,44 @@ export default function HelpdeskTicketDetail() {
         first_response_at: ticket.first_response_at ?? new Date().toISOString(),
       }).eq("id", ticket.id);
     }
+    // Look up assignee email so we can fan out to them as well
+    let assigneeEmail: string | undefined;
+    if (ticket.assignee_id && ticket.assignee_id !== user?.id) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("user_id", ticket.assignee_id)
+        .maybeSingle();
+      assigneeEmail = prof?.email ?? undefined;
+    }
+
     if (!internal) {
+      // Notify the reporter (default recipient resolution)
       supabase.functions.invoke("helpdesk-notify", {
         body: {
           ticket_id: ticket.id,
           notification_type: "reply",
+          metadata: { comment_body: reply.trim() },
+        },
+      }).catch(() => {});
+      // Also notify the assignee, if there is one and it isn't the author
+      if (assigneeEmail) {
+        supabase.functions.invoke("helpdesk-notify", {
+          body: {
+            ticket_id: ticket.id,
+            notification_type: "reply",
+            recipient_email: assigneeEmail,
+            metadata: { comment_body: reply.trim() },
+          },
+        }).catch(() => {});
+      }
+    } else if (assigneeEmail) {
+      // Internal note: notify assignee only (never the reporter)
+      supabase.functions.invoke("helpdesk-notify", {
+        body: {
+          ticket_id: ticket.id,
+          notification_type: "internal_note",
+          recipient_email: assigneeEmail,
           metadata: { comment_body: reply.trim() },
         },
       }).catch(() => {});
