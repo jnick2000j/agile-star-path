@@ -785,7 +785,7 @@ export default function Helpdesk() {
   );
 }
 
-function StatCard({ label, value, icon, accent }: { label: string; value: number; icon?: React.ReactNode; accent?: "destructive" | "success" }) {
+function StatCard({ label, value, icon, accent }: { label: string; value: number; icon?: React.ReactNode; accent?: "destructive" | "success" | "warning" }) {
   return (
     <div className="border rounded-lg bg-card p-4">
       <div className="flex items-center justify-between">
@@ -796,6 +796,7 @@ function StatCard({ label, value, icon, accent }: { label: string; value: number
         "text-2xl font-semibold mt-1",
         accent === "destructive" && "text-destructive",
         accent === "success" && "text-success",
+        accent === "warning" && "text-warning",
       )}>{value}</p>
     </div>
   );
