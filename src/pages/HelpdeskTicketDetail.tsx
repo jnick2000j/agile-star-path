@@ -57,6 +57,7 @@ import { TicketSLAPanel } from "@/components/sla/TicketSLAPanel";
 import { TicketCSATPanel } from "@/components/csat/TicketCSATPanel";
 import { KBSuggestionsPanel } from "@/components/kb/KBSuggestionsPanel";
 import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
+import { MacroPicker } from "@/components/helpdesk/MacroPicker";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -466,6 +467,25 @@ export default function HelpdeskTicketDetail() {
                        <Label htmlFor="internal" className="text-sm">Internal note</Label>
                      </div>
                      <div className="flex items-center gap-2">
+                       <MacroPicker
+                         ticketId={ticket.id}
+                         context={{
+                           ticket: {
+                             reference_number: (ticket as any).reference_number,
+                             subject: ticket.subject,
+                             status: ticket.status,
+                             priority: ticket.priority,
+                             type: ticket.type,
+                           },
+                           customer: {
+                             first_name: (ticket as any).requester_first_name,
+                             last_name: (ticket as any).requester_last_name,
+                             email: (ticket as any).requester_email,
+                           },
+                           organization: { name: currentOrganization?.name },
+                         }}
+                         onInsert={(text) => setReply((prev) => (prev ? prev + "\n\n" + text : text))}
+                       />
                        <AIReplyDraftButton ticketId={ticket.id} onDraft={(text) => setReply(text)} />
                        <Button onClick={submitReply} disabled={!reply.trim()}>Post Reply</Button>
                      </div>
