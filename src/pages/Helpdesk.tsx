@@ -400,10 +400,42 @@ export default function Helpdesk() {
               Drop here to move ticket to the top level
             </div>
           )}
+
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border rounded-lg bg-primary/5 px-3 py-2">
+              <span className="text-sm font-medium">
+                {selectedIds.size} selected
+              </span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                Bulk actions apply to all selected tickets
+              </span>
+              <div className="ml-auto flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => bulkReparent(null)}>
+                  Move to top level
+                </Button>
+                <Button size="sm" onClick={() => setBulkParentOpen(true)}>
+                  Set parent...
+                </Button>
+                <Button size="sm" variant="ghost" onClick={clearSelection}>
+                  Clear
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="border rounded-lg bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px]">
+                    <Checkbox
+                      checked={
+                        allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false
+                      }
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all visible tickets"
+                    />
+                  </TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead>Type</TableHead>
