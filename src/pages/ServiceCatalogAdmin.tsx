@@ -201,6 +201,9 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
       {fieldsOpen && (
         <FieldsDialog itemId={fieldsOpen} open={!!fieldsOpen} onOpenChange={(v) => !v && setFieldsOpen(null)} />
       )}
+      {tasksOpen && (
+        <TasksDialog itemId={tasksOpen} orgId={currentOrganization?.id} open={!!tasksOpen} onOpenChange={(v) => !v && setTasksOpen(null)} />
+      )}
     </>
   );
 
