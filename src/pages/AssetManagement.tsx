@@ -103,7 +103,7 @@ export default function AssetManagement() {
   const filterFn = (rows: any[], keys: string[]) => rows.filter((r) => !search || keys.some((k) => String(r[k] || "").toLowerCase().includes(search.toLowerCase())));
 
   return (
-    <AppLayout>
+    <AppLayout title="Asset Management">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
