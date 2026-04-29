@@ -67,7 +67,7 @@ export default function CSATSurvey() {
       setSubmitting(false);
       return;
     }
-    await supabase
+    await (supabase as any)
       .from("helpdesk_csat_surveys")
       .update({ status: "completed", responded_at: new Date().toISOString() })
       .eq("id", survey.id);
