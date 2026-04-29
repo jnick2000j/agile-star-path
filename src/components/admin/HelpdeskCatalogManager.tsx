@@ -533,6 +533,31 @@ export function HelpdeskCatalogManager() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label>Parent item (optional)</Label>
+              <Select
+                value={editingItem?.parent_item_id ?? "none"}
+                onValueChange={(v) => setEditingItem({
+                  ...editingItem!,
+                  parent_item_id: v === "none" ? null : v,
+                })}
+              >
+                <SelectTrigger><SelectValue placeholder="— Top level —" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Top level —</SelectItem>
+                  {currentList && flattenTree(itemsByList[currentList.id] ?? [])
+                    .filter(({ item }) => !blockedParentIds.has(item.id))
+                    .map(({ item, depth }) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {"\u00A0".repeat(depth * 2)}{depth > 0 ? "↳ " : ""}{item.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                Nest this item under another for drill-down topic selection on tickets.
+              </p>
+            </div>
+            <div className="space-y-1.5">
               <Label>Description</Label>
               <Textarea
                 rows={2}
