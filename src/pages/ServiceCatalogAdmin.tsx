@@ -35,6 +35,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
   const qc = useQueryClient();
 
   const [catOpen, setCatOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any | null>(null);
   const [itemOpen, setItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [fieldsOpen, setFieldsOpen] = useState<string | null>(null);
