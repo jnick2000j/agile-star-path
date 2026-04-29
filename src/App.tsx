@@ -74,6 +74,10 @@ import ServiceCatalog from "./pages/ServiceCatalog";
 import ServiceCatalogAdmin from "./pages/ServiceCatalogAdmin";
 import Problems from "./pages/Problems";
 import ProblemDetail from "./pages/ProblemDetail";
+import MajorIncidents from "./pages/MajorIncidents";
+import MajorIncidentDetail from "./pages/MajorIncidentDetail";
+import StatusPageAdmin from "./pages/StatusPageAdmin";
+import StatusPagePublic from "./pages/StatusPagePublic";
 import CMWorkflows from "./pages/CMWorkflows";
 import SupportPortal from "./pages/SupportPortal";
 import MyTickets from "./pages/MyTickets";
@@ -185,6 +189,10 @@ const App = () => (
             <Route path="/catalog/admin" element={<ProtectedRoute><ServiceCatalogAdmin /></ProtectedRoute>} />
             <Route path="/problems" element={<ProtectedRoute><Problems /></ProtectedRoute>} />
             <Route path="/problems/:id" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
+            <Route path="/major-incidents" element={<ProtectedRoute><MajorIncidents /></ProtectedRoute>} />
+            <Route path="/major-incidents/:id" element={<ProtectedRoute><MajorIncidentDetail /></ProtectedRoute>} />
+            <Route path="/status/admin" element={<ProtectedRoute><StatusPageAdmin /></ProtectedRoute>} />
+            <Route path="/status" element={<StatusPagePublic />} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />

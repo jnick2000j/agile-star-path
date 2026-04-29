@@ -52,6 +52,7 @@ import {
 import { LinkedCIsPanel } from "@/components/cmdb/LinkedCIsPanel";
 import { CatalogRequestPanel } from "@/components/catalog/CatalogRequestPanel";
 import { TicketProblemPanel } from "@/components/problems/TicketProblemPanel";
+import { TicketMajorIncidentPanel } from "@/components/major-incidents/TicketMajorIncidentPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -675,6 +676,12 @@ export default function HelpdeskTicketDetail() {
               ticketSubject={ticket.subject}
               ticketDescription={ticket.description}
               parentProblemId={(ticket as any).parent_problem_id ?? null}
+            />
+
+            <TicketMajorIncidentPanel
+              ticketId={ticket.id}
+              ticketSubject={ticket.subject}
+              ticketDescription={ticket.description}
             />
 
 
