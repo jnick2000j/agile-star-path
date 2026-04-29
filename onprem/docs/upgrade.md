@@ -103,3 +103,21 @@ Set `UPDATE_CHANNEL` in `.env` to:
 
 Channel only affects `pimp-cli download` defaults. `pimp-cli download v1.4.0`
 always works regardless of channel.
+
+## Notable schema additions in recent releases
+
+These tables/triggers are added by ordered migrations in the bundle and need
+no manual action — they are listed here for operators auditing the diff:
+
+| Migration introduces                       | Purpose |
+|--------------------------------------------|---------|
+| `organization_module_toggles`              | Per-org enable/disable for Problem Mgmt, CMDB, Service Catalog, Status Page, MIM |
+| `service_catalog_categories.icon`          | Lucide icon name shown in catalog browse |
+| `service_catalog_item_tasks`               | Predefined ordered fulfillment tasks per catalog item |
+| `helpdesk_spawn_next_catalog_task` fn      | Spawns next sequential child ticket |
+| `trg_helpdesk_catalog_task_close` trigger  | Fires next task when prior is resolved/closed |
+
+If you maintain custom RLS or BI views over `service_catalog_*` or
+`helpdesk_tickets`, re-validate after upgrading — the catalog-task workflow
+writes `metadata->>catalog_task_id` and `parent_ticket_id` on child tickets.
+

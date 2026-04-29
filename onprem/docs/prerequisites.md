@@ -80,3 +80,21 @@ cp /etc/letsencrypt/live/$DOMAIN/privkey.pem   onprem/tls/
 
 You must supply SMTP credentials before installing — invites, password resets,
 and MFA challenges all require email delivery. See [smtp.md](./smtp.md).
+
+## Module footprint
+
+These tables are always created but only consume meaningful rows when the
+matching module is enabled in **Helpdesk → Admin → Modules** (per org) or
+**Platform Admin → Module Toggles** (global override):
+
+| Module                  | Tables that grow when enabled |
+|-------------------------|-------------------------------|
+| Service Catalog         | `service_catalog_*` (categories, items, fields, tasks, requests, approvals) |
+| Problem Management      | `problems`, `problem_known_errors` |
+| CMDB                    | `cmdb_items`, `cmdb_relationships` |
+| Status Page             | `status_page_components`, `status_page_incidents` |
+| Major Incident Mgmt     | `major_incidents`, `major_incident_updates` |
+
+A 4 vCPU / 8 GB host comfortably runs all five modules at small/medium
+volumes. For >100 service-catalog requests/day or >50 active major incidents,
+plan for the next sizing tier in [scaling-ha.md](./scaling-ha.md).

@@ -1,8 +1,15 @@
 # AI Provider Configuration
 
 On-prem installs default to a **local Ollama** running in the same Compose
-stack. You can switch to OpenAI, Azure OpenAI, Anthropic, or any
-OpenAI-compatible endpoint at any time.
+stack. You can switch to OpenAI, Azure OpenAI, Anthropic, Google Gemini, the
+**Lovable AI Gateway**, or any OpenAI-compatible endpoint at any time.
+
+The platform uses AI for: ticket-intake conversations, KB embedding & semantic
+search, KB suggestions on tickets, weekly status report summarisation, ticket
+summarisation, risk insights, AI Advisor, AI Wizards, the "Ask the Task
+Master" assistant, and reply drafting. Each consumer can be enabled/disabled
+in `ai_provider_settings.enabled_modules`.
+
 
 ## Local Ollama (default)
 
@@ -53,6 +60,52 @@ AI_BASE_URL=https://api.anthropic.com/v1
 AI_DEFAULT_MODEL=claude-3-5-sonnet-20241022
 AI_API_KEY=sk-ant-...
 ```
+
+## Google Gemini (direct)
+
+```env
+AI_PROVIDER=google
+AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
+AI_DEFAULT_MODEL=gemini-2.5-flash
+AI_API_KEY=<google-api-key>
+```
+
+Supported model identifiers include `gemini-2.5-pro`, `gemini-2.5-flash`,
+`gemini-2.5-flash-lite`, and the preview models
+`gemini-3.1-pro-preview`, `gemini-3-flash-preview`,
+`gemini-3-pro-image-preview`, `gemini-3.1-flash-image-preview`.
+
+## Lovable AI Gateway
+
+A managed multi-provider gateway that exposes Google, OpenAI and image-gen
+models behind a single endpoint with a single key. Recommended when you want
+no per-provider account management.
+
+```env
+AI_PROVIDER=lovable
+AI_BASE_URL=https://ai.gateway.lovable.dev/v1
+AI_DEFAULT_MODEL=google/gemini-2.5-flash
+AI_API_KEY=<lovable-ai-key>
+```
+
+Currently supported model strings:
+
+| Model                                   | Best for |
+|-----------------------------------------|----------|
+| `google/gemini-2.5-pro`                 | Heavy reasoning, multimodal, long context |
+| `google/gemini-2.5-flash`               | Balanced default for most workloads |
+| `google/gemini-2.5-flash-lite`          | High-volume classification / summarisation |
+| `google/gemini-3.1-pro-preview`         | Latest preview, strongest reasoning |
+| `google/gemini-3-flash-preview`         | Fast preview, balanced |
+| `google/gemini-3-pro-image-preview`     | Image generation |
+| `google/gemini-3.1-flash-image-preview` | Fast image generation/editing |
+| `openai/gpt-5`                          | All-rounder, top accuracy |
+| `openai/gpt-5-mini`                     | Cheaper GPT-5 with most reasoning |
+| `openai/gpt-5-nano`                     | Highest throughput, cheapest GPT-5 |
+| `openai/gpt-5.2`                        | Latest OpenAI reasoning model |
+
+Cloud builds default to this gateway. On-prem operators may also point to it,
+or self-host with Ollama / direct providers above.
 
 ## Per-organization overrides
 
