@@ -216,6 +216,13 @@ export function CreateTicketDialog({
             />
           </div>
           <KBInlineSuggestions subject={form.subject} description={form.description} />
+          <div className="border-t pt-4">
+            <CatalogPicker
+              value={catalogSelection}
+              onChange={setCatalogSelection}
+              ticketType={form.ticket_type}
+            />
+          </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Programme</Label>
