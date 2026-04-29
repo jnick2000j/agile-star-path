@@ -277,6 +277,9 @@ export default function HelpdeskTicketDetail() {
   return (
     <AppLayout title={ticket.subject} subtitle={ticket.reference_number ?? ""}>
       <div className="space-y-4">
+        <HelpdeskBreadcrumbs
+          trail={[{ label: ticket.reference_number || ticket.subject || "Ticket" }]}
+        />
         <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Helpdesk
         </Button>
