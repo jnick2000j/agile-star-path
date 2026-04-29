@@ -167,19 +167,21 @@ export function HelpdeskCatalogManager() {
     qc.invalidateQueries({ queryKey: ["hd-catalog-lists"] });
   };
 
-  const openNewItem = () => {
-    if (!currentList) return;
+  const openNewItem = (list: ListRow) => {
+    setActiveListId(list.id);
+    const listItems = itemsByList[list.id] ?? [];
     setEditingItem({
       name: "",
       description: "",
       is_active: true,
-      sort_order: (items[items.length - 1]?.sort_order ?? 0) + 10,
+      sort_order: (listItems[listItems.length - 1]?.sort_order ?? 0) + 10,
       metadata: {},
     });
     setItemDialogOpen(true);
   };
 
   const editItem = (item: ItemRow) => {
+    setActiveListId(item.list_id);
     setEditingItem({ ...item });
     setItemDialogOpen(true);
   };
@@ -206,14 +208,14 @@ export function HelpdeskCatalogManager() {
     toast.success("Item saved");
     setItemDialogOpen(false);
     setEditingItem(null);
-    qc.invalidateQueries({ queryKey: ["hd-catalog-items", currentList.id] });
+    qc.invalidateQueries({ queryKey: ["hd-catalog-items-all"] });
   };
 
   const deleteItem = async (id: string) => {
     if (!confirm("Delete this item?")) return;
     const { error } = await supabase.from("helpdesk_catalog_items").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["hd-catalog-items", currentList?.id] });
+    qc.invalidateQueries({ queryKey: ["hd-catalog-items-all"] });
   };
 
   return (
