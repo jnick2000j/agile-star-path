@@ -58,6 +58,7 @@ import { TicketCSATPanel } from "@/components/csat/TicketCSATPanel";
 import { KBSuggestionsPanel } from "@/components/kb/KBSuggestionsPanel";
 import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
 import { MacroPicker } from "@/components/helpdesk/MacroPicker";
+import { ApprovalsPanel } from "@/components/helpdesk/ApprovalsPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -546,6 +547,7 @@ export default function HelpdeskTicketDetail() {
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <ApprovalsPanel ticketId={ticket.id} />
             <Card className="p-4 space-y-4">
               <h3 className="font-semibold">Properties</h3>
               <div className="space-y-2">
