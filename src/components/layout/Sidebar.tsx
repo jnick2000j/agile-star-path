@@ -108,6 +108,7 @@ export function Sidebar() {
         { label: "CMDB", href: "/cmdb" },
         { label: "Status Page", href: "/status/admin" },
         { label: "Customer Portal", href: "/help" },
+        { label: "SLA & Escalation", href: "/support/sla" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },

@@ -4366,6 +4366,143 @@ export type Database = {
           },
         ]
       }
+      helpdesk_escalation_events: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          organization_id: string
+          rule_id: string | null
+          ticket_id: string
+          trigger_type: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          organization_id: string
+          rule_id?: string | null
+          ticket_id: string
+          trigger_type: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          organization_id?: string
+          rule_id?: string | null
+          ticket_id?: string
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_escalation_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_escalation_events_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_escalation_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_escalation_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_escalation_rules: {
+        Row: {
+          action: string
+          cooldown_minutes: number
+          created_at: string
+          description: string | null
+          id: string
+          is_enabled: boolean
+          name: string
+          notify_emails: string[] | null
+          organization_id: string
+          priority: string | null
+          raise_to_priority: string | null
+          target_role: string | null
+          target_user_id: string | null
+          threshold_minutes: number
+          ticket_type: string | null
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          cooldown_minutes?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          name: string
+          notify_emails?: string[] | null
+          organization_id: string
+          priority?: string | null
+          raise_to_priority?: string | null
+          target_role?: string | null
+          target_user_id?: string | null
+          threshold_minutes?: number
+          ticket_type?: string | null
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          cooldown_minutes?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          name?: string
+          notify_emails?: string[] | null
+          organization_id?: string
+          priority?: string | null
+          raise_to_priority?: string | null
+          target_role?: string | null
+          target_user_id?: string | null
+          threshold_minutes?: number
+          ticket_type?: string | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_escalation_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_escalation_rules_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_escalation_rules_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_notifications: {
         Row: {
           body: string | null
