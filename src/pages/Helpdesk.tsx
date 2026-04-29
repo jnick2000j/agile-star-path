@@ -89,6 +89,9 @@ export default function Helpdesk() {
   const { accessLevel } = useOrgAccessLevel();
   const isAdmin = accessLevel === "admin";
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get("view") === "admin" && isAdmin ? "admin" : "console";
+  const [adminTab, setAdminTab] = useState<string>("catalog");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("open_active");
   const [typeFilter, setTypeFilter] = useState<string>("all");
