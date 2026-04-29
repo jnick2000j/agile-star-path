@@ -482,6 +482,71 @@ export function HelpdeskCatalogManager() {
                 />
               </div>
             </div>
+
+            <div className="border-t pt-3 space-y-3">
+              <div>
+                <Label className="text-sm">Auto-fill defaults (optional)</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  When a user picks this item on a new ticket, these values will be applied automatically
+                  if the field is still empty / unchanged.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Default category</Label>
+                <Input
+                  value={editingItem?.metadata?.default_category ?? ""}
+                  onChange={(e) => setEditingItem({
+                    ...editingItem!,
+                    metadata: { ...(editingItem?.metadata ?? {}), default_category: e.target.value },
+                  })}
+                  placeholder="e.g. Access, Performance, Bug"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Default priority</Label>
+                  <Select
+                    value={editingItem?.metadata?.default_priority ?? "none"}
+                    onValueChange={(v) => setEditingItem({
+                      ...editingItem!,
+                      metadata: {
+                        ...(editingItem?.metadata ?? {}),
+                        default_priority: v === "none" ? undefined : v,
+                      },
+                    })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— None —</SelectItem>
+                      {PRIORITIES.map((p) => (
+                        <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Default ticket type</Label>
+                  <Select
+                    value={editingItem?.metadata?.default_ticket_type ?? "none"}
+                    onValueChange={(v) => setEditingItem({
+                      ...editingItem!,
+                      metadata: {
+                        ...(editingItem?.metadata ?? {}),
+                        default_ticket_type: v === "none" ? undefined : v,
+                      },
+                    })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— None —</SelectItem>
+                      {TICKET_TYPES.map((t) => (
+                        <SelectItem key={t} value={t} className="capitalize">{t.replace("_", " ")}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setItemDialogOpen(false)}>Cancel</Button>
