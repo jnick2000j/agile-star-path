@@ -81,14 +81,15 @@ export default function ServiceCatalog() {
           >
             All
           </Badge>
-          {categories.map((c) => (
+          {categories.map((c: any) => (
             <Badge
               key={c.id}
               variant={activeCategory === c.id ? "default" : "outline"}
-              className="cursor-pointer"
+              className="cursor-pointer gap-1.5"
               onClick={() => setActiveCategory(c.id)}
               style={activeCategory === c.id ? undefined : { borderColor: c.color }}
             >
+              <CategoryIcon name={c.icon} size={12} color={activeCategory === c.id ? undefined : c.color} />
               {c.name}
             </Badge>
           ))}
