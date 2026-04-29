@@ -116,6 +116,7 @@ export function Sidebar() {
         { label: "Email-to-Ticket", href: "/support/email-intake" },
         { label: "Macros & Templates", href: "/support/macros" },
         { label: "SLA Escalation", href: "/support/sla-escalation" },
+        { label: "Customer Portal", href: "/portal" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },
