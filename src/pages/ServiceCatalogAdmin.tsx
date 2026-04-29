@@ -261,12 +261,25 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
   return embedded ? body : <AppLayout title="Service Catalog Admin" subtitle="Define orderable services with approval workflows">{body}</AppLayout>;
 }
 
-function CategoryDialog({ open, onOpenChange, onSave }: any) {
-  const [name, setName] = useState(""); const [description, setDescription] = useState(""); const [color, setColor] = useState("#64748b");
+function CategoryDialog({ open, onOpenChange, category, onSave }: any) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [color, setColor] = useState("#64748b");
+
+  useEffect(() => {
+    if (open) {
+      setName(category?.name ?? "");
+      setDescription(category?.description ?? "");
+      setColor(category?.color ?? "#64748b");
+    }
+  }, [open, category]);
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { setName(""); setDescription(""); } onOpenChange(v); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>New category</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{category ? "Edit category" : "New category"}</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>Description</Label><Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
