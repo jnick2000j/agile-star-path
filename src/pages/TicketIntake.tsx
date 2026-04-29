@@ -19,7 +19,7 @@ import { format } from "date-fns";
 const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const INTAKE_URL = `https://${PROJECT_REF}.supabase.co/functions/v1/ticket-intake`;
 
-export default function TicketIntake() {
+export default function TicketIntake({ embedded = false }: { embedded?: boolean } = {}) {
   const { currentOrganization } = useOrganization();
   const [channels, setChannels] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -52,10 +52,9 @@ export default function TicketIntake() {
     load();
   };
 
-  return (
-    <AppLayout title="Ticket Intake Channels">
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex justify-between items-start">
+  const body = (
+    <div className={embedded ? "space-y-6" : "container mx-auto py-6 space-y-6"}>
+      <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold">Ticket Intake</h1>
             <p className="text-muted-foreground">Public channels for accepting tickets via web widgets and APIs</p>
