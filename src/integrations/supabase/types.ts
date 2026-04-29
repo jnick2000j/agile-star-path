@@ -6756,6 +6756,194 @@ export type Database = {
           },
         ]
       }
+      problem_ci_links: {
+        Row: {
+          ci_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          link_type: string
+          organization_id: string
+          problem_id: string
+        }
+        Insert: {
+          ci_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_type?: string
+          organization_id: string
+          problem_id: string
+        }
+        Update: {
+          ci_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_type?: string
+          organization_id?: string
+          problem_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "problem_ci_links_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "problem_ci_links_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "configuration_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "problem_ci_links_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problem_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "problem_ci_links_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      problem_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          comment: string | null
+          from_status: string | null
+          id: string
+          problem_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          comment?: string | null
+          from_status?: string | null
+          id?: string
+          problem_id: string
+          to_status: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          comment?: string | null
+          from_status?: string | null
+          id?: string
+          problem_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "problem_status_history_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problem_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "problem_status_history_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      problems: {
+        Row: {
+          assignee_id: string | null
+          category: string | null
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          identified_at: string
+          is_known_error: boolean
+          metadata: Json
+          organization_id: string
+          priority: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reference_number: string | null
+          reporter_user_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          root_cause: string | null
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+          workaround: string | null
+        }
+        Insert: {
+          assignee_id?: string | null
+          category?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          identified_at?: string
+          is_known_error?: boolean
+          metadata?: Json
+          organization_id: string
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          reporter_user_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          workaround?: string | null
+        }
+        Update: {
+          assignee_id?: string | null
+          category?: string | null
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          identified_at?: string
+          is_known_error?: boolean
+          metadata?: Json
+          organization_id?: string
+          priority?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          reporter_user_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          workaround?: string | null
+        }
+        Relationships: []
+      }
       product_features: {
         Row: {
           actual_release_date: string | null
@@ -11555,6 +11743,96 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      problem_summary: {
+        Row: {
+          assignee_id: string | null
+          category: string | null
+          closed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string | null
+          identified_at: string | null
+          is_known_error: boolean | null
+          linked_incident_count: number | null
+          metadata: Json | null
+          open_incident_count: number | null
+          organization_id: string | null
+          priority: string | null
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reference_number: string | null
+          reporter_user_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          root_cause: string | null
+          status: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+          workaround: string | null
+        }
+        Insert: {
+          assignee_id?: string | null
+          category?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          identified_at?: string | null
+          is_known_error?: boolean | null
+          linked_incident_count?: never
+          metadata?: Json | null
+          open_incident_count?: never
+          organization_id?: string | null
+          priority?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          reporter_user_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          workaround?: string | null
+        }
+        Update: {
+          assignee_id?: string | null
+          category?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          identified_at?: string | null
+          is_known_error?: boolean | null
+          linked_incident_count?: never
+          metadata?: Json | null
+          open_incident_count?: never
+          organization_id?: string | null
+          priority?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          reporter_user_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          workaround?: string | null
+        }
+        Relationships: []
       }
       profiles_directory: {
         Row: {
