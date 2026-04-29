@@ -240,97 +240,102 @@ export function HelpdeskCatalogManager() {
           <p className="text-sm">No catalog lists yet — create your first one to start tagging tickets.</p>
         </div>
       ) : (
-        <Tabs value={currentList?.id} onValueChange={setActiveListId}>
-          <TabsList className="flex flex-wrap h-auto bg-secondary">
-            {lists.map((l) => {
-              const Icon = (l.icon && ICONS[l.icon]) || ListIcon;
-              return (
-                <TabsTrigger key={l.id} value={l.id} className="gap-2">
-                  <Icon className="h-3.5 w-3.5" />
-                  {l.name}
-                  {!l.is_active && <Badge variant="outline" className="text-[10px]">off</Badge>}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          {currentList && (
-            <TabsContent value={currentList.id} className="space-y-4 mt-4">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                  <h4 className="font-medium flex items-center gap-2">
-                    {currentList.name}
-                    {!currentList.is_active && <Badge variant="outline">Inactive</Badge>}
-                    {currentList.allow_multiple ? (
-                      <Badge variant="outline" className="text-[10px]">Multi-select</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px]">Single</Badge>
+        <div className="space-y-2">
+          {lists.map((l) => {
+            const Icon = (l.icon && ICONS[l.icon]) || ListIcon;
+            const listItems = itemsByList[l.id] ?? [];
+            const expanded = expandedListIds[l.id] ?? true;
+            return (
+              <Collapsible
+                key={l.id}
+                open={expanded}
+                onOpenChange={() => toggleList(l.id)}
+                className="border rounded-lg bg-card"
+              >
+                <div className="flex items-center justify-between gap-2 p-3">
+                  <CollapsibleTrigger className="flex items-center gap-2 flex-1 min-w-0 text-left hover:opacity-80">
+                    <ChevronRight
+                      className={`h-4 w-4 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`}
+                    />
+                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="font-medium truncate">{l.name}</span>
+                    <Badge variant="outline" className="text-[10px] shrink-0">
+                      {listItems.length} {listItems.length === 1 ? "item" : "items"}
+                    </Badge>
+                    {!l.is_active && (
+                      <Badge variant="outline" className="text-[10px] shrink-0">Inactive</Badge>
                     )}
-                  </h4>
-                  {currentList.description && (
-                    <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{currentList.description}</p>
-                  )}
-                  {currentList.required_for_types.length > 0 && (
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Required when ticket type is: {currentList.required_for_types.map(t => t.replace("_", " ")).join(", ")}
-                    </p>
-                  )}
+                    {l.allow_multiple ? (
+                      <Badge variant="outline" className="text-[10px] shrink-0 hidden sm:inline-flex">Multi</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] shrink-0 hidden sm:inline-flex">Single</Badge>
+                    )}
+                  </CollapsibleTrigger>
+                  <div className="flex gap-1 shrink-0">
+                    <Button variant="ghost" size="sm" onClick={() => openNewItem(l)} className="gap-1.5">
+                      <Plus className="h-3.5 w-3.5" /> Item
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => editList(l)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteList(l.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => editList(currentList)} className="gap-2">
-                    <Pencil className="h-3.5 w-3.5" /> Edit list
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => deleteList(currentList.id)} className="gap-2 text-destructive hover:text-destructive">
-                    <Trash2 className="h-3.5 w-3.5" /> Delete
-                  </Button>
-                  <Button size="sm" onClick={openNewItem} className="gap-2">
-                    <Plus className="h-3.5 w-3.5" /> Add item
-                  </Button>
-                </div>
-              </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="w-[80px]">Order</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[120px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                        No items yet — add some so they appear in the ticket dropdown.
-                      </TableCell>
-                    </TableRow>
-                  ) : items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{item.description || "—"}</TableCell>
-                      <TableCell className="text-xs">{item.sort_order}</TableCell>
-                      <TableCell>
-                        {item.is_active
-                          ? <Badge className="bg-success/10 text-success">Active</Badge>
-                          : <Badge variant="outline">Inactive</Badge>}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => editItem(item)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-          )}
-        </Tabs>
+                <CollapsibleContent>
+                  {(l.description || l.required_for_types.length > 0) && (
+                    <div className="px-3 pb-2 pl-10 space-y-1">
+                      {l.description && (
+                        <p className="text-xs text-muted-foreground max-w-2xl">{l.description}</p>
+                      )}
+                      {l.required_for_types.length > 0 && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Required for: {l.required_for_types.map((t) => t.replace("_", " ")).join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div className="border-t bg-muted/20">
+                    {listItems.length === 0 ? (
+                      <p className="text-xs text-muted-foreground py-4 pl-10">
+                        No items yet — add one so it appears in the ticket dropdown.
+                      </p>
+                    ) : (
+                      <ul className="divide-y">
+                        {listItems.map((item) => (
+                          <li
+                            key={item.id}
+                            className="flex items-center gap-2 py-2 pl-10 pr-3 hover:bg-muted/40"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium truncate">{item.name}</span>
+                                {!item.is_active && (
+                                  <Badge variant="outline" className="text-[10px]">Inactive</Badge>
+                                )}
+                              </div>
+                              {item.description && (
+                                <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                              )}
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => editItem(item)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+        </div>
       )}
 
       {/* List dialog */}
