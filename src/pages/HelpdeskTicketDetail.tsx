@@ -485,6 +485,55 @@ export default function HelpdeskTicketDetail() {
               status={ticket.status}
             />
 
+            <Card className="p-4 space-y-3">
+              <h3 className="font-semibold">Hierarchy</h3>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Parent ticket</Label>
+                <ParentTicketPicker
+                  currentTicketId={ticket.id}
+                  value={(ticket as any).parent_ticket_id ?? null}
+                  onChange={(parentId) => updateField("parent_ticket_id", parentId)}
+                />
+                {parentTicket && (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/support/tickets/${parentTicket.id}`)}
+                    className="text-xs text-primary hover:underline truncate block max-w-full text-left"
+                  >
+                    Open parent: {parentTicket.reference_number ?? ""} {parentTicket.subject ?? ""}
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">
+                  Sub-tickets ({childTickets.length})
+                </Label>
+                {childTickets.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No sub-tickets linked.</p>
+                ) : (
+                  <ul className="space-y-1">
+                    {childTickets.map((c: any) => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/support/tickets/${c.id}`)}
+                          className="w-full flex items-center gap-2 text-left text-sm hover:bg-muted rounded px-2 py-1"
+                        >
+                          <span className="font-mono text-[11px] text-muted-foreground shrink-0">
+                            {c.reference_number ?? c.id.slice(0, 6)}
+                          </span>
+                          <span className="truncate flex-1">{c.subject}</span>
+                          <Badge variant="outline" className="text-[10px] capitalize shrink-0">
+                            {formatLabel(c.status)}
+                          </Badge>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </Card>
+
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
               <div className="text-sm space-y-1">
