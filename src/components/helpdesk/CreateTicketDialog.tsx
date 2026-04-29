@@ -46,6 +46,12 @@ export function CreateTicketDialog({
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>({});
+  // Track which fields the user has manually edited so we don't overwrite their input
+  const [touched, setTouched] = useState<Record<"category" | "priority" | "ticket_type", boolean>>({
+    category: false,
+    priority: false,
+    ticket_type: false,
+  });
   const [form, setForm] = useState({
     subject: "",
     description: "",
@@ -56,6 +62,29 @@ export function CreateTicketDialog({
     project_id: defaultProjectId || "",
     product_id: defaultProductId || "",
   });
+
+  const handleCatalogItemAdded = (defaults: CatalogItemDefaults, itemName: string) => {
+    setForm((prev) => {
+      const next = { ...prev };
+      const applied: string[] = [];
+      if (defaults.default_category && !touched.category && !prev.category.trim()) {
+        next.category = defaults.default_category;
+        applied.push(`category "${defaults.default_category}"`);
+      }
+      if (defaults.default_priority && !touched.priority) {
+        next.priority = defaults.default_priority;
+        applied.push(`priority ${defaults.default_priority}`);
+      }
+      if (defaults.default_ticket_type && !touched.ticket_type) {
+        next.ticket_type = defaults.default_ticket_type;
+        applied.push(`type ${defaults.default_ticket_type.replace("_", " ")}`);
+      }
+      if (applied.length > 0) {
+        toast.info(`Auto-filled from "${itemName}": ${applied.join(", ")}`);
+      }
+      return next;
+    });
+  };
 
   const { data: programmes = [] } = useQuery({
     queryKey: ["programmes-min", currentOrganization?.id],
