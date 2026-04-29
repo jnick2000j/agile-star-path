@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { dispatchAutomation } from "@/lib/automations";
+import { dispatchCMWorkflow } from "@/lib/cmWorkflows";
 
 interface Props {
   open: boolean;
@@ -109,6 +110,13 @@ export function CreateChangeDialog({ open, onOpenChange, onCreated }: Props) {
         entity_id: created.id,
         payload: { ...form },
         triggered_by: user?.id,
+      });
+      dispatchCMWorkflow({
+        organization_id: currentOrganization.id,
+        trigger_event: "change_created",
+        change_request_id: created.id,
+        triggered_by: user?.id,
+        payload: { ...form },
       });
     }
     toast.success("Change request created");

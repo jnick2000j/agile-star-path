@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
 import { EntityAuditTrail } from "@/components/audit/EntityAuditTrail";
+import { dispatchCMWorkflow, type CMTriggerEvent } from "@/lib/cmWorkflows";
 
 const STATUS_OPTIONS = ["draft","submitted","in_review","cab_review","needs_information","approved","rejected","scheduled","in_progress","implemented","closed","cancelled","failed"];
 const STATUS_STYLES: Record<string, string> = {
@@ -314,6 +315,23 @@ export default function ChangeManagementDetail() {
     toast.success(`${FIELD_LABELS[field] ?? field} updated`);
     qc.invalidateQueries({ queryKey: ["cm-request", id] });
     qc.invalidateQueries({ queryKey: ["cm-activity", id] });
+    // Fire CM workflow dispatch for relevant field changes
+    const fieldToEvent: Record<string, CMTriggerEvent> = {
+      status: "status_changed",
+      urgency: "urgency_changed",
+      impact: "impact_changed",
+      owner_id: "assigned",
+    };
+    const event = fieldToEvent[field];
+    if (event && change.organization_id) {
+      dispatchCMWorkflow({
+        organization_id: change.organization_id,
+        trigger_event: event,
+        change_request_id: change.id,
+        triggered_by: user?.id,
+        payload: { field, from: prev, to: value, status: field === "status" ? value : change.status },
+      });
+    }
   };
 
   const updateField = (field: string, value: any) => {
@@ -444,6 +462,13 @@ export default function ChangeManagementDetail() {
       notes: `Approval request sent to ${userLabel(newApproverId)} (${newApprovalKind})`,
     });
     toast.success("Approval added");
+    dispatchCMWorkflow({
+      organization_id: change.organization_id,
+      trigger_event: "approval_requested",
+      change_request_id: change.id,
+      triggered_by: user?.id,
+      payload: { approval_kind: newApprovalKind, approver_id: newApproverId },
+    });
     setNewApproverId("");
     qc.invalidateQueries({ queryKey: ["cm-approvals", id] });
     qc.invalidateQueries({ queryKey: ["cm-activity", id] });
@@ -461,6 +486,15 @@ export default function ChangeManagementDetail() {
       notes: `${userLabel(user?.id)} ${decision} the ${approval.approval_kind} approval`,
     });
     toast.success(`Marked ${decision}`);
+    if (change?.organization_id) {
+      dispatchCMWorkflow({
+        organization_id: change.organization_id,
+        trigger_event: "approval_decided",
+        change_request_id: change.id,
+        triggered_by: user?.id,
+        payload: { approval_id: approval.id, approval_kind: approval.approval_kind, decision },
+      });
+    }
     qc.invalidateQueries({ queryKey: ["cm-approvals", id] });
     qc.invalidateQueries({ queryKey: ["cm-activity", id] });
   };
