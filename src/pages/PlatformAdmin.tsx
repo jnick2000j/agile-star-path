@@ -478,6 +478,10 @@ export default function PlatformAdmin() {
           <VerticalPacksManager />
         </TabsContent>
 
+        <TabsContent value="modules" className="space-y-4">
+          <PlatformModuleToggles />
+        </TabsContent>
+
         <TabsContent value="audit" className="space-y-4">
           <AuditRetentionPolicy scope="platform" />
           <AuditLogViewer scope="platform" />
