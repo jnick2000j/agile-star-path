@@ -111,6 +111,7 @@ export function Sidebar() {
         { label: "Customer Portal", href: "/help" },
         { label: "SLA & Escalation", href: "/support/sla" },
         { label: "Analytics", href: "/support/analytics" },
+        { label: "CSAT Surveys", href: "/support/csat" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },
