@@ -85,8 +85,8 @@ export default function ApprovalChainsPage() {
   const { data: profiles = [] } = useQuery({
     queryKey: ["org-profiles-min", orgId],
     enabled: !!orgId,
-    queryFn: async () => {
-      const { data } = await supabase
+    queryFn: async (): Promise<any[]> => {
+      const { data } = await (supabase as any)
         .from("profiles")
         .select("id, first_name, last_name, email")
         .eq("organization_id", orgId!)
