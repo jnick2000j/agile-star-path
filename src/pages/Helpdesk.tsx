@@ -683,6 +683,35 @@ export default function Helpdesk() {
           onConfirm={(parentId) => bulkReparent(parentId)}
         />
 
+        <AlertDialog
+          open={!!deleteTarget}
+          onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {deleteTarget?.label}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes the ticket{deleteTarget && deleteTarget.ids.length > 1 ? "s" : ""}, along
+                with all comments, activity, and attachments. Any sub-tickets will be moved to the
+                parent above (or to the top level). This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  performDelete();
+                }}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {isAdmin && (
           <Sheet open={catalogOpen} onOpenChange={setCatalogOpen}>
             <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
