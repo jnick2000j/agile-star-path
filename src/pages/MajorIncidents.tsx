@@ -68,7 +68,7 @@ export default function MajorIncidents() {
   }), [incidents]);
 
   return (
-    <AppLayout>
+    <AppLayout title="Major Incidents">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>

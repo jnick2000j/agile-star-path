@@ -129,13 +129,13 @@ export default function MajorIncidentDetail() {
   });
 
   if (isLoading || !incident) {
-    return <AppLayout><div className="p-6">Loading...</div></AppLayout>;
+    return <AppLayout title="Major Incident"><div className="p-6">Loading...</div></AppLayout>;
   }
 
   const inc: any = incident;
 
   return (
-    <AppLayout>
+    <AppLayout title="Major Incident">
       <div className="p-6 space-y-6 max-w-6xl mx-auto">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate("/major-incidents")}>
