@@ -691,7 +691,6 @@ export default function Helpdesk() {
               </TableBody>
             </Table>
           </div>
-        </div>
             </TabsContent>
 
             {isAdmin && (
@@ -763,6 +762,7 @@ export default function Helpdesk() {
             </SheetContent>
           </Sheet>
         )}
+        </div>
       </FeatureGate>
     </AppLayout>
   );
