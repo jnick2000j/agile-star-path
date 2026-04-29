@@ -7,6 +7,7 @@ export interface ViewSwitcherTab {
   label: string;
   to: string;
   icon?: LucideIcon;
+  external?: boolean;
 }
 
 interface Props {
@@ -31,17 +32,28 @@ export function ViewSwitcher({ tabs, current, className }: Props) {
       {tabs.map((t) => {
         const Icon = t.icon;
         const active = t.key === current;
+        const classes = cn(
+          "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+          active
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+        );
+        if (t.external) {
+          return (
+            <a
+              key={t.key}
+              href={t.to}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={classes}
+            >
+              {Icon && <Icon className="h-4 w-4" />}
+              {t.label}
+            </a>
+          );
+        }
         return (
-          <NavLink
-            key={t.key}
-            to={t.to}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              active
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
-            )}
-          >
+          <NavLink key={t.key} to={t.to} className={classes}>
             {Icon && <Icon className="h-4 w-4" />}
             {t.label}
           </NavLink>
