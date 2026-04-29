@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,14 +91,24 @@ export default function Helpdesk() {
   const isAdmin = accessLevel === "admin";
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get("view") === "admin" && isAdmin ? "admin" : "console";
+  const tabParam = searchParams.get("tab");
+  const isServiceRequestsTab = tabParam === "service_requests";
+  const view = searchParams.get("view") === "admin" && isAdmin ? "admin" : (isServiceRequestsTab ? "service-requests" : "console");
   const [adminTab, setAdminTab] = useState<string>("catalog");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("open_active");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>(isServiceRequestsTab ? "service_request" : "all");
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+
+  // Sync ticket type filter with the Service Requests tab
+  useEffect(() => {
+    if (isServiceRequestsTab && typeFilter !== "service_request") {
+      setTypeFilter("service_request");
+    }
+  }, [isServiceRequestsTab]);
+
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const toggleExpand = (id: string) => setExpanded((s) => ({ ...s, [id]: !(s[id] ?? true) }));
   const [dragId, setDragId] = useState<string | null>(null);
@@ -368,7 +378,8 @@ export default function Helpdesk() {
           <ViewSwitcher
             current={view}
             tabs={[
-              { key: "console", label: "Agent console", to: "/support", icon: Headset },
+          { key: "console", label: "Agent console", to: "/support", icon: Headset },
+              { key: "service-requests", label: "Service Requests", to: "/support?tab=service_requests", icon: Package },
               { key: "portal", label: "Customer Portal", to: "/portal", icon: Sparkles, external: true },
               { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
               ...(isAdmin ? [{ key: "admin", label: "Admin panel", to: "/support?view=admin", icon: Wrench }] : []),
@@ -487,8 +498,14 @@ export default function Helpdesk() {
             </Select>
             <Button onClick={() => setCreateOpen(true)} className="shrink-0 ml-auto">
               <Plus className="h-4 w-4 mr-2" />
-              New Ticket
+              {isServiceRequestsTab ? "New Request" : "New Ticket"}
             </Button>
+            {isServiceRequestsTab && (
+              <Button variant="outline" onClick={() => navigate("/catalog")} className="shrink-0 gap-2">
+                <Package className="h-4 w-4" />
+                Browse Catalog
+              </Button>
+            )}
           </div>
 
           {/* Table */}
