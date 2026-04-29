@@ -112,54 +112,76 @@ export default function HelpdeskTicketDetail() {
     enabled: !!currentOrganization?.id,
   });
 
-  const updateField = async (field: string, value: any) => {
+  const updateFields = async (fields: Record<string, any>, opts?: { skipResolveIntercept?: boolean }) => {
     if (!ticket) return;
-    const prev = (ticket as any)[field];
-    const patch: any = { [field]: value };
-    if (field === "status" && value === "resolved" && !ticket.resolved_at) patch.resolved_at = new Date().toISOString();
-    if (field === "status" && value === "closed" && !ticket.closed_at) patch.closed_at = new Date().toISOString();
+    // Intercept status -> resolved unless explicitly skipped (e.g. from the ResolveTicketDialog)
+    if (!opts?.skipResolveIntercept && fields.status === "resolved" && ticket.status !== "resolved") {
+      setResolveOpen(true);
+      return;
+    }
+    const patch: any = { ...fields };
+    if (fields.status === "resolved" && !ticket.resolved_at) patch.resolved_at = new Date().toISOString();
+    if (fields.status === "closed" && !ticket.closed_at) patch.closed_at = new Date().toISOString();
     const { error } = await supabase.from("helpdesk_tickets").update(patch).eq("id", ticket.id);
     if (error) {
       toast.error("Update failed: " + error.message);
       return;
     }
-    await supabase.from("helpdesk_ticket_activity").insert({
-      ticket_id: ticket.id,
-      organization_id: ticket.organization_id,
-      actor_user_id: user?.id ?? null,
-      event_type: `${field}_changed`,
-      from_value: { [field]: prev },
-      to_value: { [field]: value },
-    });
-    if (field === "assignee_id" && value) {
+    // Activity log per changed field
+    for (const [field, value] of Object.entries(fields)) {
+      const prev = (ticket as any)[field];
+      await supabase.from("helpdesk_ticket_activity").insert({
+        ticket_id: ticket.id,
+        organization_id: ticket.organization_id,
+        actor_user_id: user?.id ?? null,
+        event_type: `${field}_changed`,
+        from_value: { [field]: prev },
+        to_value: { [field]: value },
+      });
+    }
+    if ("assignee_id" in fields && fields.assignee_id) {
       supabase.functions.invoke("helpdesk-notify", {
         body: { ticket_id: ticket.id, notification_type: "assigned" },
       }).catch(() => {});
     }
-    if (field === "status") {
+    if ("status" in fields) {
       supabase.functions.invoke("helpdesk-notify", {
-        body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: value } },
+        body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: fields.status } },
       }).catch(() => {});
     }
-    // Dispatch workflows
     const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
-    const event =
-      field === "status" ? "status_changed" :
-      field === "assignee_id" ? "assigned" :
-      field === "priority" ? "priority_changed" : null;
-    if (event) {
-      dispatchHelpdeskWorkflow({
-        organization_id: ticket.organization_id,
-        trigger_event: event as any,
-        ticket_id: ticket.id,
-        triggered_by: user?.id,
-        payload: { from: prev, to: value, field },
-      });
+    for (const [field, value] of Object.entries(fields)) {
+      const event =
+        field === "status" ? "status_changed" :
+        field === "assignee_id" ? "assigned" :
+        field === "priority" ? "priority_changed" : null;
+      if (event) {
+        dispatchHelpdeskWorkflow({
+          organization_id: ticket.organization_id,
+          trigger_event: event as any,
+          ticket_id: ticket.id,
+          triggered_by: user?.id,
+          payload: { from: (ticket as any)[field], to: value, field },
+        });
+      }
     }
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-activity", id] });
   };
+
+  const updateField = (field: string, value: any) => updateFields({ [field]: value });
+
+  const handleConfirmResolve = async ({ resolution_code, resolution }: { resolution_code: string; resolution: string }) => {
+    setResolving(true);
+    await updateFields(
+      { status: "resolved", resolution_code, resolution },
+      { skipResolveIntercept: true },
+    );
+    setResolving(false);
+    setResolveOpen(false);
+  };
+
 
   const submitReply = async () => {
     if (!ticket || !reply.trim()) return;
