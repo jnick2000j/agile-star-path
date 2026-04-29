@@ -182,6 +182,7 @@ export function CreateTicketDialog({
       category: "", programme_id: "", project_id: "", product_id: "",
     });
     setCatalogSelection({});
+    setTouched({ category: false, priority: false, ticket_type: false });
     onCreated?.();
   };
 
