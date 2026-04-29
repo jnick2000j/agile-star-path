@@ -22,6 +22,8 @@ import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
 import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
 import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
+import { BulkParentDialog } from "@/components/helpdesk/BulkParentDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn, formatLabel } from "@/lib/utils";
 import {
@@ -75,6 +77,15 @@ export default function Helpdesk() {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const [dropOnRoot, setDropOnRoot] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkParentOpen, setBulkParentOpen] = useState(false);
+  const toggleSelected = (id: string) =>
+    setSelectedIds((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  const clearSelection = () => setSelectedIds(new Set());
 
   const { data: tickets = [], refetch, isLoading } = useQuery({
     queryKey: ["helpdesk-tickets", currentOrganization?.id, statusFilter, typeFilter],
@@ -212,6 +223,59 @@ export default function Helpdesk() {
     refetch();
   };
 
+  // Bulk reparent: validate each id (no self/descendant cycles), then update in one query.
+  const bulkReparent = async (newParentId: string | null) => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    const invalid: string[] = [];
+    if (newParentId) {
+      const blockedDescendants = descendantsOf(newParentId);
+      for (const id of ids) {
+        if (id === newParentId) { invalid.push(id); continue; }
+        if (blockedDescendants.has(id)) { invalid.push(id); continue; }
+      }
+    }
+    const validIds = ids.filter((id) => !invalid.includes(id));
+    if (!validIds.length) {
+      toast.error("None of the selected tickets can be moved under that parent");
+      return;
+    }
+    const { error } = await supabase
+      .from("helpdesk_tickets")
+      .update({ parent_ticket_id: newParentId })
+      .in("id", validIds);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const skipped = invalid.length;
+    toast.success(
+      `Moved ${validIds.length} ticket${validIds.length === 1 ? "" : "s"}` +
+        (newParentId ? " under new parent" : " to top level") +
+        (skipped ? ` (${skipped} skipped to avoid a cycle)` : ""),
+    );
+    if (newParentId) setExpanded((s) => ({ ...s, [newParentId]: true }));
+    clearSelection();
+    refetch();
+  };
+
+  // Select-all helpers based on the currently visible (filtered) tickets.
+  const visibleIds = filtered.map((t: any) => t.id) as string[];
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+  const someVisibleSelected = visibleIds.some((id) => selectedIds.has(id));
+  const toggleSelectAll = () => {
+    setSelectedIds((s) => {
+      if (allVisibleSelected) {
+        const next = new Set(s);
+        visibleIds.forEach((id) => next.delete(id));
+        return next;
+      }
+      const next = new Set(s);
+      visibleIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
   return (
     <AppLayout title="Helpdesk" subtitle="Ticket-based support and service requests">
       <FeatureGate
@@ -336,10 +400,42 @@ export default function Helpdesk() {
               Drop here to move ticket to the top level
             </div>
           )}
+
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border rounded-lg bg-primary/5 px-3 py-2">
+              <span className="text-sm font-medium">
+                {selectedIds.size} selected
+              </span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                Bulk actions apply to all selected tickets
+              </span>
+              <div className="ml-auto flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => bulkReparent(null)}>
+                  Move to top level
+                </Button>
+                <Button size="sm" onClick={() => setBulkParentOpen(true)}>
+                  Set parent...
+                </Button>
+                <Button size="sm" variant="ghost" onClick={clearSelection}>
+                  Clear
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="border rounded-lg bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px]">
+                    <Checkbox
+                      checked={
+                        allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false
+                      }
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all visible tickets"
+                    />
+                  </TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead>Type</TableHead>
@@ -352,9 +448,9 @@ export default function Helpdesk() {
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
                 ) : filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
                 ) : flattened.map(({ ticket: t, depth, hasChildren }) => {
                   const sla = slaStateOf(t);
                   const slaCfg = SLA_BADGE[sla];
@@ -400,6 +496,16 @@ export default function Helpdesk() {
                       )}
                       onClick={() => navigate(`/support/tickets/${t.id}`)}
                     >
+                      <TableCell
+                        className="w-[40px]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={selectedIds.has(t.id)}
+                          onCheckedChange={() => toggleSelected(t.id)}
+                          aria-label={`Select ticket ${t.reference_number ?? t.id}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-mono text-xs">
                         <div className="flex items-center gap-1" style={{ paddingLeft: depth * 18 }}>
                           {hasChildren ? (
@@ -457,6 +563,13 @@ export default function Helpdesk() {
           open={createOpen}
           onOpenChange={setCreateOpen}
           onCreated={() => refetch()}
+        />
+
+        <BulkParentDialog
+          open={bulkParentOpen}
+          onOpenChange={setBulkParentOpen}
+          selectedIds={Array.from(selectedIds)}
+          onConfirm={(parentId) => bulkReparent(parentId)}
         />
 
         {isAdmin && (
