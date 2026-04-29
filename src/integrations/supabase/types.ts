@@ -5416,6 +5416,54 @@ export type Database = {
           },
         ]
       }
+      kb_article_feedback: {
+        Row: {
+          article_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          is_helpful: boolean
+          organization_id: string
+          session_token: string | null
+          user_id: string | null
+        }
+        Insert: {
+          article_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_helpful: boolean
+          organization_id: string
+          session_token?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_helpful?: boolean
+          organization_id?: string
+          session_token?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_feedback_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_feedback_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_articles: {
         Row: {
           author_user_id: string | null
@@ -5550,6 +5598,63 @@ export type Database = {
           },
         ]
       }
+      kb_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_public: boolean
+          name: string
+          organization_id: string
+          parent_id: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          organization_id: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_search_log: {
         Row: {
           ai_answer: string | null
@@ -5596,6 +5701,61 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_ticket_deflections: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          resolved_without_ticket: boolean
+          search_query: string | null
+          ticket_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          resolved_without_ticket?: boolean
+          search_query?: string | null
+          ticket_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          resolved_without_ticket?: boolean
+          search_query?: string | null
+          ticket_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_ticket_deflections_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_ticket_deflections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_ticket_deflections_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -12614,6 +12774,7 @@ export type Database = {
         Returns: boolean
       }
       is_org_suspended: { Args: { _org_id: string }; Returns: boolean }
+      kb_increment_view: { Args: { p_article_id: string }; Returns: undefined }
       log_audit_event: {
         Args: {
           _event_category?: string
