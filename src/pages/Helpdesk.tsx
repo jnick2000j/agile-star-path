@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
 import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
+import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn, formatLabel } from "@/lib/utils";
 import {
@@ -144,6 +145,7 @@ export default function Helpdesk() {
         description="Premium module: ticket portal, email intake, SLA tracking, and links to projects, programmes, and products."
       >
         <div className="space-y-6">
+          <HelpdeskBreadcrumbs />
           <ViewSwitcher
             current="console"
             tabs={[

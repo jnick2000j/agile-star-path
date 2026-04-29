@@ -5,11 +5,13 @@ import { LifeBuoy, Sparkles, Headset, Inbox } from "lucide-react";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { AIIntakeChat } from "@/components/intake/AIIntakeChat";
 import { KBAssistant } from "@/components/kb/KBAssistant";
+import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
 
 export default function SupportPortal() {
   return (
     <AppLayout title="Support Portal" subtitle="Get help and track your support requests">
       <div className="space-y-6 max-w-4xl">
+        <HelpdeskBreadcrumbs />
         <ViewSwitcher
           current="portal"
           tabs={[

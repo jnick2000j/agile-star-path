@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
 import {
   Select,
   SelectContent,
@@ -276,6 +277,9 @@ export default function HelpdeskTicketDetail() {
   return (
     <AppLayout title={ticket.subject} subtitle={ticket.reference_number ?? ""}>
       <div className="space-y-4">
+        <HelpdeskBreadcrumbs
+          trail={[{ label: ticket.reference_number || ticket.subject || "Ticket" }]}
+        />
         <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Helpdesk
         </Button>
