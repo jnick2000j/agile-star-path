@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -35,6 +35,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
   const qc = useQueryClient();
 
   const [catOpen, setCatOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any | null>(null);
   const [itemOpen, setItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [fieldsOpen, setFieldsOpen] = useState<string | null>(null);
@@ -70,14 +71,35 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
 
   const handleSaveCategory = async (form: { name: string; description: string; color: string }) => {
     if (!currentOrganization?.id) return;
-    const { error } = await supabase.from("service_catalog_categories").insert({
-      organization_id: currentOrganization.id,
-      name: form.name, description: form.description || null, color: form.color || "#64748b",
-    });
+    const payload = {
+      name: form.name,
+      description: form.description || null,
+      color: form.color || "#64748b",
+    };
+    const { error } = editingCategory
+      ? await supabase.from("service_catalog_categories").update(payload).eq("id", editingCategory.id)
+      : await supabase.from("service_catalog_categories").insert({
+          organization_id: currentOrganization.id,
+          ...payload,
+        });
     if (error) { toast.error(error.message); return; }
-    toast.success("Category created");
+    toast.success(editingCategory ? "Category updated" : "Category created");
     qc.invalidateQueries({ queryKey: ["svc-categories"] });
     setCatOpen(false);
+    setEditingCategory(null);
+  };
+
+  const handleDeleteCategory = async (cat: any) => {
+    const inUse = items.some((i: any) => i.category_id === cat.id);
+    const msg = inUse
+      ? `"${cat.name}" is used by one or more catalog items. Delete anyway? Items will keep working but become uncategorized.`
+      : `Delete category "${cat.name}"?`;
+    if (!confirm(msg)) return;
+    const { error } = await supabase.from("service_catalog_categories").delete().eq("id", cat.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Category deleted");
+    qc.invalidateQueries({ queryKey: ["svc-categories"] });
+    qc.invalidateQueries({ queryKey: ["svc-items"] });
   };
 
   const handleSaveItem = async (form: any) => {
@@ -122,7 +144,9 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
               <h2 className="text-lg font-semibold">Categories</h2>
               <p className="text-xs text-muted-foreground">Group catalog items for browsing.</p>
             </div>
-            <Button size="sm" onClick={() => setCatOpen(true)}><Plus className="h-4 w-4 mr-1" /> Category</Button>
+            <Button size="sm" onClick={() => { setEditingCategory(null); setCatOpen(true); }}>
+              <Plus className="h-4 w-4 mr-1" /> Category
+            </Button>
           </div>
           <Card className="p-3">
             {categories.length === 0 ? (
@@ -130,10 +154,32 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
             ) : (
               <div className="flex flex-wrap gap-2">
                 {categories.map((c) => (
-                  <Badge key={c.id} variant="outline" style={{ borderColor: c.color }} className="gap-2">
+                  <div
+                    key={c.id}
+                    className="inline-flex items-center gap-1 rounded-md border bg-card pl-2 pr-1 py-0.5"
+                    style={{ borderColor: c.color }}
+                  >
                     <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
-                    {c.name}
-                  </Badge>
+                    <span className="text-sm">{c.name}</span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => { setEditingCategory(c); setCatOpen(true); }}
+                      aria-label={`Edit ${c.name}`}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => handleDeleteCategory(c)}
+                      aria-label={`Delete ${c.name}`}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 ))}
               </div>
             )}
@@ -190,7 +236,12 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
         </section>
       </div>
 
-      <CategoryDialog open={catOpen} onOpenChange={setCatOpen} onSave={handleSaveCategory} />
+      <CategoryDialog
+        open={catOpen}
+        onOpenChange={(v: boolean) => { setCatOpen(v); if (!v) setEditingCategory(null); }}
+        category={editingCategory}
+        onSave={handleSaveCategory}
+      />
       <ItemDialog
         open={itemOpen}
         onOpenChange={(v) => { setItemOpen(v); if (!v) setEditingItem(null); }}
@@ -210,12 +261,25 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
   return embedded ? body : <AppLayout title="Service Catalog Admin" subtitle="Define orderable services with approval workflows">{body}</AppLayout>;
 }
 
-function CategoryDialog({ open, onOpenChange, onSave }: any) {
-  const [name, setName] = useState(""); const [description, setDescription] = useState(""); const [color, setColor] = useState("#64748b");
+function CategoryDialog({ open, onOpenChange, category, onSave }: any) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [color, setColor] = useState("#64748b");
+
+  useEffect(() => {
+    if (open) {
+      setName(category?.name ?? "");
+      setDescription(category?.description ?? "");
+      setColor(category?.color ?? "#64748b");
+    }
+  }, [open, category]);
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { setName(""); setDescription(""); } onOpenChange(v); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>New category</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{category ? "Edit category" : "New category"}</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>Description</Label><Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
@@ -231,13 +295,15 @@ function CategoryDialog({ open, onOpenChange, onSave }: any) {
 }
 
 function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
-  const [form, setForm] = useState<any>(() => item ?? {
+  const empty = {
     name: "", short_description: "", description: "", category_id: "",
     default_priority: "medium", approval_policy: "none", approver_user_ids: [],
     cost_estimate: "", estimated_fulfillment_hours: "", is_active: true,
-  });
-  // re-sync when item changes
-  useState(() => setForm(item ?? form));
+  };
+  const [form, setForm] = useState<any>(item ?? empty);
+  useEffect(() => {
+    if (open) setForm(item ?? empty);
+  }, [open, item]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
