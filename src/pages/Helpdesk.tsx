@@ -291,6 +291,22 @@ export default function Helpdesk() {
           onOpenChange={setCreateOpen}
           onCreated={() => refetch()}
         />
+
+        {isAdmin && (
+          <Sheet open={catalogOpen} onOpenChange={setCatalogOpen}>
+            <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Helpdesk Catalog</SheetTitle>
+                <SheetDescription>
+                  Define custom lists like Services, Applications, Departments, or Locations that agents can attach to tickets in addition to the ticket type.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6">
+                <HelpdeskCatalogManager />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </FeatureGate>
     </AppLayout>
   );
