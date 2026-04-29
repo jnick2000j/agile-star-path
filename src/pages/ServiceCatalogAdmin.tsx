@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+import { CategoryIcon, CategoryIconPicker } from "@/components/catalog/CategoryIconPicker";
 
 const FIELD_TYPES = [
   { value: "text", label: "Short text" },
@@ -69,12 +70,13 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
     enabled: !!currentOrganization?.id,
   });
 
-  const handleSaveCategory = async (form: { name: string; description: string; color: string }) => {
+  const handleSaveCategory = async (form: { name: string; description: string; color: string; icon: string | null }) => {
     if (!currentOrganization?.id) return;
     const payload = {
       name: form.name,
       description: form.description || null,
       color: form.color || "#64748b",
+      icon: form.icon || null,
     };
     const { error } = editingCategory
       ? await supabase.from("service_catalog_categories").update(payload).eq("id", editingCategory.id)
@@ -159,7 +161,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
                     className="inline-flex items-center gap-1 rounded-md border bg-card pl-2 pr-1 py-0.5"
                     style={{ borderColor: c.color }}
                   >
-                    <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
+                    <CategoryIcon name={c.icon} size={14} color={c.color} />
                     <span className="text-sm">{c.name}</span>
                     <Button
                       size="icon"
@@ -265,12 +267,14 @@ function CategoryDialog({ open, onOpenChange, category, onSave }: any) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("#64748b");
+  const [icon, setIcon] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setName(category?.name ?? "");
       setDescription(category?.description ?? "");
       setColor(category?.color ?? "#64748b");
+      setIcon(category?.icon ?? null);
     }
   }, [open, category]);
 
@@ -283,16 +287,26 @@ function CategoryDialog({ open, onOpenChange, category, onSave }: any) {
         <div className="space-y-3">
           <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>Description</Label><Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div><Label>Color</Label><Input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-9 w-20" /></div>
+          <div className="flex items-end gap-3">
+            <div>
+              <Label>Color</Label>
+              <Input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-9 w-20" />
+            </div>
+            <div className="flex-1">
+              <Label>Icon</Label>
+              <div><CategoryIconPicker value={icon} onChange={setIcon} color={color} /></div>
+            </div>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => onSave({ name, description, color })} disabled={!name.trim()}>Save</Button>
+          <Button onClick={() => onSave({ name, description, color, icon })} disabled={!name.trim()}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
   const empty = {

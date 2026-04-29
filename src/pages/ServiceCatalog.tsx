@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package, Settings2, Clock, ShieldCheck } from "lucide-react";
 import { RequestCatalogItemDialog } from "@/components/catalog/RequestCatalogItemDialog";
+import { CategoryIcon } from "@/components/catalog/CategoryIconPicker";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 
 export default function ServiceCatalog() {
@@ -27,7 +28,7 @@ export default function ServiceCatalog() {
       if (!currentOrganization?.id) return [];
       const { data } = await supabase
         .from("service_catalog_categories")
-        .select("id, name, color")
+        .select("id, name, color, icon")
         .eq("organization_id", currentOrganization.id)
         .eq("is_active", true)
         .order("sort_order");
@@ -80,14 +81,15 @@ export default function ServiceCatalog() {
           >
             All
           </Badge>
-          {categories.map((c) => (
+          {categories.map((c: any) => (
             <Badge
               key={c.id}
               variant={activeCategory === c.id ? "default" : "outline"}
-              className="cursor-pointer"
+              className="cursor-pointer gap-1.5"
               onClick={() => setActiveCategory(c.id)}
               style={activeCategory === c.id ? undefined : { borderColor: c.color }}
             >
+              <CategoryIcon name={c.icon} size={12} color={activeCategory === c.id ? undefined : c.color} />
               {c.name}
             </Badge>
           ))}
