@@ -110,6 +110,7 @@ export function Sidebar() {
         { label: "Status Page", href: "/status/admin" },
         { label: "Customer Portal", href: "/help" },
         { label: "SLA & Escalation", href: "/support/sla" },
+        { label: "Analytics", href: "/support/analytics" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },

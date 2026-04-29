@@ -87,6 +87,7 @@ import HelpSubmit from "./pages/HelpSubmit";
 import HelpMyTickets from "./pages/HelpMyTickets";
 import SLAManagement from "./pages/SLAManagement";
 import AssetManagement from "./pages/AssetManagement";
+import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -205,6 +206,7 @@ const App = () => (
             <Route path="/help/my-tickets" element={<ProtectedRoute><HelpMyTickets /></ProtectedRoute>} />
             <Route path="/support/sla" element={<ProtectedRoute><SLAManagement /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute><AssetManagement /></ProtectedRoute>} />
+            <Route path="/support/analytics" element={<ProtectedRoute><HelpdeskAnalytics /></ProtectedRoute>} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
