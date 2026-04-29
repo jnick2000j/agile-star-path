@@ -223,6 +223,59 @@ export default function Helpdesk() {
     refetch();
   };
 
+  // Bulk reparent: validate each id (no self/descendant cycles), then update in one query.
+  const bulkReparent = async (newParentId: string | null) => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    const invalid: string[] = [];
+    if (newParentId) {
+      const blockedDescendants = descendantsOf(newParentId);
+      for (const id of ids) {
+        if (id === newParentId) { invalid.push(id); continue; }
+        if (blockedDescendants.has(id)) { invalid.push(id); continue; }
+      }
+    }
+    const validIds = ids.filter((id) => !invalid.includes(id));
+    if (!validIds.length) {
+      toast.error("None of the selected tickets can be moved under that parent");
+      return;
+    }
+    const { error } = await supabase
+      .from("helpdesk_tickets")
+      .update({ parent_ticket_id: newParentId })
+      .in("id", validIds);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const skipped = invalid.length;
+    toast.success(
+      `Moved ${validIds.length} ticket${validIds.length === 1 ? "" : "s"}` +
+        (newParentId ? " under new parent" : " to top level") +
+        (skipped ? ` (${skipped} skipped to avoid a cycle)` : ""),
+    );
+    if (newParentId) setExpanded((s) => ({ ...s, [newParentId]: true }));
+    clearSelection();
+    refetch();
+  };
+
+  // Select-all helpers based on the currently visible (filtered) tickets.
+  const visibleIds = filtered.map((t: any) => t.id) as string[];
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+  const someVisibleSelected = visibleIds.some((id) => selectedIds.has(id));
+  const toggleSelectAll = () => {
+    setSelectedIds((s) => {
+      if (allVisibleSelected) {
+        const next = new Set(s);
+        visibleIds.forEach((id) => next.delete(id));
+        return next;
+      }
+      const next = new Set(s);
+      visibleIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
   return (
     <AppLayout title="Helpdesk" subtitle="Ticket-based support and service requests">
       <FeatureGate
