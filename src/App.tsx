@@ -72,6 +72,8 @@ import CMDB from "./pages/CMDB";
 import CMDBDetail from "./pages/CMDBDetail";
 import ServiceCatalog from "./pages/ServiceCatalog";
 import ServiceCatalogAdmin from "./pages/ServiceCatalogAdmin";
+import Problems from "./pages/Problems";
+import ProblemDetail from "./pages/ProblemDetail";
 import CMWorkflows from "./pages/CMWorkflows";
 import SupportPortal from "./pages/SupportPortal";
 import MyTickets from "./pages/MyTickets";
@@ -181,6 +183,8 @@ const App = () => (
             <Route path="/cmdb/:id" element={<ProtectedRoute><CMDBDetail /></ProtectedRoute>} />
             <Route path="/catalog" element={<ProtectedRoute><ServiceCatalog /></ProtectedRoute>} />
             <Route path="/catalog/admin" element={<ProtectedRoute><ServiceCatalogAdmin /></ProtectedRoute>} />
+            <Route path="/problems" element={<ProtectedRoute><Problems /></ProtectedRoute>} />
+            <Route path="/problems/:id" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
