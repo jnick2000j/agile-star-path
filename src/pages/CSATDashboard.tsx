@@ -41,7 +41,7 @@ export default function CSATDashboard() {
       setSurveys(s || []);
       setLoading(false);
     })();
-  }, [currentOrganization?.id]);
+  }, [currentOrganization]);
 
   const stats = useMemo(() => {
     if (!responses.length) {
