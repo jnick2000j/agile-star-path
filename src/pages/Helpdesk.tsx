@@ -91,11 +91,13 @@ export default function Helpdesk() {
   const isAdmin = accessLevel === "admin";
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get("view") === "admin" && isAdmin ? "admin" : "console";
+  const tabParam = searchParams.get("tab");
+  const isServiceRequestsTab = tabParam === "service_requests";
+  const view = searchParams.get("view") === "admin" && isAdmin ? "admin" : (isServiceRequestsTab ? "service-requests" : "console");
   const [adminTab, setAdminTab] = useState<string>("catalog");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("open_active");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>(isServiceRequestsTab ? "service_request" : "all");
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
