@@ -32,22 +32,88 @@ export function ApprovalsPanel({ ticketId }: Props) {
 
   const decide = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "approved" | "rejected" }) => {
-      const { error } = await supabase
+      const { data: row, error } = await supabase
         .from("service_catalog_request_approvals")
         .update({
           status,
           comment: comments[id] || null,
           decided_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq("id", id)
+        .select("organization_id, step_order, ticket_id")
+        .single();
       if (error) throw error;
-      // Trigger evaluation
-      await supabase.rpc("helpdesk_evaluate_approvals", { _ticket_id: ticketId });
+
+      // Re-evaluate the chain if one exists, otherwise we still continue with simple sequential approvals
+      const { data: outcome } = await supabase.rpc("helpdesk_evaluate_approvals", { _ticket_id: ticketId });
+
+      // Pull the ticket to access reporter + catalog metadata for notifications
+      const { data: ticket } = await supabase
+        .from("helpdesk_tickets")
+        .select("id, subject, reporter_user_id, metadata")
+        .eq("id", ticketId)
+        .maybeSingle();
+      const itemName = (ticket?.metadata as any)?.catalog_item_name ?? "your request";
+
+      // Re-fetch the latest approval list to know what to do next
+      const { data: latest } = await supabase
+        .from("service_catalog_request_approvals")
+        .select("approver_user_id, status, step_order")
+        .eq("ticket_id", ticketId)
+        .order("step_order", { ascending: true });
+      const all = latest ?? [];
+      const anyRejected = all.some((a) => a.status === "rejected");
+      const allApproved = all.length > 0 && all.every((a) => a.status === "approved");
+      const nextPending = all.find((a) => a.status === "pending");
+
+      // Notify the requester on a final outcome
+      if (ticket?.reporter_user_id && (anyRejected || allApproved || outcome === "rejected" || outcome === "approved")) {
+        await supabase.from("notifications").insert({
+          user_id: ticket.reporter_user_id,
+          type: "approval_decision",
+          title: anyRejected || outcome === "rejected" ? `Request rejected: ${itemName}` : `Request approved: ${itemName}`,
+          message: anyRejected || outcome === "rejected"
+            ? `Your service request was rejected at step ${row.step_order}.`
+            : `All approvals complete — fulfillment is starting now.`,
+          link: `/support?ticket=${ticketId}`,
+          metadata: { ticket_id: ticketId },
+        });
+      }
+
+      // Notify next approver in sequential mode
+      if (status === "approved" && !anyRejected && nextPending) {
+        await supabase.from("notifications").insert({
+          user_id: nextPending.approver_user_id,
+          type: "approval_request",
+          title: `Approval needed: ${itemName}`,
+          message: `It's your turn to review this service request (step ${nextPending.step_order}).`,
+          link: `/support?ticket=${ticketId}`,
+          metadata: { ticket_id: ticketId, step: nextPending.step_order },
+        });
+      }
+
+      // On full approval → reopen ticket and spawn the first fulfillment task
+      if (allApproved || outcome === "approved") {
+        await supabase
+          .from("helpdesk_tickets")
+          .update({ status: "open" })
+          .eq("id", ticketId);
+        await supabase.rpc("helpdesk_spawn_next_catalog_task", { _parent_ticket_id: ticketId });
+      }
+
+      // On rejection → cancel the ticket
+      if (anyRejected || outcome === "rejected") {
+        await supabase
+          .from("helpdesk_tickets")
+          .update({ status: "cancelled" })
+          .eq("id", ticketId);
+      }
     },
     onSuccess: () => {
       toast.success("Decision recorded");
       qc.invalidateQueries({ queryKey: ["ticket-approvals", ticketId] });
       qc.invalidateQueries({ queryKey: ["helpdesk-ticket", ticketId] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-tickets"] });
     },
     onError: (e: any) => toast.error(e.message),
   });

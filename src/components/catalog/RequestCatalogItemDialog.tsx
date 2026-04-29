@@ -96,20 +96,35 @@ export function RequestCatalogItemDialog({ itemId, open, onOpenChange, onCreated
       });
 
       // 4. Create approval steps
-      if (item.approval_policy === "specific_users" && (item.approver_user_ids ?? []).length > 0) {
-        const rows = item.approver_user_ids.map((uid: string, idx: number) => ({
+      const approverIds: string[] = (item.approver_user_ids ?? []) as string[];
+      if (item.approval_policy === "specific_users" && approverIds.length > 0) {
+        const rows = approverIds.map((uid: string, idx: number) => ({
           organization_id: currentOrganization.id,
           ticket_id: ticket.id,
           step_order: idx + 1,
           approver_user_id: uid,
           status: "pending" as const,
+          mode: "sequential" as const,
         }));
         await supabase.from("service_catalog_request_approvals").insert(rows);
         // Hold ticket until approvals complete
         await supabase.from("helpdesk_tickets").update({ status: "pending" }).eq("id", ticket.id);
+
+        // Notify the first approver immediately; others get notified when their turn comes
+        await supabase.from("notifications").insert({
+          user_id: approverIds[0],
+          type: "approval_request",
+          title: `Approval needed: ${item.name}`,
+          message: `${reporterName ?? "A user"} submitted a request that requires your approval.`,
+          link: `/support?ticket=${ticket.id}`,
+          metadata: { ticket_id: ticket.id, item_id: item.id, step: 1 },
+        });
       } else if (item.approval_policy === "manager") {
         // No org-manager-of-user mapping yet; mark ticket pending for now
         await supabase.from("helpdesk_tickets").update({ status: "pending" }).eq("id", ticket.id);
+      } else {
+        // No approvals required → spawn first fulfillment task immediately
+        await supabase.rpc("helpdesk_spawn_next_catalog_task", { _parent_ticket_id: ticket.id });
       }
 
       toast.success("Request submitted");
