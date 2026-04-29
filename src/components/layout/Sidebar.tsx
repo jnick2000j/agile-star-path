@@ -106,8 +106,6 @@ export function Sidebar() {
         { label: "Problems", href: "/problems" },
         { label: "CMDB", href: "/cmdb" },
         { label: "Assets & Licenses", href: "/assets" },
-        { label: "Status Page", href: "/status/admin" },
-        { label: "Customer Portal", href: "/portal" },
         { label: "Analytics", href: "/support/analytics" },
         { label: "CSAT Surveys", href: "/support/csat" },
         { label: "Reports & Exports", href: "/support/reports" },

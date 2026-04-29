@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket, Wrench } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import TicketIntake from "@/pages/TicketIntake";
 import EmailIntake from "@/pages/EmailIntake";
@@ -40,7 +40,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
 import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
@@ -89,6 +89,9 @@ export default function Helpdesk() {
   const { accessLevel } = useOrgAccessLevel();
   const isAdmin = accessLevel === "admin";
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get("view") === "admin" && isAdmin ? "admin" : "console";
+  const [adminTab, setAdminTab] = useState<string>("catalog");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("open_active");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -361,27 +364,52 @@ export default function Helpdesk() {
         <div className="space-y-6">
           <HelpdeskBreadcrumbs />
           <ViewSwitcher
-            current="console"
+            current={view}
             tabs={[
               { key: "console", label: "Agent console", to: "/support", icon: Headset },
               { key: "portal", label: "Customer Portal", to: "/portal", icon: Sparkles },
               { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
+              ...(isAdmin ? [{ key: "admin", label: "Admin panel", to: "/support?view=admin", icon: Wrench }] : []),
             ]}
           />
-          <Tabs defaultValue="tickets" className="space-y-6">
-            <div className="border-b overflow-x-auto">
-              <TabsList className="w-full h-auto p-0 bg-transparent justify-start gap-1 rounded-none">
-                <TabsTrigger value="tickets" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><Ticket className="h-4 w-4" /> Tickets</TabsTrigger>
-                {isAdmin && <TabsTrigger value="catalog" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><Package className="h-4 w-4" /> Catalog</TabsTrigger>}
-                {isAdmin && <TabsTrigger value="intake" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><Globe className="h-4 w-4" /> Intake Channels</TabsTrigger>}
-                {isAdmin && <TabsTrigger value="email" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><AtSign className="h-4 w-4" /> Email-to-Ticket</TabsTrigger>}
-                {isAdmin && <TabsTrigger value="macros" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><FileText className="h-4 w-4" /> Macros</TabsTrigger>}
-                {isAdmin && <TabsTrigger value="sla" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><AlarmClock className="h-4 w-4" /> SLA Escalation</TabsTrigger>}
-                {isAdmin && <TabsTrigger value="approvals" className="flex-1 min-w-[140px] gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary py-3"><ShieldCheck className="h-4 w-4" /> Approvals</TabsTrigger>}
-              </TabsList>
-            </div>
 
-            <TabsContent value="tickets" className="space-y-6 mt-0">
+          {view === "admin" && isAdmin ? (
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "catalog", label: "Catalog", icon: Package },
+                  { key: "intake", label: "Intake Channels", icon: Globe },
+                  { key: "email", label: "Email-to-Ticket", icon: AtSign },
+                  { key: "macros", label: "Macros", icon: FileText },
+                  { key: "sla", label: "SLA Escalation", icon: AlarmClock },
+                  { key: "approvals", label: "Approvals", icon: ShieldCheck },
+                ].map((b) => {
+                  const Icon = b.icon;
+                  const active = adminTab === b.key;
+                  return (
+                    <Button
+                      key={b.key}
+                      variant={active ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setAdminTab(b.key)}
+                      className="gap-2"
+                    >
+                      <Icon className="h-4 w-4" /> {b.label}
+                    </Button>
+                  );
+                })}
+              </div>
+              <div className="border rounded-lg bg-card p-4">
+                {adminTab === "catalog" && <ServiceCatalogAdmin embedded />}
+                {adminTab === "intake" && <TicketIntake embedded />}
+                {adminTab === "email" && <EmailIntake embedded />}
+                {adminTab === "macros" && <MacrosPage embedded />}
+                {adminTab === "sla" && <SLAEscalationRules embedded />}
+                {adminTab === "approvals" && <ApprovalChainsPage embedded />}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <StatCard label="Open" value={stats.open} icon={<LifeBuoy className="h-4 w-4" />} />
@@ -693,19 +721,8 @@ export default function Helpdesk() {
               </TableBody>
             </Table>
           </div>
-            </TabsContent>
-
-            {isAdmin && (
-              <>
-                <TabsContent value="catalog" className="mt-0"><ServiceCatalogAdmin embedded /></TabsContent>
-                <TabsContent value="intake" className="mt-0"><TicketIntake embedded /></TabsContent>
-                <TabsContent value="email" className="mt-0"><EmailIntake embedded /></TabsContent>
-                <TabsContent value="macros" className="mt-0"><MacrosPage embedded /></TabsContent>
-                <TabsContent value="sla" className="mt-0"><SLAEscalationRules embedded /></TabsContent>
-                <TabsContent value="approvals" className="mt-0"><ApprovalChainsPage embedded /></TabsContent>
-              </>
-            )}
-          </Tabs>
+            </div>
+          )}
 
         <CreateTicketDialog
           open={createOpen}
