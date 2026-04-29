@@ -115,6 +115,7 @@ export function Sidebar() {
         { label: "Intake Channels", href: "/support/intake" },
         { label: "Email-to-Ticket", href: "/support/email-intake" },
         { label: "Macros & Templates", href: "/support/macros" },
+        { label: "SLA Escalation", href: "/support/sla-escalation" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },
