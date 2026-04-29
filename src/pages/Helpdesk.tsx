@@ -371,8 +371,8 @@ export default function Helpdesk() {
 
           {/* Toolbar */}
           <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-            <div className="flex items-center gap-2 flex-1 max-w-xl">
-              <div className="relative flex-1">
+            <div className="flex flex-wrap items-center gap-2 flex-1 md:max-w-xl">
+              <div className="relative w-full sm:flex-1 sm:min-w-[180px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search tickets, reference, reporter..."
@@ -382,7 +382,7 @@ export default function Helpdesk() {
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[170px]">
+                <SelectTrigger className="w-[48%] sm:w-[170px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -398,7 +398,7 @@ export default function Helpdesk() {
                 </SelectContent>
               </Select>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[170px]">
+                <SelectTrigger className="w-[48%] sm:w-[170px]">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -411,7 +411,7 @@ export default function Helpdesk() {
                 </SelectContent>
               </Select>
               <Select value={slaFilter} onValueChange={setSlaFilter}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px]">
                   <SelectValue placeholder="SLA" />
                 </SelectTrigger>
                 <SelectContent>
@@ -424,7 +424,7 @@ export default function Helpdesk() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {isAdmin && (
                 <Button variant="outline" onClick={() => setCatalogOpen(true)}>
                   <Settings2 className="h-4 w-4 mr-2" />
@@ -506,7 +506,7 @@ export default function Helpdesk() {
             </div>
           )}
 
-          <div className="border rounded-lg bg-card">
+          <div className="border rounded-lg bg-card overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
