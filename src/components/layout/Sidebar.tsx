@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { useVertical } from "@/hooks/useVertical";
 import { useDashboardPrefs } from "@/hooks/useDashboardPrefs";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
+import { useModuleToggles } from "@/hooks/useModuleToggles";
 
 interface NavItem {
   label: string;
