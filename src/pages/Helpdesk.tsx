@@ -287,7 +287,7 @@ export default function Helpdesk() {
       // Reparent children of each deleted ticket to that ticket's parent.
       const parentMap = new Map<string, string | null>();
       tickets.forEach((t: any) => parentMap.set(t.id, t.parent_ticket_id ?? null));
-      const reparentOps: Promise<any>[] = [];
+      const reparentOps: PromiseLike<any>[] = [];
       const grouped = new Map<string | null, string[]>();
       tickets.forEach((t: any) => {
         if (t.parent_ticket_id && ids.includes(t.parent_ticket_id) && !ids.includes(t.id)) {
