@@ -62,6 +62,7 @@ const PRIORITIES = ["low", "medium", "high", "urgent"];
 export function HelpdeskCatalogManager() {
   const { currentOrganization } = useOrganization();
   const qc = useQueryClient();
+  const [expandedListIds, setExpandedListIds] = useState<Record<string, boolean>>({});
   const [activeListId, setActiveListId] = useState<string | null>(null);
   const [listDialogOpen, setListDialogOpen] = useState(false);
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
@@ -82,24 +83,30 @@ export function HelpdeskCatalogManager() {
     enabled: !!currentOrganization?.id,
   });
 
-  const currentList = activeListId
-    ? lists.find((l) => l.id === activeListId)
-    : lists[0];
-
-  const { data: items = [] } = useQuery({
-    queryKey: ["hd-catalog-items", currentList?.id],
+  // Fetch ALL items for the org once, then group by list_id (parent/child tree)
+  const { data: allItems = [] } = useQuery({
+    queryKey: ["hd-catalog-items-all", currentOrganization?.id],
     queryFn: async () => {
-      if (!currentList?.id) return [];
+      if (!currentOrganization?.id) return [];
       const { data } = await supabase
         .from("helpdesk_catalog_items")
         .select("*")
-        .eq("list_id", currentList.id)
+        .eq("organization_id", currentOrganization.id)
         .order("sort_order")
         .order("name");
       return (data ?? []) as ItemRow[];
     },
-    enabled: !!currentList?.id,
+    enabled: !!currentOrganization?.id,
   });
+
+  const itemsByList = allItems.reduce<Record<string, ItemRow[]>>((acc, it) => {
+    (acc[it.list_id] ||= []).push(it);
+    return acc;
+  }, {});
+
+  const currentList = activeListId ? lists.find((l) => l.id === activeListId) ?? null : null;
+  const toggleList = (id: string) =>
+    setExpandedListIds((s) => ({ ...s, [id]: !s[id] }));
 
   const openNewList = () => {
     setEditingList({
