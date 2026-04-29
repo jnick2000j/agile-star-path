@@ -67,24 +67,29 @@ export default function HelpdeskAnalytics() {
     enabled: !!orgId,
   });
 
+  const assigneeIds = useMemo(() => {
+    const set = new Set<string>();
+    tickets.forEach((t: any) => { if (t.assignee_id) set.add(t.assignee_id); });
+    return Array.from(set);
+  }, [tickets]);
+
   const { data: agents = [] } = useQuery({
-    queryKey: ["analytics-agents", orgId],
+    queryKey: ["analytics-agents", orgId, assigneeIds.join(",")],
     queryFn: async () => {
-      if (!orgId) return [];
+      if (!orgId || assigneeIds.length === 0) return [];
       const { data } = await supabase
-        .from("organization_members")
-        .select("user_id, profiles:user_id(first_name, last_name)")
-        .eq("organization_id", orgId);
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .in("id", assigneeIds);
       return data ?? [];
     },
-    enabled: !!orgId,
+    enabled: !!orgId && assigneeIds.length > 0,
   });
 
   const agentMap = useMemo(() => {
     const m = new Map<string, string>();
-    agents.forEach((a: any) => {
-      const p = a.profiles;
-      if (p) m.set(a.user_id, `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Unnamed");
+    agents.forEach((p: any) => {
+      m.set(p.id, `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Unnamed");
     });
     return m;
   }, [agents]);
