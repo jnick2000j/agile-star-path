@@ -7,8 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
-import { Plus, BookOpen, Ticket, ArrowRight } from "lucide-react";
+import { Sparkles, BookOpen, Ticket, ArrowRight, Package } from "lucide-react";
 import { STATUS_BADGE } from "@/lib/portalStatus";
+import { PortalServiceStatus } from "@/components/portal/PortalServiceStatus";
 
 export default function PortalDashboard() {
   const { user } = useAuth();
@@ -44,6 +45,21 @@ export default function PortalDashboard() {
     },
   });
 
+  const { data: catalogItems = [] } = useQuery({
+    queryKey: ["portal-catalog-popular", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("service_catalog_items")
+        .select("id, name, short_description")
+        .eq("organization_id", currentOrganization!.id)
+        .eq("is_active", true)
+        .order("sort_order")
+        .limit(4);
+      return data ?? [];
+    },
+  });
+
   const open = tickets.filter((t: any) => !["resolved", "closed", "cancelled"].includes(t.status));
   const closed = tickets.filter((t: any) => ["resolved", "closed", "cancelled"].includes(t.status));
 
@@ -52,11 +68,36 @@ export default function PortalDashboard() {
       <div>
         <h1 className="text-2xl font-semibold">Welcome back</h1>
         <p className="text-sm text-muted-foreground">
-          Submit a request, track your open tickets, or search the knowledge base.
+          One place for all your IT help — chat with the assistant, track tickets, browse the knowledge base,
+          or request a service.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Service status moved to top of customer portal */}
+      <PortalServiceStatus />
+
+      {/* Primary CTA: AI chat */}
+      <Card className="p-5 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Sparkles className="h-6 w-6 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-semibold text-lg">Need help or a service?</h2>
+            <p className="text-sm text-muted-foreground mb-3">
+              Chat with the assistant. It will figure out whether you need a support ticket or a service request,
+              suggest help articles, and submit it for you.
+            </p>
+            <Link to="/portal/new">
+              <Button>
+                <Sparkles className="h-4 w-4 mr-1" /> Start a chat
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card className="p-4">
           <div className="text-3xl font-bold">{open.length}</div>
           <div className="text-sm text-muted-foreground">Open requests</div>
@@ -64,15 +105,6 @@ export default function PortalDashboard() {
         <Card className="p-4">
           <div className="text-3xl font-bold">{closed.length}</div>
           <div className="text-sm text-muted-foreground">Recently resolved</div>
-        </Card>
-        <Card className="p-4 flex items-center justify-between">
-          <div>
-            <div className="font-medium">Need help?</div>
-            <div className="text-sm text-muted-foreground">Submit a new request</div>
-          </div>
-          <Link to="/portal/new">
-            <Button size="sm"><Plus className="h-4 w-4 mr-1" /> New</Button>
-          </Link>
         </Card>
       </div>
 
@@ -112,6 +144,33 @@ export default function PortalDashboard() {
           </div>
         )}
       </Card>
+
+      {catalogItems.length > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold flex items-center gap-2">
+              <Package className="h-4 w-4" /> Service Catalog
+            </h2>
+            <Link to="/portal/catalog" className="text-sm text-primary hover:underline">
+              Browse all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {catalogItems.map((it: any) => (
+              <Link
+                key={it.id}
+                to="/portal/new"
+                className="block rounded-md border p-3 hover:border-primary/40 transition-colors"
+              >
+                <div className="font-medium text-sm">{it.name}</div>
+                {it.short_description && (
+                  <div className="text-xs text-muted-foreground line-clamp-2">{it.short_description}</div>
+                )}
+              </Link>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
