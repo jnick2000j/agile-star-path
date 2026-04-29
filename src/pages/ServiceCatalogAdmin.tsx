@@ -267,12 +267,14 @@ function CategoryDialog({ open, onOpenChange, category, onSave }: any) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("#64748b");
+  const [icon, setIcon] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setName(category?.name ?? "");
       setDescription(category?.description ?? "");
       setColor(category?.color ?? "#64748b");
+      setIcon(category?.icon ?? null);
     }
   }, [open, category]);
 
@@ -285,16 +287,26 @@ function CategoryDialog({ open, onOpenChange, category, onSave }: any) {
         <div className="space-y-3">
           <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>Description</Label><Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div><Label>Color</Label><Input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-9 w-20" /></div>
+          <div className="flex items-end gap-3">
+            <div>
+              <Label>Color</Label>
+              <Input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-9 w-20" />
+            </div>
+            <div className="flex-1">
+              <Label>Icon</Label>
+              <div><CategoryIconPicker value={icon} onChange={setIcon} color={color} /></div>
+            </div>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => onSave({ name, description, color })} disabled={!name.trim()}>Save</Button>
+          <Button onClick={() => onSave({ name, description, color, icon })} disabled={!name.trim()}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
   const empty = {
