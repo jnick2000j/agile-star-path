@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
 import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
+import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn, formatLabel } from "@/lib/utils";
 import {
