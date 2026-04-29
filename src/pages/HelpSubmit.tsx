@@ -57,7 +57,7 @@ export default function HelpSubmit() {
           reporter_user_id: user.user.id,
           source: "portal",
         } as any)
-        .select("id, ticket_number")
+        .select("id, reference_number")
         .single();
       if (error) throw error;
       // log deflection (no resolution)
@@ -71,7 +71,7 @@ export default function HelpSubmit() {
       return data;
     },
     onSuccess: (t: any) => {
-      toast.success(`Request ${t.ticket_number} submitted`);
+      toast.success(`Request ${t.reference_number} submitted`);
       navigate("/help/my-tickets");
     },
     onError: (e: any) => toast.error(e.message),

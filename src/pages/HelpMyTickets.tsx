@@ -31,7 +31,7 @@ export default function HelpMyTickets() {
       if (!userId) return [];
       const { data, error } = await supabase
         .from("helpdesk_tickets")
-        .select("id, ticket_number, subject, status, priority, created_at, updated_at")
+        .select("id, reference_number, subject, status, priority, created_at, updated_at")
         .eq("reporter_user_id", userId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -90,7 +90,7 @@ export default function HelpMyTickets() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
+                      <span className="font-mono text-xs text-muted-foreground">{t.reference_number}</span>
                       <Badge className={STATUS_STYLES[t.status] ?? "bg-muted"} variant="outline">{t.status}</Badge>
                       <Badge variant="outline" className="text-xs">{t.priority}</Badge>
                     </div>
