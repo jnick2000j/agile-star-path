@@ -311,6 +311,31 @@ export default function Helpdesk() {
           </div>
 
           {/* Table */}
+          {dragId && (
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                setDropOnRoot(true);
+              }}
+              onDragLeave={() => setDropOnRoot(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                const draggedId = e.dataTransfer.getData("text/plain") || dragId;
+                setDropOnRoot(false);
+                setDragId(null);
+                if (draggedId) reparent(draggedId, null);
+              }}
+              className={cn(
+                "border-2 border-dashed rounded-lg px-4 py-3 text-sm text-center transition-colors",
+                dropOnRoot
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-muted-foreground/30 text-muted-foreground",
+              )}
+            >
+              Drop here to move ticket to the top level
+            </div>
+          )}
           <div className="border rounded-lg bg-card">
             <Table>
               <TableHeader>
