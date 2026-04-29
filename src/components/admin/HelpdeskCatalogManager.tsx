@@ -54,10 +54,37 @@ type ItemRow = {
   description: string | null;
   is_active: boolean;
   sort_order: number;
+  parent_item_id: string | null;
   metadata: { default_category?: string; default_priority?: string; default_ticket_type?: string } | null;
 };
 
 const PRIORITIES = ["low", "medium", "high", "urgent"];
+
+/** Flatten items into a parent-first tree, ordered by sort_order then name. */
+function flattenTree(items: ItemRow[]): { item: ItemRow; depth: number }[] {
+  const byParent: Record<string, ItemRow[]> = {};
+  for (const it of items) {
+    const key = it.parent_item_id ?? "__root__";
+    (byParent[key] ||= []).push(it);
+  }
+  for (const k of Object.keys(byParent)) {
+    byParent[k].sort((a, b) => (a.sort_order - b.sort_order) || a.name.localeCompare(b.name));
+  }
+  const out: { item: ItemRow; depth: number }[] = [];
+  const walk = (parentKey: string, depth: number) => {
+    for (const it of byParent[parentKey] ?? []) {
+      out.push({ item: it, depth });
+      walk(it.id, depth + 1);
+    }
+  };
+  walk("__root__", 0);
+  // Add any orphans (parent missing/inactive) at root level
+  const seen = new Set(out.map((x) => x.item.id));
+  for (const it of items) {
+    if (!seen.has(it.id)) out.push({ item: it, depth: 0 });
+  }
+  return out;
+}
 
 export function HelpdeskCatalogManager() {
   const { currentOrganization } = useOrganization();
@@ -167,7 +194,7 @@ export function HelpdeskCatalogManager() {
     qc.invalidateQueries({ queryKey: ["hd-catalog-lists"] });
   };
 
-  const openNewItem = (list: ListRow) => {
+  const openNewItem = (list: ListRow, parent?: ItemRow) => {
     setActiveListId(list.id);
     const listItems = itemsByList[list.id] ?? [];
     setEditingItem({
@@ -175,6 +202,7 @@ export function HelpdeskCatalogManager() {
       description: "",
       is_active: true,
       sort_order: (listItems[listItems.length - 1]?.sort_order ?? 0) + 10,
+      parent_item_id: parent?.id ?? null,
       metadata: {},
     });
     setItemDialogOpen(true);
@@ -186,6 +214,25 @@ export function HelpdeskCatalogManager() {
     setItemDialogOpen(true);
   };
 
+  // Build a Set of ids that cannot be selected as a parent for the editing item
+  // (the item itself + all of its descendants — to prevent cycles).
+  const blockedParentIds = (() => {
+    if (!editingItem?.id || !currentList) return new Set<string>();
+    const siblings = itemsByList[currentList.id] ?? [];
+    const childrenOf = (pid: string) => siblings.filter((s) => s.parent_item_id === pid);
+    const blocked = new Set<string>([editingItem.id]);
+    const walk = (id: string) => {
+      for (const c of childrenOf(id)) {
+        if (!blocked.has(c.id)) {
+          blocked.add(c.id);
+          walk(c.id);
+        }
+      }
+    };
+    walk(editingItem.id);
+    return blocked;
+  })();
+
   const saveItem = async () => {
     if (!currentList || !editingItem || !currentOrganization?.id) return;
     if (!editingItem.name?.trim()) return toast.error("Name is required");
@@ -196,6 +243,7 @@ export function HelpdeskCatalogManager() {
       description: editingItem.description?.trim() || null,
       is_active: editingItem.is_active ?? true,
       sort_order: editingItem.sort_order ?? 0,
+      parent_item_id: editingItem.parent_item_id ?? null,
       metadata: editingItem.metadata ?? {},
     };
     let error;
@@ -304,11 +352,15 @@ export function HelpdeskCatalogManager() {
                       </p>
                     ) : (
                       <ul className="divide-y">
-                        {listItems.map((item) => (
+                        {flattenTree(listItems).map(({ item, depth }) => (
                           <li
                             key={item.id}
-                            className="flex items-center gap-2 py-2 pl-10 pr-3 hover:bg-muted/40"
+                            className="flex items-center gap-2 py-2 pr-3 hover:bg-muted/40"
+                            style={{ paddingLeft: `${40 + depth * 20}px` }}
                           >
+                            {depth > 0 && (
+                              <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                            )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium truncate">{item.name}</span>
@@ -320,6 +372,15 @@ export function HelpdeskCatalogManager() {
                                 <p className="text-xs text-muted-foreground truncate">{item.description}</p>
                               )}
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openNewItem(l, item)}
+                              className="gap-1 text-xs h-7"
+                              title="Add child item"
+                            >
+                              <Plus className="h-3 w-3" /> Child
+                            </Button>
                             <Button variant="ghost" size="icon" onClick={() => editItem(item)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -470,6 +531,31 @@ export function HelpdeskCatalogManager() {
                 onChange={(e) => setEditingItem({ ...editingItem!, name: e.target.value })}
                 placeholder="e.g. Salesforce"
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Parent item (optional)</Label>
+              <Select
+                value={editingItem?.parent_item_id ?? "none"}
+                onValueChange={(v) => setEditingItem({
+                  ...editingItem!,
+                  parent_item_id: v === "none" ? null : v,
+                })}
+              >
+                <SelectTrigger><SelectValue placeholder="— Top level —" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Top level —</SelectItem>
+                  {currentList && flattenTree(itemsByList[currentList.id] ?? [])
+                    .filter(({ item }) => !blockedParentIds.has(item.id))
+                    .map(({ item, depth }) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {"\u00A0".repeat(depth * 2)}{depth > 0 ? "↳ " : ""}{item.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                Nest this item under another for drill-down topic selection on tickets.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label>Description</Label>
