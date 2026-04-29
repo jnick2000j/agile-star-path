@@ -351,9 +351,21 @@ export default function HelpdeskTicketDetail() {
         <HelpdeskBreadcrumbs
           trail={[{ label: ticket.reference_number || ticket.subject || "Ticket" }]}
         />
-        <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Helpdesk
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/support")}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Helpdesk
+          </Button>
+          {isAdmin && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteOpen(true)}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> Delete ticket
+            </Button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main */}
@@ -628,6 +640,37 @@ export default function HelpdeskTicketDetail() {
         submitting={resolving}
         onConfirm={handleConfirmResolve}
       />
+
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(open) => !deleting && setDeleteOpen(open)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {ticket.reference_number ?? "ticket"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes "{ticket.subject}" along with all comments,
+              activity, and attachments. Any sub-tickets will be moved up to this
+              ticket's parent (or to the top level). This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
