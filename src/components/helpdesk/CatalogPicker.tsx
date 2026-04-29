@@ -162,7 +162,16 @@ export function CatalogPicker({ value, onChange, ticketType, compact = false, on
             {list.description && !compact && (
               <p className="text-[11px] text-muted-foreground">{list.description}</p>
             )}
-            {list.allow_multiple ? (
+            {hasNesting(items) ? (
+              <DrillDownPicker
+                items={items}
+                selected={selectedIds}
+                onChange={(ids) => setList(list.id, ids)}
+                allowMultiple={list.allow_multiple}
+                placeholder={`Select ${list.name.toLowerCase()}…`}
+                invalid={isInvalid}
+              />
+            ) : list.allow_multiple ? (
               <MultiSelect
                 items={items}
                 selected={selectedIds}
