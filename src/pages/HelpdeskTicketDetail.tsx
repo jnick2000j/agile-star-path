@@ -42,6 +42,14 @@ import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/
 import { TicketAttachments } from "@/components/helpdesk/TicketAttachments";
 import { EntityAuditTrail } from "@/components/audit/EntityAuditTrail";
 import { ParentTicketPicker } from "@/components/helpdesk/ParentTicketPicker";
+import {
+  CatalogPicker,
+  CatalogSummary,
+  saveTicketCatalogSelection,
+  useTicketCatalogSelection,
+  type CatalogSelection,
+} from "@/components/helpdesk/CatalogPicker";
+import { useQueryClient as useQC } from "@tanstack/react-query";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
