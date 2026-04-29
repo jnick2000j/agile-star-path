@@ -38,6 +38,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
   const [itemOpen, setItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [fieldsOpen, setFieldsOpen] = useState<string | null>(null);
+  const [tasksOpen, setTasksOpen] = useState<string | null>(null);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["svc-categories", currentOrganization?.id],
