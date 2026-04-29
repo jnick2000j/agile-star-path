@@ -40,6 +40,7 @@ import { PlatformAIProviderSettings } from "@/components/admin/PlatformAIProvide
 import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
+import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
@@ -251,6 +252,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
+          <TabsTrigger value="modules">Module Toggles</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
@@ -474,6 +476,10 @@ export default function PlatformAdmin() {
             </Button>
           </div>
           <VerticalPacksManager />
+        </TabsContent>
+
+        <TabsContent value="modules" className="space-y-4">
+          <PlatformModuleToggles />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">
