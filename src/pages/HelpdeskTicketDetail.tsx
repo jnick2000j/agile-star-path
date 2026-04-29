@@ -49,6 +49,7 @@ import {
   useTicketCatalogSelection,
   type CatalogSelection,
 } from "@/components/helpdesk/CatalogPicker";
+import { LinkedCIsPanel } from "@/components/cmdb/LinkedCIsPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
