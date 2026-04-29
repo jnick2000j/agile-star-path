@@ -367,7 +367,7 @@ export default function Helpdesk() {
             current={view}
             tabs={[
               { key: "console", label: "Agent console", to: "/support", icon: Headset },
-              { key: "portal", label: "Customer Portal", to: "/portal", icon: Sparkles },
+              { key: "portal", label: "Customer Portal", to: "/portal", icon: Sparkles, external: true },
               { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
               ...(isAdmin ? [{ key: "admin", label: "Admin panel", to: "/support?view=admin", icon: Wrench }] : []),
             ]}
