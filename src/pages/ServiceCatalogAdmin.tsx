@@ -174,6 +174,9 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
                   <Button size="sm" variant="outline" onClick={() => setFieldsOpen(item.id)}>
                     <Settings2 className="h-3.5 w-3.5 mr-1" /> Fields
                   </Button>
+                  <Button size="sm" variant="outline" onClick={() => setTasksOpen(item.id)}>
+                    <ListChecks className="h-3.5 w-3.5 mr-1" /> Tasks
+                  </Button>
                   <Button size="icon" variant="ghost" onClick={() => { setEditingItem(item); setItemOpen(true); }}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
