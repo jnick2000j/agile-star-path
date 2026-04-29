@@ -418,11 +418,17 @@ export default function HelpdeskTicketDetail() {
               </div>
             </Card>
 
-            <Card className="p-4 space-y-2">
-              <h3 className="font-semibold">Resolution</h3>
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Resolution</h3>
+                {(ticket as any).resolution_code && (
+                  <Badge variant="outline">{resolutionCodeLabel((ticket as any).resolution_code)}</Badge>
+                )}
+              </div>
               <Textarea
                 rows={4}
                 defaultValue={ticket.resolution ?? ""}
+                key={`res-${ticket.id}-${ticket.resolution ?? ""}`}
                 onBlur={(e) => {
                   if (e.target.value !== (ticket.resolution ?? "")) {
                     updateField("resolution", e.target.value || null);
@@ -430,6 +436,11 @@ export default function HelpdeskTicketDetail() {
                 }}
                 placeholder="Resolution details..."
               />
+              {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+                <Button size="sm" variant="outline" className="w-full" onClick={() => setResolveOpen(true)}>
+                  Mark as Resolved…
+                </Button>
+              )}
             </Card>
 
             <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
@@ -438,6 +449,15 @@ export default function HelpdeskTicketDetail() {
           </div>
         </div>
       </div>
+
+      <ResolveTicketDialog
+        open={resolveOpen}
+        onOpenChange={setResolveOpen}
+        defaultCode={(ticket as any).resolution_code ?? null}
+        defaultNotes={ticket.resolution ?? null}
+        submitting={resolving}
+        onConfirm={handleConfirmResolve}
+      />
     </AppLayout>
   );
 }
