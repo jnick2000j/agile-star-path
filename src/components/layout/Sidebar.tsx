@@ -107,6 +107,7 @@ export function Sidebar() {
         { label: "Service Catalog", href: "/catalog" },
         { label: "CMDB", href: "/cmdb" },
         { label: "Status Page", href: "/status/admin" },
+        { label: "Customer Portal", href: "/help" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },
