@@ -685,6 +685,7 @@ export default function HelpdeskTicketDetail() {
               ticketDescription={ticket.description}
             />
 
+            <TicketSLAPanel ticket={ticket} />
 
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
