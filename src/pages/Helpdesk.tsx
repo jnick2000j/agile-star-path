@@ -721,19 +721,8 @@ export default function Helpdesk() {
               </TableBody>
             </Table>
           </div>
-            </TabsContent>
-
-            {isAdmin && (
-              <>
-                <TabsContent value="catalog" className="mt-0"><ServiceCatalogAdmin embedded /></TabsContent>
-                <TabsContent value="intake" className="mt-0"><TicketIntake embedded /></TabsContent>
-                <TabsContent value="email" className="mt-0"><EmailIntake embedded /></TabsContent>
-                <TabsContent value="macros" className="mt-0"><MacrosPage embedded /></TabsContent>
-                <TabsContent value="sla" className="mt-0"><SLAEscalationRules embedded /></TabsContent>
-                <TabsContent value="approvals" className="mt-0"><ApprovalChainsPage embedded /></TabsContent>
-              </>
-            )}
-          </Tabs>
+            </div>
+          )}
 
         <CreateTicketDialog
           open={createOpen}
