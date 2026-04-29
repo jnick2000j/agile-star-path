@@ -475,7 +475,7 @@ export default function HelpdeskTicketDetail() {
                              subject: ticket.subject,
                              status: ticket.status,
                              priority: ticket.priority,
-                             type: ticket.type,
+                             type: (ticket as any).type,
                            },
                            customer: {
                              first_name: (ticket as any).requester_first_name,
