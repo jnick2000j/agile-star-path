@@ -277,7 +277,56 @@ export default function Helpdesk() {
     refetch();
   };
 
-  // Select-all helpers based on the currently visible (filtered) tickets.
+  // Delete tickets. Children of deleted tickets are reparented to the deleted
+  // ticket's own parent (or to top-level) so they remain visible.
+  const performDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const ids = deleteTarget.ids;
+      // Reparent children of each deleted ticket to that ticket's parent.
+      const parentMap = new Map<string, string | null>();
+      tickets.forEach((t: any) => parentMap.set(t.id, t.parent_ticket_id ?? null));
+      const reparentOps: Promise<any>[] = [];
+      const grouped = new Map<string | null, string[]>();
+      tickets.forEach((t: any) => {
+        if (t.parent_ticket_id && ids.includes(t.parent_ticket_id) && !ids.includes(t.id)) {
+          // walk up until we find an ancestor not being deleted (or null)
+          let anc: string | null = parentMap.get(t.parent_ticket_id) ?? null;
+          while (anc && ids.includes(anc)) anc = parentMap.get(anc) ?? null;
+          const list = grouped.get(anc) ?? [];
+          list.push(t.id);
+          grouped.set(anc, list);
+        }
+      });
+      grouped.forEach((childIds, newParent) => {
+        reparentOps.push(
+          supabase
+            .from("helpdesk_tickets")
+            .update({ parent_ticket_id: newParent })
+            .in("id", childIds),
+        );
+      });
+      if (reparentOps.length) await Promise.all(reparentOps);
+
+      const { error } = await supabase
+        .from("helpdesk_tickets")
+        .delete()
+        .in("id", ids);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success(
+        ids.length === 1 ? "Ticket deleted" : `${ids.length} tickets deleted`,
+      );
+      clearSelection();
+      setDeleteTarget(null);
+      refetch();
+    } finally {
+      setDeleting(false);
+    }
+  };
   const visibleIds = filtered.map((t: any) => t.id) as string[];
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
   const someVisibleSelected = visibleIds.some((id) => selectedIds.has(id));
