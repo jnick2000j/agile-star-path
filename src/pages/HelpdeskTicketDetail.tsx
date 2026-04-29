@@ -16,7 +16,18 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageSquare, Activity, Save, Clock } from "lucide-react";
+import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,6 +67,36 @@ export default function HelpdeskTicketDetail() {
   const [internal, setInternal] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
   const [resolving, setResolving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { accessLevel } = useOrgAccessLevel();
+  const isAdmin = accessLevel === "admin";
+
+  const handleDelete = async () => {
+    if (!ticket) return;
+    setDeleting(true);
+    try {
+      // Reparent any sub-tickets to this ticket's parent (or null) so they aren't orphaned.
+      await supabase
+        .from("helpdesk_tickets")
+        .update({ parent_ticket_id: (ticket as any).parent_ticket_id ?? null })
+        .eq("parent_ticket_id", ticket.id);
+      const { error } = await supabase
+        .from("helpdesk_tickets")
+        .delete()
+        .eq("id", ticket.id);
+      if (error) {
+        toast.error("Delete failed: " + error.message);
+        return;
+      }
+      toast.success("Ticket deleted");
+      qc.invalidateQueries({ queryKey: ["helpdesk-tickets"] });
+      navigate("/support");
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
 
   const { data: ticket, isLoading } = useQuery({
     queryKey: ["helpdesk-ticket", id],
