@@ -212,6 +212,7 @@ const App = () => (
             <Route path="/support/analytics" element={<ProtectedRoute><HelpdeskAnalytics /></ProtectedRoute>} />
             <Route path="/support/csat" element={<ProtectedRoute><CSATDashboard /></ProtectedRoute>} />
             <Route path="/csat/:token" element={<CSATSurvey />} />
+            <Route path="/support/intake" element={<ProtectedRoute><TicketIntake /></ProtectedRoute>} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
