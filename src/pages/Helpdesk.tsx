@@ -635,6 +635,33 @@ export default function Helpdesk() {
                       <TableCell className="text-sm text-muted-foreground">
                         {t.created_at ? format(new Date(t.created_at), "MMM d, yyyy") : "—"}
                       </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()} className="w-[50px]">
+                        {isAdmin && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Row actions</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onSelect={() =>
+                                  setDeleteTarget({
+                                    ids: [t.id],
+                                    label: t.reference_number
+                                      ? `${t.reference_number} — ${t.subject}`
+                                      : t.subject || "this ticket",
+                                  })
+                                }
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" /> Delete ticket
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
