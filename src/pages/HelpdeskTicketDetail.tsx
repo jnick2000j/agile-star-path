@@ -77,6 +77,39 @@ export default function HelpdeskTicketDetail() {
   const [resolving, setResolving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [catalogEditing, setCatalogEditing] = useState(false);
+  const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
+  const [catalogSaving, setCatalogSaving] = useState(false);
+  const { data: catalogSelection = {}, refetch: refetchCatalog } = useTicketCatalogSelection(id);
+
+  const startCatalogEdit = () => {
+    setCatalogDraft(catalogSelection);
+    setCatalogEditing(true);
+  };
+  const cancelCatalogEdit = () => {
+    setCatalogEditing(false);
+    setCatalogDraft({});
+  };
+  const saveCatalog = async () => {
+    if (!ticket) return;
+    setCatalogSaving(true);
+    try {
+      await saveTicketCatalogSelection(
+        ticket.id,
+        ticket.organization_id,
+        catalogDraft,
+        user?.id,
+      );
+      toast.success("Catalog selections updated");
+      setCatalogEditing(false);
+      await refetchCatalog();
+      qc.invalidateQueries({ queryKey: ["hd-ticket-catalog", ticket.id] });
+    } catch (e: any) {
+      toast.error("Save failed: " + (e?.message ?? "unknown error"));
+    } finally {
+      setCatalogSaving(false);
+    }
+  };
   const { accessLevel } = useOrgAccessLevel();
   const isAdmin = accessLevel === "admin";
 
