@@ -54,7 +54,7 @@ const empty: MacroForm = {
   is_shared: true,
 };
 
-export default function MacrosPage() {
+export default function MacrosPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const qc = useQueryClient();
@@ -141,10 +141,9 @@ export default function MacrosPage() {
     setEditing({ ...editing, body: editing.body + token });
   };
 
-  return (
-    <AppLayout title="Macros & Canned Responses">
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between">
+  const body = (
+    <div className={embedded ? "space-y-6" : "p-6 space-y-6 max-w-7xl mx-auto"}>
+      <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold flex items-center gap-2">
               <FileText className="h-6 w-6" /> Macros & Canned Responses
