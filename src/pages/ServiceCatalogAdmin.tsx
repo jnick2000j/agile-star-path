@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+import { CategoryIcon, CategoryIconPicker } from "@/components/catalog/CategoryIconPicker";
 
 const FIELD_TYPES = [
   { value: "text", label: "Short text" },
