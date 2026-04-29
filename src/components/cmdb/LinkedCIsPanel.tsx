@@ -35,7 +35,7 @@ export function LinkedCIsPanel({ ticketId }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ci_ticket_links")
-        .select("id, link_type, ci_id, configuration_items!inner(id, name, reference_number, environment, criticality), cmdb_ci_health:configuration_items!inner(id)")
+        .select("id, link_type, ci_id, configuration_items!inner(id, name, reference_number, environment, criticality)")
         .eq("ticket_id", ticketId);
       if (error) throw error;
       // fetch health for each ci in one round-trip
