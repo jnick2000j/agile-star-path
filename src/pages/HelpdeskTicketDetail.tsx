@@ -30,6 +30,7 @@ import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
 import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/ResolveTicketDialog";
 import { TicketAttachments } from "@/components/helpdesk/TicketAttachments";
 import { EntityAuditTrail } from "@/components/audit/EntityAuditTrail";
+import { ParentTicketPicker } from "@/components/helpdesk/ParentTicketPicker";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
