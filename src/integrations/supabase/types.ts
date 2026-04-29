@@ -10386,6 +10386,63 @@ export type Database = {
           },
         ]
       }
+      service_catalog_item_tasks: {
+        Row: {
+          created_at: string
+          default_assignee_id: string | null
+          default_priority: string
+          description: string | null
+          estimated_hours: number | null
+          id: string
+          item_id: string
+          organization_id: string
+          step_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_assignee_id?: string | null
+          default_priority?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          item_id: string
+          organization_id: string
+          step_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_assignee_id?: string | null
+          default_priority?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          item_id?: string
+          organization_id?: string
+          step_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_item_tasks_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_catalog_item_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_catalog_items: {
         Row: {
           approval_policy: string
@@ -13890,6 +13947,10 @@ export type Database = {
         Returns: string
       }
       helpdesk_sla_sweep_breaches: { Args: never; Returns: number }
+      helpdesk_spawn_next_catalog_task: {
+        Args: { _parent_ticket_id: string }
+        Returns: string
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_helpdesk_admin: {
         Args: { _org_id: string; _user_id: string }
