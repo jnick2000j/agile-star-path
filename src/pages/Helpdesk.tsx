@@ -521,12 +521,12 @@ export default function Helpdesk() {
                   </TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Subject</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>SLA</TableHead>
-                  <TableHead>Reporter</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead className="hidden lg:table-cell">SLA</TableHead>
+                  <TableHead className="hidden lg:table-cell">Reporter</TableHead>
+                  <TableHead className="hidden xl:table-cell">Created</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -625,18 +625,18 @@ export default function Helpdesk() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? formatLabel(t.ticket_type)}</Badge></TableCell>
+                      <TableCell className="hidden md:table-cell"><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? formatLabel(t.ticket_type)}</Badge></TableCell>
                       <TableCell><Badge className={cn(PRIORITY_STYLES[t.priority])}>{formatLabel(t.priority)}</Badge></TableCell>
                       <TableCell><Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge></TableCell>
-                      <TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         {sla === "none" ? (
                           <span className="text-xs text-muted-foreground">—</span>
                         ) : (
                           <Badge className={cn("text-xs", slaCfg.cls)}>{slaCfg.label}</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm">{t.reporter_name || t.reporter_email || "—"}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="hidden lg:table-cell text-sm">{t.reporter_name || t.reporter_email || "—"}</TableCell>
+                      <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
                         {t.created_at ? format(new Date(t.created_at), "MMM d, yyyy") : "—"}
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()} className="w-[50px]">
