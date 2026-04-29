@@ -164,6 +164,53 @@ export default function Helpdesk() {
   };
   roots.forEach((r) => walk(r, 0));
 
+  // Collect all descendant ids of a ticket (within the full tickets set, not just filtered)
+  // so we can prevent dropping a ticket onto itself or one of its descendants.
+  const descendantsOf = (rootId: string): Set<string> => {
+    const result = new Set<string>();
+    const allChildrenByParent: Record<string, any[]> = {};
+    tickets.forEach((t: any) => {
+      if (t.parent_ticket_id) (allChildrenByParent[t.parent_ticket_id] ||= []).push(t);
+    });
+    const stack = [rootId];
+    while (stack.length) {
+      const id = stack.pop()!;
+      const kids = allChildrenByParent[id] ?? [];
+      for (const k of kids) {
+        if (!result.has(k.id)) {
+          result.add(k.id);
+          stack.push(k.id);
+        }
+      }
+    }
+    return result;
+  };
+
+  const reparent = async (childId: string, newParentId: string | null) => {
+    const child = tickets.find((t: any) => t.id === childId);
+    if (!child) return;
+    if (child.parent_ticket_id === newParentId) return;
+    if (newParentId === childId) {
+      toast.error("A ticket can't be its own parent");
+      return;
+    }
+    if (newParentId && descendantsOf(childId).has(newParentId)) {
+      toast.error("Can't move a ticket under one of its own sub-tickets");
+      return;
+    }
+    const { error } = await supabase
+      .from("helpdesk_tickets")
+      .update({ parent_ticket_id: newParentId })
+      .eq("id", childId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(newParentId ? "Moved under new parent" : "Moved to top level");
+    if (newParentId) setExpanded((s) => ({ ...s, [newParentId]: true }));
+    refetch();
+  };
+
   return (
     <AppLayout title="Helpdesk" subtitle="Ticket-based support and service requests">
       <FeatureGate
