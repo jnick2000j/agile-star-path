@@ -15,7 +15,7 @@ import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 export default function ServiceCatalog() {
   const { currentOrganization } = useOrganization();
   const { accessLevel } = useOrgAccessLevel();
-  const isManager = accessLevel === "admin" || accessLevel === "owner" || accessLevel === "manager";
+  const isManager = accessLevel === "admin" || accessLevel === "manager";
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
