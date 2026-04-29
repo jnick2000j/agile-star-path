@@ -45,6 +45,7 @@ export function CreateTicketDialog({
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>({});
   const [form, setForm] = useState({
     subject: "",
     description: "",
