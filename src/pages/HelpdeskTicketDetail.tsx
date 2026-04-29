@@ -628,6 +628,41 @@ export default function HelpdeskTicketDetail() {
               </div>
             </Card>
 
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Catalog selections</h3>
+                {!catalogEditing ? (
+                  <Button size="sm" variant="outline" onClick={startCatalogEdit}>
+                    Edit
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelCatalogEdit}
+                      disabled={catalogSaving}
+                    >
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
+                      {catalogSaving ? "Saving..." : "Save"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {catalogEditing ? (
+                <CatalogPicker
+                  value={catalogDraft}
+                  onChange={setCatalogDraft}
+                  ticketType={ticket.ticket_type}
+                  compact
+                />
+              ) : (
+                <CatalogSummary ticketId={ticket.id} />
+              )}
+            </Card>
+
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
               <div className="text-sm space-y-1">
