@@ -53,6 +53,7 @@ import { LinkedCIsPanel } from "@/components/cmdb/LinkedCIsPanel";
 import { CatalogRequestPanel } from "@/components/catalog/CatalogRequestPanel";
 import { TicketProblemPanel } from "@/components/problems/TicketProblemPanel";
 import { TicketMajorIncidentPanel } from "@/components/major-incidents/TicketMajorIncidentPanel";
+import { TicketSLAPanel } from "@/components/sla/TicketSLAPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
