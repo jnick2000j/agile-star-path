@@ -4914,6 +4914,89 @@ export type Database = {
           },
         ]
       }
+      helpdesk_macro_usage: {
+        Row: {
+          id: string
+          macro_id: string
+          organization_id: string
+          ticket_id: string | null
+          used_at: string
+          used_by: string | null
+        }
+        Insert: {
+          id?: string
+          macro_id: string
+          organization_id: string
+          ticket_id?: string | null
+          used_at?: string
+          used_by?: string | null
+        }
+        Update: {
+          id?: string
+          macro_id?: string
+          organization_id?: string
+          ticket_id?: string | null
+          used_at?: string
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_macro_usage_macro_id_fkey"
+            columns: ["macro_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_macros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_macros: {
+        Row: {
+          body: string
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_shared: boolean
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          shortcut: string | null
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_shared?: boolean
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          shortcut?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_shared?: boolean
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          shortcut?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       helpdesk_notifications: {
         Row: {
           body: string | null
