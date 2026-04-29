@@ -3826,6 +3826,63 @@ export type Database = {
           },
         ]
       }
+      helpdesk_ticket_attachments: {
+        Row: {
+          comment_id: string | null
+          created_at: string
+          file_name: string
+          file_size: number | null
+          id: string
+          is_internal: boolean
+          mime_type: string | null
+          organization_id: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          id?: string
+          is_internal?: boolean
+          mime_type?: string | null
+          organization_id: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          is_internal?: boolean
+          mime_type?: string | null
+          organization_id?: string
+          storage_path?: string
+          ticket_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_attachments_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_ticket_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_ticket_catalog_items: {
         Row: {
           catalog_item_id: string

@@ -27,6 +27,7 @@ import { SLAStatus } from "@/components/helpdesk/SLAStatus";
 import { KBAssistant } from "@/components/kb/KBAssistant";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
 import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/ResolveTicketDialog";
+import { TicketAttachments } from "@/components/helpdesk/TicketAttachments";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -482,6 +483,8 @@ export default function HelpdeskTicketDetail() {
                 </Button>
               )}
             </Card>
+
+            <TicketAttachments ticketId={ticket.id} organizationId={ticket.organization_id} />
 
             <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
 
