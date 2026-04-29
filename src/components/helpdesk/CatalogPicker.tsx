@@ -205,6 +205,182 @@ export function CatalogPicker({ value, onChange, ticketType, compact = false, on
   );
 }
 
+/** True when at least one item references another as its parent. */
+function hasNesting(items: ItemRow[]) {
+  return items.some((i) => i.parent_item_id);
+}
+
+/**
+ * Drill-down picker for nested catalog items. Users navigate level-by-level
+ * (e.g. Applications → Office) and can only confirm a leaf (an item with no
+ * children). A breadcrumb at the top lets them jump back to any level.
+ */
+function DrillDownPicker({
+  items, selected, onChange, allowMultiple, placeholder, invalid,
+}: {
+  items: ItemRow[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+  allowMultiple: boolean;
+  placeholder: string;
+  invalid?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [path, setPath] = useState<(string | null)[]>([null]);
+
+  const itemById = useMemo(() => {
+    const m: Record<string, ItemRow> = {};
+    for (const i of items) m[i.id] = i;
+    return m;
+  }, [items]);
+
+  const childrenOf = (parentId: string | null) =>
+    items
+      .filter((i) => (i.parent_item_id ?? null) === parentId)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+  const hasChildren = (id: string) => items.some((i) => i.parent_item_id === id);
+
+  const labelFor = (id: string): string => {
+    const parts: string[] = [];
+    let cur: ItemRow | undefined = itemById[id];
+    let guard = 0;
+    while (cur && guard++ < 20) {
+      parts.unshift(cur.name);
+      cur = cur.parent_item_id ? itemById[cur.parent_item_id] : undefined;
+    }
+    return parts.join(" › ");
+  };
+
+  const currentParentId = path[path.length - 1];
+  const currentChildren = childrenOf(currentParentId);
+
+  const breadcrumbs = path.map((pid) =>
+    pid === null ? "All" : itemById[pid]?.name ?? "—",
+  );
+
+  const pick = (id: string) => {
+    if (hasChildren(id)) {
+      setPath((p) => [...p, id]);
+      return;
+    }
+    if (allowMultiple) {
+      if (!selected.includes(id)) onChange([...selected, id]);
+    } else {
+      onChange([id]);
+      setOpen(false);
+    }
+    setPath([null]);
+  };
+
+  const remove = (id: string) => onChange(selected.filter((x) => x !== id));
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) setPath([null]);
+      }}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-full justify-between font-normal h-auto min-h-9 py-1.5",
+            invalid && "border-destructive",
+          )}
+        >
+          <div className="flex flex-wrap gap-1 items-center">
+            {selected.length === 0 ? (
+              <span className="text-muted-foreground">{placeholder}</span>
+            ) : (
+              selected.map((id) => (
+                <Badge key={id} variant="secondary" className="gap-1">
+                  {labelFor(id)}
+                  <span
+                    role="button"
+                    onClick={(e) => { e.stopPropagation(); remove(id); }}
+                    className="hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </span>
+                </Badge>
+              ))
+            )}
+          </div>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start">
+        <div className="flex items-center gap-1 px-2 py-1.5 border-b text-xs flex-wrap">
+          {breadcrumbs.map((label, idx) => {
+            const isLast = idx === breadcrumbs.length - 1;
+            return (
+              <span key={idx} className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPath((p) => p.slice(0, idx + 1))}
+                  className={cn(
+                    "hover:underline",
+                    isLast ? "text-foreground font-medium" : "text-muted-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+                {!isLast && <span className="text-muted-foreground">›</span>}
+              </span>
+            );
+          })}
+        </div>
+        <Command>
+          <CommandInput placeholder="Search this level…" />
+          <CommandList>
+            <CommandEmpty>No items here.</CommandEmpty>
+            <CommandGroup>
+              {currentChildren.map((it) => {
+                const drill = hasChildren(it.id);
+                const isSelected = selected.includes(it.id);
+                return (
+                  <CommandItem
+                    key={it.id}
+                    value={it.name}
+                    onSelect={() => pick(it.id)}
+                    className="cursor-pointer"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        isSelected ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">{it.name}</p>
+                      {it.description && (
+                        <p className="text-[11px] text-muted-foreground truncate">{it.description}</p>
+                      )}
+                    </div>
+                    {drill ? (
+                      <span className="ml-2 text-[11px] text-muted-foreground">Open ›</span>
+                    ) : (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Select
+                      </span>
+                    )}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function MultiSelect({
   items, selected, onChange, placeholder, invalid,
 }: {
