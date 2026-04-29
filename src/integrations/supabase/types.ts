@@ -5057,6 +5057,113 @@ export type Database = {
           },
         ]
       }
+      helpdesk_sla_escalation_events: {
+        Row: {
+          actions_taken: Json
+          details: Json
+          fired_at: string
+          id: string
+          organization_id: string
+          rule_id: string | null
+          sla_leg: string
+          ticket_id: string
+          trigger_type: string
+        }
+        Insert: {
+          actions_taken?: Json
+          details?: Json
+          fired_at?: string
+          id?: string
+          organization_id: string
+          rule_id?: string | null
+          sla_leg: string
+          ticket_id: string
+          trigger_type: string
+        }
+        Update: {
+          actions_taken?: Json
+          details?: Json
+          fired_at?: string
+          id?: string
+          organization_id?: string
+          rule_id?: string | null
+          sla_leg?: string
+          ticket_id?: string
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_sla_escalation_events_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_sla_escalation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_sla_escalation_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          note_template: string | null
+          notify_assignee: boolean
+          notify_user_ids: string[]
+          organization_id: string
+          post_internal_note: boolean
+          priority_filter: string[] | null
+          raise_priority: boolean
+          reassign_to: string | null
+          sla_leg: string
+          threshold_percent: number
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          note_template?: string | null
+          notify_assignee?: boolean
+          notify_user_ids?: string[]
+          organization_id: string
+          post_internal_note?: boolean
+          priority_filter?: string[] | null
+          raise_priority?: boolean
+          reassign_to?: string | null
+          sla_leg?: string
+          threshold_percent?: number
+          trigger_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          note_template?: string | null
+          notify_assignee?: boolean
+          notify_user_ids?: string[]
+          organization_id?: string
+          post_internal_note?: boolean
+          priority_filter?: string[] | null
+          raise_priority?: boolean
+          reassign_to?: string | null
+          sla_leg?: string
+          threshold_percent?: number
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helpdesk_sla_policies: {
         Row: {
           business_hours_only: boolean
