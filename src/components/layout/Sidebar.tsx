@@ -92,7 +92,7 @@ export function Sidebar() {
     { label: "Tasks", icon: ListTodo, href: "/tasks", module: "tasks" },
     { label: "Timesheets", icon: Clock, href: "/timesheets", module: "timesheets" },
     { label: "Governance", icon: Shield, href: "/prince2" },
-    { label: "Change Mgmt", icon: GitBranch, href: "/change-management", module: "change_management", children: [
+    { label: "Change Mgmt.", icon: GitBranch, href: "/change-management", module: "change_management", children: [
       { label: "All Changes", href: "/change-management" },
       { label: "Workflows", href: "/change-management/workflows" },
     ] },
