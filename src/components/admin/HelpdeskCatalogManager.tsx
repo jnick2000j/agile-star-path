@@ -168,7 +168,7 @@ export function HelpdeskCatalogManager() {
     qc.invalidateQueries({ queryKey: ["hd-catalog-lists"] });
   };
 
-  const openNewItem = (list: ListRow) => {
+  const openNewItem = (list: ListRow, parent?: ItemRow) => {
     setActiveListId(list.id);
     const listItems = itemsByList[list.id] ?? [];
     setEditingItem({
@@ -176,6 +176,7 @@ export function HelpdeskCatalogManager() {
       description: "",
       is_active: true,
       sort_order: (listItems[listItems.length - 1]?.sort_order ?? 0) + 10,
+      parent_item_id: parent?.id ?? null,
       metadata: {},
     });
     setItemDialogOpen(true);
@@ -187,6 +188,25 @@ export function HelpdeskCatalogManager() {
     setItemDialogOpen(true);
   };
 
+  // Build a Set of ids that cannot be selected as a parent for the editing item
+  // (the item itself + all of its descendants — to prevent cycles).
+  const blockedParentIds = (() => {
+    if (!editingItem?.id || !currentList) return new Set<string>();
+    const siblings = itemsByList[currentList.id] ?? [];
+    const childrenOf = (pid: string) => siblings.filter((s) => s.parent_item_id === pid);
+    const blocked = new Set<string>([editingItem.id]);
+    const walk = (id: string) => {
+      for (const c of childrenOf(id)) {
+        if (!blocked.has(c.id)) {
+          blocked.add(c.id);
+          walk(c.id);
+        }
+      }
+    };
+    walk(editingItem.id);
+    return blocked;
+  })();
+
   const saveItem = async () => {
     if (!currentList || !editingItem || !currentOrganization?.id) return;
     if (!editingItem.name?.trim()) return toast.error("Name is required");
@@ -197,6 +217,7 @@ export function HelpdeskCatalogManager() {
       description: editingItem.description?.trim() || null,
       is_active: editingItem.is_active ?? true,
       sort_order: editingItem.sort_order ?? 0,
+      parent_item_id: editingItem.parent_item_id ?? null,
       metadata: editingItem.metadata ?? {},
     };
     let error;
