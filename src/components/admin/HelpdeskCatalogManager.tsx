@@ -167,6 +167,7 @@ export function HelpdeskCatalogManager() {
       description: "",
       is_active: true,
       sort_order: (items[items.length - 1]?.sort_order ?? 0) + 10,
+      metadata: {},
     });
     setItemDialogOpen(true);
   };
