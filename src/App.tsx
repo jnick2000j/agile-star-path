@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { OrganizationProvider } from "@/hooks/useOrganization";
@@ -79,12 +79,9 @@ import MajorIncidentDetail from "./pages/MajorIncidentDetail";
 import StatusPageAdmin from "./pages/StatusPageAdmin";
 import StatusPagePublic from "./pages/StatusPagePublic";
 import CMWorkflows from "./pages/CMWorkflows";
-import SupportPortal from "./pages/SupportPortal";
+
 import MyTickets from "./pages/MyTickets";
-import HelpPortal from "./pages/HelpPortal";
 import HelpArticle from "./pages/HelpArticle";
-import HelpSubmit from "./pages/HelpSubmit";
-import HelpMyTickets from "./pages/HelpMyTickets";
 import SLAManagement from "./pages/SLAManagement";
 import AssetManagement from "./pages/AssetManagement";
 import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
@@ -103,6 +100,7 @@ import PortalTicketDetail from "./pages/portal/PortalTicketDetail";
 import PortalNewTicket from "./pages/portal/PortalNewTicket";
 import PortalKB from "./pages/portal/PortalKB";
 import PortalKBArticle from "./pages/portal/PortalKBArticle";
+import PortalCatalog from "./pages/portal/PortalCatalog";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -201,7 +199,7 @@ const App = () => (
             <Route path="/prince2/quality" element={<ProtectedRoute><QualityManagement /></ProtectedRoute>} />
             <Route path="/support" element={<ProtectedRoute><Helpdesk /></ProtectedRoute>} />
             <Route path="/support/legacy" element={<ProtectedRoute><Support /></ProtectedRoute>} />
-            <Route path="/support/portal" element={<ProtectedRoute><SupportPortal /></ProtectedRoute>} />
+            <Route path="/support/portal" element={<Navigate to="/portal" replace />} />
             <Route path="/support/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
             <Route path="/support/tickets/:id" element={<ProtectedRoute><HelpdeskTicketDetail /></ProtectedRoute>} />
             <Route path="/support/workflows" element={<ProtectedRoute><HelpdeskWorkflows /></ProtectedRoute>} />
@@ -215,10 +213,10 @@ const App = () => (
             <Route path="/major-incidents/:id" element={<ProtectedRoute><MajorIncidentDetail /></ProtectedRoute>} />
             <Route path="/status/admin" element={<ProtectedRoute><StatusPageAdmin /></ProtectedRoute>} />
             <Route path="/status" element={<StatusPagePublic />} />
-            <Route path="/help" element={<HelpPortal />} />
+            <Route path="/help" element={<Navigate to="/portal" replace />} />
             <Route path="/help/article/:id" element={<HelpArticle />} />
-            <Route path="/help/submit" element={<ProtectedRoute><HelpSubmit /></ProtectedRoute>} />
-            <Route path="/help/my-tickets" element={<ProtectedRoute><HelpMyTickets /></ProtectedRoute>} />
+            <Route path="/help/submit" element={<Navigate to="/portal/new" replace />} />
+            <Route path="/help/my-tickets" element={<Navigate to="/portal/tickets" replace />} />
             <Route path="/support/sla" element={<ProtectedRoute><SLAManagement /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute><AssetManagement /></ProtectedRoute>} />
             <Route path="/support/analytics" element={<ProtectedRoute><HelpdeskAnalytics /></ProtectedRoute>} />
@@ -237,6 +235,7 @@ const App = () => (
               <Route path="new" element={<PortalNewTicket />} />
               <Route path="kb" element={<PortalKB />} />
               <Route path="kb/:id" element={<PortalKBArticle />} />
+              <Route path="catalog" element={<PortalCatalog />} />
             </Route>
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
@@ -247,7 +246,7 @@ const App = () => (
             <Route path="/governance" element={<ProtectedRoute><Governance /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-            <Route path="/portal" element={<ProtectedRoute><StakeholderPortal /></ProtectedRoute>} />
+            <Route path="/stakeholder-portal" element={<ProtectedRoute><StakeholderPortal /></ProtectedRoute>} />
             <Route path="/ai-approvals" element={<ProtectedRoute><AIApprovals /></ProtectedRoute>} />
             <Route path="/ai-wizards" element={<ProtectedRoute><AIWizards /></ProtectedRoute>} />
             <Route path="/ai-advisor" element={<ProtectedRoute><AIAdvisor /></ProtectedRoute>} />

@@ -69,7 +69,7 @@ export default function Dashboard() {
       {hasStakeholderAccess && (
         <div className="mb-6 flex justify-end">
           <Button asChild>
-            <Link to="/portal">
+            <Link to="/stakeholder-portal">
               <Eye className="h-4 w-4 mr-2" />
               Open Stakeholder Portal
             </Link>

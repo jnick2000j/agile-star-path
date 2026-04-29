@@ -35,6 +35,10 @@ interface Props {
   intent: "ticket" | "change_request";
   /** Greeting shown as the first AI message before the user types. */
   greeting?: string;
+  /** Where to navigate after a ticket is created. Defaults to /support/tickets/:id (agent console). */
+  ticketRedirectBase?: string;
+  /** Override the source field stored on the ticket. Defaults to "internal". */
+  ticketSource?: string;
 }
 
 const DEFAULT_GREETINGS: Record<Props["intent"], string> = {
@@ -49,7 +53,7 @@ const PRIORITIES = ["low", "medium", "high", "urgent"];
 const CHANGE_TYPES = ["standard", "normal", "emergency", "operational"];
 const IMPACT_LEVELS = ["low", "medium", "high", "critical"];
 
-export function AIIntakeChat({ intent, greeting }: Props) {
+export function AIIntakeChat({ intent, greeting, ticketRedirectBase = "/support/tickets", ticketSource = "internal" }: Props) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -147,7 +151,7 @@ export function AIIntakeChat({ intent, greeting }: Props) {
             reporter_user_id: user?.id ?? null,
             reporter_email: user?.email ?? null,
             created_by: user?.id ?? null,
-            source: "internal" as any,
+            source: ticketSource as any,
           })
           .select("id, reference_number")
           .single();
@@ -157,7 +161,7 @@ export function AIIntakeChat({ intent, greeting }: Props) {
           body: { ticket_id: data.id, notification_type: "created" },
         }).catch(() => {});
         toast.success(`Ticket ${data.reference_number ?? ""} created`);
-        navigate(`/support/tickets/${data.id}`);
+        navigate(`${ticketRedirectBase}/${data.id}`);
       } else {
         const { data, error } = await supabase
           .from("change_management_requests")

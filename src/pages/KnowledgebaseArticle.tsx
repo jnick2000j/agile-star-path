@@ -128,7 +128,7 @@ export default function KnowledgebaseArticle() {
         {feedback === "not_helpful" && (
           <Card className="p-4 bg-muted/30">
             <p className="text-sm">
-              Sorry this didn't help. <Link to="/support/portal" className="text-primary underline">Open a support ticket</Link> and our team will assist.
+              Sorry this didn't help. <Link to="/portal/new" className="text-primary underline">Open a support ticket</Link> and our team will assist.
             </p>
           </Card>
         )}
