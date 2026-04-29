@@ -4653,6 +4653,116 @@ export type Database = {
           },
         ]
       }
+      helpdesk_intake_channels: {
+        Row: {
+          allowed_origins: string[] | null
+          branding: Json
+          channel_type: string
+          created_at: string
+          created_by: string | null
+          default_assignee_id: string | null
+          default_category_id: string | null
+          default_priority: string
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          public_token: string
+          rate_limit_per_hour: number
+          require_email: boolean
+          updated_at: string
+        }
+        Insert: {
+          allowed_origins?: string[] | null
+          branding?: Json
+          channel_type?: string
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_category_id?: string | null
+          default_priority?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          public_token?: string
+          rate_limit_per_hour?: number
+          require_email?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allowed_origins?: string[] | null
+          branding?: Json
+          channel_type?: string
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_category_id?: string | null
+          default_priority?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          public_token?: string
+          rate_limit_per_hour?: number
+          require_email?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      helpdesk_intake_submissions: {
+        Row: {
+          channel_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          organization_id: string
+          status: string
+          subject: string | null
+          submitter_email: string | null
+          submitter_name: string | null
+          ticket_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          organization_id: string
+          status?: string
+          subject?: string | null
+          submitter_email?: string | null
+          submitter_name?: string | null
+          ticket_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          organization_id?: string
+          status?: string
+          subject?: string | null
+          submitter_email?: string | null
+          submitter_name?: string | null
+          ticket_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_intake_submissions_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_intake_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_notifications: {
         Row: {
           body: string | null
