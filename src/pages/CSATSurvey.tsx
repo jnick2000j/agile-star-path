@@ -53,7 +53,7 @@ export default function CSATSurvey() {
     }
     setSubmitting(true);
     const sentiment = SENTIMENT[rating - 1];
-    const { error: insErr } = await supabase.from("helpdesk_csat_responses").insert({
+    const { error: insErr } = await (supabase as any).from("helpdesk_csat_responses").insert({
       organization_id: survey.organization_id,
       survey_id: survey.id,
       ticket_id: survey.ticket_id,
