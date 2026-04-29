@@ -69,6 +69,8 @@ export default function Helpdesk() {
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const toggleExpand = (id: string) => setExpanded((s) => ({ ...s, [id]: !(s[id] ?? true) }));
 
   const { data: tickets = [], refetch, isLoading } = useQuery({
     queryKey: ["helpdesk-tickets", currentOrganization?.id, statusFilter, typeFilter],
