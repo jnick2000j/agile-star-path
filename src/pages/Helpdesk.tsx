@@ -431,67 +431,63 @@ export default function Helpdesk() {
             <StatCard label="Total" value={stats.total} />
           </div>
 
-          {/* Toolbar */}
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-            <div className="flex flex-wrap items-center gap-2 flex-1 md:max-w-xl">
-              <div className="relative w-full sm:flex-1 sm:min-w-[180px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search tickets, reference, reporter..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[48%] sm:w-[170px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="open_active">Active (open)</SelectItem>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="on_hold">On hold</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[48%] sm:w-[170px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  <SelectItem value="support">Support</SelectItem>
-                  <SelectItem value="incident">Incident</SelectItem>
-                  <SelectItem value="service_request">Service Request</SelectItem>
-                  <SelectItem value="question">Question</SelectItem>
-                  <SelectItem value="problem">Problem</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={slaFilter} onValueChange={setSlaFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
-                  <SelectValue placeholder="SLA" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All SLA states</SelectItem>
-                  <SelectItem value="breached">Breached</SelectItem>
-                  <SelectItem value="at_risk">At risk</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="on_track">On track</SelectItem>
-                  <SelectItem value="none">No SLA</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Toolbar — single row on md+ */}
+          <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tickets, reference, reporter..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setCreateOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Ticket
-              </Button>
-            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px] shrink-0">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="open_active">Active (open)</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="on_hold">On hold</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[150px] shrink-0">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="support">Support</SelectItem>
+                <SelectItem value="incident">Incident</SelectItem>
+                <SelectItem value="service_request">Service Request</SelectItem>
+                <SelectItem value="question">Question</SelectItem>
+                <SelectItem value="problem">Problem</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={slaFilter} onValueChange={setSlaFilter}>
+              <SelectTrigger className="w-[140px] shrink-0">
+                <SelectValue placeholder="SLA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All SLA states</SelectItem>
+                <SelectItem value="breached">Breached</SelectItem>
+                <SelectItem value="at_risk">At risk</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+                <SelectItem value="on_track">On track</SelectItem>
+                <SelectItem value="none">No SLA</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={() => setCreateOpen(true)} className="shrink-0 ml-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              New Ticket
+            </Button>
           </div>
 
           {/* Table */}
