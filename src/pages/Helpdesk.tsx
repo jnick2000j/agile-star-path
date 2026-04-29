@@ -357,7 +357,7 @@ export default function Helpdesk() {
             current="console"
             tabs={[
               { key: "console", label: "Agent console", to: "/support", icon: Headset },
-              { key: "portal", label: "Get support (AI)", to: "/support/portal", icon: Sparkles },
+              { key: "portal", label: "Customer Portal", to: "/portal", icon: Sparkles },
               { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
             ]}
           />
