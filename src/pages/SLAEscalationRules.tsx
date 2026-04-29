@@ -86,7 +86,7 @@ const empty: RuleForm = {
 
 const PRIORITIES = ["low", "medium", "high", "urgent"];
 
-export default function SLAEscalationRules() {
+export default function SLAEscalationRules({ embedded = false }: { embedded?: boolean } = {}) {
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { accessLevel } = useOrgAccessLevel();
@@ -235,10 +235,10 @@ export default function SLAEscalationRules() {
     });
   };
 
-  return (
-    <AppLayout title="SLA Escalation Engine">
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <div className="flex items-start justify-between gap-4">
+  const body = (
+    <>
+    <div className={embedded ? "space-y-6" : "p-6 space-y-6 max-w-7xl mx-auto"}>
+      <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold flex items-center gap-2">
               <AlarmClock className="h-6 w-6" /> SLA Escalation Engine
