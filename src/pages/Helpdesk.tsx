@@ -391,7 +391,7 @@ export default function Helpdesk() {
               <div className="grid grid-cols-7 gap-2 w-full">
                 {[
                   { key: "modules", label: "Modules", icon: ToggleLeft },
-                  { key: "catalog", label: "Catalog", icon: Package },
+                  { key: "catalog", label: "Service Catalog", icon: Package },
                   { key: "intake", label: "Intake Channels", icon: Globe },
                   { key: "email", label: "Email-to-Ticket", icon: AtSign },
                   { key: "macros", label: "Macros", icon: FileText },
