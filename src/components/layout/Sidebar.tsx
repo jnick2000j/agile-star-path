@@ -114,6 +114,7 @@ export function Sidebar() {
         { label: "CSAT Surveys", href: "/support/csat" },
         { label: "Intake Channels", href: "/support/intake" },
         { label: "Email-to-Ticket", href: "/support/email-intake" },
+        { label: "Macros & Templates", href: "/support/macros" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },
