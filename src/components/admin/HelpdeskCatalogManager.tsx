@@ -54,7 +54,10 @@ type ItemRow = {
   description: string | null;
   is_active: boolean;
   sort_order: number;
+  metadata: { default_category?: string; default_priority?: string; default_ticket_type?: string } | null;
 };
+
+const PRIORITIES = ["low", "medium", "high", "urgent"];
 
 export function HelpdeskCatalogManager() {
   const { currentOrganization } = useOrganization();
