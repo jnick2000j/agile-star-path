@@ -60,6 +60,32 @@ type ItemRow = {
 
 const PRIORITIES = ["low", "medium", "high", "urgent"];
 
+/** Flatten items into a parent-first tree, ordered by sort_order then name. */
+function flattenTree(items: ItemRow[]): { item: ItemRow; depth: number }[] {
+  const byParent: Record<string, ItemRow[]> = {};
+  for (const it of items) {
+    const key = it.parent_item_id ?? "__root__";
+    (byParent[key] ||= []).push(it);
+  }
+  for (const k of Object.keys(byParent)) {
+    byParent[k].sort((a, b) => (a.sort_order - b.sort_order) || a.name.localeCompare(b.name));
+  }
+  const out: { item: ItemRow; depth: number }[] = [];
+  const walk = (parentKey: string, depth: number) => {
+    for (const it of byParent[parentKey] ?? []) {
+      out.push({ item: it, depth });
+      walk(it.id, depth + 1);
+    }
+  };
+  walk("__root__", 0);
+  // Add any orphans (parent missing/inactive) at root level
+  const seen = new Set(out.map((x) => x.item.id));
+  for (const it of items) {
+    if (!seen.has(it.id)) out.push({ item: it, depth: 0 });
+  }
+  return out;
+}
+
 export function HelpdeskCatalogManager() {
   const { currentOrganization } = useOrganization();
   const qc = useQueryClient();
