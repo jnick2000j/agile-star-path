@@ -161,7 +161,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
                     className="inline-flex items-center gap-1 rounded-md border bg-card pl-2 pr-1 py-0.5"
                     style={{ borderColor: c.color }}
                   >
-                    <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
+                    <CategoryIcon name={c.icon} size={14} color={c.color} />
                     <span className="text-sm">{c.name}</span>
                     <Button
                       size="icon"
