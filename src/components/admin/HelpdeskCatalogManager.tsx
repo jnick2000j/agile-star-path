@@ -54,6 +54,7 @@ type ItemRow = {
   description: string | null;
   is_active: boolean;
   sort_order: number;
+  parent_item_id: string | null;
   metadata: { default_category?: string; default_priority?: string; default_ticket_type?: string } | null;
 };
 
