@@ -71,6 +71,9 @@ export default function Helpdesk() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const toggleExpand = (id: string) => setExpanded((s) => ({ ...s, [id]: !(s[id] ?? true) }));
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  const [dropOnRoot, setDropOnRoot] = useState(false);
 
   const { data: tickets = [], refetch, isLoading } = useQuery({
     queryKey: ["helpdesk-tickets", currentOrganization?.id, statusFilter, typeFilter],
