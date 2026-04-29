@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { cn, formatLabel } from "@/lib/utils";
+import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-info/10 text-info",
