@@ -56,6 +56,7 @@ import { TicketMajorIncidentPanel } from "@/components/major-incidents/TicketMaj
 import { TicketSLAPanel } from "@/components/sla/TicketSLAPanel";
 import { TicketCSATPanel } from "@/components/csat/TicketCSATPanel";
 import { KBSuggestionsPanel } from "@/components/kb/KBSuggestionsPanel";
+import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -460,12 +461,15 @@ export default function HelpdeskTicketDetail() {
                     placeholder="Type your reply..."
                   />
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Switch checked={internal} onCheckedChange={setInternal} id="internal" />
-                      <Label htmlFor="internal" className="text-sm">Internal note</Label>
-                    </div>
-                    <Button onClick={submitReply} disabled={!reply.trim()}>Post Reply</Button>
-                  </div>
+                     <div className="flex items-center gap-2">
+                       <Switch checked={internal} onCheckedChange={setInternal} id="internal" />
+                       <Label htmlFor="internal" className="text-sm">Internal note</Label>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <AIReplyDraftButton ticketId={ticket.id} onDraft={(text) => setReply(text)} />
+                       <Button onClick={submitReply} disabled={!reply.trim()}>Post Reply</Button>
+                     </div>
+                   </div>
                 </Card>
               </TabsContent>
               <TabsContent value="activity" className="space-y-2">
