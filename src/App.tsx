@@ -88,6 +88,8 @@ import HelpMyTickets from "./pages/HelpMyTickets";
 import SLAManagement from "./pages/SLAManagement";
 import AssetManagement from "./pages/AssetManagement";
 import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
+import CSATDashboard from "./pages/CSATDashboard";
+import CSATSurvey from "./pages/CSATSurvey";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -207,6 +209,8 @@ const App = () => (
             <Route path="/support/sla" element={<ProtectedRoute><SLAManagement /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute><AssetManagement /></ProtectedRoute>} />
             <Route path="/support/analytics" element={<ProtectedRoute><HelpdeskAnalytics /></ProtectedRoute>} />
+            <Route path="/support/csat" element={<ProtectedRoute><CSATDashboard /></ProtectedRoute>} />
+            <Route path="/csat/:token" element={<CSATSurvey />} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
