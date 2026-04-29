@@ -27,7 +27,7 @@ export default function ServiceCatalog() {
       if (!currentOrganization?.id) return [];
       const { data } = await supabase
         .from("service_catalog_categories")
-        .select("id, name, color")
+        .select("id, name, color, icon")
         .eq("organization_id", currentOrganization.id)
         .eq("is_active", true)
         .order("sort_order");
