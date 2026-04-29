@@ -106,6 +106,7 @@ export function Sidebar() {
         { label: "Problems", href: "/problems" },
         { label: "Service Catalog", href: "/catalog" },
         { label: "CMDB", href: "/cmdb" },
+        { label: "Assets & Licenses", href: "/assets" },
         { label: "Status Page", href: "/status/admin" },
         { label: "Customer Portal", href: "/help" },
         { label: "SLA & Escalation", href: "/support/sla" },
