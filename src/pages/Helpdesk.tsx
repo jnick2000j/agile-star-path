@@ -498,8 +498,14 @@ export default function Helpdesk() {
             </Select>
             <Button onClick={() => setCreateOpen(true)} className="shrink-0 ml-auto">
               <Plus className="h-4 w-4 mr-2" />
-              New Ticket
+              {isServiceRequestsTab ? "New Request" : "New Ticket"}
             </Button>
+            {isServiceRequestsTab && (
+              <Button variant="outline" onClick={() => navigate("/catalog")} className="shrink-0 gap-2">
+                <Package className="h-4 w-4" />
+                Browse Catalog
+              </Button>
+            )}
           </div>
 
           {/* Table */}
