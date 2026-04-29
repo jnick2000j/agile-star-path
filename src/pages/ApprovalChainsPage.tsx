@@ -63,12 +63,22 @@ export default function ApprovalChainsPage() {
     queryKey: ["approval-chains", orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: chainData } = await supabase
         .from("helpdesk_approval_chains")
-        .select("*, helpdesk_approval_chain_steps(*)")
+        .select("*")
         .eq("organization_id", orgId!)
         .order("priority", { ascending: true });
-      return data ?? [];
+      const ids = (chainData ?? []).map((c) => c.id);
+      const { data: stepData } = ids.length
+        ? await supabase
+            .from("helpdesk_approval_chain_steps")
+            .select("*")
+            .in("chain_id", ids)
+        : { data: [] as any[] };
+      return (chainData ?? []).map((c) => ({
+        ...c,
+        helpdesk_approval_chain_steps: (stepData ?? []).filter((s: any) => s.chain_id === c.id),
+      }));
     },
   });
 
