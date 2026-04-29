@@ -11,14 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2 } from "lucide-react";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
+import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn, formatLabel } from "@/lib/utils";
 import {
   Select,
@@ -56,12 +59,15 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function Helpdesk() {
   const { currentOrganization } = useOrganization();
+  const { accessLevel } = useOrgAccessLevel();
+  const isAdmin = accessLevel === "admin";
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("open_active");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
 
   const { data: tickets = [], refetch, isLoading } = useQuery({
     queryKey: ["helpdesk-tickets", currentOrganization?.id, statusFilter, typeFilter],
@@ -210,6 +216,12 @@ export default function Helpdesk() {
               </Select>
             </div>
             <div className="flex gap-2">
+              {isAdmin && (
+                <Button variant="outline" onClick={() => setCatalogOpen(true)}>
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Manage Catalog
+                </Button>
+              )}
               <Button variant="outline" onClick={() => navigate("/support/portal")}>
                 <Mail className="h-4 w-4 mr-2" />
                 Open Portal
@@ -279,6 +291,22 @@ export default function Helpdesk() {
           onOpenChange={setCreateOpen}
           onCreated={() => refetch()}
         />
+
+        {isAdmin && (
+          <Sheet open={catalogOpen} onOpenChange={setCatalogOpen}>
+            <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Helpdesk Catalog</SheetTitle>
+                <SheetDescription>
+                  Define custom lists like Services, Applications, Departments, or Locations that agents can attach to tickets in addition to the ticket type.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6">
+                <HelpdeskCatalogManager />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </FeatureGate>
     </AppLayout>
   );

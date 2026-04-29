@@ -26,6 +26,7 @@ import { cn, formatLabel } from "@/lib/utils";
 import { SLAStatus } from "@/components/helpdesk/SLAStatus";
 import { KBAssistant } from "@/components/kb/KBAssistant";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
+import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/ResolveTicketDialog";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -49,6 +50,8 @@ export default function HelpdeskTicketDetail() {
   const qc = useQueryClient();
   const [reply, setReply] = useState("");
   const [internal, setInternal] = useState(false);
+  const [resolveOpen, setResolveOpen] = useState(false);
+  const [resolving, setResolving] = useState(false);
 
   const { data: ticket, isLoading } = useQuery({
     queryKey: ["helpdesk-ticket", id],
@@ -109,54 +112,76 @@ export default function HelpdeskTicketDetail() {
     enabled: !!currentOrganization?.id,
   });
 
-  const updateField = async (field: string, value: any) => {
+  const updateFields = async (fields: Record<string, any>, opts?: { skipResolveIntercept?: boolean }) => {
     if (!ticket) return;
-    const prev = (ticket as any)[field];
-    const patch: any = { [field]: value };
-    if (field === "status" && value === "resolved" && !ticket.resolved_at) patch.resolved_at = new Date().toISOString();
-    if (field === "status" && value === "closed" && !ticket.closed_at) patch.closed_at = new Date().toISOString();
+    // Intercept status -> resolved unless explicitly skipped (e.g. from the ResolveTicketDialog)
+    if (!opts?.skipResolveIntercept && fields.status === "resolved" && ticket.status !== "resolved") {
+      setResolveOpen(true);
+      return;
+    }
+    const patch: any = { ...fields };
+    if (fields.status === "resolved" && !ticket.resolved_at) patch.resolved_at = new Date().toISOString();
+    if (fields.status === "closed" && !ticket.closed_at) patch.closed_at = new Date().toISOString();
     const { error } = await supabase.from("helpdesk_tickets").update(patch).eq("id", ticket.id);
     if (error) {
       toast.error("Update failed: " + error.message);
       return;
     }
-    await supabase.from("helpdesk_ticket_activity").insert({
-      ticket_id: ticket.id,
-      organization_id: ticket.organization_id,
-      actor_user_id: user?.id ?? null,
-      event_type: `${field}_changed`,
-      from_value: { [field]: prev },
-      to_value: { [field]: value },
-    });
-    if (field === "assignee_id" && value) {
+    // Activity log per changed field
+    for (const [field, value] of Object.entries(fields)) {
+      const prev = (ticket as any)[field];
+      await supabase.from("helpdesk_ticket_activity").insert({
+        ticket_id: ticket.id,
+        organization_id: ticket.organization_id,
+        actor_user_id: user?.id ?? null,
+        event_type: `${field}_changed`,
+        from_value: { [field]: prev },
+        to_value: { [field]: value },
+      });
+    }
+    if ("assignee_id" in fields && fields.assignee_id) {
       supabase.functions.invoke("helpdesk-notify", {
         body: { ticket_id: ticket.id, notification_type: "assigned" },
       }).catch(() => {});
     }
-    if (field === "status") {
+    if ("status" in fields) {
       supabase.functions.invoke("helpdesk-notify", {
-        body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: value } },
+        body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: fields.status } },
       }).catch(() => {});
     }
-    // Dispatch workflows
     const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
-    const event =
-      field === "status" ? "status_changed" :
-      field === "assignee_id" ? "assigned" :
-      field === "priority" ? "priority_changed" : null;
-    if (event) {
-      dispatchHelpdeskWorkflow({
-        organization_id: ticket.organization_id,
-        trigger_event: event as any,
-        ticket_id: ticket.id,
-        triggered_by: user?.id,
-        payload: { from: prev, to: value, field },
-      });
+    for (const [field, value] of Object.entries(fields)) {
+      const event =
+        field === "status" ? "status_changed" :
+        field === "assignee_id" ? "assigned" :
+        field === "priority" ? "priority_changed" : null;
+      if (event) {
+        dispatchHelpdeskWorkflow({
+          organization_id: ticket.organization_id,
+          trigger_event: event as any,
+          ticket_id: ticket.id,
+          triggered_by: user?.id,
+          payload: { from: (ticket as any)[field], to: value, field },
+        });
+      }
     }
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-activity", id] });
   };
+
+  const updateField = (field: string, value: any) => updateFields({ [field]: value });
+
+  const handleConfirmResolve = async ({ resolution_code, resolution }: { resolution_code: string; resolution: string }) => {
+    setResolving(true);
+    await updateFields(
+      { status: "resolved", resolution_code, resolution },
+      { skipResolveIntercept: true },
+    );
+    setResolving(false);
+    setResolveOpen(false);
+  };
+
 
   const submitReply = async () => {
     if (!ticket || !reply.trim()) return;
@@ -393,11 +418,17 @@ export default function HelpdeskTicketDetail() {
               </div>
             </Card>
 
-            <Card className="p-4 space-y-2">
-              <h3 className="font-semibold">Resolution</h3>
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Resolution</h3>
+                {(ticket as any).resolution_code && (
+                  <Badge variant="outline">{resolutionCodeLabel((ticket as any).resolution_code)}</Badge>
+                )}
+              </div>
               <Textarea
                 rows={4}
                 defaultValue={ticket.resolution ?? ""}
+                key={`res-${ticket.id}-${ticket.resolution ?? ""}`}
                 onBlur={(e) => {
                   if (e.target.value !== (ticket.resolution ?? "")) {
                     updateField("resolution", e.target.value || null);
@@ -405,6 +436,11 @@ export default function HelpdeskTicketDetail() {
                 }}
                 placeholder="Resolution details..."
               />
+              {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+                <Button size="sm" variant="outline" className="w-full" onClick={() => setResolveOpen(true)}>
+                  Mark as Resolved…
+                </Button>
+              )}
             </Card>
 
             <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
@@ -413,6 +449,15 @@ export default function HelpdeskTicketDetail() {
           </div>
         </div>
       </div>
+
+      <ResolveTicketDialog
+        open={resolveOpen}
+        onOpenChange={setResolveOpen}
+        defaultCode={(ticket as any).resolution_code ?? null}
+        defaultNotes={ticket.resolution ?? null}
+        submitting={resolving}
+        onConfirm={handleConfirmResolve}
+      />
     </AppLayout>
   );
 }
