@@ -4324,6 +4324,113 @@ export type Database = {
           },
         ]
       }
+      helpdesk_approval_chain_steps: {
+        Row: {
+          approver_role: string | null
+          approver_type: string
+          approver_user_id: string | null
+          chain_id: string
+          created_at: string
+          id: string
+          is_optional: boolean
+          name: string
+          organization_id: string
+          step_order: number
+        }
+        Insert: {
+          approver_role?: string | null
+          approver_type?: string
+          approver_user_id?: string | null
+          chain_id: string
+          created_at?: string
+          id?: string
+          is_optional?: boolean
+          name: string
+          organization_id: string
+          step_order?: number
+        }
+        Update: {
+          approver_role?: string | null
+          approver_type?: string
+          approver_user_id?: string | null
+          chain_id?: string
+          created_at?: string
+          id?: string
+          is_optional?: boolean
+          name?: string
+          organization_id?: string
+          step_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_approval_chain_steps_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_approval_chains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_approval_chains: {
+        Row: {
+          auto_approve_on_complete: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          mode: string
+          name: string
+          organization_id: string
+          priority: number
+          required_approvals: number
+          trigger_catalog_item_id: string | null
+          trigger_category: string | null
+          trigger_min_cost: number | null
+          trigger_priority: string | null
+          trigger_ticket_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_approve_on_complete?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          mode?: string
+          name: string
+          organization_id: string
+          priority?: number
+          required_approvals?: number
+          trigger_catalog_item_id?: string | null
+          trigger_category?: string | null
+          trigger_min_cost?: number | null
+          trigger_priority?: string | null
+          trigger_ticket_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_approve_on_complete?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          mode?: string
+          name?: string
+          organization_id?: string
+          priority?: number
+          required_approvals?: number
+          trigger_catalog_item_id?: string | null
+          trigger_category?: string | null
+          trigger_min_cost?: number | null
+          trigger_priority?: string | null
+          trigger_ticket_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helpdesk_catalog_items: {
         Row: {
           created_at: string
@@ -10214,41 +10321,60 @@ export type Database = {
       service_catalog_request_approvals: {
         Row: {
           approver_user_id: string
+          chain_id: string | null
           comment: string | null
           created_at: string
           decided_at: string | null
           id: string
+          is_optional: boolean
+          mode: string
           organization_id: string
           status: string
+          step_name: string | null
           step_order: number
           ticket_id: string
           updated_at: string
         }
         Insert: {
           approver_user_id: string
+          chain_id?: string | null
           comment?: string | null
           created_at?: string
           decided_at?: string | null
           id?: string
+          is_optional?: boolean
+          mode?: string
           organization_id: string
           status?: string
+          step_name?: string | null
           step_order?: number
           ticket_id: string
           updated_at?: string
         }
         Update: {
           approver_user_id?: string
+          chain_id?: string | null
           comment?: string | null
           created_at?: string
           decided_at?: string | null
           id?: string
+          is_optional?: boolean
+          mode?: string
           organization_id?: string
           status?: string
+          step_name?: string | null
           step_order?: number
           ticket_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "service_catalog_request_approvals_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_approval_chains"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_catalog_request_approvals_ticket_id_fkey"
             columns: ["ticket_id"]
@@ -13599,6 +13725,14 @@ export type Database = {
       has_stakeholder_access: {
         Args: { _scope_id: string; _scope_type: string; _user_id: string }
         Returns: boolean
+      }
+      helpdesk_evaluate_approvals: {
+        Args: { _ticket_id: string }
+        Returns: string
+      }
+      helpdesk_instantiate_approval_chain: {
+        Args: { _chain_id: string; _ticket_id: string }
+        Returns: number
       }
       helpdesk_sla_sweep_breaches: { Args: never; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
