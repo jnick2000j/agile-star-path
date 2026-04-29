@@ -145,8 +145,15 @@ export default function HelpdeskTicketDetail() {
       }).catch(() => {});
     }
     if ("status" in fields) {
+      const isResolve = fields.status === "resolved" && ticket.status !== "resolved";
       supabase.functions.invoke("helpdesk-notify", {
-        body: { ticket_id: ticket.id, notification_type: "status_changed", metadata: { new_status: fields.status } },
+        body: {
+          ticket_id: ticket.id,
+          notification_type: isResolve ? "resolved" : "status_changed",
+          metadata: isResolve
+            ? { resolution_code: fields.resolution_code, resolution: fields.resolution }
+            : { new_status: fields.status },
+        },
       }).catch(() => {});
     }
     const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
