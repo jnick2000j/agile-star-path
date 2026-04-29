@@ -14,13 +14,13 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { cn } from "@/lib/utils";
 
 export default function CSATDashboard() {
-  const { currentOrgId } = useOrganization();
+  const { currentOrganization } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [responses, setResponses] = useState<any[]>([]);
   const [surveys, setSurveys] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!currentOrgId) return;
+    if (!currentOrganization?.id) return;
     (async () => {
       setLoading(true);
       const since = subDays(new Date(), 90).toISOString();
@@ -28,20 +28,20 @@ export default function CSATDashboard() {
         (supabase as any)
           .from("helpdesk_csat_responses")
           .select("*, helpdesk_tickets(reference_number, subject)")
-          .eq("organization_id", currentOrgId)
+          .eq("organization_id", currentOrganization?.id)
           .gte("created_at", since)
           .order("created_at", { ascending: false }),
         (supabase as any)
           .from("helpdesk_csat_surveys")
           .select("id, status, created_at")
-          .eq("organization_id", currentOrgId)
+          .eq("organization_id", currentOrganization?.id)
           .gte("created_at", since),
       ]);
       setResponses(r || []);
       setSurveys(s || []);
       setLoading(false);
     })();
-  }, [currentOrgId]);
+  }, [currentOrganization?.id]);
 
   const stats = useMemo(() => {
     if (!responses.length) {
@@ -72,7 +72,7 @@ export default function CSATDashboard() {
   }, [responses, surveys]);
 
   return (
-    <Layout>
+    <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Customer Satisfaction</h1>
@@ -244,6 +244,6 @@ export default function CSATDashboard() {
           </>
         )}
       </div>
-    </Layout>
+    </AppLayout>
   );
 }
