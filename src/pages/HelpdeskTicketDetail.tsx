@@ -51,6 +51,7 @@ import {
 } from "@/components/helpdesk/CatalogPicker";
 import { LinkedCIsPanel } from "@/components/cmdb/LinkedCIsPanel";
 import { CatalogRequestPanel } from "@/components/catalog/CatalogRequestPanel";
+import { TicketProblemPanel } from "@/components/problems/TicketProblemPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -668,6 +669,13 @@ export default function HelpdeskTicketDetail() {
             <LinkedCIsPanel ticketId={ticket.id} />
 
             <CatalogRequestPanel ticketId={ticket.id} />
+
+            <TicketProblemPanel
+              ticketId={ticket.id}
+              ticketSubject={ticket.subject}
+              ticketDescription={ticket.description}
+              parentProblemId={(ticket as any).parent_problem_id ?? null}
+            />
 
 
             <Card className="p-4 space-y-2">
