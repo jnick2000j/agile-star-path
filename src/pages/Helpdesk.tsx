@@ -101,6 +101,14 @@ export default function Helpdesk() {
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+
+  // Sync ticket type filter with the Service Requests tab
+  useEffect(() => {
+    if (isServiceRequestsTab && typeFilter !== "service_request") {
+      setTypeFilter("service_request");
+    }
+  }, [isServiceRequestsTab]);
+
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const toggleExpand = (id: string) => setExpanded((s) => ({ ...s, [id]: !(s[id] ?? true) }));
   const [dragId, setDragId] = useState<string | null>(null);
