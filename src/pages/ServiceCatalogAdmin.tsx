@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, GripVertical, Settings2 } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 const FIELD_TYPES = [
