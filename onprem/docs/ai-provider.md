@@ -1,8 +1,15 @@
 # AI Provider Configuration
 
 On-prem installs default to a **local Ollama** running in the same Compose
-stack. You can switch to OpenAI, Azure OpenAI, Anthropic, or any
-OpenAI-compatible endpoint at any time.
+stack. You can switch to OpenAI, Azure OpenAI, Anthropic, Google Gemini, the
+**Lovable AI Gateway**, or any OpenAI-compatible endpoint at any time.
+
+The platform uses AI for: ticket-intake conversations, KB embedding & semantic
+search, KB suggestions on tickets, weekly status report summarisation, ticket
+summarisation, risk insights, AI Advisor, AI Wizards, the "Ask the Task
+Master" assistant, and reply drafting. Each consumer can be enabled/disabled
+in `ai_provider_settings.enabled_modules`.
+
 
 ## Local Ollama (default)
 
