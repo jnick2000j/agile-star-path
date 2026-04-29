@@ -252,6 +252,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="support">Support Tickets</TabsTrigger>
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
+          <TabsTrigger value="modules">Module Toggles</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
