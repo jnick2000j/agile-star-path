@@ -142,6 +142,7 @@ export default function MacrosPage({ embedded = false }: { embedded?: boolean } 
   };
 
   const body = (
+    <>
     <div className={embedded ? "space-y-6" : "p-6 space-y-6 max-w-7xl mx-auto"}>
       <div className="flex items-center justify-between">
           <div>
@@ -317,7 +318,7 @@ export default function MacrosPage({ embedded = false }: { embedded?: boolean } 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 
   return embedded ? body : <AppLayout title="Macros & Canned Responses">{body}</AppLayout>;
