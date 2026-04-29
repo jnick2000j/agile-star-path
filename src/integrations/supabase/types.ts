@@ -8650,6 +8650,270 @@ export type Database = {
           },
         ]
       }
+      service_catalog_categories: {
+        Row: {
+          color: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_catalog_item_fields: {
+        Row: {
+          created_at: string
+          field_key: string
+          field_type: string
+          help_text: string | null
+          id: string
+          is_required: boolean
+          item_id: string
+          label: string
+          options: Json
+          placeholder: string | null
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          field_key: string
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean
+          item_id: string
+          label: string
+          options?: Json
+          placeholder?: string | null
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          field_key?: string
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean
+          item_id?: string
+          label?: string
+          options?: Json
+          placeholder?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_item_fields_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_catalog_items: {
+        Row: {
+          approval_policy: string
+          approver_role: string | null
+          approver_user_ids: string[]
+          category_id: string | null
+          cost_currency: string
+          cost_estimate: number | null
+          created_at: string
+          created_by: string | null
+          default_assignee_id: string | null
+          default_assignee_team: string | null
+          default_priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          description: string | null
+          estimated_fulfillment_hours: number | null
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          short_description: string | null
+          sort_order: number
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          approval_policy?: string
+          approver_role?: string | null
+          approver_user_ids?: string[]
+          category_id?: string | null
+          cost_currency?: string
+          cost_estimate?: number | null
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_assignee_team?: string | null
+          default_priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          description?: string | null
+          estimated_fulfillment_hours?: number | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          short_description?: string | null
+          sort_order?: number
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          approval_policy?: string
+          approver_role?: string | null
+          approver_user_ids?: string[]
+          category_id?: string | null
+          cost_currency?: string
+          cost_estimate?: number | null
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_assignee_team?: string | null
+          default_priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          description?: string | null
+          estimated_fulfillment_hours?: number | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          short_description?: string | null
+          sort_order?: number
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_catalog_request_approvals: {
+        Row: {
+          approver_user_id: string
+          comment: string | null
+          created_at: string
+          decided_at: string | null
+          id: string
+          organization_id: string
+          status: string
+          step_order: number
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          approver_user_id: string
+          comment?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          organization_id: string
+          status?: string
+          step_order?: number
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          approver_user_id?: string
+          comment?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          organization_id?: string
+          status?: string
+          step_order?: number
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_request_approvals_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_catalog_request_data: {
+        Row: {
+          answers: Json
+          cost_estimate: number | null
+          created_at: string
+          id: string
+          item_id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          answers?: Json
+          cost_estimate?: number | null
+          created_at?: string
+          id?: string
+          item_id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          answers?: Json
+          cost_estimate?: number | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_request_data_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_catalog_request_data_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       siem_export_log: {
         Row: {
           attempt: number
@@ -11498,6 +11762,10 @@ export type Database = {
           saml_provider_id: string
           sso_config_id: string
         }[]
+      }
+      get_request_approval_state: {
+        Args: { _ticket_id: string }
+        Returns: string
       }
       get_user_role: {
         Args: { _user_id: string }
