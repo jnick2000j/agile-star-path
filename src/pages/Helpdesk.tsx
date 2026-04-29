@@ -11,7 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import TicketIntake from "@/pages/TicketIntake";
+import EmailIntake from "@/pages/EmailIntake";
+import MacrosPage from "@/pages/MacrosPage";
+import SLAEscalationRules from "@/pages/SLAEscalationRules";
+import ApprovalChainsPage from "@/pages/ApprovalChainsPage";
+import ServiceCatalogAdmin from "@/pages/ServiceCatalogAdmin";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -361,6 +368,18 @@ export default function Helpdesk() {
               { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
             ]}
           />
+          <Tabs defaultValue="tickets" className="space-y-6">
+            <TabsList className="flex flex-wrap h-auto">
+              <TabsTrigger value="tickets" className="gap-1"><Ticket className="h-4 w-4" /> Tickets</TabsTrigger>
+              {isAdmin && <TabsTrigger value="catalog" className="gap-1"><Package className="h-4 w-4" /> Catalog</TabsTrigger>}
+              {isAdmin && <TabsTrigger value="intake" className="gap-1"><Globe className="h-4 w-4" /> Intake Channels</TabsTrigger>}
+              {isAdmin && <TabsTrigger value="email" className="gap-1"><AtSign className="h-4 w-4" /> Email-to-Ticket</TabsTrigger>}
+              {isAdmin && <TabsTrigger value="macros" className="gap-1"><FileText className="h-4 w-4" /> Macros</TabsTrigger>}
+              {isAdmin && <TabsTrigger value="sla" className="gap-1"><AlarmClock className="h-4 w-4" /> SLA Escalation</TabsTrigger>}
+              {isAdmin && <TabsTrigger value="approvals" className="gap-1"><ShieldCheck className="h-4 w-4" /> Approvals</TabsTrigger>}
+            </TabsList>
+
+            <TabsContent value="tickets" className="space-y-6 mt-0">
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <StatCard label="Open" value={stats.open} icon={<LifeBuoy className="h-4 w-4" />} />
@@ -673,6 +692,19 @@ export default function Helpdesk() {
             </Table>
           </div>
         </div>
+            </TabsContent>
+
+            {isAdmin && (
+              <>
+                <TabsContent value="catalog" className="mt-0"><ServiceCatalogAdmin embedded /></TabsContent>
+                <TabsContent value="intake" className="mt-0"><TicketIntake embedded /></TabsContent>
+                <TabsContent value="email" className="mt-0"><EmailIntake embedded /></TabsContent>
+                <TabsContent value="macros" className="mt-0"><MacrosPage embedded /></TabsContent>
+                <TabsContent value="sla" className="mt-0"><SLAEscalationRules embedded /></TabsContent>
+                <TabsContent value="approvals" className="mt-0"><ApprovalChainsPage embedded /></TabsContent>
+              </>
+            )}
+          </Tabs>
 
         <CreateTicketDialog
           open={createOpen}

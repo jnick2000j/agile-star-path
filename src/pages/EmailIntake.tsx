@@ -21,7 +21,7 @@ import { Link } from "react-router-dom";
 const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const WEBHOOK_URL = `https://${PROJECT_REF}.supabase.co/functions/v1/inbound-email`;
 
-export default function EmailIntake() {
+export default function EmailIntake({ embedded = false }: { embedded?: boolean } = {}) {
   const { currentOrganization } = useOrganization();
   const [inboxes, setInboxes] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
@@ -53,10 +53,9 @@ export default function EmailIntake() {
     load();
   };
 
-  return (
-    <AppLayout title="Email-to-Ticket">
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex justify-between items-start">
+  const body = (
+    <div className={embedded ? "space-y-6" : "container mx-auto py-6 space-y-6"}>
+      <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold">Email-to-Ticket</h1>
             <p className="text-muted-foreground">Convert inbound emails into tickets, with thread reply detection</p>
@@ -193,10 +192,11 @@ export default function EmailIntake() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
-      </div>
-    </AppLayout>
+      </Tabs>
+    </div>
   );
+
+  return embedded ? body : <AppLayout title="Email-to-Ticket">{body}</AppLayout>;
 }
 
 function CreateInboxDialog({ orgId, onClose }: { orgId?: string; onClose: () => void }) {

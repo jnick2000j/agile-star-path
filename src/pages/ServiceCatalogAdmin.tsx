@@ -29,7 +29,7 @@ const FIELD_TYPES = [
   { value: "user", label: "User picker" },
 ];
 
-export default function ServiceCatalogAdmin() {
+export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: boolean } = {}) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -112,9 +112,9 @@ export default function ServiceCatalogAdmin() {
     qc.invalidateQueries({ queryKey: ["svc-items"] });
   };
 
-  return (
-    <AppLayout title="Service Catalog Admin" subtitle="Define orderable services with approval workflows">
-      <div className="space-y-6">
+  const body = (
+    <>
+    <div className="space-y-6">
         <section>
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -197,8 +197,10 @@ export default function ServiceCatalogAdmin() {
       {fieldsOpen && (
         <FieldsDialog itemId={fieldsOpen} open={!!fieldsOpen} onOpenChange={(v) => !v && setFieldsOpen(null)} />
       )}
-    </AppLayout>
+    </>
   );
+
+  return embedded ? body : <AppLayout title="Service Catalog Admin" subtitle="Define orderable services with approval workflows">{body}</AppLayout>;
 }
 
 function CategoryDialog({ open, onOpenChange, onSave }: any) {
