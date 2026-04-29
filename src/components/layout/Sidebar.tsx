@@ -117,6 +117,7 @@ export function Sidebar() {
         { label: "Macros & Templates", href: "/support/macros" },
         { label: "SLA Escalation", href: "/support/sla-escalation" },
         { label: "Approval Workflows", href: "/support/approvals" },
+        { label: "Reports & Exports", href: "/support/reports" },
         { label: "Customer Portal", href: "/portal" },
         { label: "Workflows", href: "/support/workflows" },
       ],
