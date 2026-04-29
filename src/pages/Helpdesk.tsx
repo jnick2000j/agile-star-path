@@ -412,8 +412,9 @@ export default function Helpdesk() {
           ) : (
             <div className="space-y-6">
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <StatCard label="Open" value={stats.open} icon={<LifeBuoy className="h-4 w-4" />} />
+            <StatCard label="Unassigned" value={stats.unassigned} accent="warning" icon={<Inbox className="h-4 w-4" />} />
             <StatCard label="Urgent" value={stats.urgent} accent="destructive" />
             <StatCard label="Resolved" value={stats.resolved} accent="success" />
             <StatCard label="Total" value={stats.total} />
