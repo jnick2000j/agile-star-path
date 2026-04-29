@@ -5164,6 +5164,119 @@ export type Database = {
           },
         ]
       }
+      helpdesk_report_runs: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          file_size_bytes: number | null
+          id: string
+          organization_id: string
+          report_id: string
+          row_count: number | null
+          started_at: string
+          status: string
+          trigger_source: string
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          organization_id: string
+          report_id: string
+          row_count?: number | null
+          started_at?: string
+          status?: string
+          trigger_source?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          organization_id?: string
+          report_id?: string
+          row_count?: number | null
+          started_at?: string
+          status?: string
+          trigger_source?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_report_runs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_reports: {
+        Row: {
+          columns: Json
+          created_at: string
+          created_by: string | null
+          dataset: string
+          description: string | null
+          filters: Json
+          group_by: string | null
+          id: string
+          is_enabled: boolean
+          last_run_at: string | null
+          name: string
+          next_run_at: string | null
+          organization_id: string
+          recipients: string[] | null
+          schedule_interval: string | null
+          sort_by: string | null
+          sort_dir: string | null
+          updated_at: string
+        }
+        Insert: {
+          columns?: Json
+          created_at?: string
+          created_by?: string | null
+          dataset?: string
+          description?: string | null
+          filters?: Json
+          group_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          name: string
+          next_run_at?: string | null
+          organization_id: string
+          recipients?: string[] | null
+          schedule_interval?: string | null
+          sort_by?: string | null
+          sort_dir?: string | null
+          updated_at?: string
+        }
+        Update: {
+          columns?: Json
+          created_at?: string
+          created_by?: string | null
+          dataset?: string
+          description?: string | null
+          filters?: Json
+          group_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          name?: string
+          next_run_at?: string | null
+          organization_id?: string
+          recipients?: string[] | null
+          schedule_interval?: string | null
+          sort_by?: string | null
+          sort_dir?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       helpdesk_sla_escalation_events: {
         Row: {
           actions_taken: Json
@@ -13733,6 +13846,10 @@ export type Database = {
       helpdesk_instantiate_approval_chain: {
         Args: { _chain_id: string; _ticket_id: string }
         Returns: number
+      }
+      helpdesk_report_compute_next_run: {
+        Args: { _interval: string }
+        Returns: string
       }
       helpdesk_sla_sweep_breaches: { Args: never; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
