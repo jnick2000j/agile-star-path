@@ -368,7 +368,8 @@ export default function Helpdesk() {
           <ViewSwitcher
             current={view}
             tabs={[
-              { key: "console", label: "Agent console", to: "/support", icon: Headset },
+          { key: "console", label: "Agent console", to: "/support", icon: Headset },
+              { key: "service-requests", label: "Service Requests", to: "/support?tab=service_requests", icon: Package },
               { key: "portal", label: "Customer Portal", to: "/portal", icon: Sparkles, external: true },
               { key: "mine", label: "My tickets", to: "/support/my-tickets", icon: Inbox },
               ...(isAdmin ? [{ key: "admin", label: "Admin panel", to: "/support?view=admin", icon: Wrench }] : []),
