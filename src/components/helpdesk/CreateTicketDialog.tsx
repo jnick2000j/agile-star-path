@@ -124,8 +124,11 @@ export function CreateTicketDialog({
       toast.error("Failed to create ticket: " + error.message);
       return;
     }
-    // Dispatch workflows for ticket_created
+    // Send confirmation email to the reporter and dispatch workflows
     if (created?.id) {
+      supabase.functions.invoke("helpdesk-notify", {
+        body: { ticket_id: created.id, notification_type: "created" },
+      }).catch(() => {});
       const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
       dispatchHelpdeskWorkflow({
         organization_id: currentOrganization.id,
