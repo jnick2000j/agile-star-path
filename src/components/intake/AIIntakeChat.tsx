@@ -152,6 +152,10 @@ export function AIIntakeChat({ intent, greeting }: Props) {
           .select("id, reference_number")
           .single();
         if (error) throw error;
+        // Send confirmation email to reporter
+        supabase.functions.invoke("helpdesk-notify", {
+          body: { ticket_id: data.id, notification_type: "created" },
+        }).catch(() => {});
         toast.success(`Ticket ${data.reference_number ?? ""} created`);
         navigate(`/support/tickets/${data.id}`);
       } else {
