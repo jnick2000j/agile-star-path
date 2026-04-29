@@ -49,7 +49,7 @@ import {
   useTicketCatalogSelection,
   type CatalogSelection,
 } from "@/components/helpdesk/CatalogPicker";
-import { useQueryClient as useQC } from "@tanstack/react-query";
+
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
