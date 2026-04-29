@@ -102,9 +102,11 @@ export function Sidebar() {
       module: "helpdesk",
       children: [
         { label: "Tickets", href: "/support" },
+        { label: "Major Incidents", href: "/major-incidents" },
         { label: "Problems", href: "/problems" },
         { label: "Service Catalog", href: "/catalog" },
         { label: "CMDB", href: "/cmdb" },
+        { label: "Status Page", href: "/status/admin" },
         { label: "Workflows", href: "/support/workflows" },
       ],
     },

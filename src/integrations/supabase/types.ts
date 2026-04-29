@@ -5826,6 +5826,261 @@ export type Database = {
           },
         ]
       }
+      major_incident_tickets: {
+        Row: {
+          created_at: string
+          id: string
+          linked_by: string | null
+          major_incident_id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          linked_by?: string | null
+          major_incident_id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          linked_by?: string | null
+          major_incident_id?: string
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "major_incident_tickets_linked_by_fkey"
+            columns: ["linked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_tickets_linked_by_fkey"
+            columns: ["linked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_tickets_major_incident_id_fkey"
+            columns: ["major_incident_id"]
+            isOneToOne: false
+            referencedRelation: "major_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_tickets_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      major_incident_updates: {
+        Row: {
+          created_at: string
+          id: string
+          is_public: boolean
+          major_incident_id: string
+          message: string
+          organization_id: string
+          posted_by: string | null
+          update_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          major_incident_id: string
+          message: string
+          organization_id: string
+          posted_by?: string | null
+          update_type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          major_incident_id?: string
+          message?: string
+          organization_id?: string
+          posted_by?: string | null
+          update_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "major_incident_updates_major_incident_id_fkey"
+            columns: ["major_incident_id"]
+            isOneToOne: false
+            referencedRelation: "major_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_updates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_updates_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incident_updates_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      major_incidents: {
+        Row: {
+          closed_at: string | null
+          comms_lead_id: string | null
+          created_at: string
+          created_by: string | null
+          declared_at: string
+          description: string | null
+          id: string
+          impact: string | null
+          incident_commander_id: string | null
+          organization_id: string
+          parent_problem_id: string | null
+          post_mortem: string | null
+          post_mortem_published_at: string | null
+          reference_number: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          comms_lead_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          declared_at?: string
+          description?: string | null
+          id?: string
+          impact?: string | null
+          incident_commander_id?: string | null
+          organization_id: string
+          parent_problem_id?: string | null
+          post_mortem?: string | null
+          post_mortem_published_at?: string | null
+          reference_number?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          comms_lead_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          declared_at?: string
+          description?: string | null
+          id?: string
+          impact?: string | null
+          incident_commander_id?: string | null
+          organization_id?: string
+          parent_problem_id?: string | null
+          post_mortem?: string | null
+          post_mortem_published_at?: string | null
+          reference_number?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "major_incidents_comms_lead_id_fkey"
+            columns: ["comms_lead_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_comms_lead_id_fkey"
+            columns: ["comms_lead_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_incident_commander_id_fkey"
+            columns: ["incident_commander_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_incident_commander_id_fkey"
+            columns: ["incident_commander_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_parent_problem_id_fkey"
+            columns: ["parent_problem_id"]
+            isOneToOne: false
+            referencedRelation: "problem_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "major_incidents_parent_problem_id_fkey"
+            columns: ["parent_problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestone_history: {
         Row: {
           changed_at: string
@@ -9764,6 +10019,241 @@ export type Database = {
           reason?: string | null
         }
         Relationships: []
+      }
+      status_page_components: {
+        Row: {
+          ci_id: string | null
+          created_at: string
+          current_status: string
+          description: string | null
+          display_order: number
+          group_name: string | null
+          id: string
+          is_public: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          ci_id?: string | null
+          created_at?: string
+          current_status?: string
+          description?: string | null
+          display_order?: number
+          group_name?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          ci_id?: string | null
+          created_at?: string
+          current_status?: string
+          description?: string | null
+          display_order?: number
+          group_name?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_page_components_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_components_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "configuration_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_components_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      status_page_incident_updates: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          organization_id: string
+          posted_by: string | null
+          status: string
+          status_incident_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          organization_id: string
+          posted_by?: string | null
+          status: string
+          status_incident_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          organization_id?: string
+          posted_by?: string | null
+          status?: string
+          status_incident_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_page_incident_updates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_incident_updates_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_incident_updates_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_incident_updates_status_incident_id_fkey"
+            columns: ["status_incident_id"]
+            isOneToOne: false
+            referencedRelation: "status_page_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      status_page_incidents: {
+        Row: {
+          affected_component_ids: string[] | null
+          created_at: string
+          created_by: string | null
+          id: string
+          impact: string
+          is_published: boolean
+          major_incident_id: string | null
+          organization_id: string
+          resolved_at: string | null
+          started_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_component_ids?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact?: string
+          is_published?: boolean
+          major_incident_id?: string | null
+          organization_id: string
+          resolved_at?: string | null
+          started_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_component_ids?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact?: string
+          is_published?: boolean
+          major_incident_id?: string | null
+          organization_id?: string
+          resolved_at?: string | null
+          started_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_page_incidents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_incidents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_incidents_major_incident_id_fkey"
+            columns: ["major_incident_id"]
+            isOneToOne: false
+            referencedRelation: "major_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "status_page_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      status_page_subscribers: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          email: string
+          id: string
+          organization_id: string
+          unsubscribe_token: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          organization_id: string
+          unsubscribe_token?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          organization_id?: string
+          unsubscribe_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_page_subscribers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submittals: {
         Row: {
