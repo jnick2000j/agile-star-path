@@ -19,6 +19,7 @@ import MacrosPage from "@/pages/MacrosPage";
 import SLAEscalationRules from "@/pages/SLAEscalationRules";
 import ApprovalChainsPage from "@/pages/ApprovalChainsPage";
 import ServiceCatalogAdmin from "@/pages/ServiceCatalogAdmin";
+import { HelpdeskModuleToggles } from "@/components/admin/HelpdeskModuleToggles";
 import {
   DropdownMenu,
   DropdownMenuContent,
