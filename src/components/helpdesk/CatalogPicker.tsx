@@ -39,9 +39,20 @@ type ItemRow = {
   name: string;
   description: string | null;
   is_active: boolean;
+  metadata?: {
+    default_category?: string;
+    default_priority?: string;
+    default_ticket_type?: string;
+  } | null;
 };
 
 export type CatalogSelection = Record<string, string[]>; // list_id -> item ids
+
+export type CatalogItemDefaults = {
+  default_category?: string;
+  default_priority?: string;
+  default_ticket_type?: string;
+};
 
 interface Props {
   /** Selection map of list_id -> item ids */
@@ -51,6 +62,11 @@ interface Props {
   ticketType?: string;
   /** When true, shows compact card titles only (no description). */
   compact?: boolean;
+  /**
+   * Fired when an item is newly added to the selection. Provides the item's
+   * configured defaults so the parent form can auto-fill matching fields.
+   */
+  onItemAdded?: (defaults: CatalogItemDefaults, itemName: string) => void;
 }
 
 export function CatalogPicker({ value, onChange, ticketType, compact = false }: Props) {
