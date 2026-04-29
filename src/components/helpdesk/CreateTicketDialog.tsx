@@ -204,7 +204,7 @@ export function CreateTicketDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select value={form.ticket_type} onValueChange={(v) => setForm({ ...form, ticket_type: v })}>
+              <Select value={form.ticket_type} onValueChange={(v) => { setTouched((t) => ({ ...t, ticket_type: true })); setForm({ ...form, ticket_type: v }); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="support">Support</SelectItem>
