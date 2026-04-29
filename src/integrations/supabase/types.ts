@@ -14056,6 +14056,15 @@ export type Database = {
         }
         Returns: Json
       }
+      submit_csat_response_by_token: {
+        Args: {
+          _comment?: string
+          _follow_up_answer?: string
+          _rating: number
+          _token: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
