@@ -26,7 +26,7 @@ export default function CSATSurvey() {
   useEffect(() => {
     (async () => {
       if (!token) return;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("helpdesk_csat_surveys")
         .select("*, helpdesk_tickets(reference_number, subject)")
         .eq("token", token)
