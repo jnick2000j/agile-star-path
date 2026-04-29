@@ -476,12 +476,6 @@ export default function Helpdesk() {
               </Select>
             </div>
             <div className="flex flex-wrap gap-2">
-              {isAdmin && (
-                <Button variant="outline" onClick={() => setCatalogOpen(true)}>
-                  <Settings2 className="h-4 w-4 mr-2" />
-                  Manage Catalog
-                </Button>
-              )}
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Ticket
