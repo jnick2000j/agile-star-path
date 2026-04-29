@@ -81,6 +81,10 @@ import StatusPagePublic from "./pages/StatusPagePublic";
 import CMWorkflows from "./pages/CMWorkflows";
 import SupportPortal from "./pages/SupportPortal";
 import MyTickets from "./pages/MyTickets";
+import HelpPortal from "./pages/HelpPortal";
+import HelpArticle from "./pages/HelpArticle";
+import HelpSubmit from "./pages/HelpSubmit";
+import HelpMyTickets from "./pages/HelpMyTickets";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -193,6 +197,10 @@ const App = () => (
             <Route path="/major-incidents/:id" element={<ProtectedRoute><MajorIncidentDetail /></ProtectedRoute>} />
             <Route path="/status/admin" element={<ProtectedRoute><StatusPageAdmin /></ProtectedRoute>} />
             <Route path="/status" element={<StatusPagePublic />} />
+            <Route path="/help" element={<HelpPortal />} />
+            <Route path="/help/article/:id" element={<HelpArticle />} />
+            <Route path="/help/submit" element={<ProtectedRoute><HelpSubmit /></ProtectedRoute>} />
+            <Route path="/help/my-tickets" element={<ProtectedRoute><HelpMyTickets /></ProtectedRoute>} />
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
