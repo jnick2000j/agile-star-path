@@ -50,6 +50,7 @@ import {
   type CatalogSelection,
 } from "@/components/helpdesk/CatalogPicker";
 import { LinkedCIsPanel } from "@/components/cmdb/LinkedCIsPanel";
+import { CatalogRequestPanel } from "@/components/catalog/CatalogRequestPanel";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -665,6 +666,9 @@ export default function HelpdeskTicketDetail() {
             </Card>
 
             <LinkedCIsPanel ticketId={ticket.id} />
+
+            <CatalogRequestPanel ticketId={ticket.id} />
+
 
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
