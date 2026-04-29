@@ -23,6 +23,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AutomationsTab } from "@/components/automations/AutomationsTab";
+import { EntityAuditTrail } from "@/components/audit/EntityAuditTrail";
 
 const STATUS_OPTIONS = ["draft","submitted","in_review","cab_review","needs_information","approved","rejected","scheduled","in_progress","implemented","closed","cancelled","failed"];
 const STATUS_STYLES: Record<string, string> = {
