@@ -218,6 +218,15 @@ Deno.serve(async (req) => {
     }).eq("id", logInsert.id);
   }
 
+  // Send confirmation email to the reporter
+  try {
+    await supabase.functions.invoke("helpdesk-notify", {
+      body: { ticket_id: newTicket.id, notification_type: "created" },
+    });
+  } catch (e) {
+    console.error("created notify failed", e);
+  }
+
   return new Response(JSON.stringify({
     ok: true, action: "ticket_created",
     ticket_id: newTicket.id,

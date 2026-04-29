@@ -15,10 +15,27 @@ const corsHeaders = {
 
 interface NotifyPayload {
   ticket_id: string;
-  notification_type: "reply" | "assigned" | "status_changed" | "sla_warning" | "created";
+  notification_type:
+    | "reply"
+    | "assigned"
+    | "status_changed"
+    | "sla_warning"
+    | "created"
+    | "resolved"
+    | "internal_note";
   recipient_email?: string;
   metadata?: Record<string, any>;
 }
+
+const RESOLUTION_LABELS: Record<string, string> = {
+  fixed: "Fixed",
+  not_fixed: "Not Fixed",
+  duplicate: "Duplicate",
+  wont_fix: "Won't Fix",
+  cannot_reproduce: "Cannot Reproduce",
+  known_error: "Known Error",
+  workaround_provided: "Workaround Provided",
+};
 
 const TEMPLATES: Record<string, (ctx: any) => { subject: string; body: string }> = {
   created: (t) => ({
@@ -29,6 +46,10 @@ const TEMPLATES: Record<string, (ctx: any) => { subject: string; body: string }>
     subject: `[${t.reference_number}] New reply on your ticket`,
     body: `${t.comment_body || "(no content)"}\n\n--\nView ticket: ${t.ticket_url || ""}`,
   }),
+  internal_note: (t) => ({
+    subject: `[${t.reference_number}] Internal note added`,
+    body: `An internal note was added to ticket "${t.subject}":\n\n${t.comment_body || "(no content)"}`,
+  }),
   assigned: (t) => ({
     subject: `[${t.reference_number}] You've been assigned a ticket`,
     body: `You've been assigned ticket ${t.reference_number}: ${t.subject}\nPriority: ${t.priority}`,
@@ -37,6 +58,18 @@ const TEMPLATES: Record<string, (ctx: any) => { subject: string; body: string }>
     subject: `[${t.reference_number}] Status updated to ${t.new_status}`,
     body: `Your ticket "${t.subject}" status changed to: ${t.new_status}`,
   }),
+  resolved: (t) => {
+    const code = t.resolution_code ? RESOLUTION_LABELS[t.resolution_code] ?? t.resolution_code : null;
+    return {
+      subject: `[${t.reference_number}] Your ticket has been resolved${code ? ` — ${code}` : ""}`,
+      body:
+        `Hi ${t.reporter_name || "there"},\n\n` +
+        `Your ticket "${t.subject}" has been marked as resolved.\n` +
+        (code ? `Resolution: ${code}\n` : "") +
+        (t.resolution ? `\nNotes:\n${t.resolution}\n` : "") +
+        `\nIf this didn't fully address your issue, simply reply to this email and we'll re-open the ticket.\n\n— Support Team`,
+    };
+  },
   sla_warning: (t) => ({
     subject: `[${t.reference_number}] SLA approaching`,
     body: `Ticket "${t.subject}" is approaching its SLA target. Please action.`,
@@ -65,7 +98,7 @@ Deno.serve(async (req) => {
 
   const { data: ticket, error: tErr } = await supabase
     .from("helpdesk_tickets")
-    .select("id, organization_id, reference_number, subject, priority, status, reporter_email, reporter_name, assignee_id")
+    .select("id, organization_id, reference_number, subject, priority, status, reporter_email, reporter_name, assignee_id, resolution, resolution_code")
     .eq("id", payload.ticket_id)
     .single();
 
