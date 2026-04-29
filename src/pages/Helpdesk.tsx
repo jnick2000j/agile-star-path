@@ -11,14 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2 } from "lucide-react";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
+import { HelpdeskCatalogManager } from "@/components/admin/HelpdeskCatalogManager";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn, formatLabel } from "@/lib/utils";
 import {
   Select,
