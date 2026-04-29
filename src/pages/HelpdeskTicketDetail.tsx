@@ -30,6 +30,7 @@ import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
 import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/ResolveTicketDialog";
 import { TicketAttachments } from "@/components/helpdesk/TicketAttachments";
 import { EntityAuditTrail } from "@/components/audit/EntityAuditTrail";
+import { ParentTicketPicker } from "@/components/helpdesk/ParentTicketPicker";
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
@@ -113,6 +114,35 @@ export default function HelpdeskTicketDetail() {
       return profiles ?? [];
     },
     enabled: !!currentOrganization?.id,
+  });
+
+  const { data: childTickets = [] } = useQuery({
+    queryKey: ["helpdesk-child-tickets", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data } = await supabase
+        .from("helpdesk_tickets")
+        .select("id, reference_number, subject, status, priority")
+        .eq("parent_ticket_id", id)
+        .order("created_at", { ascending: true });
+      return data ?? [];
+    },
+    enabled: !!id,
+  });
+
+  const { data: parentTicket } = useQuery({
+    queryKey: ["helpdesk-parent-ticket", (ticket as any)?.parent_ticket_id],
+    queryFn: async () => {
+      const pid = (ticket as any)?.parent_ticket_id;
+      if (!pid) return null;
+      const { data } = await supabase
+        .from("helpdesk_tickets")
+        .select("id, reference_number, subject")
+        .eq("id", pid)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!(ticket as any)?.parent_ticket_id,
   });
 
   const updateFields = async (fields: Record<string, any>, opts?: { skipResolveIntercept?: boolean }) => {
@@ -454,6 +484,55 @@ export default function HelpdeskTicketDetail() {
               resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
               status={ticket.status}
             />
+
+            <Card className="p-4 space-y-3">
+              <h3 className="font-semibold">Hierarchy</h3>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Parent ticket</Label>
+                <ParentTicketPicker
+                  currentTicketId={ticket.id}
+                  value={(ticket as any).parent_ticket_id ?? null}
+                  onChange={(parentId) => updateField("parent_ticket_id", parentId)}
+                />
+                {parentTicket && (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/support/tickets/${parentTicket.id}`)}
+                    className="text-xs text-primary hover:underline truncate block max-w-full text-left"
+                  >
+                    Open parent: {parentTicket.reference_number ?? ""} {parentTicket.subject ?? ""}
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">
+                  Sub-tickets ({childTickets.length})
+                </Label>
+                {childTickets.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No sub-tickets linked.</p>
+                ) : (
+                  <ul className="space-y-1">
+                    {childTickets.map((c: any) => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/support/tickets/${c.id}`)}
+                          className="w-full flex items-center gap-2 text-left text-sm hover:bg-muted rounded px-2 py-1"
+                        >
+                          <span className="font-mono text-[11px] text-muted-foreground shrink-0">
+                            {c.reference_number ?? c.id.slice(0, 6)}
+                          </span>
+                          <span className="truncate flex-1">{c.subject}</span>
+                          <Badge variant="outline" className="text-[10px] capitalize shrink-0">
+                            {formatLabel(c.status)}
+                          </Badge>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </Card>
 
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>

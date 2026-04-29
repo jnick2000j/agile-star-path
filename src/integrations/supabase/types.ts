@@ -4414,6 +4414,7 @@ export type Database = {
           metadata: Json
           organization_id: string
           parent_problem_id: string | null
+          parent_ticket_id: string | null
           priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
           product_id: string | null
           programme_id: string | null
@@ -4453,6 +4454,7 @@ export type Database = {
           metadata?: Json
           organization_id: string
           parent_problem_id?: string | null
+          parent_ticket_id?: string | null
           priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
           product_id?: string | null
           programme_id?: string | null
@@ -4492,6 +4494,7 @@ export type Database = {
           metadata?: Json
           organization_id?: string
           parent_problem_id?: string | null
+          parent_ticket_id?: string | null
           priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
           product_id?: string | null
           programme_id?: string | null
@@ -4529,6 +4532,13 @@ export type Database = {
           {
             foreignKeyName: "helpdesk_tickets_parent_problem_id_fkey"
             columns: ["parent_problem_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_parent_ticket_id_fkey"
+            columns: ["parent_ticket_id"]
             isOneToOne: false
             referencedRelation: "helpdesk_tickets"
             referencedColumns: ["id"]
