@@ -94,6 +94,13 @@ import TicketIntake from "./pages/TicketIntake";
 import EmailIntake from "./pages/EmailIntake";
 import MacrosPage from "./pages/MacrosPage";
 import SLAEscalationRules from "./pages/SLAEscalationRules";
+import { CustomerPortalLayout } from "./components/portal/CustomerPortalLayout";
+import PortalDashboard from "./pages/portal/PortalDashboard";
+import PortalTicketList from "./pages/portal/PortalTicketList";
+import PortalTicketDetail from "./pages/portal/PortalTicketDetail";
+import PortalNewTicket from "./pages/portal/PortalNewTicket";
+import PortalKB from "./pages/portal/PortalKB";
+import PortalKBArticle from "./pages/portal/PortalKBArticle";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -219,6 +226,14 @@ const App = () => (
             <Route path="/support/email-intake" element={<ProtectedRoute><EmailIntake /></ProtectedRoute>} />
             <Route path="/support/macros" element={<ProtectedRoute><MacrosPage /></ProtectedRoute>} />
             <Route path="/support/sla-escalation" element={<ProtectedRoute><SLAEscalationRules /></ProtectedRoute>} />
+            <Route path="/portal" element={<ProtectedRoute><CustomerPortalLayout /></ProtectedRoute>}>
+              <Route index element={<PortalDashboard />} />
+              <Route path="tickets" element={<PortalTicketList />} />
+              <Route path="tickets/:id" element={<PortalTicketDetail />} />
+              <Route path="new" element={<PortalNewTicket />} />
+              <Route path="kb" element={<PortalKB />} />
+              <Route path="kb/:id" element={<PortalKBArticle />} />
+            </Route>
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
             <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
