@@ -71,14 +71,35 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
 
   const handleSaveCategory = async (form: { name: string; description: string; color: string }) => {
     if (!currentOrganization?.id) return;
-    const { error } = await supabase.from("service_catalog_categories").insert({
-      organization_id: currentOrganization.id,
-      name: form.name, description: form.description || null, color: form.color || "#64748b",
-    });
+    const payload = {
+      name: form.name,
+      description: form.description || null,
+      color: form.color || "#64748b",
+    };
+    const { error } = editingCategory
+      ? await supabase.from("service_catalog_categories").update(payload).eq("id", editingCategory.id)
+      : await supabase.from("service_catalog_categories").insert({
+          organization_id: currentOrganization.id,
+          ...payload,
+        });
     if (error) { toast.error(error.message); return; }
-    toast.success("Category created");
+    toast.success(editingCategory ? "Category updated" : "Category created");
     qc.invalidateQueries({ queryKey: ["svc-categories"] });
     setCatOpen(false);
+    setEditingCategory(null);
+  };
+
+  const handleDeleteCategory = async (cat: any) => {
+    const inUse = items.some((i: any) => i.category_id === cat.id);
+    const msg = inUse
+      ? `"${cat.name}" is used by one or more catalog items. Delete anyway? Items will keep working but become uncategorized.`
+      : `Delete category "${cat.name}"?`;
+    if (!confirm(msg)) return;
+    const { error } = await supabase.from("service_catalog_categories").delete().eq("id", cat.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Category deleted");
+    qc.invalidateQueries({ queryKey: ["svc-categories"] });
+    qc.invalidateQueries({ queryKey: ["svc-items"] });
   };
 
   const handleSaveItem = async (form: any) => {
