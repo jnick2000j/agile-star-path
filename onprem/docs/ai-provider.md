@@ -107,7 +107,7 @@ Currently supported model strings:
 Cloud builds default to this gateway. On-prem operators may also point to it,
 or self-host with Ollama / direct providers above.
 
-
+## Per-organization overrides
 
 Each org can override the global provider via **Settings → AI Provider**
 (visible to org admins). The override is stored in
