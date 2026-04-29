@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -615,9 +615,13 @@ export default function Helpdesk() {
                         <div className="flex items-center gap-2">
                           <span className="truncate">{t.subject}</span>
                           {hasChildren && (
-                            <Badge variant="outline" className="text-[10px]">
-                              {(childrenByParent[t.id] ?? []).length} sub
-                            </Badge>
+                            <span
+                              className="inline-flex items-center gap-1 h-5 pl-1.5 pr-2 rounded-full bg-primary/10 text-primary text-[10px] font-medium leading-none"
+                              title={`${(childrenByParent[t.id] ?? []).length} sub-ticket${(childrenByParent[t.id] ?? []).length === 1 ? "" : "s"}`}
+                            >
+                              <GitBranch className="h-3 w-3" />
+                              {(childrenByParent[t.id] ?? []).length}
+                            </span>
                           )}
                         </div>
                       </TableCell>
