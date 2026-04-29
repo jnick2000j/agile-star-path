@@ -236,7 +236,12 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
         </section>
       </div>
 
-      <CategoryDialog open={catOpen} onOpenChange={setCatOpen} onSave={handleSaveCategory} />
+      <CategoryDialog
+        open={catOpen}
+        onOpenChange={(v: boolean) => { setCatOpen(v); if (!v) setEditingCategory(null); }}
+        category={editingCategory}
+        onSave={handleSaveCategory}
+      />
       <ItemDialog
         open={itemOpen}
         onOpenChange={(v) => { setItemOpen(v); if (!v) setEditingItem(null); }}
