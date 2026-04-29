@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-info/10 text-info",
@@ -71,6 +72,9 @@ export default function Helpdesk() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const toggleExpand = (id: string) => setExpanded((s) => ({ ...s, [id]: !(s[id] ?? true) }));
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  const [dropOnRoot, setDropOnRoot] = useState(false);
 
   const { data: tickets = [], refetch, isLoading } = useQuery({
     queryKey: ["helpdesk-tickets", currentOrganization?.id, statusFilter, typeFilter],
@@ -160,6 +164,53 @@ export default function Helpdesk() {
     if (isOpen && kids.length) kids.forEach((k) => walk(k, depth + 1));
   };
   roots.forEach((r) => walk(r, 0));
+
+  // Collect all descendant ids of a ticket (within the full tickets set, not just filtered)
+  // so we can prevent dropping a ticket onto itself or one of its descendants.
+  const descendantsOf = (rootId: string): Set<string> => {
+    const result = new Set<string>();
+    const allChildrenByParent: Record<string, any[]> = {};
+    tickets.forEach((t: any) => {
+      if (t.parent_ticket_id) (allChildrenByParent[t.parent_ticket_id] ||= []).push(t);
+    });
+    const stack = [rootId];
+    while (stack.length) {
+      const id = stack.pop()!;
+      const kids = allChildrenByParent[id] ?? [];
+      for (const k of kids) {
+        if (!result.has(k.id)) {
+          result.add(k.id);
+          stack.push(k.id);
+        }
+      }
+    }
+    return result;
+  };
+
+  const reparent = async (childId: string, newParentId: string | null) => {
+    const child = tickets.find((t: any) => t.id === childId);
+    if (!child) return;
+    if (child.parent_ticket_id === newParentId) return;
+    if (newParentId === childId) {
+      toast.error("A ticket can't be its own parent");
+      return;
+    }
+    if (newParentId && descendantsOf(childId).has(newParentId)) {
+      toast.error("Can't move a ticket under one of its own sub-tickets");
+      return;
+    }
+    const { error } = await supabase
+      .from("helpdesk_tickets")
+      .update({ parent_ticket_id: newParentId })
+      .eq("id", childId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(newParentId ? "Moved under new parent" : "Moved to top level");
+    if (newParentId) setExpanded((s) => ({ ...s, [newParentId]: true }));
+    refetch();
+  };
 
   return (
     <AppLayout title="Helpdesk" subtitle="Ticket-based support and service requests">
@@ -260,6 +311,31 @@ export default function Helpdesk() {
           </div>
 
           {/* Table */}
+          {dragId && (
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                setDropOnRoot(true);
+              }}
+              onDragLeave={() => setDropOnRoot(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                const draggedId = e.dataTransfer.getData("text/plain") || dragId;
+                setDropOnRoot(false);
+                setDragId(null);
+                if (draggedId) reparent(draggedId, null);
+              }}
+              className={cn(
+                "border-2 border-dashed rounded-lg px-4 py-3 text-sm text-center transition-colors",
+                dropOnRoot
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-muted-foreground/30 text-muted-foreground",
+              )}
+            >
+              Drop here to move ticket to the top level
+            </div>
+          )}
           <div className="border rounded-lg bg-card">
             <Table>
               <TableHeader>
@@ -283,10 +359,45 @@ export default function Helpdesk() {
                   const sla = slaStateOf(t);
                   const slaCfg = SLA_BADGE[sla];
                   const isOpen = expanded[t.id] ?? true;
+                  const isDragging = dragId === t.id;
+                  const isDropTarget = dropTargetId === t.id && dragId && dragId !== t.id;
                   return (
                     <TableRow
                       key={t.id}
-                      className={cn("cursor-pointer", depth > 0 && "bg-muted/20")}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData("text/plain", t.id);
+                        setDragId(t.id);
+                      }}
+                      onDragEnd={() => {
+                        setDragId(null);
+                        setDropTargetId(null);
+                      }}
+                      onDragOver={(e) => {
+                        if (!dragId || dragId === t.id) return;
+                        // Block dropping onto own descendant
+                        if (descendantsOf(dragId).has(t.id)) return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        if (dropTargetId !== t.id) setDropTargetId(t.id);
+                      }}
+                      onDragLeave={() => {
+                        if (dropTargetId === t.id) setDropTargetId(null);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const draggedId = e.dataTransfer.getData("text/plain") || dragId;
+                        setDropTargetId(null);
+                        setDragId(null);
+                        if (draggedId && draggedId !== t.id) reparent(draggedId, t.id);
+                      }}
+                      className={cn(
+                        "cursor-pointer transition-colors",
+                        depth > 0 && "bg-muted/20",
+                        isDragging && "opacity-40",
+                        isDropTarget && "ring-2 ring-inset ring-primary bg-primary/5",
+                      )}
                       onClick={() => navigate(`/support/tickets/${t.id}`)}
                     >
                       <TableCell className="font-mono text-xs">
