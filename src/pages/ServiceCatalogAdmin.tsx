@@ -311,32 +311,207 @@ function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
 
 function ApproverPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { currentOrganization } = useOrganization();
-  const { data: members = [] } = useQuery({
+  const { data: members = [], isLoading } = useQuery({
     queryKey: ["org-members-picker", currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const { data } = await supabase
+      // Step 1: org members
+      const { data: access, error: accessErr } = await supabase
         .from("user_organization_access")
-        .select("user_id, profiles(first_name, last_name, email)")
+        .select("user_id")
         .eq("organization_id", currentOrganization.id);
-      return data ?? [];
+      if (accessErr || !access?.length) return [];
+      const ids = access.map((a) => a.user_id);
+      // Step 2: profiles for those users (no FK on user_organization_access -> profiles)
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, first_name, last_name, email, archived")
+        .in("user_id", ids);
+      return (profiles ?? [])
+        .filter((p: any) => !p.archived)
+        .sort((a: any, b: any) =>
+          `${a.first_name ?? ""} ${a.last_name ?? ""}`.localeCompare(`${b.first_name ?? ""} ${b.last_name ?? ""}`)
+        );
     },
     enabled: !!currentOrganization?.id,
   });
   const toggle = (id: string) => onChange(value.includes(id) ? value.filter(v => v !== id) : [...value, id]);
   return (
     <div>
-      <Label>Approvers (in order)</Label>
-      <div className="mt-2 max-h-48 overflow-auto border rounded-md p-2 space-y-1">
-        {members.map((m: any) => (
-          <label key={m.user_id} className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={value.includes(m.user_id)} onChange={() => toggle(m.user_id)} />
-            <span>{m.profiles?.first_name ?? ""} {m.profiles?.last_name ?? ""}</span>
-            <span className="text-muted-foreground text-xs">{m.profiles?.email}</span>
-          </label>
-        ))}
+      <div className="flex items-center justify-between">
+        <Label>Approvers (in order)</Label>
+        <span className="text-xs text-muted-foreground">{value.length} selected</span>
       </div>
+      <div className="mt-2 max-h-48 overflow-auto border rounded-md p-2 space-y-1">
+        {isLoading && <p className="text-xs text-muted-foreground">Loading members…</p>}
+        {!isLoading && members.length === 0 && (
+          <p className="text-xs text-muted-foreground">No members found in this organization.</p>
+        )}
+        {members.map((m: any) => {
+          const display = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
+          return (
+            <label key={m.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+              <input type="checkbox" checked={value.includes(m.user_id)} onChange={() => toggle(m.user_id)} />
+              <span className="flex-1">{display}</span>
+              {m.email && display !== m.email && <span className="text-muted-foreground text-xs">{m.email}</span>}
+            </label>
+          );
+        })}
+      </div>
+      {value.length > 0 && (
+        <p className="text-xs text-muted-foreground mt-1">Approvals are processed sequentially in the order shown above.</p>
+      )}
     </div>
+  );
+}
+
+function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; orgId?: string; open: boolean; onOpenChange: (v: boolean) => void }) {
+  const qc = useQueryClient();
+  const { currentOrganization } = useOrganization();
+  const effectiveOrg = orgId ?? currentOrganization?.id;
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["svc-item-tasks", itemId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("service_catalog_item_tasks")
+        .select("*")
+        .eq("item_id", itemId)
+        .order("step_order", { ascending: true });
+      return data ?? [];
+    },
+  });
+
+  const { data: members = [] } = useQuery({
+    queryKey: ["org-members-picker", effectiveOrg],
+    queryFn: async () => {
+      if (!effectiveOrg) return [];
+      const { data: access } = await supabase
+        .from("user_organization_access")
+        .select("user_id")
+        .eq("organization_id", effectiveOrg);
+      const ids = (access ?? []).map((a) => a.user_id);
+      if (ids.length === 0) return [];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, first_name, last_name, email")
+        .in("user_id", ids);
+      return profiles ?? [];
+    },
+    enabled: !!effectiveOrg,
+  });
+
+  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "" });
+
+  const refetch = () => qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
+
+  const addTask = async () => {
+    if (!form.title.trim() || !effectiveOrg) { toast.error("Task title required"); return; }
+    const nextOrder = (tasks[tasks.length - 1]?.step_order ?? 0) + 1;
+    const { error } = await supabase.from("service_catalog_item_tasks").insert({
+      organization_id: effectiveOrg,
+      item_id: itemId,
+      step_order: nextOrder,
+      title: form.title.trim(),
+      description: form.description.trim() || null,
+      default_assignee_id: form.default_assignee_id || null,
+      default_priority: form.default_priority,
+      estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
+    });
+    if (error) { toast.error(error.message); return; }
+    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "" });
+    refetch();
+  };
+
+  const removeTask = async (id: string) => {
+    await supabase.from("service_catalog_item_tasks").delete().eq("id", id);
+    refetch();
+  };
+
+  const move = async (id: string, dir: -1 | 1) => {
+    const idx = tasks.findIndex((t: any) => t.id === id);
+    const swap = tasks[idx + dir];
+    if (!swap) return;
+    await supabase.from("service_catalog_item_tasks").update({ step_order: swap.step_order }).eq("id", id);
+    await supabase.from("service_catalog_item_tasks").update({ step_order: tasks[idx].step_order }).eq("id", swap.id);
+    refetch();
+  };
+
+  const memberLabel = (uid: string) => {
+    const m: any = members.find((x: any) => x.user_id === uid);
+    if (!m) return "Unknown";
+    return [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Fulfillment tasks</DialogTitle>
+          <DialogDescription>
+            Each task becomes a child Help Desk ticket. They open one at a time — the next task ticket is created when the previous one is resolved.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            {tasks.length === 0 && (
+              <p className="text-sm text-muted-foreground">No tasks defined yet — approved requests will only create the parent ticket.</p>
+            )}
+            {tasks.map((t: any, idx: number) => (
+              <div key={t.id} className="flex items-center gap-2 border rounded-md p-2 text-sm">
+                <Badge variant="outline" className="text-xs">Step {idx + 1}</Badge>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{t.title}</div>
+                  <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
+                    <span className="capitalize">{t.default_priority}</span>
+                    {t.default_assignee_id && <span>· {memberLabel(t.default_assignee_id)}</span>}
+                    {t.estimated_hours != null && <span>· {t.estimated_hours}h</span>}
+                  </div>
+                </div>
+                <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => move(t.id, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" disabled={idx === tasks.length - 1} onClick={() => move(t.id, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => removeTask(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+              </div>
+            ))}
+          </div>
+          <div className="border-t pt-3 space-y-2">
+            <h4 className="text-sm font-semibold">Add task</h4>
+            <Input placeholder="Task title (e.g. Provision laptop)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <Textarea rows={2} placeholder="Description / instructions for the assignee" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label className="text-xs">Assignee</Label>
+                <Select value={form.default_assignee_id || "_none"} onValueChange={(v) => setForm({ ...form, default_assignee_id: v === "_none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Unassigned</SelectItem>
+                    {members.map((m: any) => {
+                      const label = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
+                      return <SelectItem key={m.user_id} value={m.user_id}>{label}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Priority</Label>
+                <Select value={form.default_priority} onValueChange={(v) => setForm({ ...form, default_priority: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["low","medium","high","urgent"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Est. hours</Label>
+                <Input type="number" value={form.estimated_hours} onChange={(e) => setForm({ ...form, estimated_hours: e.target.value })} />
+              </div>
+            </div>
+            <Button size="sm" onClick={addTask}><Plus className="h-4 w-4 mr-1" /> Add task</Button>
+          </div>
+        </div>
+        <DialogFooter><Button onClick={() => onOpenChange(false)}>Done</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
