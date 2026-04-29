@@ -169,6 +169,7 @@ export default function Helpdesk() {
 
   const stats = {
     open: tickets.filter((t: any) => ["new", "open", "pending"].includes(t.status)).length,
+    unassigned: tickets.filter((t: any) => !t.assignee_id && !["closed", "cancelled", "resolved"].includes(t.status)).length,
     urgent: tickets.filter((t: any) => t.priority === "urgent" && !["closed", "cancelled"].includes(t.status)).length,
     resolved: tickets.filter((t: any) => t.status === "resolved").length,
     total: tickets.length,
