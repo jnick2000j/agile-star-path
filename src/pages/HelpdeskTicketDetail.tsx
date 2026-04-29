@@ -664,6 +664,8 @@ export default function HelpdeskTicketDetail() {
               )}
             </Card>
 
+            <LinkedCIsPanel ticketId={ticket.id} />
+
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
               <div className="text-sm space-y-1">
