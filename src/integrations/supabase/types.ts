@@ -2132,6 +2132,140 @@ export type Database = {
         }
         Relationships: []
       }
+      ci_relationships: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          relationship_type: string
+          source_ci_id: string
+          target_ci_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          relationship_type: string
+          source_ci_id: string
+          target_ci_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          relationship_type?: string
+          source_ci_id?: string
+          target_ci_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_relationships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_relationships_source_ci_id_fkey"
+            columns: ["source_ci_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_relationships_source_ci_id_fkey"
+            columns: ["source_ci_id"]
+            isOneToOne: false
+            referencedRelation: "configuration_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_relationships_target_ci_id_fkey"
+            columns: ["target_ci_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_relationships_target_ci_id_fkey"
+            columns: ["target_ci_id"]
+            isOneToOne: false
+            referencedRelation: "configuration_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ci_ticket_links: {
+        Row: {
+          ci_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          link_type: string
+          notes: string | null
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          ci_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_type?: string
+          notes?: string | null
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          ci_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_type?: string
+          notes?: string | null
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ci_ticket_links_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_ticket_links_ci_id_fkey"
+            columns: ["ci_id"]
+            isOneToOne: false
+            referencedRelation: "configuration_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_ticket_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ci_ticket_links_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_engagements: {
         Row: {
           account_manager: string | null
@@ -2563,6 +2697,51 @@ export type Database = {
           },
         ]
       }
+      cmdb_ci_types: {
+        Row: {
+          category: string
+          color: string
+          created_at: string
+          default_attributes: Json
+          description: string | null
+          icon: string
+          id: string
+          is_system: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          color?: string
+          created_at?: string
+          default_attributes?: Json
+          description?: string | null
+          icon?: string
+          id?: string
+          is_system?: boolean
+          key: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          color?: string
+          created_at?: string
+          default_attributes?: Json
+          description?: string | null
+          icon?: string
+          id?: string
+          is_system?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comms_packs: {
         Row: {
           created_at: string
@@ -2811,6 +2990,114 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "compliance_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      configuration_items: {
+        Row: {
+          attributes: Json
+          business_service: string | null
+          ci_type_id: string
+          cost_center: string | null
+          created_at: string
+          created_by: string | null
+          criticality: string
+          description: string | null
+          environment: string | null
+          external_id: string | null
+          external_source: string | null
+          id: string
+          is_public_facing: boolean
+          lifecycle_state: string
+          location: string | null
+          name: string
+          organization_id: string
+          owner_team: string | null
+          owner_user_id: string | null
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reference_number: string | null
+          retired_at: string | null
+          status: string
+          tags: string[]
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          attributes?: Json
+          business_service?: string | null
+          ci_type_id: string
+          cost_center?: string | null
+          created_at?: string
+          created_by?: string | null
+          criticality?: string
+          description?: string | null
+          environment?: string | null
+          external_id?: string | null
+          external_source?: string | null
+          id?: string
+          is_public_facing?: boolean
+          lifecycle_state?: string
+          location?: string | null
+          name: string
+          organization_id: string
+          owner_team?: string | null
+          owner_user_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          retired_at?: string | null
+          status?: string
+          tags?: string[]
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          attributes?: Json
+          business_service?: string | null
+          ci_type_id?: string
+          cost_center?: string | null
+          created_at?: string
+          created_by?: string | null
+          criticality?: string
+          description?: string | null
+          environment?: string | null
+          external_id?: string | null
+          external_source?: string | null
+          id?: string
+          is_public_facing?: boolean
+          lifecycle_state?: string
+          location?: string | null
+          name?: string
+          organization_id?: string
+          owner_team?: string | null
+          owner_user_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reference_number?: string | null
+          retired_at?: string | null
+          status?: string
+          tags?: string[]
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configuration_items_ci_type_id_fkey"
+            columns: ["ci_type_id"]
+            isOneToOne: false
+            referencedRelation: "cmdb_ci_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuration_items_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -10981,6 +11268,30 @@ export type Database = {
       }
     }
     Views: {
+      cmdb_ci_health: {
+        Row: {
+          critical_ticket_count: number | null
+          criticality: string | null
+          environment: string | null
+          health_state: string | null
+          id: string | null
+          is_public_facing: boolean | null
+          name: string | null
+          open_ticket_count: number | null
+          organization_id: string | null
+          reference_number: string | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configuration_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles_directory: {
         Row: {
           archived: boolean | null
@@ -11062,6 +11373,22 @@ export type Database = {
       check_residency_policy: {
         Args: { _org_id: string; _processing_region: string }
         Returns: Json
+      }
+      ci_blast_radius: {
+        Args: { _ci_id: string; _max_depth?: number }
+        Returns: {
+          ci_id: string
+          ci_type_id: string
+          ci_type_label: string
+          criticality: string
+          depth: number
+          environment: string
+          name: string
+          open_incident_count: number
+          reference_number: string
+          shortest_path: string[]
+          status: string
+        }[]
       }
       compute_compliance_score: {
         Args: { _scope_id: string; _scope_type: string }

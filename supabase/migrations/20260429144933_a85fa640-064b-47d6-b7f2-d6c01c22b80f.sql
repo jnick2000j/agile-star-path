@@ -1,0 +1,1 @@
+ALTER VIEW public.cmdb_ci_health SET (security_invoker = on);
