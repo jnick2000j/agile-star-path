@@ -431,9 +431,9 @@ export default function Helpdesk() {
                   Manage Catalog
                 </Button>
               )}
-              <Button variant="outline" onClick={() => navigate("/support/portal")}>
+              <Button variant="outline" onClick={() => navigate("/portal")}>
                 <Mail className="h-4 w-4 mr-2" />
-                Open Portal
+                Customer Portal
               </Button>
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
