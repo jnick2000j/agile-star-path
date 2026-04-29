@@ -496,6 +496,16 @@ export default function Helpdesk() {
                       )}
                       onClick={() => navigate(`/support/tickets/${t.id}`)}
                     >
+                      <TableCell
+                        className="w-[40px]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={selectedIds.has(t.id)}
+                          onCheckedChange={() => toggleSelected(t.id)}
+                          aria-label={`Select ticket ${t.reference_number ?? t.id}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-mono text-xs">
                         <div className="flex items-center gap-1" style={{ paddingLeft: depth * 18 }}>
                           {hasChildren ? (
