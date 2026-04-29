@@ -304,7 +304,8 @@ export default function Helpdesk() {
           supabase
             .from("helpdesk_tickets")
             .update({ parent_ticket_id: newParent })
-            .in("id", childIds),
+            .in("id", childIds)
+            .then((r) => r),
         );
       });
       if (reparentOps.length) await Promise.all(reparentOps);
