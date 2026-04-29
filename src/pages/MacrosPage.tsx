@@ -317,6 +317,8 @@ export default function MacrosPage({ embedded = false }: { embedded?: boolean } 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </div>
   );
+
+  return embedded ? body : <AppLayout title="Macros & Canned Responses">{body}</AppLayout>;
 }
