@@ -45,6 +45,7 @@ export function CreateTicketDialog({
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>({});
   const [form, setForm] = useState({
     subject: "",
     description: "",
@@ -124,6 +125,14 @@ export function CreateTicketDialog({
       toast.error("Failed to create ticket: " + error.message);
       return;
     }
+    // Save catalog selections
+    if (created?.id) {
+      try {
+        await saveTicketCatalogSelection(created.id, currentOrganization.id, catalogSelection, user?.id);
+      } catch (e: any) {
+        toast.error("Ticket created, but failed to save catalog selections: " + e.message);
+      }
+    }
     // Send confirmation email to the reporter and dispatch workflows
     if (created?.id) {
       supabase.functions.invoke("helpdesk-notify", {
@@ -143,6 +152,7 @@ export function CreateTicketDialog({
       subject: "", description: "", ticket_type: "support", priority: "medium",
       category: "", programme_id: "", project_id: "", product_id: "",
     });
+    setCatalogSelection({});
     onCreated?.();
   };
 
@@ -206,6 +216,13 @@ export function CreateTicketDialog({
             />
           </div>
           <KBInlineSuggestions subject={form.subject} description={form.description} />
+          <div className="border-t pt-4">
+            <CatalogPicker
+              value={catalogSelection}
+              onChange={setCatalogSelection}
+              ticketType={form.ticket_type}
+            />
+          </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Programme</Label>
