@@ -170,10 +170,11 @@ x-channel-token: <your_channel_token>
           </TabsContent>
         </Tabs>
 
-        {selected && <ChannelCodeDialog channel={selected} onClose={() => setSelected(null)} />}
-      </div>
-    </AppLayout>
+      {selected && <ChannelCodeDialog channel={selected} onClose={() => setSelected(null)} />}
+    </div>
   );
+
+  return embedded ? body : <AppLayout title="Ticket Intake Channels">{body}</AppLayout>;
 }
 
 function CodeBlock({ code }: { code: string }) {
