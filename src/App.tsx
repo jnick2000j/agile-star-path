@@ -79,12 +79,9 @@ import MajorIncidentDetail from "./pages/MajorIncidentDetail";
 import StatusPageAdmin from "./pages/StatusPageAdmin";
 import StatusPagePublic from "./pages/StatusPagePublic";
 import CMWorkflows from "./pages/CMWorkflows";
-import SupportPortal from "./pages/SupportPortal";
+
 import MyTickets from "./pages/MyTickets";
-import HelpPortal from "./pages/HelpPortal";
 import HelpArticle from "./pages/HelpArticle";
-import HelpSubmit from "./pages/HelpSubmit";
-import HelpMyTickets from "./pages/HelpMyTickets";
 import SLAManagement from "./pages/SLAManagement";
 import AssetManagement from "./pages/AssetManagement";
 import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
