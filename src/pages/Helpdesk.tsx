@@ -527,6 +527,7 @@ export default function Helpdesk() {
                   <TableHead>SLA</TableHead>
                   <TableHead>Reporter</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
