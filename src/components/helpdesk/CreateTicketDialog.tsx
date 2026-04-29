@@ -232,7 +232,7 @@ export function CreateTicketDialog({
             <Label>Category</Label>
             <Input
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              onChange={(e) => { setTouched((t) => ({ ...t, category: true })); setForm({ ...form, category: e.target.value }); }}
               placeholder="e.g. Access, Performance, Bug, Question"
             />
           </div>
