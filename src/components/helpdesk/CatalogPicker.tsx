@@ -39,9 +39,20 @@ type ItemRow = {
   name: string;
   description: string | null;
   is_active: boolean;
+  metadata?: {
+    default_category?: string;
+    default_priority?: string;
+    default_ticket_type?: string;
+  } | null;
 };
 
 export type CatalogSelection = Record<string, string[]>; // list_id -> item ids
+
+export type CatalogItemDefaults = {
+  default_category?: string;
+  default_priority?: string;
+  default_ticket_type?: string;
+};
 
 interface Props {
   /** Selection map of list_id -> item ids */
@@ -51,9 +62,14 @@ interface Props {
   ticketType?: string;
   /** When true, shows compact card titles only (no description). */
   compact?: boolean;
+  /**
+   * Fired when an item is newly added to the selection. Provides the item's
+   * configured defaults so the parent form can auto-fill matching fields.
+   */
+  onItemAdded?: (defaults: CatalogItemDefaults, itemName: string) => void;
 }
 
-export function CatalogPicker({ value, onChange, ticketType, compact = false }: Props) {
+export function CatalogPicker({ value, onChange, ticketType, compact = false, onItemAdded }: Props) {
   const { currentOrganization } = useOrganization();
 
   const { data: lists = [] } = useQuery({
@@ -91,9 +107,37 @@ export function CatalogPicker({ value, onChange, ticketType, compact = false }: 
     enabled: !!currentOrganization?.id,
   });
 
+  // Flat lookup of all items for quick metadata access
+  const itemById = useMemo(() => {
+    const map: Record<string, ItemRow> = {};
+    for (const list of Object.values(itemsByList)) {
+      for (const it of list) map[it.id] = it;
+    }
+    return map;
+  }, [itemsByList]);
+
   if (lists.length === 0) return null;
 
   const setList = (listId: string, ids: string[]) => {
+    // Detect newly added items and emit their defaults
+    if (onItemAdded) {
+      const prev = value[listId] ?? [];
+      const added = ids.filter((id) => !prev.includes(id));
+      for (const newId of added) {
+        const item = itemById[newId];
+        const md = item?.metadata;
+        if (item && md && (md.default_category || md.default_priority || md.default_ticket_type)) {
+          onItemAdded(
+            {
+              default_category: md.default_category,
+              default_priority: md.default_priority,
+              default_ticket_type: md.default_ticket_type,
+            },
+            item.name,
+          );
+        }
+      }
+    }
     onChange({ ...value, [listId]: ids });
   };
 

@@ -23,7 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
-import { CatalogPicker, saveTicketCatalogSelection, type CatalogSelection } from "@/components/helpdesk/CatalogPicker";
+import { CatalogPicker, saveTicketCatalogSelection, type CatalogSelection, type CatalogItemDefaults } from "@/components/helpdesk/CatalogPicker";
 
 interface Props {
   open: boolean;
@@ -46,6 +46,12 @@ export function CreateTicketDialog({
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>({});
+  // Track which fields the user has manually edited so we don't overwrite their input
+  const [touched, setTouched] = useState<Record<"category" | "priority" | "ticket_type", boolean>>({
+    category: false,
+    priority: false,
+    ticket_type: false,
+  });
   const [form, setForm] = useState({
     subject: "",
     description: "",
@@ -56,6 +62,29 @@ export function CreateTicketDialog({
     project_id: defaultProjectId || "",
     product_id: defaultProductId || "",
   });
+
+  const handleCatalogItemAdded = (defaults: CatalogItemDefaults, itemName: string) => {
+    setForm((prev) => {
+      const next = { ...prev };
+      const applied: string[] = [];
+      if (defaults.default_category && !touched.category && !prev.category.trim()) {
+        next.category = defaults.default_category;
+        applied.push(`category "${defaults.default_category}"`);
+      }
+      if (defaults.default_priority && !touched.priority) {
+        next.priority = defaults.default_priority;
+        applied.push(`priority ${defaults.default_priority}`);
+      }
+      if (defaults.default_ticket_type && !touched.ticket_type) {
+        next.ticket_type = defaults.default_ticket_type;
+        applied.push(`type ${defaults.default_ticket_type.replace("_", " ")}`);
+      }
+      if (applied.length > 0) {
+        toast.info(`Auto-filled from "${itemName}": ${applied.join(", ")}`);
+      }
+      return next;
+    });
+  };
 
   const { data: programmes = [] } = useQuery({
     queryKey: ["programmes-min", currentOrganization?.id],
@@ -153,6 +182,7 @@ export function CreateTicketDialog({
       category: "", programme_id: "", project_id: "", product_id: "",
     });
     setCatalogSelection({});
+    setTouched({ category: false, priority: false, ticket_type: false });
     onCreated?.();
   };
 
@@ -174,7 +204,7 @@ export function CreateTicketDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select value={form.ticket_type} onValueChange={(v) => setForm({ ...form, ticket_type: v })}>
+              <Select value={form.ticket_type} onValueChange={(v) => { setTouched((t) => ({ ...t, ticket_type: true })); setForm({ ...form, ticket_type: v }); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="support">Support</SelectItem>
@@ -187,7 +217,7 @@ export function CreateTicketDialog({
             </div>
             <div className="space-y-2">
               <Label>Priority</Label>
-              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+              <Select value={form.priority} onValueChange={(v) => { setTouched((t) => ({ ...t, priority: true })); setForm({ ...form, priority: v }); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low</SelectItem>
@@ -202,7 +232,7 @@ export function CreateTicketDialog({
             <Label>Category</Label>
             <Input
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              onChange={(e) => { setTouched((t) => ({ ...t, category: true })); setForm({ ...form, category: e.target.value }); }}
               placeholder="e.g. Access, Performance, Bug, Question"
             />
           </div>
@@ -221,6 +251,7 @@ export function CreateTicketDialog({
               value={catalogSelection}
               onChange={setCatalogSelection}
               ticketType={form.ticket_type}
+              onItemAdded={handleCatalogItemAdded}
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
