@@ -144,7 +144,9 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
               <h2 className="text-lg font-semibold">Categories</h2>
               <p className="text-xs text-muted-foreground">Group catalog items for browsing.</p>
             </div>
-            <Button size="sm" onClick={() => setCatOpen(true)}><Plus className="h-4 w-4 mr-1" /> Category</Button>
+            <Button size="sm" onClick={() => { setEditingCategory(null); setCatOpen(true); }}>
+              <Plus className="h-4 w-4 mr-1" /> Category
+            </Button>
           </div>
           <Card className="p-3">
             {categories.length === 0 ? (
@@ -152,10 +154,32 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
             ) : (
               <div className="flex flex-wrap gap-2">
                 {categories.map((c) => (
-                  <Badge key={c.id} variant="outline" style={{ borderColor: c.color }} className="gap-2">
+                  <div
+                    key={c.id}
+                    className="inline-flex items-center gap-1 rounded-md border bg-card pl-2 pr-1 py-0.5"
+                    style={{ borderColor: c.color }}
+                  >
                     <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
-                    {c.name}
-                  </Badge>
+                    <span className="text-sm">{c.name}</span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => { setEditingCategory(c); setCatOpen(true); }}
+                      aria-label={`Edit ${c.name}`}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => handleDeleteCategory(c)}
+                      aria-label={`Delete ${c.name}`}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 ))}
               </div>
             )}
