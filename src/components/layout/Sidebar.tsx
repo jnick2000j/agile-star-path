@@ -186,7 +186,32 @@ export function Sidebar() {
     if (v === undefined || v === null) return true;
     return v === true || v === "true";
   };
-  const navigation = allNavigation.filter((item) => isModuleEnabled(item.module));
+  const baseNavigation = allNavigation.filter((item) => isModuleEnabled(item.module));
+
+  // Apply per-org helpdesk module toggles to the Helpdesk subtree.
+  const { isEnabled: isHelpdeskModuleEnabled } = useModuleToggles();
+  const helpdeskHrefToModuleKey: Record<string, string> = {
+    "/major-incidents": "major_incidents",
+    "/problems": "problems",
+    "/catalog": "service_catalog",
+    "/cmdb": "cmdb",
+    "/assets": "assets",
+    "/status/admin": "status_page",
+    "/support/csat": "csat",
+    "/support/analytics": "analytics",
+    "/support/reports": "reports",
+    "/support/workflows": "workflows",
+  };
+  const navigation = baseNavigation.map((item) => {
+    if (item.module !== "helpdesk" || !item.children) return item;
+    return {
+      ...item,
+      children: item.children.filter((c) => {
+        const key = helpdeskHrefToModuleKey[c.href];
+        return key ? isHelpdeskModuleEnabled(key) : true;
+      }),
+    };
+  });
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
