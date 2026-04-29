@@ -90,6 +90,7 @@ import AssetManagement from "./pages/AssetManagement";
 import HelpdeskAnalytics from "./pages/HelpdeskAnalytics";
 import CSATDashboard from "./pages/CSATDashboard";
 import CSATSurvey from "./pages/CSATSurvey";
+import TicketIntake from "./pages/TicketIntake";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
