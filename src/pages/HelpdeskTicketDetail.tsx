@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { HelpdeskBreadcrumbs } from "@/components/helpdesk/HelpdeskBreadcrumbs";
 import {
   Select,
   SelectContent,
