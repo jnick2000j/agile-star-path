@@ -690,6 +690,13 @@ export default function HelpdeskTicketDetail() {
 
             <TicketCSATPanel ticket={ticket} />
 
+            <KBSuggestionsPanel
+              organizationId={ticket.organization_id}
+              query={`${ticket.subject || ""}\n\n${ticket.description || ""}`}
+              ticketId={ticket.id}
+              context="agent_reply"
+            />
+
             <Card className="p-4 space-y-2">
               <h3 className="font-semibold">Linked</h3>
               <div className="text-sm space-y-1">
