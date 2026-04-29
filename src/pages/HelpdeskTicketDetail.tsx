@@ -484,6 +484,8 @@ export default function HelpdeskTicketDetail() {
               )}
             </Card>
 
+            <TicketAttachments ticketId={ticket.id} organizationId={ticket.organization_id} />
+
             <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
 
             <KBAssistant surface="agent" ticketId={ticket.id} placeholder="Ask the KB for a suggested reply…" />
