@@ -279,17 +279,47 @@ export default function Helpdesk() {
                   <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Loading...</TableCell></TableRow>
                 ) : filtered.length === 0 ? (
                   <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No tickets found</TableCell></TableRow>
-                ) : filtered.map((t: any) => {
+                ) : flattened.map(({ ticket: t, depth, hasChildren }) => {
                   const sla = slaStateOf(t);
                   const slaCfg = SLA_BADGE[sla];
+                  const isOpen = expanded[t.id] ?? true;
                   return (
                     <TableRow
                       key={t.id}
-                      className="cursor-pointer"
+                      className={cn("cursor-pointer", depth > 0 && "bg-muted/20")}
                       onClick={() => navigate(`/support/tickets/${t.id}`)}
                     >
-                      <TableCell className="font-mono text-xs">{t.reference_number ?? "—"}</TableCell>
-                      <TableCell className="font-medium">{t.subject}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <div className="flex items-center gap-1" style={{ paddingLeft: depth * 18 }}>
+                          {hasChildren ? (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); toggleExpand(t.id); }}
+                              className="p-0.5 rounded hover:bg-muted"
+                              aria-label={isOpen ? "Collapse sub-tickets" : "Expand sub-tickets"}
+                            >
+                              {isOpen
+                                ? <ChevronDown className="h-3.5 w-3.5" />
+                                : <ChevronRight className="h-3.5 w-3.5" />}
+                            </button>
+                          ) : depth > 0 ? (
+                            <CornerDownRight className="h-3.5 w-3.5 text-muted-foreground" />
+                          ) : (
+                            <span className="inline-block w-[18px]" />
+                          )}
+                          <span>{t.reference_number ?? "—"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate">{t.subject}</span>
+                          {hasChildren && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {(childrenByParent[t.id] ?? []).length} sub
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell><Badge variant="outline">{TYPE_LABELS[t.ticket_type] ?? formatLabel(t.ticket_type)}</Badge></TableCell>
                       <TableCell><Badge className={cn(PRIORITY_STYLES[t.priority])}>{formatLabel(t.priority)}</Badge></TableCell>
                       <TableCell><Badge className={cn(STATUS_STYLES[t.status])}>{formatLabel(t.status)}</Badge></TableCell>
