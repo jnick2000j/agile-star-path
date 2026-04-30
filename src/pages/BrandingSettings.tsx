@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSignedLogo } from "@/hooks/useSignedLogo";
 
 const fontOptions = [
   { value: "Inter", label: "Inter" },
@@ -296,6 +297,10 @@ export default function BrandingSettings() {
 
   const update = (key: keyof BrandingState, value: any) => setBranding((prev) => ({ ...prev, [key]: value }));
 
+  // Signed URLs for previews — the 'logos' bucket is private.
+  const signedLogoUrl = useSignedLogo(branding.logo_url);
+  const signedBgUrl = useSignedLogo(branding.login_bg_image_url);
+
   return (
     <AppLayout title="Branding Settings" subtitle="Customize your organization's appearance">
       <div className="max-w-4xl space-y-6">
@@ -367,7 +372,7 @@ export default function BrandingSettings() {
                       <div className="space-y-2">
                         <Label>Current Logo</Label>
                         <div className="flex items-center gap-4">
-                          <img src={branding.logo_url} alt="Logo" className="h-16 w-auto object-contain rounded-lg border border-border p-2" />
+                          <img src={signedLogoUrl || branding.logo_url} alt="Logo" className="h-16 w-auto object-contain rounded-lg border border-border p-2" />
                           <Button variant="outline" size="sm" onClick={() => update("logo_url", "")}>Remove</Button>
                         </div>
                       </div>
@@ -456,7 +461,7 @@ export default function BrandingSettings() {
                   <Label>Background Image (optional)</Label>
                   {branding.login_bg_image_url && (
                     <div className="flex items-center gap-3 mb-2">
-                      <img src={branding.login_bg_image_url} alt="BG" className="h-16 w-24 object-cover rounded border border-border" />
+                      <img src={signedBgUrl || branding.login_bg_image_url} alt="BG" className="h-16 w-24 object-cover rounded border border-border" />
                       <Button variant="outline" size="sm" onClick={() => update("login_bg_image_url", "")}>Remove</Button>
                     </div>
                   )}
@@ -645,16 +650,16 @@ export default function BrandingSettings() {
                     className="w-1/2 p-6 text-white relative overflow-hidden flex flex-col justify-between"
                     style={{
                       backgroundColor: branding.primary_color,
-                      backgroundImage: branding.login_bg_image_url ? `url(${branding.login_bg_image_url})` : undefined,
+                      backgroundImage: signedBgUrl ? `url(${signedBgUrl})` : undefined,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
                   >
-                    {branding.login_bg_image_url && <div className="absolute inset-0 bg-black/40" />}
+                    {signedBgUrl && <div className="absolute inset-0 bg-black/40" />}
                     <div className="relative z-10">
                       <div className="flex items-center gap-2 mb-8">
-                        {branding.show_logo && branding.logo_url && (
-                          <img src={branding.logo_url} alt="Logo" className="h-8 w-auto object-contain" />
+                        {branding.show_logo && signedLogoUrl && (
+                          <img src={signedLogoUrl} alt="Logo" className="h-8 w-auto object-contain" />
                         )}
                         <span className="text-sm font-semibold">{branding.app_name || "TaskMaster"}</span>
                       </div>

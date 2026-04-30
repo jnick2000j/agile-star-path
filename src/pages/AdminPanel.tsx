@@ -21,6 +21,19 @@ import {
   Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSignedLogo } from "@/hooks/useSignedLogo";
+
+function OrgLogoImg({ stored, name, primaryColor }: { stored?: string | null; name: string; primaryColor?: string | null }) {
+  const url = useSignedLogo(stored);
+  if (url) {
+    return <img src={url} alt={name} className="h-10 w-10 rounded-lg object-cover" />;
+  }
+  return (
+    <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: primaryColor || "#2563eb" }}>
+      <Building2 className="h-5 w-5 text-white" />
+    </div>
+  );
+}
 import {
   Table,
   TableBody,
@@ -525,20 +538,7 @@ export default function AdminPanel() {
                 <div key={org.id} className="metric-card">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      {org.logo_url ? (
-                        <img
-                          src={org.logo_url}
-                          alt={org.name}
-                          className="h-10 w-10 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div 
-                          className="h-10 w-10 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: org.primary_color || "#2563eb" }}
-                        >
-                          <Building2 className="h-5 w-5 text-white" />
-                        </div>
-                      )}
+                      <OrgLogoImg stored={org.logo_url} name={org.name} primaryColor={org.primary_color} />
                       <div>
                         <h4 className="font-medium">{org.name}</h4>
                         <p className="text-xs text-muted-foreground">/{org.slug}</p>

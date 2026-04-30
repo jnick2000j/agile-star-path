@@ -39,3 +39,5 @@ project_id = "lpsbudbighowwdmgdfyc"
     verify_jwt = false
   [functions.weekly-construction-report]
     verify_jwt = false
+  [functions.get-public-branding]
+    verify_jwt = false

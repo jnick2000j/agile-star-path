@@ -117,11 +117,10 @@ export default function Auth() {
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
-      const { data } = await supabase
-        .from("branding_settings")
-        .select("*")
-        .is("organization_id", null)
-        .maybeSingle();
+      // Use the public edge function so anonymous visitors get fresh signed URLs
+      // for the logo and login background (the 'logos' bucket is private).
+      const { data: payload, error } = await supabase.functions.invoke("get-public-branding");
+      const data = !error ? (payload as any)?.branding : null;
 
       if (data) {
         setBranding(data as any);
