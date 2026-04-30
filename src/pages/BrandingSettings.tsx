@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSignedLogo } from "@/hooks/useSignedLogo";
 
 const fontOptions = [
   { value: "Inter", label: "Inter" },
