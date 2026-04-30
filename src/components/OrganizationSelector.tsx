@@ -65,20 +65,7 @@ export function OrganizationSelector() {
               currentOrganization?.id === org.id && "bg-accent"
             )}
           >
-            {org.logo_url ? (
-              <img
-                src={org.logo_url}
-                alt={org.name}
-                className="h-5 w-5 rounded object-contain"
-              />
-            ) : (
-              <div
-                className="h-5 w-5 rounded flex items-center justify-center"
-                style={{ backgroundColor: org.primary_color || "#2563eb" }}
-              >
-                <Building2 className="h-3 w-3 text-white" />
-              </div>
-            )}
+            <OrgLogo stored={org.logo_url} name={org.name} primaryColor={org.primary_color} />
             <span className="flex-1 truncate">{org.name}</span>
             {currentOrganization?.id === org.id && (
               <Check className="h-4 w-4 text-primary" />
