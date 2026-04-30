@@ -10,6 +10,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useSignedLogo } from "@/hooks/useSignedLogo";
+
+function OrgLogo({ stored, name, primaryColor, size = "h-5 w-5" }: { stored?: string | null; name?: string; primaryColor?: string | null; size?: string }) {
+  const url = useSignedLogo(stored);
+  if (url) {
+    return <img src={url} alt={name || ""} className={`${size} rounded object-contain`} />;
+  }
+  return (
+    <div className={`${size} rounded flex items-center justify-center`} style={{ backgroundColor: primaryColor || "#2563eb" }}>
+      <Building2 className="h-3 w-3 text-white" />
+    </div>
+  );
+}
 
 export function OrganizationSelector() {
   const { organizations, currentOrganization, setCurrentOrganization, loading } = useOrganization();
@@ -32,20 +45,7 @@ export function OrganizationSelector() {
           className="gap-2 w-full justify-between bg-sidebar-accent/60 hover:bg-sidebar-accent text-sidebar-foreground border-sidebar-border"
         >
           <div className="flex items-center gap-2">
-            {currentOrganization?.logo_url ? (
-              <img
-                src={currentOrganization.logo_url}
-                alt={currentOrganization.name}
-                className="h-5 w-5 rounded object-contain"
-              />
-            ) : (
-              <div
-                className="h-5 w-5 rounded flex items-center justify-center"
-                style={{ backgroundColor: currentOrganization?.primary_color || "#2563eb" }}
-              >
-                <Building2 className="h-3 w-3 text-white" />
-              </div>
-            )}
+            <OrgLogo stored={currentOrganization?.logo_url} name={currentOrganization?.name} primaryColor={currentOrganization?.primary_color} />
             <span className="truncate">
               {currentOrganization?.name || "Select Organization"}
             </span>
