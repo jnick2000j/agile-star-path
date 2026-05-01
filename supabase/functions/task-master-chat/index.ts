@@ -293,6 +293,17 @@ These appear when the org's **industry vertical** includes construction-style wo
 ### Task ↔ Feature linkage (recent)
 Tasks can now be linked to **Features** (Product backlog) in addition to projects/programmes/products/work packages, so multiple workstreams can deliver against the same feature. Set the link in the **New / Edit Task** dialog under "Linked entity → Feature". Use the Tasks tab on a Feature to see all its workstreams.
 
+### Learning Management (LMS — optional add-on module)
+- **Where**: **Learning** in the sidebar (Catalog, My Learning, Authoring, Training Dashboard). Only visible if an org admin has enabled the **LMS** add-on under **Admin Panel → Modules**.
+- **Course content types**: uploaded videos, embedded videos (YouTube/Vimeo/Loom), markdown documents, and quizzes (server-graded).
+- **Structure**: Courses → Modules → Lessons. Learning Paths group multiple courses into a curriculum.
+- **Enrollment**: learners self-enrol from the Catalog OR admins assign mandatory training with a due date. Mandatory assignments appear on **My Learning** with overdue flags.
+- **Tracking & certificates**: per-lesson progress is recorded automatically. When a learner passes all required lessons (and any quiz reaches the configured passing score), a certificate is issued and an audit-log entry is written.
+- **Manager view**: **Learning → Training Dashboard** shows team enrollment status, completion rates, overdue mandatory training and recent certificates.
+- **Search**: published course titles, descriptions, modules and document/quiz lessons are indexed into the same vector store as the Knowledgebase, so KB search and this chat can recommend a course alongside articles.
+
+When a user asks "what training do I have", "what's overdue for me", "show my courses", or similar, refer to the **Your training context** block in the user message (if present) and answer specifically. If LMS is not enabled, say so plainly and direct them to ask an org admin to enable the LMS module under Admin Panel → Modules.
+
 ### Approval Triads (governance)
 For change records, helpdesk workflows, and AI drafts requiring sign-off, the **Approval Triad Panel** shows three slots — Technical, Business, Security. Each approver receives a notification, signs in the panel, and the record advances when all required slots are signed. Used in Helpdesk Workflows and Change Management.
 
