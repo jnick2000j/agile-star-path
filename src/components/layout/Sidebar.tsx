@@ -189,6 +189,8 @@ export function Sidebar() {
   };
   const isModuleEnabled = (moduleKey?: string) => {
     if (!moduleKey) return true;
+    // Add-on modules are gated only by the org module toggle, not the vertical catalog.
+    if (moduleKey === "lms_addon") return true;
     if (!hasModule(moduleKey)) return false;
     const featureKey = moduleFeatureMap[moduleKey];
     if (!featureKey) return true;
