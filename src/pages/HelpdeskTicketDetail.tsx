@@ -690,6 +690,11 @@ export default function HelpdeskTicketDetail() {
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <TicketWatchersPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
             <ApprovalsPanel ticketId={ticket.id} />
             <Card className="p-4 space-y-4">
               <h3 className="font-semibold">Properties</h3>
