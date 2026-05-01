@@ -182,7 +182,7 @@ export function ConvertTicketToTaskDialog({ open, onOpenChange, ticket, onConver
         source_ticket_id: ticket.id,
         [entityFieldName]: entityId,
       };
-      const { data: createdTask, error: taskErr } = await supabase
+      const { data: createdTask, error: taskErr } = await (supabase as any)
         .from("tasks")
         .insert(taskInsert)
         .select("id")
