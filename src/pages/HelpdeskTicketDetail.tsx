@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2, BookOpen, Paperclip, History as HistoryIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
