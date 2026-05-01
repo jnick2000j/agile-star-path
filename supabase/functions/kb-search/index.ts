@@ -92,12 +92,16 @@ Deno.serve(async (req) => {
       // 3. Generate grounded answer
       const apiKey = Deno.env.get("LOVABLE_API_KEY");
       const context = articles
-        .map((a, i) => `[${i + 1}] ${a.title}\n${a.chunks.join("\n")}`)
+        .map((a, i) => {
+          const tag = a.source === "lms" ? `[${i + 1}] (Training course) ${a.title}` : `[${i + 1}] ${a.title}`;
+          return `${tag}\n${a.chunks.join("\n")}`;
+        })
         .join("\n\n---\n\n");
 
-      const systemPrompt = `You are a helpful support assistant. Answer the user's question using ONLY the knowledgebase articles provided in the context below. 
+      const systemPrompt = `You are a helpful support assistant. Answer the user's question using ONLY the sources provided below. Sources are either knowledgebase articles or training courses (marked "Training course").
 - Be concise (2-4 short paragraphs max).
-- Cite sources inline like [1], [2] referring to article numbers.
+- Cite sources inline like [1], [2] referring to the numbered sources.
+- When a source is a training course, suggest the user open it for the full lesson.
 - If the context does not contain the answer, say so plainly and suggest opening a ticket.
 - Use markdown for formatting (lists, code blocks where helpful).`;
 
