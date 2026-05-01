@@ -5537,6 +5537,51 @@ export type Database = {
           },
         ]
       }
+      helpdesk_ticket_assignees: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          is_primary: boolean
+          organization_id: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          organization_id: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          organization_id?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_assignees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_assignees_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_ticket_attachments: {
         Row: {
           comment_id: string | null
