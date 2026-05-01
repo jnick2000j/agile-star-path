@@ -678,9 +678,6 @@ export default function HelpdeskTicketDetail() {
               <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)}>
                 <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
               </Button>
-              <Button size="sm" variant="outline" onClick={() => setActiveTab("links")}>
-                <Link2 className="h-4 w-4 mr-2" /> Links
-              </Button>
               {(ticket as any).converted_to_task_id ? (
                 <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}>
                   <ListChecks className="h-4 w-4 mr-2" /> Open task
@@ -691,10 +688,7 @@ export default function HelpdeskTicketDetail() {
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)}>
-                <Network className="h-4 w-4 mr-2" /> Hierarchy
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setCatalogOpen(true)}>
-                <Package className="h-4 w-4 mr-2" /> Catalog
+                <Network className="h-4 w-4 mr-2" /> Make Parent/Child
               </Button>
               <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => setDeclareMIOpen(true)}>
                 <Siren className="h-4 w-4 mr-2" /> Major Incident
