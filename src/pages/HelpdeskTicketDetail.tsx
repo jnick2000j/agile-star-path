@@ -1000,6 +1000,14 @@ export default function HelpdeskTicketDetail() {
         onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
       />
 
+      <DeclareMajorIncidentDialog
+        open={declareMIOpen}
+        onOpenChange={setDeclareMIOpen}
+        seedTicketId={ticket.id}
+        seedTitle={ticket.subject}
+        seedDescription={ticket.description}
+      />
+
       <Dialog open={resolutionOpen} onOpenChange={setResolutionOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
