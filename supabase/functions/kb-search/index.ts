@@ -135,13 +135,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 4. Log search
+    // 4. Log search (only KB article ids — kb_search_log.matched_article_ids FKs to kb_articles)
     await supabase.from("kb_search_log").insert({
       organization_id,
       user_id: user?.id ?? null,
       query,
       surface,
-      matched_article_ids: articles.map((a) => a.id),
+      matched_article_ids: articles.filter((a) => a.source === "kb").map((a) => a.id),
       ai_answer: aiAnswer || null,
       ticket_id: ticket_id ?? null,
     });
@@ -150,11 +150,14 @@ Deno.serve(async (req) => {
       JSON.stringify({
         answer: aiAnswer,
         articles: articles.map((a) => ({
+          source: a.source,
           id: a.id,
           title: a.title,
           summary: a.summary,
           category: a.category,
           similarity: a.similarity,
+          // Convenience deep-link the UI can use without knowing the schema:
+          href: a.source === "lms" ? `/learning/courses/${a.id}` : `/knowledgebase/${a.id}`,
         })),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
