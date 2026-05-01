@@ -26,6 +26,7 @@ export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const { currentOrganization } = useOrganization();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
