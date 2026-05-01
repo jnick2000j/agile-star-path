@@ -77,7 +77,8 @@ import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
 import { TicketAssigneesPanel } from "@/components/helpdesk/TicketAssigneesPanel";
 import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
 import { Link } from "react-router-dom";
-import { ListChecks, Download, FileText, Image as ImageIcon } from "lucide-react";
+import { ListChecks, Download, FileText, Image as ImageIcon, Siren } from "lucide-react";
+import { DeclareMajorIncidentDialog } from "@/components/major-incidents/DeclareMajorIncidentDialog";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
@@ -171,6 +172,7 @@ export default function HelpdeskTicketDetail() {
   const [convertOpen, setConvertOpen] = useState(false);
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
+  const [declareMIOpen, setDeclareMIOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("conversation");
   const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
   const [catalogSaving, setCatalogSaving] = useState(false);
@@ -661,39 +663,34 @@ export default function HelpdeskTicketDetail() {
             <div className="flex flex-wrap items-center gap-2 ml-auto">
               {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
                 <Button size="sm" onClick={() => setResolveOpen(true)}>
-                  Mark as Resolved…
+                  <Save className="h-4 w-4 mr-2" /> Mark as Resolved
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}
-              >
+              <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}>
                 <Clock className="h-4 w-4 mr-2" /> Log time
               </Button>
               <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)}>
-                Resolution
+                <FileText className="h-4 w-4 mr-2" /> Resolution
                 {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)}>
-                <Gauge className="h-4 w-4 mr-1" /> SLA / CSAT
+                <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
               </Button>
               <Button size="sm" variant="outline" onClick={() => setActiveTab("links")}>
-                <Link2 className="h-4 w-4 mr-1" /> Links
+                <Link2 className="h-4 w-4 mr-2" /> Links
               </Button>
               {(ticket as any).converted_to_task_id ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}
-                >
-                  <ListChecks className="h-4 w-4 mr-1" /> Open task
+                <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}>
+                  <ListChecks className="h-4 w-4 mr-2" /> Open task
                 </Button>
               ) : (
                 <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)}>
-                  <ListChecks className="h-4 w-4 mr-1" /> To task
+                  <ListChecks className="h-4 w-4 mr-2" /> To task
                 </Button>
               )}
+              <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => setDeclareMIOpen(true)}>
+                <Siren className="h-4 w-4 mr-2" /> Major Incident
+              </Button>
             </div>
           </div>
         </Card>
@@ -1001,6 +998,14 @@ export default function HelpdeskTicketDetail() {
         onOpenChange={setConvertOpen}
         ticket={ticket as any}
         onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
+      />
+
+      <DeclareMajorIncidentDialog
+        open={declareMIOpen}
+        onOpenChange={setDeclareMIOpen}
+        seedTicketId={ticket.id}
+        seedTitle={ticket.subject}
+        seedDescription={ticket.description ?? undefined}
       />
 
       <Dialog open={resolutionOpen} onOpenChange={setResolutionOpen}>
