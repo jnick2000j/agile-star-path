@@ -985,37 +985,6 @@ export default function HelpdeskTicketDetail() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={catalogOpen} onOpenChange={setCatalogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2"><Package className="h-4 w-4" /> Catalog selections</span>
-              {!catalogEditing ? (
-                <Button size="sm" variant="outline" onClick={startCatalogEdit}>Edit</Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" onClick={cancelCatalogEdit} disabled={catalogSaving}>Cancel</Button>
-                  <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
-                    {catalogSaving ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          {catalogEditing ? (
-            <CatalogPicker
-              value={catalogDraft}
-              onChange={setCatalogDraft}
-              ticketType={ticket.ticket_type}
-              compact
-            />
-          ) : (
-            <CatalogSummary ticketId={ticket.id} />
-          )}
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={resolutionOpen} onOpenChange={setResolutionOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
