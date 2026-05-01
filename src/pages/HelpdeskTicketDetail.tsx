@@ -171,6 +171,7 @@ export default function HelpdeskTicketDetail() {
   const [convertOpen, setConvertOpen] = useState(false);
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("conversation");
   const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
   const [catalogSaving, setCatalogSaving] = useState(false);
   const { data: catalogSelection = {}, refetch: refetchCatalog } = useTicketCatalogSelection(id);
