@@ -22,7 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2, BookOpen, Paperclip, History as HistoryIcon, Users, Link2, Settings2, Gauge } from "lucide-react";
+import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2, BookOpen, Paperclip, History as HistoryIcon, Users, Link2, Settings2, Gauge, Network, Package } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
