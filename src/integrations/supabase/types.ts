@@ -7100,6 +7100,60 @@ export type Database = {
           },
         ]
       }
+      lms_course_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          course_id: string
+          created_at: string
+          embedding: string | null
+          id: string
+          organization_id: string
+          source_id: string | null
+          source_kind: string
+          token_estimate: number | null
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          course_id: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          organization_id: string
+          source_id?: string | null
+          source_kind: string
+          token_estimate?: number | null
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          course_id?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          organization_id?: string
+          source_id?: string | null
+          source_kind?: string
+          token_estimate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_course_chunks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_course_chunks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_courses: {
         Row: {
           category: string | null
@@ -7110,6 +7164,8 @@ export type Database = {
           est_duration_minutes: number | null
           id: string
           issues_certificate: boolean
+          kb_index_status: string
+          kb_indexed_at: string | null
           organization_id: string
           passing_score_percent: number
           status: string
@@ -7125,6 +7181,8 @@ export type Database = {
           est_duration_minutes?: number | null
           id?: string
           issues_certificate?: boolean
+          kb_index_status?: string
+          kb_indexed_at?: string | null
           organization_id: string
           passing_score_percent?: number
           status?: string
@@ -7140,6 +7198,8 @@ export type Database = {
           est_duration_minutes?: number | null
           id?: string
           issues_certificate?: boolean
+          kb_index_status?: string
+          kb_indexed_at?: string | null
           organization_id?: string
           passing_score_percent?: number
           status?: string
@@ -14635,6 +14695,7 @@ export type Database = {
           chunk_id: string
           content: string
           similarity: number
+          source: string
           status: string
           summary: string
           title: string

@@ -293,6 +293,17 @@ These appear when the org's **industry vertical** includes construction-style wo
 ### Task ↔ Feature linkage (recent)
 Tasks can now be linked to **Features** (Product backlog) in addition to projects/programmes/products/work packages, so multiple workstreams can deliver against the same feature. Set the link in the **New / Edit Task** dialog under "Linked entity → Feature". Use the Tasks tab on a Feature to see all its workstreams.
 
+### Learning Management (LMS — optional add-on module)
+- **Where**: **Learning** in the sidebar (Catalog, My Learning, Authoring, Training Dashboard). Only visible if an org admin has enabled the **LMS** add-on under **Admin Panel → Modules**.
+- **Course content types**: uploaded videos, embedded videos (YouTube/Vimeo/Loom), markdown documents, and quizzes (server-graded).
+- **Structure**: Courses → Modules → Lessons. Learning Paths group multiple courses into a curriculum.
+- **Enrollment**: learners self-enrol from the Catalog OR admins assign mandatory training with a due date. Mandatory assignments appear on **My Learning** with overdue flags.
+- **Tracking & certificates**: per-lesson progress is recorded automatically. When a learner passes all required lessons (and any quiz reaches the configured passing score), a certificate is issued and an audit-log entry is written.
+- **Manager view**: **Learning → Training Dashboard** shows team enrollment status, completion rates, overdue mandatory training and recent certificates.
+- **Search**: published course titles, descriptions, modules and document/quiz lessons are indexed into the same vector store as the Knowledgebase, so KB search and this chat can recommend a course alongside articles.
+
+When a user asks "what training do I have", "what's overdue for me", "show my courses", or similar, refer to the **Your training context** block in the user message (if present) and answer specifically. If LMS is not enabled, say so plainly and direct them to ask an org admin to enable the LMS module under Admin Panel → Modules.
+
 ### Approval Triads (governance)
 For change records, helpdesk workflows, and AI drafts requiring sign-off, the **Approval Triad Panel** shows three slots — Technical, Business, Security. Each approver receives a notification, signs in the panel, and the record advances when all required slots are signed. Used in Helpdesk Workflows and Change Management.
 
@@ -403,7 +414,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, organization_id } = await req.json();
 
     // Input validation
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
@@ -430,14 +441,86 @@ serve(async (req) => {
       }
     }
 
+    // ---- Build LMS context (best-effort, gated on org-level lms toggle) ----
+    let lmsContext = "";
+    if (organization_id && typeof organization_id === "string") {
+      try {
+        const { data: toggleRow } = await authClient
+          .from("organization_module_toggles")
+          .select("enabled")
+          .eq("organization_id", organization_id)
+          .eq("module_key", "lms")
+          .maybeSingle();
+
+        // LMS is an opt-in add-on: only inject context when explicitly enabled.
+        if (toggleRow?.enabled === true) {
+          const userId = claimsData.claims.sub as string;
+          const today = new Date().toISOString().slice(0, 10);
+
+          const [enrollments, assignments] = await Promise.all([
+            authClient
+              .from("lms_enrollments")
+              .select("status, progress_percent, due_at, course:lms_courses(id, title, category)")
+              .eq("user_id", userId)
+              .eq("organization_id", organization_id)
+              .order("due_at", { ascending: true, nullsFirst: false })
+              .limit(15),
+            authClient
+              .from("lms_assignments")
+              .select("mandatory, due_at, course:lms_courses(id, title)")
+              .eq("user_id", userId)
+              .eq("organization_id", organization_id)
+              .eq("mandatory", true)
+              .limit(15),
+          ]);
+
+          const lines: string[] = [`### Your training context (today: ${today})`];
+          const enrolled = enrollments.data ?? [];
+          const mandatory = assignments.data ?? [];
+
+          if (enrolled.length === 0 && mandatory.length === 0) {
+            lines.push("- You have no current enrollments or mandatory training.");
+          } else {
+            if (mandatory.length) {
+              lines.push("**Mandatory training assigned to you:**");
+              for (const a of mandatory) {
+                const c: any = a.course;
+                if (!c) continue;
+                const due = a.due_at ? ` — due ${String(a.due_at).slice(0, 10)}` : "";
+                lines.push(`- ${c.title} (course id ${c.id})${due}`);
+              }
+            }
+            if (enrolled.length) {
+              lines.push("**Your enrollments:**");
+              for (const e of enrolled) {
+                const c: any = e.course;
+                if (!c) continue;
+                const due = e.due_at ? `, due ${String(e.due_at).slice(0, 10)}` : "";
+                lines.push(`- ${c.title} — ${e.status}, ${e.progress_percent ?? 0}% complete${due}`);
+              }
+            }
+          }
+          lmsContext = lines.join("\n");
+        } else {
+          lmsContext = "### Your training context\nThe LMS add-on is not enabled for this workspace.";
+        }
+      } catch (e) {
+        console.warn("LMS context build failed:", e);
+      }
+    }
+
+    const augmentedMessages = lmsContext
+      ? [{ role: "system" as const, content: lmsContext }, ...messages]
+      : messages;
+
     const aiResp = await callAI({
       supabase: authClient,
-      organizationId: null,
+      organizationId: organization_id ?? null,
       model: "google/gemini-3-flash-preview",
       stream: true,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        ...messages,
+        ...augmentedMessages,
       ],
     });
     if (!aiResp.ok) return aiResp.errorResponse;

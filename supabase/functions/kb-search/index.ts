@@ -63,11 +63,15 @@ Deno.serve(async (req) => {
 
     const chunks = matches ?? [];
 
-    // Group into unique articles
+    // Group into unique sources (KB article OR LMS course). The RPC now returns
+    // a `source` column ('kb' | 'lms'); article_id holds the KB article id or
+    // the LMS course id depending on source.
     const articleMap = new Map<string, any>();
     for (const c of chunks) {
-      if (!articleMap.has(c.article_id)) {
-        articleMap.set(c.article_id, {
+      const key = `${c.source ?? "kb"}:${c.article_id}`;
+      if (!articleMap.has(key)) {
+        articleMap.set(key, {
+          source: c.source ?? "kb",
           id: c.article_id,
           title: c.title,
           summary: c.summary,
@@ -77,7 +81,7 @@ Deno.serve(async (req) => {
           chunks: [c.content],
         });
       } else {
-        articleMap.get(c.article_id).chunks.push(c.content);
+        articleMap.get(key).chunks.push(c.content);
       }
     }
     const articles = Array.from(articleMap.values()).slice(0, 5);
@@ -88,12 +92,16 @@ Deno.serve(async (req) => {
       // 3. Generate grounded answer
       const apiKey = Deno.env.get("LOVABLE_API_KEY");
       const context = articles
-        .map((a, i) => `[${i + 1}] ${a.title}\n${a.chunks.join("\n")}`)
+        .map((a, i) => {
+          const tag = a.source === "lms" ? `[${i + 1}] (Training course) ${a.title}` : `[${i + 1}] ${a.title}`;
+          return `${tag}\n${a.chunks.join("\n")}`;
+        })
         .join("\n\n---\n\n");
 
-      const systemPrompt = `You are a helpful support assistant. Answer the user's question using ONLY the knowledgebase articles provided in the context below. 
+      const systemPrompt = `You are a helpful support assistant. Answer the user's question using ONLY the sources provided below. Sources are either knowledgebase articles or training courses (marked "Training course").
 - Be concise (2-4 short paragraphs max).
-- Cite sources inline like [1], [2] referring to article numbers.
+- Cite sources inline like [1], [2] referring to the numbered sources.
+- When a source is a training course, suggest the user open it for the full lesson.
 - If the context does not contain the answer, say so plainly and suggest opening a ticket.
 - Use markdown for formatting (lists, code blocks where helpful).`;
 
@@ -127,13 +135,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 4. Log search
+    // 4. Log search (only KB article ids — kb_search_log.matched_article_ids FKs to kb_articles)
     await supabase.from("kb_search_log").insert({
       organization_id,
       user_id: user?.id ?? null,
       query,
       surface,
-      matched_article_ids: articles.map((a) => a.id),
+      matched_article_ids: articles.filter((a) => a.source === "kb").map((a) => a.id),
       ai_answer: aiAnswer || null,
       ticket_id: ticket_id ?? null,
     });
@@ -142,11 +150,14 @@ Deno.serve(async (req) => {
       JSON.stringify({
         answer: aiAnswer,
         articles: articles.map((a) => ({
+          source: a.source,
           id: a.id,
           title: a.title,
           summary: a.summary,
           category: a.category,
           similarity: a.similarity,
+          // Convenience deep-link the UI can use without knowing the schema:
+          href: a.source === "lms" ? `/learning/courses/${a.id}` : `/knowledgebase/${a.id}`,
         })),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },

@@ -12,6 +12,8 @@ import { toast } from "sonner";
 
 interface KBArticleResult {
   id: string;
+  source?: "kb" | "lms";
+  href?: string;
   title: string;
   summary: string | null;
   category: string | null;
@@ -148,8 +150,8 @@ export function KBAssistant({
                 </p>
                 {result.articles.map((a, i) => (
                   <Link
-                    key={a.id}
-                    to={`/knowledgebase/${a.id}`}
+                    key={`${a.source ?? "kb"}:${a.id}`}
+                    to={a.href ?? `/knowledgebase/${a.id}`}
                     className="block rounded-md border p-3 hover:bg-accent/40 transition"
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -157,6 +159,9 @@ export function KBAssistant({
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs text-muted-foreground">[{i + 1}]</span>
                           <p className="font-medium text-sm truncate">{a.title}</p>
+                          {a.source === "lms" && (
+                            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Course</Badge>
+                          )}
                         </div>
                         {a.summary && (
                           <p className="text-xs text-muted-foreground line-clamp-2">{a.summary}</p>

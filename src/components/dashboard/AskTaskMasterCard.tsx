@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -25,6 +26,7 @@ export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const { currentOrganization } = useOrganization();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,7 +59,11 @@ export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {
           Authorization: `Bearer ${token}`,
         },
         // Strip the seeded greeting — it's UI-only context, not part of the model history
-        body: JSON.stringify({ messages: next.filter((m) => m !== GREETING) }),
+        body: JSON.stringify({
+          // Strip the seeded greeting — it's UI-only context, not part of the model history
+          messages: next.filter((m) => m !== GREETING),
+          organization_id: currentOrganization?.id ?? null,
+        }),
       });
 
       if (resp.status === 429) {
