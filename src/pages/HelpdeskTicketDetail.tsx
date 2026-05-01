@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ArrowLeft, MessageSquare, Activity, Save, Clock, Trash2, BookOpen, Paperclip, History as HistoryIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -601,9 +607,9 @@ export default function HelpdeskTicketDetail() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Main */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4 min-w-0">
             <Card className="p-6">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
@@ -619,9 +625,12 @@ export default function HelpdeskTicketDetail() {
             </Card>
 
             <Tabs defaultValue="conversation">
-              <TabsList>
+              <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="conversation"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
                 <TabsTrigger value="activity"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
+                <TabsTrigger value="knowledge"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
+                <TabsTrigger value="attachments"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
+                <TabsTrigger value="audit"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
               </TabsList>
               <TabsContent value="conversation" className="space-y-3">
                 {comments.length === 0 && <p className="text-sm text-muted-foreground">No replies yet.</p>}
@@ -658,12 +667,12 @@ export default function HelpdeskTicketDetail() {
                     onMentionsChange={setMentions}
                     disabled={posting}
                   />
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                      <div className="flex items-center gap-2">
                        <Switch checked={internal} onCheckedChange={setInternal} id="internal" />
                        <Label htmlFor="internal" className="text-sm">Internal note</Label>
                      </div>
-                     <div className="flex items-center gap-2">
+                     <div className="flex items-center gap-2 flex-wrap">
                        <MacroPicker
                          ticketId={ticket.id}
                          context={{
@@ -706,7 +715,6 @@ export default function HelpdeskTicketDetail() {
                         if (x === null || x === undefined) return "—";
                         if (typeof x === "object") return JSON.stringify(x);
                         const s = String(x);
-                        // If looks like a UUID, try to resolve to a user name
                         if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) {
                           const u = (orgUsers as any[]).find(o => o.user_id === s);
                           return u ? (u.full_name || u.email || s) : s;
@@ -743,68 +751,89 @@ export default function HelpdeskTicketDetail() {
                   );
                 })}
               </TabsContent>
+              <TabsContent value="knowledge" className="space-y-4">
+                <KBSuggestionsPanel
+                  organizationId={ticket.organization_id}
+                  query={`${ticket.subject || ""}\n\n${ticket.description || ""}`}
+                  ticketId={ticket.id}
+                  context="agent_reply"
+                />
+                <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
+                <KBAssistant surface="agent" ticketId={ticket.id} placeholder="Ask the KB for a suggested reply…" />
+              </TabsContent>
+              <TabsContent value="attachments" className="space-y-4">
+                <TicketAttachments ticketId={ticket.id} organizationId={ticket.organization_id} />
+              </TabsContent>
+              <TabsContent value="audit">
+                <EntityAuditTrail entityType="helpdesk_ticket" entityId={ticket.id} title="Ticket Audit Trail" />
+              </TabsContent>
             </Tabs>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4">
-            <TicketWatchersPanel
-              ticketId={ticket.id}
-              organizationId={ticket.organization_id}
-              orgUsers={orgUsers as any}
-            />
-            <ApprovalsPanel ticketId={ticket.id} />
-            <Card className="p-4 space-y-4">
-              <h3 className="font-semibold">Properties</h3>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Status</Label>
-                <Select value={ticket.status} onValueChange={(v) => updateField("status", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
-                </Select>
+          <aside className="space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1">
+            {/* Always-visible essentials */}
+            <Card className="p-4 space-y-3">
+              <h3 className="font-semibold text-sm">Properties</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  <Select value={ticket.status} onValueChange={(v) => updateField("status", v)}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Priority</Label>
+                  <Select value={ticket.priority} onValueChange={(v) => updateField("priority", v)}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{PRIORITY_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Type</Label>
+                  <Select value={ticket.ticket_type} onValueChange={(v) => updateField("ticket_type", v)}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Source</Label>
+                  <div className="h-8 flex items-center"><Badge variant="outline" className="text-xs">{ticket.source}</Badge></div>
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs text-muted-foreground">Assignee</Label>
+                  <Select value={ticket.assignee_id ?? "none"} onValueChange={(v) => updateField("assignee_id", v === "none" ? null : v)}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Unassigned</SelectItem>
+                      {orgUsers.map((u: any) => (
+                        <SelectItem key={u.user_id} value={u.user_id}>{u.full_name || u.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {ticket.category && (
+                  <div className="space-y-1 col-span-2">
+                    <Label className="text-xs text-muted-foreground">Category</Label>
+                    <p className="text-sm">{ticket.category}</p>
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Priority</Label>
-                <Select value={ticket.priority} onValueChange={(v) => updateField("priority", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{PRIORITY_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
-                </Select>
+              <div className="flex flex-col gap-2 pt-1">
+                {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+                  <Button size="sm" onClick={() => setResolveOpen(true)}>
+                    Mark as Resolved…
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}
+                >
+                  <Clock className="h-4 w-4 mr-2" /> Log time
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Type</Label>
-                <Select value={ticket.ticket_type} onValueChange={(v) => updateField("ticket_type", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Assignee</Label>
-                <Select value={ticket.assignee_id ?? "none"} onValueChange={(v) => updateField("assignee_id", v === "none" ? null : v)}>
-                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Unassigned</SelectItem>
-                    {orgUsers.map((u: any) => (
-                      <SelectItem key={u.user_id} value={u.user_id}>{u.full_name || u.email}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Category</Label>
-                <p className="text-sm">{ticket.category || "—"}</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Source</Label>
-                <Badge variant="outline">{ticket.source}</Badge>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}
-              >
-                <Clock className="h-4 w-4 mr-2" /> Log time on this ticket
-              </Button>
             </Card>
 
             <SLAStatus
@@ -818,192 +847,189 @@ export default function HelpdeskTicketDetail() {
               status={ticket.status}
             />
 
-            <Card className="p-4 space-y-3">
-              <h3 className="font-semibold">Hierarchy</h3>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Parent ticket</Label>
-                <ParentTicketPicker
-                  currentTicketId={ticket.id}
-                  value={(ticket as any).parent_ticket_id ?? null}
-                  onChange={(parentId) => updateField("parent_ticket_id", parentId)}
-                />
-                {parentTicket && (
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/support/tickets/${parentTicket.id}`)}
-                    className="text-xs text-primary hover:underline truncate block max-w-full text-left"
-                  >
-                    Open parent: {parentTicket.reference_number ?? ""} {parentTicket.subject ?? ""}
-                  </button>
-                )}
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">
-                  Sub-tickets ({childTickets.length})
-                </Label>
-                {childTickets.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No sub-tickets linked.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {childTickets.map((c: any) => (
-                      <li key={c.id}>
-                        <button
-                          type="button"
-                          onClick={() => navigate(`/support/tickets/${c.id}`)}
-                          className="w-full flex items-center gap-2 text-left text-sm hover:bg-muted rounded px-2 py-1"
-                        >
-                          <span className="font-mono text-[11px] text-muted-foreground shrink-0">
-                            {c.reference_number ?? c.id.slice(0, 6)}
-                          </span>
-                          <span className="truncate flex-1">{c.subject}</span>
-                          <Badge variant="outline" className="text-[10px] capitalize shrink-0">
-                            {formatLabel(c.status)}
-                          </Badge>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Catalog selections</h3>
-                {!catalogEditing ? (
-                  <Button size="sm" variant="outline" onClick={startCatalogEdit}>
-                    Edit
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={cancelCatalogEdit}
-                      disabled={catalogSaving}
-                    >
-                      Cancel
-                    </Button>
-                    <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
-                      {catalogSaving ? "Saving..." : "Save"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-              {catalogEditing ? (
-                <CatalogPicker
-                  value={catalogDraft}
-                  onChange={setCatalogDraft}
-                  ticketType={ticket.ticket_type}
-                  compact
-                />
-              ) : (
-                <CatalogSummary ticketId={ticket.id} />
-              )}
-            </Card>
-
-            <LinkedCIsPanel ticketId={ticket.id} />
-
-            <CatalogRequestPanel ticketId={ticket.id} />
-
-            <TicketProblemPanel
+            <TicketWatchersPanel
               ticketId={ticket.id}
-              ticketSubject={ticket.subject}
-              ticketDescription={ticket.description}
-              parentProblemId={(ticket as any).parent_problem_id ?? null}
-            />
-
-            <TicketMajorIncidentPanel
-              ticketId={ticket.id}
-              ticketSubject={ticket.subject}
-              ticketDescription={ticket.description}
-            />
-
-            <TicketSLAPanel ticket={ticket} />
-
-            <TicketCSATPanel ticket={ticket} />
-
-            <KBSuggestionsPanel
               organizationId={ticket.organization_id}
-              query={`${ticket.subject || ""}\n\n${ticket.description || ""}`}
-              ticketId={ticket.id}
-              context="agent_reply"
+              orgUsers={orgUsers as any}
             />
 
-            <Card className="p-4 space-y-2">
-              <h3 className="font-semibold">Linked</h3>
-              <div className="text-sm space-y-1">
-                <p><span className="text-muted-foreground">Programme:</span> {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : "—"}</p>
-                <p><span className="text-muted-foreground">Project:</span> {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : "—"}</p>
-                <p><span className="text-muted-foreground">Product:</span> {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : "—"}</p>
-              </div>
-            </Card>
+            {/* Collapsible secondary panels */}
+            <Accordion type="multiple" defaultValue={["resolution"]} className="space-y-2">
+              <AccordionItem value="resolution" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">
+                  Resolution
+                  {(ticket as any).resolution_code && (
+                    <Badge variant="outline" className="ml-2 text-xs">{resolutionCodeLabel((ticket as any).resolution_code)}</Badge>
+                  )}
+                </AccordionTrigger>
+                <AccordionContent className="pb-3 space-y-2">
+                  <Textarea
+                    rows={4}
+                    defaultValue={ticket.resolution ?? ""}
+                    key={`res-${ticket.id}-${ticket.resolution ?? ""}`}
+                    onBlur={(e) => {
+                      if (e.target.value !== (ticket.resolution ?? "")) {
+                        updateField("resolution", e.target.value || null);
+                      }
+                    }}
+                    placeholder="Resolution details..."
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <Card className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Resolution</h3>
-                {(ticket as any).resolution_code && (
-                  <Badge variant="outline">{resolutionCodeLabel((ticket as any).resolution_code)}</Badge>
-                )}
-              </div>
-              <Textarea
-                rows={4}
-                defaultValue={ticket.resolution ?? ""}
-                key={`res-${ticket.id}-${ticket.resolution ?? ""}`}
-                onBlur={(e) => {
-                  if (e.target.value !== (ticket.resolution ?? "")) {
-                    updateField("resolution", e.target.value || null);
-                  }
-                }}
-                placeholder="Resolution details..."
-              />
-              {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
-                <Button size="sm" variant="outline" className="w-full" onClick={() => setResolveOpen(true)}>
-                  Mark as Resolved…
-                </Button>
-              )}
-            </Card>
+              <AccordionItem value="convert" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">
+                  <span className="flex items-center gap-2"><ListChecks className="h-4 w-4 text-primary" /> Convert to task</span>
+                </AccordionTrigger>
+                <AccordionContent className="pb-3">
+                  {(ticket as any).converted_to_task_id ? (
+                    <div className="text-sm text-muted-foreground">
+                      Already converted.{" "}
+                      <Link to={`/tasks?focus=${(ticket as any).converted_to_task_id}`} className="text-primary hover:underline">
+                        Open task
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        Promote this ticket to a delivery task linked to a programme, project or product.
+                      </p>
+                      <Button size="sm" variant="outline" className="w-full" onClick={() => setConvertOpen(true)}>
+                        Convert to task…
+                      </Button>
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
 
-            <Card className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <ListChecks className="h-4 w-4 text-primary" />
-                  Convert to task
-                </h3>
-              </div>
-              {(ticket as any).converted_to_task_id ? (
-                <div className="text-sm text-muted-foreground">
-                  Already converted.{" "}
-                  <Link
-                    to={`/tasks?focus=${(ticket as any).converted_to_task_id}`}
-                    className="text-primary hover:underline"
-                  >
-                    Open task
-                  </Link>
-                </div>
-              ) : (
-                <>
-                  <p className="text-xs text-muted-foreground">
-                    Promote this ticket to a delivery task linked to a programme, project or product.
-                    Description and attachments are imported.
-                  </p>
-                  <Button size="sm" variant="outline" className="w-full" onClick={() => setConvertOpen(true)}>
-                    Convert to task…
-                  </Button>
-                </>
-              )}
-            </Card>
+              <AccordionItem value="approvals" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">Approvals</AccordionTrigger>
+                <AccordionContent className="pb-3">
+                  <ApprovalsPanel ticketId={ticket.id} />
+                </AccordionContent>
+              </AccordionItem>
 
-            <TicketAttachments ticketId={ticket.id} organizationId={ticket.organization_id} />
+              <AccordionItem value="hierarchy" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">
+                  Hierarchy {childTickets.length > 0 && <span className="ml-2 text-xs text-muted-foreground">({childTickets.length})</span>}
+                </AccordionTrigger>
+                <AccordionContent className="pb-3 space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Parent ticket</Label>
+                    <ParentTicketPicker
+                      currentTicketId={ticket.id}
+                      value={(ticket as any).parent_ticket_id ?? null}
+                      onChange={(parentId) => updateField("parent_ticket_id", parentId)}
+                    />
+                    {parentTicket && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/support/tickets/${parentTicket.id}`)}
+                        className="text-xs text-primary hover:underline truncate block max-w-full text-left"
+                      >
+                        Open parent: {parentTicket.reference_number ?? ""} {parentTicket.subject ?? ""}
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">
+                      Sub-tickets ({childTickets.length})
+                    </Label>
+                    {childTickets.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No sub-tickets linked.</p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {childTickets.map((c: any) => (
+                          <li key={c.id}>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/support/tickets/${c.id}`)}
+                              className="w-full flex items-center gap-2 text-left text-sm hover:bg-muted rounded px-2 py-1"
+                            >
+                              <span className="font-mono text-[11px] text-muted-foreground shrink-0">
+                                {c.reference_number ?? c.id.slice(0, 6)}
+                              </span>
+                              <span className="truncate flex-1">{c.subject}</span>
+                              <Badge variant="outline" className="text-[10px] capitalize shrink-0">
+                                {formatLabel(c.status)}
+                              </Badge>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            <EntityAuditTrail entityType="helpdesk_ticket" entityId={ticket.id} title="Ticket Audit Trail" />
+              <AccordionItem value="catalog" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">Catalog selections</AccordionTrigger>
+                <AccordionContent className="pb-3 space-y-2">
+                  <div className="flex items-center justify-end">
+                    {!catalogEditing ? (
+                      <Button size="sm" variant="outline" onClick={startCatalogEdit}>
+                        Edit
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={cancelCatalogEdit} disabled={catalogSaving}>
+                          Cancel
+                        </Button>
+                        <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
+                          {catalogSaving ? "Saving..." : "Save"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {catalogEditing ? (
+                    <CatalogPicker
+                      value={catalogDraft}
+                      onChange={setCatalogDraft}
+                      ticketType={ticket.ticket_type}
+                      compact
+                    />
+                  ) : (
+                    <CatalogSummary ticketId={ticket.id} />
+                  )}
+                </AccordionContent>
+              </AccordionItem>
 
-            <KBInlineSuggestions subject={ticket.subject} description={ticket.description ?? ""} />
+              <AccordionItem value="related" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">Related items</AccordionTrigger>
+                <AccordionContent className="pb-3 space-y-3">
+                  <LinkedCIsPanel ticketId={ticket.id} />
+                  <CatalogRequestPanel ticketId={ticket.id} />
+                  <TicketProblemPanel
+                    ticketId={ticket.id}
+                    ticketSubject={ticket.subject}
+                    ticketDescription={ticket.description}
+                    parentProblemId={(ticket as any).parent_problem_id ?? null}
+                  />
+                  <TicketMajorIncidentPanel
+                    ticketId={ticket.id}
+                    ticketSubject={ticket.subject}
+                    ticketDescription={ticket.description}
+                  />
+                  <div className="text-sm space-y-1 pt-2 border-t">
+                    <p><span className="text-muted-foreground">Programme:</span> {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : "—"}</p>
+                    <p><span className="text-muted-foreground">Project:</span> {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : "—"}</p>
+                    <p><span className="text-muted-foreground">Product:</span> {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : "—"}</p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            <KBAssistant surface="agent" ticketId={ticket.id} placeholder="Ask the KB for a suggested reply…" />
-          </div>
+              <AccordionItem value="sla-csat" className="border rounded-md bg-card px-3">
+                <AccordionTrigger className="text-sm font-semibold py-3">SLA &amp; CSAT</AccordionTrigger>
+                <AccordionContent className="pb-3 space-y-3">
+                  <TicketSLAPanel ticket={ticket} />
+                  <TicketCSATPanel ticket={ticket} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </aside>
         </div>
       </div>
+
 
       <ResolveTicketDialog
         open={resolveOpen}
