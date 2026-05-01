@@ -52,20 +52,31 @@ export default function LmsAdmin() {
 
   const saveCourse = async (form: Partial<LmsCourse>) => {
     if (!currentOrganization?.id || !user) return;
+    let courseId: string | undefined;
     if (editing) {
       const { error } = await supabase.from("lms_courses").update(form).eq("id", editing.id);
       if (error) return toast.error(error.message);
+      courseId = editing.id;
       toast.success("Course updated");
     } else {
-      const { error } = await supabase.from("lms_courses").insert({
+      const { data, error } = await supabase.from("lms_courses").insert({
         ...form,
         organization_id: currentOrganization.id,
         created_by: user.id,
         title: form.title || "Untitled course",
-      } as any);
+      } as any).select("id").single();
       if (error) return toast.error(error.message);
+      courseId = data?.id;
       toast.success("Course created");
     }
+
+    // Reindex into the shared KB / chat search whenever a course is touched.
+    // Fire-and-forget: a trigger has already flagged kb_index_status=pending.
+    if (courseId) {
+      supabase.functions.invoke("lms-embed-course", { body: { course_id: courseId } })
+        .catch((e) => console.warn("lms-embed-course failed:", e));
+    }
+
     setOpen(false);
     setEditing(null);
     await reload();
