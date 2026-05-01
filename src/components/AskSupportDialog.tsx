@@ -48,6 +48,7 @@ export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) 
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { currentOrganization } = useOrganization();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
