@@ -638,6 +638,8 @@ export default function HelpdeskTicketDetail() {
               <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="conversation"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
                 <TabsTrigger value="activity"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
+                <TabsTrigger value="people"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
+                <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Links</TabsTrigger>
                 <TabsTrigger value="knowledge"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
                 <TabsTrigger value="attachments"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
                 <TabsTrigger value="audit"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
