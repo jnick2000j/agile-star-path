@@ -720,6 +720,8 @@ export default function HelpdeskTicketDetail() {
                 <TabsTrigger value="activity"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
                 <TabsTrigger value="people"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
                 <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Links</TabsTrigger>
+                <TabsTrigger value="parent_child"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
+                <TabsTrigger value="catalog"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
                 <TabsTrigger value="knowledge"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
                 <TabsTrigger value="attachments"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
                 <TabsTrigger value="audit"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
