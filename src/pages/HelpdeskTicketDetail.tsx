@@ -567,25 +567,38 @@ export default function HelpdeskTicketDetail() {
               </TabsList>
               <TabsContent value="conversation" className="space-y-3">
                 {comments.length === 0 && <p className="text-sm text-muted-foreground">No replies yet.</p>}
-                {comments.map((c: any) => (
-                  <Card key={c.id} className={cn("p-4", c.is_internal && "bg-warning/5 border-warning/30")}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{c.author_email || "System"}</span>
-                      <div className="flex items-center gap-2">
-                        {c.is_internal && <Badge variant="outline" className="text-xs">Internal</Badge>}
-                        {c.is_from_email && <Badge variant="outline" className="text-xs">Email</Badge>}
-                        <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "PPp")}</span>
+                {comments.map((c: any) => {
+                  const atts = (commentAttachments as any[]).filter((a) => a.comment_id === c.id);
+                  return (
+                    <Card key={c.id} className={cn("p-4", c.is_internal && "bg-warning/5 border-warning/30")}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">{c.author_email || "System"}</span>
+                        <div className="flex items-center gap-2">
+                          {c.is_internal && <Badge variant="outline" className="text-xs">Internal</Badge>}
+                          {c.is_from_email && <Badge variant="outline" className="text-xs">Email</Badge>}
+                          <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "PPp")}</span>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm whitespace-pre-wrap">{c.body}</p>
-                  </Card>
-                ))}
+                      <p className="text-sm whitespace-pre-wrap">{renderBodyWithMentions(c.body ?? "", orgUsers as any)}</p>
+                      {atts.length > 0 && (
+                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {atts.map((a: any) => (
+                            <CommentAttachment key={a.id} attachment={a} />
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })}
                 <Card className="p-4 space-y-3">
-                  <Textarea
-                    rows={4}
+                  <CommentComposer
                     value={reply}
-                    onChange={(e) => setReply(e.target.value)}
-                    placeholder="Type your reply..."
+                    onChange={setReply}
+                    users={orgUsers as any}
+                    pendingFiles={pendingFiles}
+                    onPendingFilesChange={setPendingFiles}
+                    onMentionsChange={setMentions}
+                    disabled={posting}
                   />
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-2">
@@ -613,7 +626,12 @@ export default function HelpdeskTicketDetail() {
                          onInsert={(text) => setReply((prev) => (prev ? prev + "\n\n" + text : text))}
                        />
                        <AIReplyDraftButton ticketId={ticket.id} onDraft={(text) => setReply(text)} />
-                       <Button onClick={submitReply} disabled={!reply.trim()}>Post Reply</Button>
+                       <Button
+                         onClick={submitReply}
+                         disabled={posting || (!reply.trim() && pendingFiles.length === 0)}
+                       >
+                         {posting ? "Posting…" : "Post Reply"}
+                       </Button>
                      </div>
                    </div>
                 </Card>
