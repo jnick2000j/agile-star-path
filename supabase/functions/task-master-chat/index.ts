@@ -414,7 +414,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, organization_id } = await req.json();
 
     // Input validation
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
@@ -441,14 +441,86 @@ serve(async (req) => {
       }
     }
 
+    // ---- Build LMS context (best-effort, gated on org-level lms toggle) ----
+    let lmsContext = "";
+    if (organization_id && typeof organization_id === "string") {
+      try {
+        const { data: toggleRow } = await authClient
+          .from("organization_module_toggles")
+          .select("enabled")
+          .eq("organization_id", organization_id)
+          .eq("module_key", "lms")
+          .maybeSingle();
+
+        // LMS is an opt-in add-on: only inject context when explicitly enabled.
+        if (toggleRow?.enabled === true) {
+          const userId = claimsData.claims.sub as string;
+          const today = new Date().toISOString().slice(0, 10);
+
+          const [enrollments, assignments] = await Promise.all([
+            authClient
+              .from("lms_enrollments")
+              .select("status, progress_percent, due_at, course:lms_courses(id, title, category)")
+              .eq("user_id", userId)
+              .eq("organization_id", organization_id)
+              .order("due_at", { ascending: true, nullsFirst: false })
+              .limit(15),
+            authClient
+              .from("lms_assignments")
+              .select("mandatory, due_at, course:lms_courses(id, title)")
+              .eq("user_id", userId)
+              .eq("organization_id", organization_id)
+              .eq("mandatory", true)
+              .limit(15),
+          ]);
+
+          const lines: string[] = [`### Your training context (today: ${today})`];
+          const enrolled = enrollments.data ?? [];
+          const mandatory = assignments.data ?? [];
+
+          if (enrolled.length === 0 && mandatory.length === 0) {
+            lines.push("- You have no current enrollments or mandatory training.");
+          } else {
+            if (mandatory.length) {
+              lines.push("**Mandatory training assigned to you:**");
+              for (const a of mandatory) {
+                const c: any = a.course;
+                if (!c) continue;
+                const due = a.due_at ? ` — due ${String(a.due_at).slice(0, 10)}` : "";
+                lines.push(`- ${c.title} (course id ${c.id})${due}`);
+              }
+            }
+            if (enrolled.length) {
+              lines.push("**Your enrollments:**");
+              for (const e of enrolled) {
+                const c: any = e.course;
+                if (!c) continue;
+                const due = e.due_at ? `, due ${String(e.due_at).slice(0, 10)}` : "";
+                lines.push(`- ${c.title} — ${e.status}, ${e.progress_percent ?? 0}% complete${due}`);
+              }
+            }
+          }
+          lmsContext = lines.join("\n");
+        } else {
+          lmsContext = "### Your training context\nThe LMS add-on is not enabled for this workspace.";
+        }
+      } catch (e) {
+        console.warn("LMS context build failed:", e);
+      }
+    }
+
+    const augmentedMessages = lmsContext
+      ? [{ role: "system" as const, content: lmsContext }, ...messages]
+      : messages;
+
     const aiResp = await callAI({
       supabase: authClient,
-      organizationId: null,
+      organizationId: organization_id ?? null,
       model: "google/gemini-3-flash-preview",
       stream: true,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        ...messages,
+        ...augmentedMessages,
       ],
     });
     if (!aiResp.ok) return aiResp.errorResponse;
