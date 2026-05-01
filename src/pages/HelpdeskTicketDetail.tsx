@@ -60,8 +60,10 @@ import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
 import { MacroPicker } from "@/components/helpdesk/MacroPicker";
 import { ApprovalsPanel } from "@/components/helpdesk/ApprovalsPanel";
 import { ConvertTicketToTaskDialog } from "@/components/helpdesk/ConvertTicketToTaskDialog";
+import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
+import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
 import { Link } from "react-router-dom";
-import { ListChecks } from "lucide-react";
+import { ListChecks, Download, FileText, Image as ImageIcon } from "lucide-react";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
