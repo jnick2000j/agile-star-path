@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -60,13 +60,73 @@ import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
 import { MacroPicker } from "@/components/helpdesk/MacroPicker";
 import { ApprovalsPanel } from "@/components/helpdesk/ApprovalsPanel";
 import { ConvertTicketToTaskDialog } from "@/components/helpdesk/ConvertTicketToTaskDialog";
+import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
+import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
 import { Link } from "react-router-dom";
-import { ListChecks } from "lucide-react";
+import { ListChecks, Download, FileText, Image as ImageIcon } from "lucide-react";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
 const TYPE_OPTIONS = ["support", "incident", "service_request", "question", "problem"];
+
+function CommentAttachment({ attachment }: { attachment: any }) {
+  const isImage = !!attachment.mime_type && attachment.mime_type.startsWith("image/");
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.storage
+      .from("helpdesk-attachments")
+      .createSignedUrl(attachment.storage_path, 60 * 60)
+      .then(({ data }) => {
+        if (!cancelled) setSignedUrl(data?.signedUrl ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setSignedUrl("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [attachment.storage_path]);
+  const handleOpen = () => {
+    if (!signedUrl) return;
+    window.open(signedUrl, "_blank", "noopener,noreferrer");
+  };
+  if (isImage) {
+    return (
+      <button
+        type="button"
+        onClick={handleOpen}
+        className="group relative block overflow-hidden rounded-md border bg-muted hover:opacity-90"
+        title={attachment.file_name}
+      >
+        {signedUrl ? (
+          <img src={signedUrl} alt={attachment.file_name} className="h-32 w-full object-cover" />
+        ) : (
+          <div className="h-32 w-full flex items-center justify-center">
+            <ImageIcon className="h-6 w-6 text-muted-foreground" />
+          </div>
+        )}
+        <span className="absolute bottom-0 inset-x-0 bg-background/80 text-[10px] truncate px-1 py-0.5">
+          {attachment.file_name}
+        </span>
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleOpen}
+      className="flex items-center gap-2 px-2 py-2 rounded-md border hover:bg-muted/50 text-left"
+      title={attachment.file_name}
+    >
+      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+      <span className="text-xs truncate flex-1">{attachment.file_name}</span>
+      <Download className="h-3 w-3 text-muted-foreground" />
+    </button>
+  );
+}
+
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-info/10 text-info",
@@ -86,6 +146,9 @@ export default function HelpdeskTicketDetail() {
   const qc = useQueryClient();
   const [reply, setReply] = useState("");
   const [internal, setInternal] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [mentions, setMentions] = useState<string[]>([]);
+  const [posting, setPosting] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -192,6 +255,20 @@ export default function HelpdeskTicketDetail() {
     },
     enabled: !!id,
   });
+
+  const { data: commentAttachments = [] } = useQuery({
+    queryKey: ["helpdesk-comment-attachments", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("helpdesk_ticket_attachments")
+        .select("*")
+        .eq("ticket_id", id!)
+        .not("comment_id", "is", null);
+      return data ?? [];
+    },
+    enabled: !!id,
+  });
+
 
   const { data: orgUsers = [] } = useQuery({
     queryKey: ["org-users-min", currentOrganization?.id],
@@ -320,81 +397,183 @@ export default function HelpdeskTicketDetail() {
 
 
   const submitReply = async () => {
-    if (!ticket || !reply.trim()) return;
-    const { error } = await supabase.from("helpdesk_ticket_comments").insert({
-      ticket_id: ticket.id,
-      organization_id: ticket.organization_id,
-      author_user_id: user?.id ?? null,
-      author_email: user?.email ?? null,
-      body: reply.trim(),
-      is_internal: internal,
-    });
-    if (error) {
-      toast.error("Reply failed: " + error.message);
-      return;
-    }
-    setReply("");
-    if (ticket.status === "new") {
-      await supabase.from("helpdesk_tickets").update({
-        status: "open",
-        first_response_at: ticket.first_response_at ?? new Date().toISOString(),
-      }).eq("id", ticket.id);
-    }
-    // Look up assignee email so we can fan out to them as well
-    let assigneeEmail: string | undefined;
-    if (ticket.assignee_id && ticket.assignee_id !== user?.id) {
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("user_id", ticket.assignee_id)
-        .maybeSingle();
-      assigneeEmail = prof?.email ?? undefined;
-    }
-
-    if (!internal) {
-      // Notify the reporter (default recipient resolution)
-      supabase.functions.invoke("helpdesk-notify", {
-        body: {
+    if (!ticket || (!reply.trim() && pendingFiles.length === 0)) return;
+    setPosting(true);
+    try {
+      const { data: comment, error } = await supabase
+        .from("helpdesk_ticket_comments")
+        .insert({
           ticket_id: ticket.id,
-          notification_type: "reply",
-          metadata: { comment_body: reply.trim() },
-        },
-      }).catch(() => {});
-      // Also notify the assignee, if there is one and it isn't the author
-      if (assigneeEmail) {
+          organization_id: ticket.organization_id,
+          author_user_id: user?.id ?? null,
+          author_email: user?.email ?? null,
+          body: reply.trim(),
+          is_internal: internal,
+        })
+        .select("id")
+        .single();
+      if (error || !comment) {
+        toast.error("Reply failed: " + (error?.message ?? "unknown"));
+        return;
+      }
+
+      // Upload pending files and link them to this comment
+      if (pendingFiles.length > 0 && user) {
+        for (const pf of pendingFiles) {
+          const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const path = `${ticket.organization_id}/${ticket.id}/${Date.now()}-${safeName}`;
+          const { error: upErr } = await supabase.storage
+            .from("helpdesk-attachments")
+            .upload(path, pf.file, { contentType: pf.file.type, upsert: false });
+          if (upErr) {
+            toast.error(`Failed to upload ${pf.file.name}: ${upErr.message}`);
+            continue;
+          }
+          const { error: insErr } = await supabase.from("helpdesk_ticket_attachments").insert({
+            ticket_id: ticket.id,
+            organization_id: ticket.organization_id,
+            comment_id: comment.id,
+            uploaded_by: user.id,
+            storage_path: path,
+            file_name: pf.file.name,
+            file_size: pf.file.size,
+            mime_type: pf.file.type || null,
+            is_internal: internal,
+          });
+          if (insErr) {
+            await supabase.storage.from("helpdesk-attachments").remove([path]);
+            toast.error(`Failed to record ${pf.file.name}: ${insErr.message}`);
+          }
+        }
+        // Cleanup blob URLs
+        pendingFiles.forEach((pf) => pf.previewUrl && URL.revokeObjectURL(pf.previewUrl));
+      }
+
+      // Record @mentions
+      if (mentions.length > 0) {
+        await supabase.from("helpdesk_comment_mentions").insert(
+          mentions.map((uid) => ({
+            comment_id: comment.id,
+            ticket_id: ticket.id,
+            organization_id: ticket.organization_id,
+            mentioned_user_id: uid,
+            mentioned_by: user?.id ?? null,
+          })),
+        );
+      }
+
+      setReply("");
+      setPendingFiles([]);
+      setMentions([]);
+
+      if (ticket.status === "new") {
+        await supabase.from("helpdesk_tickets").update({
+          status: "open",
+          first_response_at: ticket.first_response_at ?? new Date().toISOString(),
+        }).eq("id", ticket.id);
+      }
+
+      // Notify mentioned users (best-effort)
+      if (mentions.length > 0) {
+        const { data: mProfiles } = await supabase
+          .from("profiles")
+          .select("user_id, email")
+          .in("user_id", mentions);
+        for (const p of mProfiles ?? []) {
+          if (!p.email || p.user_id === user?.id) continue;
+          supabase.functions.invoke("helpdesk-notify", {
+            body: {
+              ticket_id: ticket.id,
+              notification_type: internal ? "internal_note" : "reply",
+              recipient_email: p.email,
+              metadata: { comment_body: reply.trim(), mention: true },
+            },
+          }).catch(() => {});
+        }
+      }
+
+      // Notify watchers (best-effort)
+      const { data: watcherRows } = await supabase
+        .from("helpdesk_ticket_watchers")
+        .select("user_id")
+        .eq("ticket_id", ticket.id);
+      const watcherIds = (watcherRows ?? []).map((w: any) => w.user_id).filter((wid: string) => wid !== user?.id);
+      if (watcherIds.length > 0) {
+        const { data: wProfiles } = await supabase
+          .from("profiles")
+          .select("user_id, email")
+          .in("user_id", watcherIds);
+        for (const p of wProfiles ?? []) {
+          if (!p.email) continue;
+          supabase.functions.invoke("helpdesk-notify", {
+            body: {
+              ticket_id: ticket.id,
+              notification_type: internal ? "internal_note" : "reply",
+              recipient_email: p.email,
+              metadata: { comment_body: reply.trim(), watcher: true },
+            },
+          }).catch(() => {});
+        }
+      }
+
+      // Look up assignee email so we can fan out to them as well
+      let assigneeEmail: string | undefined;
+      if (ticket.assignee_id && ticket.assignee_id !== user?.id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("user_id", ticket.assignee_id)
+          .maybeSingle();
+        assigneeEmail = prof?.email ?? undefined;
+      }
+
+      if (!internal) {
         supabase.functions.invoke("helpdesk-notify", {
           body: {
             ticket_id: ticket.id,
             notification_type: "reply",
+            metadata: { comment_body: reply.trim() },
+          },
+        }).catch(() => {});
+        if (assigneeEmail) {
+          supabase.functions.invoke("helpdesk-notify", {
+            body: {
+              ticket_id: ticket.id,
+              notification_type: "reply",
+              recipient_email: assigneeEmail,
+              metadata: { comment_body: reply.trim() },
+            },
+          }).catch(() => {});
+        }
+      } else if (assigneeEmail) {
+        supabase.functions.invoke("helpdesk-notify", {
+          body: {
+            ticket_id: ticket.id,
+            notification_type: "internal_note",
             recipient_email: assigneeEmail,
             metadata: { comment_body: reply.trim() },
           },
         }).catch(() => {});
       }
-    } else if (assigneeEmail) {
-      // Internal note: notify assignee only (never the reporter)
-      supabase.functions.invoke("helpdesk-notify", {
-        body: {
-          ticket_id: ticket.id,
-          notification_type: "internal_note",
-          recipient_email: assigneeEmail,
-          metadata: { comment_body: reply.trim() },
-        },
-      }).catch(() => {});
+
+      const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
+      dispatchHelpdeskWorkflow({
+        organization_id: ticket.organization_id,
+        trigger_event: internal ? "internal_note_added" : "replied",
+        ticket_id: ticket.id,
+        triggered_by: user?.id,
+        payload: { body: reply.trim() },
+      });
+      toast.success("Reply added");
+      qc.invalidateQueries({ queryKey: ["helpdesk-comments", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-comment-attachments", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-attachments", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
+    } finally {
+      setPosting(false);
     }
-    // Dispatch workflows for reply / internal note
-    const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
-    dispatchHelpdeskWorkflow({
-      organization_id: ticket.organization_id,
-      trigger_event: internal ? "internal_note_added" : "replied",
-      ticket_id: ticket.id,
-      triggered_by: user?.id,
-      payload: { body: reply.trim() },
-    });
-    toast.success("Reply added");
-    qc.invalidateQueries({ queryKey: ["helpdesk-comments", id] });
-    qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
   };
+
 
   if (isLoading || !ticket) {
     return <AppLayout title="Ticket"><div className="text-muted-foreground">Loading...</div></AppLayout>;
@@ -446,25 +625,38 @@ export default function HelpdeskTicketDetail() {
               </TabsList>
               <TabsContent value="conversation" className="space-y-3">
                 {comments.length === 0 && <p className="text-sm text-muted-foreground">No replies yet.</p>}
-                {comments.map((c: any) => (
-                  <Card key={c.id} className={cn("p-4", c.is_internal && "bg-warning/5 border-warning/30")}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{c.author_email || "System"}</span>
-                      <div className="flex items-center gap-2">
-                        {c.is_internal && <Badge variant="outline" className="text-xs">Internal</Badge>}
-                        {c.is_from_email && <Badge variant="outline" className="text-xs">Email</Badge>}
-                        <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "PPp")}</span>
+                {comments.map((c: any) => {
+                  const atts = (commentAttachments as any[]).filter((a) => a.comment_id === c.id);
+                  return (
+                    <Card key={c.id} className={cn("p-4", c.is_internal && "bg-warning/5 border-warning/30")}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">{c.author_email || "System"}</span>
+                        <div className="flex items-center gap-2">
+                          {c.is_internal && <Badge variant="outline" className="text-xs">Internal</Badge>}
+                          {c.is_from_email && <Badge variant="outline" className="text-xs">Email</Badge>}
+                          <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "PPp")}</span>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm whitespace-pre-wrap">{c.body}</p>
-                  </Card>
-                ))}
+                      <p className="text-sm whitespace-pre-wrap">{renderBodyWithMentions(c.body ?? "", orgUsers as any)}</p>
+                      {atts.length > 0 && (
+                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {atts.map((a: any) => (
+                            <CommentAttachment key={a.id} attachment={a} />
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })}
                 <Card className="p-4 space-y-3">
-                  <Textarea
-                    rows={4}
+                  <CommentComposer
                     value={reply}
-                    onChange={(e) => setReply(e.target.value)}
-                    placeholder="Type your reply..."
+                    onChange={setReply}
+                    users={orgUsers as any}
+                    pendingFiles={pendingFiles}
+                    onPendingFilesChange={setPendingFiles}
+                    onMentionsChange={setMentions}
+                    disabled={posting}
                   />
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-2">
@@ -492,7 +684,12 @@ export default function HelpdeskTicketDetail() {
                          onInsert={(text) => setReply((prev) => (prev ? prev + "\n\n" + text : text))}
                        />
                        <AIReplyDraftButton ticketId={ticket.id} onDraft={(text) => setReply(text)} />
-                       <Button onClick={submitReply} disabled={!reply.trim()}>Post Reply</Button>
+                       <Button
+                         onClick={submitReply}
+                         disabled={posting || (!reply.trim() && pendingFiles.length === 0)}
+                       >
+                         {posting ? "Posting…" : "Post Reply"}
+                       </Button>
                      </div>
                    </div>
                 </Card>
@@ -551,6 +748,11 @@ export default function HelpdeskTicketDetail() {
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <TicketWatchersPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
             <ApprovalsPanel ticketId={ticket.id} />
             <Card className="p-4 space-y-4">
               <h3 className="font-semibold">Properties</h3>
