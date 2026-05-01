@@ -73,17 +73,21 @@ const TYPE_OPTIONS = ["support", "incident", "service_request", "question", "pro
 function CommentAttachment({ attachment }: { attachment: any }) {
   const isImage = !!attachment.mime_type && attachment.mime_type.startsWith("image/");
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  useState(() => {
-    return undefined;
-  });
-  // Lazy-load signed URL on mount
-  if (signedUrl === null) {
+  useEffect(() => {
+    let cancelled = false;
     supabase.storage
       .from("helpdesk-attachments")
       .createSignedUrl(attachment.storage_path, 60 * 60)
-      .then(({ data }) => setSignedUrl(data?.signedUrl ?? ""))
-      .catch(() => setSignedUrl(""));
-  }
+      .then(({ data }) => {
+        if (!cancelled) setSignedUrl(data?.signedUrl ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setSignedUrl("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [attachment.storage_path]);
   const handleOpen = () => {
     if (!signedUrl) return;
     window.open(signedUrl, "_blank", "noopener,noreferrer");
