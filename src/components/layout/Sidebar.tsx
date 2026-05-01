@@ -147,6 +147,7 @@ export function Sidebar() {
     {
       label: "Learning",
       icon: GraduationCap,
+      module: "lms_addon",
       children: [
         { label: "Catalog", href: "/learning" },
         { label: "My Learning", href: "/learning/my" },
@@ -188,6 +189,8 @@ export function Sidebar() {
   };
   const isModuleEnabled = (moduleKey?: string) => {
     if (!moduleKey) return true;
+    // Add-on modules are gated only by the org module toggle, not the vertical catalog.
+    if (moduleKey === "lms_addon") return true;
     if (!hasModule(moduleKey)) return false;
     const featureKey = moduleFeatureMap[moduleKey];
     if (!featureKey) return true;
@@ -213,16 +216,18 @@ export function Sidebar() {
     "/support/reports": "reports",
     "/support/workflows": "workflows",
   };
-  const navigation = baseNavigation.map((item) => {
-    if (item.module !== "helpdesk" || !item.children) return item;
-    return {
-      ...item,
-      children: item.children.filter((c) => {
-        const key = helpdeskHrefToModuleKey[c.href];
-        return key ? isHelpdeskModuleEnabled(key) : true;
-      }),
-    };
-  });
+  const navigation = baseNavigation
+    .filter((item) => item.module !== "lms_addon" || isHelpdeskModuleEnabled("lms"))
+    .map((item) => {
+      if (item.module !== "helpdesk" || !item.children) return item;
+      return {
+        ...item,
+        children: item.children.filter((c) => {
+          const key = helpdeskHrefToModuleKey[c.href];
+          return key ? isHelpdeskModuleEnabled(key) : true;
+        }),
+      };
+    });
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
