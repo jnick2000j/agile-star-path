@@ -812,6 +812,13 @@ export default function HelpdeskTicketDetail() {
         onConfirm={handleConfirmResolve}
       />
 
+      <ConvertTicketToTaskDialog
+        open={convertOpen}
+        onOpenChange={setConvertOpen}
+        ticket={ticket as any}
+        onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
+      />
+
       <AlertDialog
         open={deleteOpen}
         onOpenChange={(open) => !deleting && setDeleteOpen(open)}
