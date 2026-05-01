@@ -67,6 +67,7 @@ import { MacroPicker } from "@/components/helpdesk/MacroPicker";
 import { ApprovalsPanel } from "@/components/helpdesk/ApprovalsPanel";
 import { ConvertTicketToTaskDialog } from "@/components/helpdesk/ConvertTicketToTaskDialog";
 import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
+import { TicketAssigneesPanel } from "@/components/helpdesk/TicketAssigneesPanel";
 import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
 import { Link } from "react-router-dom";
 import { ListChecks, Download, FileText, Image as ImageIcon } from "lucide-react";
@@ -802,16 +803,15 @@ export default function HelpdeskTicketDetail() {
                   <div className="h-8 flex items-center"><Badge variant="outline" className="text-xs">{ticket.source}</Badge></div>
                 </div>
                 <div className="space-y-1 col-span-2">
-                  <Label className="text-xs text-muted-foreground">Assignee</Label>
-                  <Select value={ticket.assignee_id ?? "none"} onValueChange={(v) => updateField("assignee_id", v === "none" ? null : v)}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Unassigned</SelectItem>
-                      {orgUsers.map((u: any) => (
-                        <SelectItem key={u.user_id} value={u.user_id}>{u.full_name || u.email}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-xs text-muted-foreground">Primary Assignee</Label>
+                  <p className="text-sm">
+                    {ticket.assignee_id
+                      ? (orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.full_name
+                          || orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.email
+                          || "Assigned")
+                      : <span className="text-muted-foreground">Unassigned</span>}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Manage co-assignees in the Assignees panel below.</p>
                 </div>
                 {ticket.category && (
                   <div className="space-y-1 col-span-2">
@@ -845,6 +845,12 @@ export default function HelpdeskTicketDetail() {
               responseBreached={(ticket as any).sla_response_breached ?? false}
               resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
               status={ticket.status}
+            />
+
+            <TicketAssigneesPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
             />
 
             <TicketWatchersPanel
