@@ -13,6 +13,8 @@ import { Bot, Send, Loader2, Sparkles, User, LifeBuoy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { useOrganization } from "@/hooks/useOrganization";
+import { maybeRunLmsCommand } from "@/lib/lmsChatCommands";
 
 interface Message {
   role: "user" | "assistant";
@@ -46,6 +48,7 @@ export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) 
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { currentOrganization } = useOrganization();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -62,6 +65,28 @@ export function AskSupportDialog({ open, onOpenChange }: AskSupportDialogProps) 
     setMessages(allMessages);
     setInput("");
     setIsLoading(true);
+
+    // Intercept LMS slash commands locally and short-circuit the AI call.
+    try {
+      const cmdResult = await maybeRunLmsCommand(
+        messageText,
+        currentOrganization?.id ?? null,
+      );
+      if (cmdResult) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              cmdResult.markdown ?? "Command finished without a response.",
+          },
+        ]);
+        setIsLoading(false);
+        return;
+      }
+    } catch (e) {
+      console.warn("LMS command interceptor failed, falling back to AI:", e);
+    }
 
     let assistantContent = "";
 

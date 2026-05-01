@@ -42,6 +42,29 @@ export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {
     setInput("");
     setStreaming(true);
 
+    // Intercept LMS slash commands locally and short-circuit the AI call.
+    try {
+      const { maybeRunLmsCommand } = await import("@/lib/lmsChatCommands");
+      const cmdResult = await maybeRunLmsCommand(
+        trimmed,
+        currentOrganization?.id ?? null,
+      );
+      if (cmdResult) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              cmdResult.markdown ?? "Command finished without a response.",
+          },
+        ]);
+        setStreaming(false);
+        return;
+      }
+    } catch (e) {
+      console.warn("LMS command interceptor failed, falling back to AI:", e);
+    }
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
