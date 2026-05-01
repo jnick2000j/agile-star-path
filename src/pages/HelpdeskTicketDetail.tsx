@@ -70,6 +70,60 @@ const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
 const TYPE_OPTIONS = ["support", "incident", "service_request", "question", "problem"];
 
+function CommentAttachment({ attachment }: { attachment: any }) {
+  const isImage = !!attachment.mime_type && attachment.mime_type.startsWith("image/");
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  useState(() => {
+    return undefined;
+  });
+  // Lazy-load signed URL on mount
+  if (signedUrl === null) {
+    supabase.storage
+      .from("helpdesk-attachments")
+      .createSignedUrl(attachment.storage_path, 60 * 60)
+      .then(({ data }) => setSignedUrl(data?.signedUrl ?? ""))
+      .catch(() => setSignedUrl(""));
+  }
+  const handleOpen = () => {
+    if (!signedUrl) return;
+    window.open(signedUrl, "_blank", "noopener,noreferrer");
+  };
+  if (isImage) {
+    return (
+      <button
+        type="button"
+        onClick={handleOpen}
+        className="group relative block overflow-hidden rounded-md border bg-muted hover:opacity-90"
+        title={attachment.file_name}
+      >
+        {signedUrl ? (
+          <img src={signedUrl} alt={attachment.file_name} className="h-32 w-full object-cover" />
+        ) : (
+          <div className="h-32 w-full flex items-center justify-center">
+            <ImageIcon className="h-6 w-6 text-muted-foreground" />
+          </div>
+        )}
+        <span className="absolute bottom-0 inset-x-0 bg-background/80 text-[10px] truncate px-1 py-0.5">
+          {attachment.file_name}
+        </span>
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleOpen}
+      className="flex items-center gap-2 px-2 py-2 rounded-md border hover:bg-muted/50 text-left"
+      title={attachment.file_name}
+    >
+      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+      <span className="text-xs truncate flex-1">{attachment.file_name}</span>
+      <Download className="h-3 w-3 text-muted-foreground" />
+    </button>
+  );
+}
+
+
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-info/10 text-info",
   open: "bg-primary/10 text-primary",
