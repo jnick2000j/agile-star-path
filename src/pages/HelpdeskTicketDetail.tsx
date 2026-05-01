@@ -642,10 +642,6 @@ export default function HelpdeskTicketDetail() {
                 <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="space-y-1 min-w-[120px]">
-              <Label className="text-xs text-muted-foreground">Source</Label>
-              <div className="h-8 flex items-center"><Badge variant="outline" className="text-xs">{ticket.source}</Badge></div>
-            </div>
             <div className="space-y-1 min-w-[180px] flex-1">
               <Label className="text-xs text-muted-foreground">Primary Assignee</Label>
               <p className="text-sm h-8 flex items-center truncate">
@@ -662,7 +658,7 @@ export default function HelpdeskTicketDetail() {
                 <p className="text-sm h-8 flex items-center truncate">{ticket.category}</p>
               </div>
             )}
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex flex-wrap items-center gap-2 ml-auto">
               {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
                 <Button size="sm" onClick={() => setResolveOpen(true)}>
                   Mark as Resolved…
@@ -675,6 +671,29 @@ export default function HelpdeskTicketDetail() {
               >
                 <Clock className="h-4 w-4 mr-2" /> Log time
               </Button>
+              <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)}>
+                Resolution
+                {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)}>
+                <Gauge className="h-4 w-4 mr-1" /> SLA / CSAT
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setActiveTab("links")}>
+                <Link2 className="h-4 w-4 mr-1" /> Links
+              </Button>
+              {(ticket as any).converted_to_task_id ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}
+                >
+                  <ListChecks className="h-4 w-4 mr-1" /> Open task
+                </Button>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)}>
+                  <ListChecks className="h-4 w-4 mr-1" /> To task
+                </Button>
+              )}
             </div>
           </div>
         </Card>
@@ -1009,38 +1028,6 @@ export default function HelpdeskTicketDetail() {
               </div>
             </Card>
 
-            {/* Compact quick actions */}
-            <Card className="p-4 space-y-2">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Settings2 className="h-4 w-4" /> Quick actions
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button size="sm" variant="outline" className="justify-start" onClick={() => setResolutionOpen(true)}>
-                  Resolution
-                  {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
-                </Button>
-                <Button size="sm" variant="outline" className="justify-start" onClick={() => setSlaCsatOpen(true)}>
-                  <Gauge className="h-4 w-4 mr-1" /> SLA / CSAT
-                </Button>
-                <Button size="sm" variant="outline" className="justify-start" onClick={() => setActiveTab("links")}>
-                  <Link2 className="h-4 w-4 mr-1" /> Links
-                </Button>
-                {(ticket as any).converted_to_task_id ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}
-                  >
-                    <ListChecks className="h-4 w-4 mr-1" /> Open task
-                  </Button>
-                ) : (
-                  <Button size="sm" variant="outline" className="justify-start" onClick={() => setConvertOpen(true)}>
-                    <ListChecks className="h-4 w-4 mr-1" /> To task
-                  </Button>
-                )}
-              </div>
-            </Card>
           </aside>
         </div>
       </div>
