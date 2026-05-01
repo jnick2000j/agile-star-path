@@ -762,6 +762,36 @@ export default function HelpdeskTicketDetail() {
               )}
             </Card>
 
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <ListChecks className="h-4 w-4 text-primary" />
+                  Convert to task
+                </h3>
+              </div>
+              {(ticket as any).converted_to_task_id ? (
+                <div className="text-sm text-muted-foreground">
+                  Already converted.{" "}
+                  <Link
+                    to={`/tasks?focus=${(ticket as any).converted_to_task_id}`}
+                    className="text-primary hover:underline"
+                  >
+                    Open task
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    Promote this ticket to a delivery task linked to a programme, project or product.
+                    Description and attachments are imported.
+                  </p>
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => setConvertOpen(true)}>
+                    Convert to task…
+                  </Button>
+                </>
+              )}
+            </Card>
+
             <TicketAttachments ticketId={ticket.id} organizationId={ticket.organization_id} />
 
             <EntityAuditTrail entityType="helpdesk_ticket" entityId={ticket.id} title="Ticket Audit Trail" />
