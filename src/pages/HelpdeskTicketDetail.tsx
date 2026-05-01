@@ -696,18 +696,6 @@ export default function HelpdeskTicketDetail() {
               )}
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t">
-            <SLAStatus
-              createdAt={ticket.created_at}
-              responseDueAt={(ticket as any).sla_response_due_at}
-              resolutionDueAt={(ticket as any).sla_resolution_due_at}
-              firstResponseAt={ticket.first_response_at}
-              resolvedAt={ticket.resolved_at}
-              responseBreached={(ticket as any).sla_response_breached ?? false}
-              resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
-              status={ticket.status}
-            />
-          </div>
         </Card>
 
         <div className="grid grid-cols-1 gap-6 items-start">
