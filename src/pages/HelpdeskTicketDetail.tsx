@@ -516,7 +516,6 @@ export default function HelpdeskTicketDetail() {
     }
   };
 
-  };
 
   if (isLoading || !ticket) {
     return <AppLayout title="Ticket"><div className="text-muted-foreground">Loading...</div></AppLayout>;
