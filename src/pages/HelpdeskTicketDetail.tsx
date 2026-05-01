@@ -846,6 +846,12 @@ export default function HelpdeskTicketDetail() {
               status={ticket.status}
             />
 
+            <TicketAssigneesPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
+
             <TicketWatchersPanel
               ticketId={ticket.id}
               organizationId={ticket.organization_id}
