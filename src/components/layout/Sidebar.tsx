@@ -216,16 +216,18 @@ export function Sidebar() {
     "/support/reports": "reports",
     "/support/workflows": "workflows",
   };
-  const navigation = baseNavigation.map((item) => {
-    if (item.module !== "helpdesk" || !item.children) return item;
-    return {
-      ...item,
-      children: item.children.filter((c) => {
-        const key = helpdeskHrefToModuleKey[c.href];
-        return key ? isHelpdeskModuleEnabled(key) : true;
-      }),
-    };
-  });
+  const navigation = baseNavigation
+    .filter((item) => item.module !== "lms_addon" || isHelpdeskModuleEnabled("lms"))
+    .map((item) => {
+      if (item.module !== "helpdesk" || !item.children) return item;
+      return {
+        ...item,
+        children: item.children.filter((c) => {
+          const key = helpdeskHrefToModuleKey[c.href];
+          return key ? isHelpdeskModuleEnabled(key) : true;
+        }),
+      };
+    });
 
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) =>
