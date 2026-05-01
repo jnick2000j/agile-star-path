@@ -63,11 +63,15 @@ Deno.serve(async (req) => {
 
     const chunks = matches ?? [];
 
-    // Group into unique articles
+    // Group into unique sources (KB article OR LMS course). The RPC now returns
+    // a `source` column ('kb' | 'lms'); article_id holds the KB article id or
+    // the LMS course id depending on source.
     const articleMap = new Map<string, any>();
     for (const c of chunks) {
-      if (!articleMap.has(c.article_id)) {
-        articleMap.set(c.article_id, {
+      const key = `${c.source ?? "kb"}:${c.article_id}`;
+      if (!articleMap.has(key)) {
+        articleMap.set(key, {
+          source: c.source ?? "kb",
           id: c.article_id,
           title: c.title,
           summary: c.summary,
@@ -77,7 +81,7 @@ Deno.serve(async (req) => {
           chunks: [c.content],
         });
       } else {
-        articleMap.get(c.article_id).chunks.push(c.content);
+        articleMap.get(key).chunks.push(c.content);
       }
     }
     const articles = Array.from(articleMap.values()).slice(0, 5);
