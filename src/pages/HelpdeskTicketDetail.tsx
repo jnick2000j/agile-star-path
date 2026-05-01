@@ -1005,7 +1005,7 @@ export default function HelpdeskTicketDetail() {
         onOpenChange={setDeclareMIOpen}
         seedTicketId={ticket.id}
         seedTitle={ticket.subject}
-        seedDescription={ticket.description}
+        seedDescription={ticket.description ?? undefined}
       />
 
       <Dialog open={resolutionOpen} onOpenChange={setResolutionOpen}>
