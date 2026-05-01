@@ -13,6 +13,8 @@ import { Bot, Send, Loader2, Sparkles, User, LifeBuoy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { useOrganization } from "@/hooks/useOrganization";
+import { maybeRunLmsCommand } from "@/lib/lmsChatCommands";
 
 interface Message {
   role: "user" | "assistant";
