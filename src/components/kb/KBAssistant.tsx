@@ -12,6 +12,8 @@ import { toast } from "sonner";
 
 interface KBArticleResult {
   id: string;
+  source?: "kb" | "lms";
+  href?: string;
   title: string;
   summary: string | null;
   category: string | null;
