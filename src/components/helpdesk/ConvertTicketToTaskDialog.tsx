@@ -112,8 +112,8 @@ export function ConvertTicketToTaskDialog({ open, onOpenChange, ticket, onConver
     enabled: open,
     queryFn: async (): Promise<EntityOption[]> => {
       const table = entityKind === "programme" ? "programmes" : entityKind === "project" ? "projects" : "products";
-      const { data, error } = await supabase
-        .from(table as any)
+      const { data, error } = await (supabase as any)
+        .from(table)
         .select("id, name")
         .eq("organization_id", ticket.organization_id)
         .order("name");
