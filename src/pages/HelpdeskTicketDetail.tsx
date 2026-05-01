@@ -91,6 +91,7 @@ export default function HelpdeskTicketDetail() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [catalogEditing, setCatalogEditing] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
   const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
   const [catalogSaving, setCatalogSaving] = useState(false);
   const { data: catalogSelection = {}, refetch: refetchCatalog } = useTicketCatalogSelection(id);
