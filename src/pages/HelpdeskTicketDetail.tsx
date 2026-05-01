@@ -618,6 +618,67 @@ export default function HelpdeskTicketDetail() {
           )}
         </div>
 
+        {/* Top Properties bar */}
+        <Card className="p-4 mb-4">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="space-y-1 min-w-[140px] flex-1">
+              <Label className="text-xs text-muted-foreground">Status</Label>
+              <Select value={ticket.status} onValueChange={(v) => updateField("status", v)}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>{STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1 min-w-[140px] flex-1">
+              <Label className="text-xs text-muted-foreground">Priority</Label>
+              <Select value={ticket.priority} onValueChange={(v) => updateField("priority", v)}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>{PRIORITY_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1 min-w-[140px] flex-1">
+              <Label className="text-xs text-muted-foreground">Type</Label>
+              <Select value={ticket.ticket_type} onValueChange={(v) => updateField("ticket_type", v)}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1 min-w-[120px]">
+              <Label className="text-xs text-muted-foreground">Source</Label>
+              <div className="h-8 flex items-center"><Badge variant="outline" className="text-xs">{ticket.source}</Badge></div>
+            </div>
+            <div className="space-y-1 min-w-[180px] flex-1">
+              <Label className="text-xs text-muted-foreground">Primary Assignee</Label>
+              <p className="text-sm h-8 flex items-center truncate">
+                {ticket.assignee_id
+                  ? (orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.full_name
+                      || orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.email
+                      || "Assigned")
+                  : <span className="text-muted-foreground">Unassigned</span>}
+              </p>
+            </div>
+            {ticket.category && (
+              <div className="space-y-1 min-w-[140px]">
+                <Label className="text-xs text-muted-foreground">Category</Label>
+                <p className="text-sm h-8 flex items-center truncate">{ticket.category}</p>
+              </div>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
+              {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+                <Button size="sm" onClick={() => setResolveOpen(true)}>
+                  Mark as Resolved…
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}
+              >
+                <Clock className="h-4 w-4 mr-2" /> Log time
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Main */}
           <div className="lg:col-span-2 space-y-4 min-w-0">
@@ -905,68 +966,7 @@ export default function HelpdeskTicketDetail() {
 
           {/* Sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1">
-            {/* Always-visible essentials */}
-            <Card className="p-4 space-y-3">
-              <h3 className="font-semibold text-sm">Properties</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Status</Label>
-                  <Select value={ticket.status} onValueChange={(v) => updateField("status", v)}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>{STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Priority</Label>
-                  <Select value={ticket.priority} onValueChange={(v) => updateField("priority", v)}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>{PRIORITY_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Type</Label>
-                  <Select value={ticket.ticket_type} onValueChange={(v) => updateField("ticket_type", v)}>
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>{TYPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Source</Label>
-                  <div className="h-8 flex items-center"><Badge variant="outline" className="text-xs">{ticket.source}</Badge></div>
-                </div>
-                <div className="space-y-1 col-span-2">
-                  <Label className="text-xs text-muted-foreground">Primary Assignee</Label>
-                  <p className="text-sm">
-                    {ticket.assignee_id
-                      ? (orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.full_name
-                          || orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.email
-                          || "Assigned")
-                      : <span className="text-muted-foreground">Unassigned</span>}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">Manage co-assignees in the Assignees panel below.</p>
-                </div>
-                {ticket.category && (
-                  <div className="space-y-1 col-span-2">
-                    <Label className="text-xs text-muted-foreground">Category</Label>
-                    <p className="text-sm">{ticket.category}</p>
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 pt-1">
-                {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
-                  <Button size="sm" onClick={() => setResolveOpen(true)}>
-                    Mark as Resolved…
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}
-                >
-                  <Clock className="h-4 w-4 mr-2" /> Log time
-                </Button>
-              </div>
-            </Card>
+            {/* Properties moved to top horizontal bar */}
 
             <SLAStatus
               createdAt={ticket.created_at}
