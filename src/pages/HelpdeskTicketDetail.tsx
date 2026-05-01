@@ -1062,6 +1062,50 @@ export default function HelpdeskTicketDetail() {
         onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
       />
 
+      <Dialog open={resolutionOpen} onOpenChange={setResolutionOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              Resolution notes
+              {(ticket as any).resolution_code && (
+                <Badge variant="outline" className="ml-2 text-xs">
+                  {resolutionCodeLabel((ticket as any).resolution_code)}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <Textarea
+            rows={6}
+            defaultValue={ticket.resolution ?? ""}
+            key={`res-dlg-${ticket.id}-${ticket.resolution ?? ""}`}
+            onBlur={(e) => {
+              if (e.target.value !== (ticket.resolution ?? "")) {
+                updateField("resolution", e.target.value || null);
+              }
+            }}
+            placeholder="Resolution details..."
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResolutionOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={slaCsatOpen} onOpenChange={setSlaCsatOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>SLA &amp; CSAT</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <TicketSLAPanel ticket={ticket} />
+            <TicketCSATPanel ticket={ticket} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSlaCsatOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog
         open={deleteOpen}
         onOpenChange={(open) => !deleting && setDeleteOpen(open)}
