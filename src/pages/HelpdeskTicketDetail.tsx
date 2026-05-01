@@ -198,6 +198,20 @@ export default function HelpdeskTicketDetail() {
     enabled: !!id,
   });
 
+  const { data: commentAttachments = [] } = useQuery({
+    queryKey: ["helpdesk-comment-attachments", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("helpdesk_ticket_attachments")
+        .select("*")
+        .eq("ticket_id", id!)
+        .not("comment_id", "is", null);
+      return data ?? [];
+    },
+    enabled: !!id,
+  });
+
+
   const { data: orgUsers = [] } = useQuery({
     queryKey: ["org-users-min", currentOrganization?.id],
     queryFn: async () => {
