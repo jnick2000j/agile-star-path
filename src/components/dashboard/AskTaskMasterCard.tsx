@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 
 type Msg = { role: "user" | "assistant"; content: string };
