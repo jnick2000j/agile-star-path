@@ -690,6 +690,12 @@ export default function HelpdeskTicketDetail() {
                   <ListChecks className="h-4 w-4 mr-2" /> To task
                 </Button>
               )}
+              <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)}>
+                <Network className="h-4 w-4 mr-2" /> Hierarchy
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setCatalogOpen(true)}>
+                <Package className="h-4 w-4 mr-2" /> Catalog
+              </Button>
               <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => setDeclareMIOpen(true)}>
                 <Siren className="h-4 w-4 mr-2" /> Major Incident
               </Button>
