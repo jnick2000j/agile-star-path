@@ -174,7 +174,7 @@ export default function HelpdeskTicketDetail() {
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
   const [declareMIOpen, setDeclareMIOpen] = useState(false);
   const [hierarchyOpen, setHierarchyOpen] = useState(false);
-  const [catalogOpen, setCatalogOpen] = useState(false);
+  
   const [activeTab, setActiveTab] = useState("conversation");
   const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
   const [catalogSaving, setCatalogSaving] = useState(false);
@@ -930,7 +930,7 @@ export default function HelpdeskTicketDetail() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Network className="h-4 w-4" /> Hierarchy
+              <Network className="h-4 w-4" /> Parent / Child
               {childTickets.length > 0 && (
                 <Badge variant="outline">{childTickets.length} sub-ticket{childTickets.length === 1 ? "" : "s"}</Badge>
               )}
