@@ -173,6 +173,8 @@ export default function HelpdeskTicketDetail() {
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
   const [declareMIOpen, setDeclareMIOpen] = useState(false);
+  const [hierarchyOpen, setHierarchyOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("conversation");
   const [catalogDraft, setCatalogDraft] = useState<CatalogSelection>({});
   const [catalogSaving, setCatalogSaving] = useState(false);
