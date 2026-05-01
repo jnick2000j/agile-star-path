@@ -77,7 +77,8 @@ import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
 import { TicketAssigneesPanel } from "@/components/helpdesk/TicketAssigneesPanel";
 import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
 import { Link } from "react-router-dom";
-import { ListChecks, Download, FileText, Image as ImageIcon } from "lucide-react";
+import { ListChecks, Download, FileText, Image as ImageIcon, Siren } from "lucide-react";
+import { DeclareMajorIncidentDialog } from "@/components/major-incidents/DeclareMajorIncidentDialog";
 
 
 const STATUS_OPTIONS = ["new", "open", "pending", "on_hold", "resolved", "closed", "cancelled"];
