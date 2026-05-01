@@ -710,9 +710,9 @@ export default function HelpdeskTicketDetail() {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 gap-6 items-start">
           {/* Main */}
-          <div className="lg:col-span-2 space-y-4 min-w-0">
+          <div className="space-y-4 min-w-0">
             <Card className="p-6">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
@@ -995,11 +995,6 @@ export default function HelpdeskTicketDetail() {
             </Tabs>
           </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1">
-            {/* Properties moved to top horizontal bar */}
-
-          </aside>
         </div>
       </div>
 
