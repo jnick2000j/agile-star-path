@@ -5655,11 +5655,100 @@ export type Database = {
           },
         ]
       }
+      helpdesk_ticket_task_conversions: {
+        Row: {
+          attachments_copied: number
+          converted_by: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          product_id: string | null
+          programme_id: string | null
+          project_id: string | null
+          reason: string
+          task_id: string
+          task_priority: string
+          ticket_id: string
+        }
+        Insert: {
+          attachments_copied?: number
+          converted_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reason: string
+          task_id: string
+          task_priority: string
+          ticket_id: string
+        }
+        Update: {
+          attachments_copied?: number
+          converted_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          product_id?: string | null
+          programme_id?: string | null
+          project_id?: string | null
+          reason?: string
+          task_id?: string
+          task_priority?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_task_conversions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_task_conversions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_task_conversions_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_task_conversions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_task_conversions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_task_conversions_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_tickets: {
         Row: {
           assignee_id: string | null
           category: string | null
           closed_at: string | null
+          converted_to_task_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -5700,6 +5789,7 @@ export type Database = {
           assignee_id?: string | null
           category?: string | null
           closed_at?: string | null
+          converted_to_task_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -5740,6 +5830,7 @@ export type Database = {
           assignee_id?: string | null
           category?: string | null
           closed_at?: string | null
+          converted_to_task_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -5777,6 +5868,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "helpdesk_tickets_converted_to_task_id_fkey"
+            columns: ["converted_to_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "helpdesk_tickets_organization_id_fkey"
             columns: ["organization_id"]
@@ -12713,6 +12811,7 @@ export type Database = {
           project_id: string | null
           reference_number: string | null
           risk_id: string | null
+          source_ticket_id: string | null
           sprint_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           story_points: number | null
@@ -12745,6 +12844,7 @@ export type Database = {
           project_id?: string | null
           reference_number?: string | null
           risk_id?: string | null
+          source_ticket_id?: string | null
           sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
@@ -12777,6 +12877,7 @@ export type Database = {
           project_id?: string | null
           reference_number?: string | null
           risk_id?: string | null
+          source_ticket_id?: string | null
           sprint_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           story_points?: number | null
@@ -12845,6 +12946,13 @@ export type Database = {
             columns: ["risk_id"]
             isOneToOne: false
             referencedRelation: "risks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_source_ticket_id_fkey"
+            columns: ["source_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
             referencedColumns: ["id"]
           },
           {
