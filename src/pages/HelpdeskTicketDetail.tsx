@@ -696,6 +696,18 @@ export default function HelpdeskTicketDetail() {
               )}
             </div>
           </div>
+          <div className="mt-3 pt-3 border-t">
+            <SLAStatus
+              createdAt={ticket.created_at}
+              responseDueAt={(ticket as any).sla_response_due_at}
+              resolutionDueAt={(ticket as any).sla_resolution_due_at}
+              firstResponseAt={ticket.first_response_at}
+              resolvedAt={ticket.resolved_at}
+              responseBreached={(ticket as any).sla_response_breached ?? false}
+              resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
+              status={ticket.status}
+            />
+          </div>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -986,17 +998,6 @@ export default function HelpdeskTicketDetail() {
           {/* Sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1">
             {/* Properties moved to top horizontal bar */}
-
-            <SLAStatus
-              createdAt={ticket.created_at}
-              responseDueAt={(ticket as any).sla_response_due_at}
-              resolutionDueAt={(ticket as any).sla_resolution_due_at}
-              firstResponseAt={ticket.first_response_at}
-              resolvedAt={ticket.resolved_at}
-              responseBreached={(ticket as any).sla_response_breached ?? false}
-              resolutionBreached={(ticket as any).sla_resolution_breached ?? false}
-              status={ticket.status}
-            />
 
           </aside>
         </div>
