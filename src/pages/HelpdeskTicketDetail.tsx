@@ -881,6 +881,97 @@ export default function HelpdeskTicketDetail() {
                   <ApprovalsPanel ticketId={ticket.id} />
                 </Card>
               </TabsContent>
+              <TabsContent value="parent_child" className="space-y-4">
+                <Card className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                      <Network className="h-4 w-4" /> Parent / Child
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {childTickets.length > 0 && (
+                        <Badge variant="outline">{childTickets.length} sub-ticket{childTickets.length === 1 ? "" : "s"}</Badge>
+                      )}
+                      <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)}>
+                        Make Parent/Child
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Parent ticket</Label>
+                    <ParentTicketPicker
+                      currentTicketId={ticket.id}
+                      value={(ticket as any).parent_ticket_id ?? null}
+                      onChange={(parentId) => updateField("parent_ticket_id", parentId)}
+                    />
+                    {parentTicket && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/support/tickets/${parentTicket.id}`)}
+                        className="text-xs text-primary hover:underline truncate block max-w-full text-left"
+                      >
+                        Open parent: {parentTicket.reference_number ?? ""} {parentTicket.subject ?? ""}
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">
+                      Sub-tickets ({childTickets.length})
+                    </Label>
+                    {childTickets.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No sub-tickets linked.</p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {childTickets.map((c: any) => (
+                          <li key={c.id}>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/support/tickets/${c.id}`)}
+                              className="w-full flex items-center gap-2 text-left text-sm hover:bg-muted rounded px-2 py-1"
+                            >
+                              <span className="font-mono text-[11px] text-muted-foreground shrink-0">
+                                {c.reference_number ?? c.id.slice(0, 6)}
+                              </span>
+                              <span className="truncate flex-1">{c.subject}</span>
+                              <Badge variant="outline" className="text-[10px] capitalize shrink-0">
+                                {formatLabel(c.status)}
+                              </Badge>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </Card>
+              </TabsContent>
+              <TabsContent value="catalog" className="space-y-4">
+                <Card className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                      <Package className="h-4 w-4" /> Catalog selections
+                    </h3>
+                    {!catalogEditing ? (
+                      <Button size="sm" variant="outline" onClick={startCatalogEdit}>Edit</Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={cancelCatalogEdit} disabled={catalogSaving}>Cancel</Button>
+                        <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
+                          {catalogSaving ? "Saving..." : "Save"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {catalogEditing ? (
+                    <CatalogPicker
+                      value={catalogDraft}
+                      onChange={setCatalogDraft}
+                      ticketType={ticket.ticket_type}
+                      compact
+                    />
+                  ) : (
+                    <CatalogSummary ticketId={ticket.id} />
+                  )}
+                </Card>
+              </TabsContent>
               <TabsContent value="knowledge" className="space-y-4">
                 <KBSuggestionsPanel
                   organizationId={ticket.organization_id}
