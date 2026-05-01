@@ -339,80 +339,183 @@ export default function HelpdeskTicketDetail() {
 
 
   const submitReply = async () => {
-    if (!ticket || !reply.trim()) return;
-    const { error } = await supabase.from("helpdesk_ticket_comments").insert({
-      ticket_id: ticket.id,
-      organization_id: ticket.organization_id,
-      author_user_id: user?.id ?? null,
-      author_email: user?.email ?? null,
-      body: reply.trim(),
-      is_internal: internal,
-    });
-    if (error) {
-      toast.error("Reply failed: " + error.message);
-      return;
-    }
-    setReply("");
-    if (ticket.status === "new") {
-      await supabase.from("helpdesk_tickets").update({
-        status: "open",
-        first_response_at: ticket.first_response_at ?? new Date().toISOString(),
-      }).eq("id", ticket.id);
-    }
-    // Look up assignee email so we can fan out to them as well
-    let assigneeEmail: string | undefined;
-    if (ticket.assignee_id && ticket.assignee_id !== user?.id) {
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("user_id", ticket.assignee_id)
-        .maybeSingle();
-      assigneeEmail = prof?.email ?? undefined;
-    }
-
-    if (!internal) {
-      // Notify the reporter (default recipient resolution)
-      supabase.functions.invoke("helpdesk-notify", {
-        body: {
+    if (!ticket || (!reply.trim() && pendingFiles.length === 0)) return;
+    setPosting(true);
+    try {
+      const { data: comment, error } = await supabase
+        .from("helpdesk_ticket_comments")
+        .insert({
           ticket_id: ticket.id,
-          notification_type: "reply",
-          metadata: { comment_body: reply.trim() },
-        },
-      }).catch(() => {});
-      // Also notify the assignee, if there is one and it isn't the author
-      if (assigneeEmail) {
+          organization_id: ticket.organization_id,
+          author_user_id: user?.id ?? null,
+          author_email: user?.email ?? null,
+          body: reply.trim(),
+          is_internal: internal,
+        })
+        .select("id")
+        .single();
+      if (error || !comment) {
+        toast.error("Reply failed: " + (error?.message ?? "unknown"));
+        return;
+      }
+
+      // Upload pending files and link them to this comment
+      if (pendingFiles.length > 0 && user) {
+        for (const pf of pendingFiles) {
+          const safeName = pf.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const path = `${ticket.organization_id}/${ticket.id}/${Date.now()}-${safeName}`;
+          const { error: upErr } = await supabase.storage
+            .from("helpdesk-attachments")
+            .upload(path, pf.file, { contentType: pf.file.type, upsert: false });
+          if (upErr) {
+            toast.error(`Failed to upload ${pf.file.name}: ${upErr.message}`);
+            continue;
+          }
+          const { error: insErr } = await supabase.from("helpdesk_ticket_attachments").insert({
+            ticket_id: ticket.id,
+            organization_id: ticket.organization_id,
+            comment_id: comment.id,
+            uploaded_by: user.id,
+            storage_path: path,
+            file_name: pf.file.name,
+            file_size: pf.file.size,
+            mime_type: pf.file.type || null,
+            is_internal: internal,
+          });
+          if (insErr) {
+            await supabase.storage.from("helpdesk-attachments").remove([path]);
+            toast.error(`Failed to record ${pf.file.name}: ${insErr.message}`);
+          }
+        }
+        // Cleanup blob URLs
+        pendingFiles.forEach((pf) => pf.previewUrl && URL.revokeObjectURL(pf.previewUrl));
+      }
+
+      // Record @mentions
+      if (mentions.length > 0) {
+        await supabase.from("helpdesk_comment_mentions").insert(
+          mentions.map((uid) => ({
+            comment_id: comment.id,
+            ticket_id: ticket.id,
+            organization_id: ticket.organization_id,
+            mentioned_user_id: uid,
+            mentioned_by: user?.id ?? null,
+          })),
+        );
+      }
+
+      setReply("");
+      setPendingFiles([]);
+      setMentions([]);
+
+      if (ticket.status === "new") {
+        await supabase.from("helpdesk_tickets").update({
+          status: "open",
+          first_response_at: ticket.first_response_at ?? new Date().toISOString(),
+        }).eq("id", ticket.id);
+      }
+
+      // Notify mentioned users (best-effort)
+      if (mentions.length > 0) {
+        const { data: mProfiles } = await supabase
+          .from("profiles")
+          .select("user_id, email")
+          .in("user_id", mentions);
+        for (const p of mProfiles ?? []) {
+          if (!p.email || p.user_id === user?.id) continue;
+          supabase.functions.invoke("helpdesk-notify", {
+            body: {
+              ticket_id: ticket.id,
+              notification_type: internal ? "internal_note" : "reply",
+              recipient_email: p.email,
+              metadata: { comment_body: reply.trim(), mention: true },
+            },
+          }).catch(() => {});
+        }
+      }
+
+      // Notify watchers (best-effort)
+      const { data: watcherRows } = await supabase
+        .from("helpdesk_ticket_watchers")
+        .select("user_id")
+        .eq("ticket_id", ticket.id);
+      const watcherIds = (watcherRows ?? []).map((w: any) => w.user_id).filter((wid: string) => wid !== user?.id);
+      if (watcherIds.length > 0) {
+        const { data: wProfiles } = await supabase
+          .from("profiles")
+          .select("user_id, email")
+          .in("user_id", watcherIds);
+        for (const p of wProfiles ?? []) {
+          if (!p.email) continue;
+          supabase.functions.invoke("helpdesk-notify", {
+            body: {
+              ticket_id: ticket.id,
+              notification_type: internal ? "internal_note" : "reply",
+              recipient_email: p.email,
+              metadata: { comment_body: reply.trim(), watcher: true },
+            },
+          }).catch(() => {});
+        }
+      }
+
+      // Look up assignee email so we can fan out to them as well
+      let assigneeEmail: string | undefined;
+      if (ticket.assignee_id && ticket.assignee_id !== user?.id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("user_id", ticket.assignee_id)
+          .maybeSingle();
+        assigneeEmail = prof?.email ?? undefined;
+      }
+
+      if (!internal) {
         supabase.functions.invoke("helpdesk-notify", {
           body: {
             ticket_id: ticket.id,
             notification_type: "reply",
+            metadata: { comment_body: reply.trim() },
+          },
+        }).catch(() => {});
+        if (assigneeEmail) {
+          supabase.functions.invoke("helpdesk-notify", {
+            body: {
+              ticket_id: ticket.id,
+              notification_type: "reply",
+              recipient_email: assigneeEmail,
+              metadata: { comment_body: reply.trim() },
+            },
+          }).catch(() => {});
+        }
+      } else if (assigneeEmail) {
+        supabase.functions.invoke("helpdesk-notify", {
+          body: {
+            ticket_id: ticket.id,
+            notification_type: "internal_note",
             recipient_email: assigneeEmail,
             metadata: { comment_body: reply.trim() },
           },
         }).catch(() => {});
       }
-    } else if (assigneeEmail) {
-      // Internal note: notify assignee only (never the reporter)
-      supabase.functions.invoke("helpdesk-notify", {
-        body: {
-          ticket_id: ticket.id,
-          notification_type: "internal_note",
-          recipient_email: assigneeEmail,
-          metadata: { comment_body: reply.trim() },
-        },
-      }).catch(() => {});
+
+      const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
+      dispatchHelpdeskWorkflow({
+        organization_id: ticket.organization_id,
+        trigger_event: internal ? "internal_note_added" : "replied",
+        ticket_id: ticket.id,
+        triggered_by: user?.id,
+        payload: { body: reply.trim() },
+      });
+      toast.success("Reply added");
+      qc.invalidateQueries({ queryKey: ["helpdesk-comments", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-comment-attachments", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-attachments", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
+    } finally {
+      setPosting(false);
     }
-    // Dispatch workflows for reply / internal note
-    const { dispatchHelpdeskWorkflow } = await import("@/lib/helpdeskWorkflows");
-    dispatchHelpdeskWorkflow({
-      organization_id: ticket.organization_id,
-      trigger_event: internal ? "internal_note_added" : "replied",
-      ticket_id: ticket.id,
-      triggered_by: user?.id,
-      payload: { body: reply.trim() },
-    });
-    toast.success("Reply added");
-    qc.invalidateQueries({ queryKey: ["helpdesk-comments", id] });
-    qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
+  };
+
   };
 
   if (isLoading || !ticket) {
