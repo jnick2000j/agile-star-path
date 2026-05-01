@@ -147,6 +147,7 @@ export function Sidebar() {
     {
       label: "Learning",
       icon: GraduationCap,
+      module: "lms_addon",
       children: [
         { label: "Catalog", href: "/learning" },
         { label: "My Learning", href: "/learning/my" },
