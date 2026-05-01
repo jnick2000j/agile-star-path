@@ -88,6 +88,9 @@ export default function HelpdeskTicketDetail() {
   const qc = useQueryClient();
   const [reply, setReply] = useState("");
   const [internal, setInternal] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [mentions, setMentions] = useState<string[]>([]);
+  const [posting, setPosting] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
