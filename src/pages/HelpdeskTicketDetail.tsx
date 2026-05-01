@@ -978,191 +978,68 @@ export default function HelpdeskTicketDetail() {
               status={ticket.status}
             />
 
-            <TicketAssigneesPanel
-              ticketId={ticket.id}
-              organizationId={ticket.organization_id}
-              orgUsers={orgUsers as any}
-            />
+            {/* Compact people summary */}
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <Users className="h-4 w-4" /> People
+                </h3>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setActiveTab("people")}>
+                  Manage
+                </Button>
+              </div>
+              <div className="text-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Primary</span>
+                  <span className="truncate max-w-[160px] text-right">
+                    {ticket.assignee_id
+                      ? (orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.full_name
+                          || orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.email
+                          || "Assigned")
+                      : <span className="text-muted-foreground">Unassigned</span>}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Reporter</span>
+                  <span className="truncate max-w-[160px] text-right">
+                    {ticket.reporter_email || "—"}
+                  </span>
+                </div>
+              </div>
+            </Card>
 
-            <TicketWatchersPanel
-              ticketId={ticket.id}
-              organizationId={ticket.organization_id}
-              orgUsers={orgUsers as any}
-            />
-
-            {/* Collapsible secondary panels */}
-            <Accordion type="multiple" defaultValue={["resolution"]} className="space-y-2">
-              <AccordionItem value="resolution" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">
+            {/* Compact quick actions */}
+            <Card className="p-4 space-y-2">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Settings2 className="h-4 w-4" /> Quick actions
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" className="justify-start" onClick={() => setResolutionOpen(true)}>
                   Resolution
-                  {(ticket as any).resolution_code && (
-                    <Badge variant="outline" className="ml-2 text-xs">{resolutionCodeLabel((ticket as any).resolution_code)}</Badge>
-                  )}
-                </AccordionTrigger>
-                <AccordionContent className="pb-3 space-y-2">
-                  <Textarea
-                    rows={4}
-                    defaultValue={ticket.resolution ?? ""}
-                    key={`res-${ticket.id}-${ticket.resolution ?? ""}`}
-                    onBlur={(e) => {
-                      if (e.target.value !== (ticket.resolution ?? "")) {
-                        updateField("resolution", e.target.value || null);
-                      }
-                    }}
-                    placeholder="Resolution details..."
-                  />
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="convert" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">
-                  <span className="flex items-center gap-2"><ListChecks className="h-4 w-4 text-primary" /> Convert to task</span>
-                </AccordionTrigger>
-                <AccordionContent className="pb-3">
-                  {(ticket as any).converted_to_task_id ? (
-                    <div className="text-sm text-muted-foreground">
-                      Already converted.{" "}
-                      <Link to={`/tasks?focus=${(ticket as any).converted_to_task_id}`} className="text-primary hover:underline">
-                        Open task
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">
-                        Promote this ticket to a delivery task linked to a programme, project or product.
-                      </p>
-                      <Button size="sm" variant="outline" className="w-full" onClick={() => setConvertOpen(true)}>
-                        Convert to task…
-                      </Button>
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="approvals" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">Approvals</AccordionTrigger>
-                <AccordionContent className="pb-3">
-                  <ApprovalsPanel ticketId={ticket.id} />
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="hierarchy" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">
-                  Hierarchy {childTickets.length > 0 && <span className="ml-2 text-xs text-muted-foreground">({childTickets.length})</span>}
-                </AccordionTrigger>
-                <AccordionContent className="pb-3 space-y-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Parent ticket</Label>
-                    <ParentTicketPicker
-                      currentTicketId={ticket.id}
-                      value={(ticket as any).parent_ticket_id ?? null}
-                      onChange={(parentId) => updateField("parent_ticket_id", parentId)}
-                    />
-                    {parentTicket && (
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/support/tickets/${parentTicket.id}`)}
-                        className="text-xs text-primary hover:underline truncate block max-w-full text-left"
-                      >
-                        Open parent: {parentTicket.reference_number ?? ""} {parentTicket.subject ?? ""}
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">
-                      Sub-tickets ({childTickets.length})
-                    </Label>
-                    {childTickets.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No sub-tickets linked.</p>
-                    ) : (
-                      <ul className="space-y-1">
-                        {childTickets.map((c: any) => (
-                          <li key={c.id}>
-                            <button
-                              type="button"
-                              onClick={() => navigate(`/support/tickets/${c.id}`)}
-                              className="w-full flex items-center gap-2 text-left text-sm hover:bg-muted rounded px-2 py-1"
-                            >
-                              <span className="font-mono text-[11px] text-muted-foreground shrink-0">
-                                {c.reference_number ?? c.id.slice(0, 6)}
-                              </span>
-                              <span className="truncate flex-1">{c.subject}</span>
-                              <Badge variant="outline" className="text-[10px] capitalize shrink-0">
-                                {formatLabel(c.status)}
-                              </Badge>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="catalog" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">Catalog selections</AccordionTrigger>
-                <AccordionContent className="pb-3 space-y-2">
-                  <div className="flex items-center justify-end">
-                    {!catalogEditing ? (
-                      <Button size="sm" variant="outline" onClick={startCatalogEdit}>
-                        Edit
-                      </Button>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={cancelCatalogEdit} disabled={catalogSaving}>
-                          Cancel
-                        </Button>
-                        <Button size="sm" onClick={saveCatalog} disabled={catalogSaving}>
-                          {catalogSaving ? "Saving..." : "Save"}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  {catalogEditing ? (
-                    <CatalogPicker
-                      value={catalogDraft}
-                      onChange={setCatalogDraft}
-                      ticketType={ticket.ticket_type}
-                      compact
-                    />
-                  ) : (
-                    <CatalogSummary ticketId={ticket.id} />
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="related" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">Related items</AccordionTrigger>
-                <AccordionContent className="pb-3 space-y-3">
-                  <LinkedCIsPanel ticketId={ticket.id} />
-                  <CatalogRequestPanel ticketId={ticket.id} />
-                  <TicketProblemPanel
-                    ticketId={ticket.id}
-                    ticketSubject={ticket.subject}
-                    ticketDescription={ticket.description}
-                    parentProblemId={(ticket as any).parent_problem_id ?? null}
-                  />
-                  <TicketMajorIncidentPanel
-                    ticketId={ticket.id}
-                    ticketSubject={ticket.subject}
-                    ticketDescription={ticket.description}
-                  />
-                  <div className="text-sm space-y-1 pt-2 border-t">
-                    <p><span className="text-muted-foreground">Programme:</span> {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : "—"}</p>
-                    <p><span className="text-muted-foreground">Project:</span> {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : "—"}</p>
-                    <p><span className="text-muted-foreground">Product:</span> {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : "—"}</p>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="sla-csat" className="border rounded-md bg-card px-3">
-                <AccordionTrigger className="text-sm font-semibold py-3">SLA &amp; CSAT</AccordionTrigger>
-                <AccordionContent className="pb-3 space-y-3">
-                  <TicketSLAPanel ticket={ticket} />
-                  <TicketCSATPanel ticket={ticket} />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                  {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
+                </Button>
+                <Button size="sm" variant="outline" className="justify-start" onClick={() => setSlaCsatOpen(true)}>
+                  <Gauge className="h-4 w-4 mr-1" /> SLA / CSAT
+                </Button>
+                <Button size="sm" variant="outline" className="justify-start" onClick={() => setActiveTab("links")}>
+                  <Link2 className="h-4 w-4 mr-1" /> Links
+                </Button>
+                {(ticket as any).converted_to_task_id ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}
+                  >
+                    <ListChecks className="h-4 w-4 mr-1" /> Open task
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" className="justify-start" onClick={() => setConvertOpen(true)}>
+                    <ListChecks className="h-4 w-4 mr-1" /> To task
+                  </Button>
+                )}
+              </div>
+            </Card>
           </aside>
         </div>
       </div>
