@@ -247,7 +247,7 @@ export function ConvertTicketToTaskDialog({ open, onOpenChange, ticket, onConver
         attachments_copied: copiedCount,
         [entityFieldName]: entityId,
       };
-      const { error: convErr } = await supabase
+      const { error: convErr } = await (supabase as any)
         .from("helpdesk_ticket_task_conversions")
         .insert(conversionRow);
       if (convErr) console.warn("conversion log insert failed", convErr);
