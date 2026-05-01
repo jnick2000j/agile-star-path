@@ -998,36 +998,6 @@ export default function HelpdeskTicketDetail() {
               status={ticket.status}
             />
 
-            {/* Compact people summary */}
-            <Card className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm flex items-center gap-2">
-                  <Users className="h-4 w-4" /> People
-                </h3>
-                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setActiveTab("people")}>
-                  Manage
-                </Button>
-              </div>
-              <div className="text-xs space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Primary</span>
-                  <span className="truncate max-w-[160px] text-right">
-                    {ticket.assignee_id
-                      ? (orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.full_name
-                          || orgUsers.find((u: any) => u.user_id === ticket.assignee_id)?.email
-                          || "Assigned")
-                      : <span className="text-muted-foreground">Unassigned</span>}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Reporter</span>
-                  <span className="truncate max-w-[160px] text-right">
-                    {ticket.reporter_email || "—"}
-                  </span>
-                </div>
-              </div>
-            </Card>
-
           </aside>
         </div>
       </div>
