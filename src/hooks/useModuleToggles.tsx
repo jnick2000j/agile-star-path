@@ -64,8 +64,8 @@ export function useModuleToggles(orgId?: string | null) {
 
   const isEnabled = useCallback(
     (key: string) => {
-      // Default = enabled if no row exists
-      if (toggles[key] === undefined) return true;
+      // Add-on modules default OFF; everything else defaults ON when no row exists.
+      if (toggles[key] === undefined) return !ADDON_MODULE_KEYS.has(key);
       return toggles[key];
     },
     [toggles],
