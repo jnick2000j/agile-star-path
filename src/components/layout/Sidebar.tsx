@@ -27,6 +27,7 @@ import {
   Briefcase,
   Star,
   StarOff,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVertical } from "@/hooks/useVertical";
@@ -143,6 +144,16 @@ export function Sidebar() {
       ],
     },
     { label: "Knowledgebase", icon: BookOpen, href: "/knowledgebase", module: "knowledgebase" },
+    {
+      label: "Learning",
+      icon: GraduationCap,
+      children: [
+        { label: "Catalog", href: "/learning" },
+        { label: "My Learning", href: "/learning/my" },
+        { label: "Authoring", href: "/learning/admin" },
+        { label: "Training Dashboard", href: "/learning/dashboard" },
+      ],
+    },
     { label: "Registers", icon: ClipboardList, href: "/registers" },
     {
       label: "Reporting",

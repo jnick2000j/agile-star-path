@@ -128,6 +128,13 @@ import KnowledgebaseArticle from "./pages/KnowledgebaseArticle";
 import NotFound from "./pages/NotFound";
 import Unsubscribe from "./pages/Unsubscribe";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import LmsCatalog from "./pages/lms/LmsCatalog";
+import MyLearning from "./pages/lms/MyLearning";
+import CourseDetail from "./pages/lms/CourseDetail";
+import LmsAdmin from "./pages/lms/LmsAdmin";
+import LmsCourseEditor from "./pages/lms/LmsCourseEditor";
+import LmsQuizEditor from "./pages/lms/LmsQuizEditor";
+import LmsManagerDashboard from "./pages/lms/LmsManagerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -263,6 +270,13 @@ const App = () => (
             <Route path="/services/retainers" element={<ProtectedRoute><Retainers /></ProtectedRoute>} />
             <Route path="/verticals/docs" element={<ProtectedRoute><VerticalsDocs /></ProtectedRoute>} />
             <Route path="/verticals/:slug" element={<ProtectedRoute><VerticalEntityRegister /></ProtectedRoute>} />
+            <Route path="/learning" element={<ProtectedRoute><LmsCatalog /></ProtectedRoute>} />
+            <Route path="/learning/my" element={<ProtectedRoute><MyLearning /></ProtectedRoute>} />
+            <Route path="/learning/courses/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
+            <Route path="/learning/admin" element={<ProtectedRoute><LmsAdmin /></ProtectedRoute>} />
+            <Route path="/learning/admin/courses/:id" element={<ProtectedRoute><LmsCourseEditor /></ProtectedRoute>} />
+            <Route path="/learning/admin/lessons/:id/quiz" element={<ProtectedRoute><LmsQuizEditor /></ProtectedRoute>} />
+            <Route path="/learning/dashboard" element={<ProtectedRoute><LmsManagerDashboard /></ProtectedRoute>} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
