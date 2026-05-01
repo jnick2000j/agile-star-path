@@ -59,7 +59,11 @@ export function AskTaskMasterCard({ compact = false }: { compact?: boolean } = {
           Authorization: `Bearer ${token}`,
         },
         // Strip the seeded greeting — it's UI-only context, not part of the model history
-        body: JSON.stringify({ messages: next.filter((m) => m !== GREETING) }),
+        body: JSON.stringify({
+          // Strip the seeded greeting — it's UI-only context, not part of the model history
+          messages: next.filter((m) => m !== GREETING),
+          organization_id: currentOrganization?.id ?? null,
+        }),
       });
 
       if (resp.status === 429) {
