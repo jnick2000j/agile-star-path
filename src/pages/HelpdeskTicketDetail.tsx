@@ -198,10 +198,20 @@ export default function HelpdeskTicketDetail() {
         catalogDraft,
         user?.id,
       );
+      // Audit log for catalog selection change
+      await supabase.from("helpdesk_ticket_activity").insert({
+        ticket_id: ticket.id,
+        organization_id: ticket.organization_id,
+        actor_user_id: user?.id ?? null,
+        event_type: "catalog_selection_changed",
+        from_value: catalogSelection,
+        to_value: catalogDraft,
+      });
       toast.success("Catalog selections updated");
       setCatalogEditing(false);
       await refetchCatalog();
       qc.invalidateQueries({ queryKey: ["hd-ticket-catalog", ticket.id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-activity", ticket.id] });
     } catch (e: any) {
       toast.error("Save failed: " + (e?.message ?? "unknown error"));
     } finally {
@@ -402,6 +412,17 @@ export default function HelpdeskTicketDetail() {
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-activity", id] });
+    if ("parent_ticket_id" in fields) {
+      qc.invalidateQueries({ queryKey: ["helpdesk-child-tickets", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-parent-ticket"] });
+      // Also refresh the new parent's child list so sub-tickets appear there immediately
+      if (fields.parent_ticket_id) {
+        qc.invalidateQueries({ queryKey: ["helpdesk-child-tickets", fields.parent_ticket_id] });
+      }
+      if ((ticket as any).parent_ticket_id) {
+        qc.invalidateQueries({ queryKey: ["helpdesk-child-tickets", (ticket as any).parent_ticket_id] });
+      }
+    }
   };
 
   const updateField = (field: string, value: any) => updateFields({ [field]: value });
@@ -662,38 +683,56 @@ export default function HelpdeskTicketDetail() {
                 <p className="text-sm h-8 flex items-center truncate">{ticket.category}</p>
               </div>
             )}
-            <div className="flex flex-wrap items-center gap-2 ml-auto">
-              {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
-                <Button size="sm" onClick={() => setResolveOpen(true)}>
-                  <Save className="h-4 w-4 mr-2" /> Mark as Resolved
-                </Button>
-              )}
-              <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)}>
-                <Clock className="h-4 w-4 mr-2" /> Log time
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)}>
-                <FileText className="h-4 w-4 mr-2" /> Resolution
-                {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)}>
-                <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
-              </Button>
-              {(ticket as any).converted_to_task_id ? (
-                <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)}>
-                  <ListChecks className="h-4 w-4 mr-2" /> Open task
-                </Button>
-              ) : (
-                <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)}>
-                  <ListChecks className="h-4 w-4 mr-2" /> To task
-                </Button>
-              )}
-              <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)}>
-                <Network className="h-4 w-4 mr-2" /> Make Parent/Child
-              </Button>
-              <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => setDeclareMIOpen(true)}>
-                <Siren className="h-4 w-4 mr-2" /> Major Incident
-              </Button>
+            <div className="space-y-1 min-w-[120px]">
+              <Label className="text-xs text-muted-foreground">Programme</Label>
+              <p className="text-sm h-8 flex items-center truncate">
+                {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
+              </p>
             </div>
+            <div className="space-y-1 min-w-[120px]">
+              <Label className="text-xs text-muted-foreground">Project</Label>
+              <p className="text-sm h-8 flex items-center truncate">
+                {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
+              </p>
+            </div>
+            <div className="space-y-1 min-w-[120px]">
+              <Label className="text-xs text-muted-foreground">Product</Label>
+              <p className="text-sm h-8 flex items-center truncate">
+                {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1">
+            {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+              <Button size="sm" onClick={() => setResolveOpen(true)} className="shrink-0">
+                <Save className="h-4 w-4 mr-2" /> Mark as Resolved
+              </Button>
+            )}
+            <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0">
+              <Clock className="h-4 w-4 mr-2" /> Log time
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)} className="shrink-0">
+              <FileText className="h-4 w-4 mr-2" /> Resolution
+              {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0">
+              <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
+            </Button>
+            {(ticket as any).converted_to_task_id ? (
+              <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)} className="shrink-0">
+                <ListChecks className="h-4 w-4 mr-2" /> Open task
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)} className="shrink-0">
+                <ListChecks className="h-4 w-4 mr-2" /> To task
+              </Button>
+            )}
+            <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)} className="shrink-0">
+              <Network className="h-4 w-4 mr-2" /> Make Parent/Child
+            </Button>
+            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive shrink-0" onClick={() => setDeclareMIOpen(true)}>
+              <Siren className="h-4 w-4 mr-2" /> Major Incident
+            </Button>
           </div>
         </Card>
 
@@ -715,11 +754,11 @@ export default function HelpdeskTicketDetail() {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="flex-wrap h-auto">
+              <TabsList className="flex w-full overflow-x-auto h-auto justify-start">
                 <TabsTrigger value="conversation"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
                 <TabsTrigger value="activity"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
                 <TabsTrigger value="people"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
-                <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Links</TabsTrigger>
+                <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Config Items &amp; Problems</TabsTrigger>
                 <TabsTrigger value="parent_child"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
                 <TabsTrigger value="catalog"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
                 <TabsTrigger value="knowledge"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
@@ -869,11 +908,6 @@ export default function HelpdeskTicketDetail() {
                     ticketDescription={ticket.description}
                     parentProblemId={(ticket as any).parent_problem_id ?? null}
                   />
-                  <div className="text-sm space-y-1 pt-2 border-t">
-                    <p><span className="text-muted-foreground">Programme:</span> {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : "—"}</p>
-                    <p><span className="text-muted-foreground">Project:</span> {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : "—"}</p>
-                    <p><span className="text-muted-foreground">Product:</span> {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : "—"}</p>
-                  </div>
                 </Card>
 
                 <Card className="p-4 space-y-3">
