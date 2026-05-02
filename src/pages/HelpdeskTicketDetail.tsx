@@ -776,16 +776,16 @@ export default function HelpdeskTicketDetail() {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="flex w-full overflow-x-auto h-auto justify-start">
-                <TabsTrigger value="conversation"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
-                <TabsTrigger value="activity"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
-                <TabsTrigger value="people"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
-                <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Config Items &amp; Problems</TabsTrigger>
-                <TabsTrigger value="parent_child"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
-                <TabsTrigger value="catalog"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
-                <TabsTrigger value="knowledge"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
-                <TabsTrigger value="attachments"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
-                <TabsTrigger value="audit"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
+              <TabsList className="flex w-full overflow-x-auto h-auto justify-start gap-1 bg-transparent p-0 rounded-none border-b">
+                <TabsTrigger value="conversation" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
+                <TabsTrigger value="activity" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
+                <TabsTrigger value="people" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
+                <TabsTrigger value="links" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Link2 className="h-4 w-4 mr-2" />Config Items &amp; Problems</TabsTrigger>
+                <TabsTrigger value="parent_child" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
+                <TabsTrigger value="catalog" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
+                <TabsTrigger value="knowledge" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
+                <TabsTrigger value="attachments" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
+                <TabsTrigger value="audit" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
               </TabsList>
               <TabsContent value="conversation" className="space-y-3">
                 {comments.length === 0 && <p className="text-sm text-muted-foreground">No replies yet.</p>}
