@@ -890,11 +890,6 @@ export default function HelpdeskTicketDetail() {
                     ticketDescription={ticket.description}
                     parentProblemId={(ticket as any).parent_problem_id ?? null}
                   />
-                  <div className="text-sm space-y-1 pt-2 border-t">
-                    <p><span className="text-muted-foreground">Programme:</span> {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : "—"}</p>
-                    <p><span className="text-muted-foreground">Project:</span> {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : "—"}</p>
-                    <p><span className="text-muted-foreground">Product:</span> {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : "—"}</p>
-                  </div>
                 </Card>
 
                 <Card className="p-4 space-y-3">
