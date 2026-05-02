@@ -198,10 +198,20 @@ export default function HelpdeskTicketDetail() {
         catalogDraft,
         user?.id,
       );
+      // Audit log for catalog selection change
+      await supabase.from("helpdesk_ticket_activity").insert({
+        ticket_id: ticket.id,
+        organization_id: ticket.organization_id,
+        actor_user_id: user?.id ?? null,
+        event_type: "catalog_selection_changed",
+        from_value: catalogSelection,
+        to_value: catalogDraft,
+      });
       toast.success("Catalog selections updated");
       setCatalogEditing(false);
       await refetchCatalog();
       qc.invalidateQueries({ queryKey: ["hd-ticket-catalog", ticket.id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-activity", ticket.id] });
     } catch (e: any) {
       toast.error("Save failed: " + (e?.message ?? "unknown error"));
     } finally {
