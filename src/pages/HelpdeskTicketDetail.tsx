@@ -785,7 +785,7 @@ export default function HelpdeskTicketDetail() {
                 <TabsTrigger value="catalog" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
                 <TabsTrigger value="knowledge" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
                 <TabsTrigger value="attachments" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
-                <TabsTrigger value="audit" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
+                <TabsTrigger value="audit" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Activity className="h-4 w-4 mr-2" />Activity</TabsTrigger>
               </TabsList>
               <TabsContent value="conversation" className="space-y-3">
                 {comments.length === 0 && <p className="text-sm text-muted-foreground">No replies yet.</p>}
