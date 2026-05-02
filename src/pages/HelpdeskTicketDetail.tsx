@@ -707,38 +707,32 @@ export default function HelpdeskTicketDetail() {
               </p>
             </div>
             <div className="space-y-1 min-w-[140px]">
-              <Label className="text-xs text-muted-foreground">SLA</Label>
+              <Label className="text-xs text-muted-foreground">&nbsp;</Label>
               <div className="h-8 flex items-center">
-                <SLABadge
-                  responseDueAt={(ticket as any).response_due_at ?? null}
-                  resolutionDueAt={(ticket as any).resolution_due_at ?? null}
-                  firstResponseAt={(ticket as any).first_response_at ?? null}
-                  resolvedAt={(ticket as any).resolved_at ?? null}
-                  responseBreached={!!(ticket as any).response_breached}
-                  resolutionBreached={!!(ticket as any).resolution_breached}
-                  status={ticket.status}
-                  pausedAt={(ticket as any).sla_paused_at ?? null}
-                />
+                <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
+                  <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
+                </Button>
               </div>
             </div>
           </div>
 
-          {/* Action buttons: square, single row */}
-          <div className="flex items-center gap-2 pt-2 border-t overflow-x-auto">
-            {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+          {/* Mark as Resolved row (below SLA/CSAT) */}
+          {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+            <div className="flex items-center gap-2 pt-2 border-t">
               <Button size="sm" onClick={() => setResolveOpen(true)} className="shrink-0 rounded-none">
                 <Save className="h-4 w-4 mr-2" /> Mark as Resolved
               </Button>
-            )}
+            </div>
+          )}
+
+          {/* Action buttons: square, single row */}
+          <div className="flex items-center gap-2 pt-2 border-t overflow-x-auto">
             <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none">
               <Clock className="h-4 w-4 mr-2" /> Log time
             </Button>
             <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)} className="shrink-0 rounded-none">
               <FileText className="h-4 w-4 mr-2" /> Resolution
               {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
-              <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
             </Button>
             {(ticket as any).converted_to_task_id ? (
               <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)} className="shrink-0 rounded-none">
