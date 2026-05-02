@@ -412,6 +412,17 @@ export default function HelpdeskTicketDetail() {
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] });
     qc.invalidateQueries({ queryKey: ["helpdesk-activity", id] });
+    if ("parent_ticket_id" in fields) {
+      qc.invalidateQueries({ queryKey: ["helpdesk-child-tickets", id] });
+      qc.invalidateQueries({ queryKey: ["helpdesk-parent-ticket"] });
+      // Also refresh the new parent's child list so sub-tickets appear there immediately
+      if (fields.parent_ticket_id) {
+        qc.invalidateQueries({ queryKey: ["helpdesk-child-tickets", fields.parent_ticket_id] });
+      }
+      if ((ticket as any).parent_ticket_id) {
+        qc.invalidateQueries({ queryKey: ["helpdesk-child-tickets", (ticket as any).parent_ticket_id] });
+      }
+    }
   };
 
   const updateField = (field: string, value: any) => updateFields({ [field]: value });
