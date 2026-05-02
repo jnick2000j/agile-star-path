@@ -48,7 +48,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn, formatLabel } from "@/lib/utils";
-import { SLAStatus } from "@/components/helpdesk/SLAStatus";
+import { SLAStatus, SLABadge } from "@/components/helpdesk/SLAStatus";
 import { KBAssistant } from "@/components/kb/KBAssistant";
 import { KBInlineSuggestions } from "@/components/kb/KBInlineSuggestions";
 import { ResolveTicketDialog, resolutionCodeLabel } from "@/components/helpdesk/ResolveTicketDialog";
