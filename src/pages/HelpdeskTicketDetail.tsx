@@ -736,11 +736,11 @@ export default function HelpdeskTicketDetail() {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="flex-wrap h-auto">
+              <TabsList className="flex w-full overflow-x-auto h-auto justify-start">
                 <TabsTrigger value="conversation"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
                 <TabsTrigger value="activity"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
                 <TabsTrigger value="people"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
-                <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Links</TabsTrigger>
+                <TabsTrigger value="links"><Link2 className="h-4 w-4 mr-2" />Config Items &amp; Problems</TabsTrigger>
                 <TabsTrigger value="parent_child"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
                 <TabsTrigger value="catalog"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
                 <TabsTrigger value="knowledge"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
