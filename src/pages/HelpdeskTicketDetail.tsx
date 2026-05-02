@@ -734,7 +734,6 @@ export default function HelpdeskTicketDetail() {
               <Siren className="h-4 w-4 mr-2" /> Major Incident
             </Button>
           </div>
-          </div>
         </Card>
 
         <div className="grid grid-cols-1 gap-6 items-start">
