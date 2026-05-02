@@ -778,14 +778,14 @@ export default function HelpdeskTicketDetail() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="flex w-full overflow-x-auto h-auto justify-start gap-1 bg-transparent p-0 rounded-none border-b">
                 <TabsTrigger value="conversation" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
-                <TabsTrigger value="activity" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Activity className="h-4 w-4 mr-2" />Activity ({activity.length})</TabsTrigger>
+                
                 <TabsTrigger value="people" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
                 <TabsTrigger value="links" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Link2 className="h-4 w-4 mr-2" />Config Items &amp; Problems</TabsTrigger>
                 <TabsTrigger value="parent_child" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
                 <TabsTrigger value="catalog" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
                 <TabsTrigger value="knowledge" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><BookOpen className="h-4 w-4 mr-2" />Knowledge</TabsTrigger>
                 <TabsTrigger value="attachments" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Paperclip className="h-4 w-4 mr-2" />Attachments</TabsTrigger>
-                <TabsTrigger value="audit" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><HistoryIcon className="h-4 w-4 mr-2" />Audit</TabsTrigger>
+                <TabsTrigger value="audit" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Activity className="h-4 w-4 mr-2" />Activity</TabsTrigger>
               </TabsList>
               <TabsContent value="conversation" className="space-y-3">
                 {comments.length === 0 && <p className="text-sm text-muted-foreground">No replies yet.</p>}
@@ -857,54 +857,6 @@ export default function HelpdeskTicketDetail() {
                      </div>
                    </div>
                 </Card>
-              </TabsContent>
-              <TabsContent value="activity" className="space-y-2">
-                {activity.length === 0 && <p className="text-sm text-muted-foreground">No activity yet.</p>}
-                {activity.map((a: any) => {
-                  const renderValue = (v: any): string => {
-                    if (v === null || v === undefined || v === "") return "—";
-                    if (typeof v === "object") {
-                      const vals = Object.values(v).filter(x => x !== null && x !== undefined && x !== "");
-                      if (vals.length === 0) return "—";
-                      return vals.map(x => {
-                        if (x === null || x === undefined) return "—";
-                        if (typeof x === "object") return JSON.stringify(x);
-                        const s = String(x);
-                        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) {
-                          const u = (orgUsers as any[]).find(o => o.user_id === s);
-                          return u ? (u.full_name || u.email || s) : s;
-                        }
-                        return formatLabel(s);
-                      }).join(", ");
-                    }
-                    return formatLabel(String(v));
-                  };
-                  const actor = (orgUsers as any[]).find(o => o.user_id === a.actor_user_id);
-                  const actorName = actor ? (actor.full_name || actor.email) : (a.actor_user_id ? "Unknown user" : "System");
-                  const eventLabel = formatLabel(a.event_type.replace(/_changed$/, "").replace(/_/g, " ")) +
-                    (a.event_type.endsWith("_changed") ? " changed" : "");
-                  return (
-                    <div key={a.id} className="flex gap-3 text-sm border-l-2 border-muted pl-3 py-2">
-                      <div className="flex-1 space-y-1">
-                        <p className="font-medium">{eventLabel}</p>
-                        <p className="text-xs text-muted-foreground">by {actorName}</p>
-                        {(a.from_value || a.to_value) && (
-                          <div className="flex items-center gap-2 text-xs">
-                            {a.from_value && (
-                              <Badge variant="outline" className="text-xs font-normal">{renderValue(a.from_value)}</Badge>
-                            )}
-                            {a.from_value && a.to_value && <span className="text-muted-foreground">→</span>}
-                            {a.to_value && (
-                              <Badge variant="secondary" className="text-xs font-normal">{renderValue(a.to_value)}</Badge>
-                            )}
-                          </div>
-                        )}
-                        {a.notes && <p className="text-xs text-muted-foreground italic">{a.notes}</p>}
-                      </div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">{format(new Date(a.created_at), "PPp")}</span>
-                    </div>
-                  );
-                })}
               </TabsContent>
               <TabsContent value="people" className="space-y-4">
                 <TicketAssigneesPanel
