@@ -688,19 +688,19 @@ export default function HelpdeskTicketDetail() {
 
           {/* Row 2: Programme / Project / Product + SLA indicator */}
           <div className="flex flex-wrap items-end gap-4 pt-2 border-t">
-            <div className="space-y-1 min-w-[120px] flex-1">
+            <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Programme</Label>
               <p className="text-sm h-8 flex items-center truncate">
                 {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
               </p>
             </div>
-            <div className="space-y-1 min-w-[120px] flex-1">
+            <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Project</Label>
               <p className="text-sm h-8 flex items-center truncate">
                 {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
               </p>
             </div>
-            <div className="space-y-1 min-w-[120px] flex-1">
+            <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Product</Label>
               <p className="text-sm h-8 flex items-center truncate">
                 {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
