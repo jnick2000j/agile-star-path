@@ -117,13 +117,17 @@ services:
           "Version": "2012-10-17",
           "Statement": [
             {
-              "Sid": "ListOwnBucket",
+              "Sid": "ListOwnBuckets",
               "Effect": "Allow",
               "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
-              "Resource": ["arn:aws:s3:::$$BUCKET"]
+              "Resource": [
+                "arn:aws:s3:::$$BUCKET",
+                "arn:aws:s3:::$$LMS_CONTENT_BUCKET",
+                "arn:aws:s3:::$$LMS_CERTS_BUCKET"
+              ]
             },
             {
-              "Sid": "RWObjectsInOwnBucket",
+              "Sid": "RWObjectsInOwnBuckets",
               "Effect": "Allow",
               "Action": [
                 "s3:PutObject",
@@ -132,7 +136,11 @@ services:
                 "s3:AbortMultipartUpload",
                 "s3:ListMultipartUploadParts"
               ],
-              "Resource": ["arn:aws:s3:::$$BUCKET/*"]
+              "Resource": [
+                "arn:aws:s3:::$$BUCKET/*",
+                "arn:aws:s3:::$$LMS_CONTENT_BUCKET/*",
+                "arn:aws:s3:::$$LMS_CERTS_BUCKET/*"
+              ]
             }
           ]
         }
