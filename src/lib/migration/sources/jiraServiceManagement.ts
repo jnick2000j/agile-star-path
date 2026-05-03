@@ -85,7 +85,7 @@ const DEFAULT_PRIORITY_MAP: Record<string, string> = {
 };
 
 export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
-  id: "jira" as const extends never ? never : "jira", // satisfy union; real id below
+  id: "jira_service_management",
   label: "Jira Service Management",
   description:
     "Import service desks and customer requests from Jira Service Management. Tickets become internal Issues with request type, reporter and SLA metadata preserved.",
@@ -180,5 +180,3 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
   },
 };
 
-// Override the id at runtime — the union in types.ts will be widened separately.
-(jiraServiceManagementAdapter as { id: string }).id = "jira_service_management";
