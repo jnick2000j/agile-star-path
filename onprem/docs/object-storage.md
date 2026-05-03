@@ -182,25 +182,38 @@ S3_SECRET_KEY=...
 
 You still need to:
 
-1. **Create the bucket** in the provider's console (private, versioning ON,
-   block public access ON).
+1. **Create the buckets** in the provider's console (private, versioning ON,
+   block public access ON):
+   - `taskmaster-uploads` (required)
+   - `lms-content` and `lms-certificates` (required if the LMS add-on module
+     will be enabled — create them up-front so toggling the module later is a
+     no-op for the storage team)
 2. **Create an IAM user/service account** with the same least-privilege
-   policy as the bootstrap script writes:
+   policy as the bootstrap script writes — replicate the two statements below
+   for each bucket you provisioned:
    ```json
    {
      "Version": "2012-10-17",
      "Statement": [
        { "Effect": "Allow",
          "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
-         "Resource": "arn:aws:s3:::taskmaster-uploads" },
+         "Resource": [
+           "arn:aws:s3:::taskmaster-uploads",
+           "arn:aws:s3:::lms-content",
+           "arn:aws:s3:::lms-certificates"
+         ] },
        { "Effect": "Allow",
          "Action": ["s3:PutObject","s3:GetObject","s3:DeleteObject",
                     "s3:AbortMultipartUpload","s3:ListMultipartUploadParts"],
-         "Resource": "arn:aws:s3:::taskmaster-uploads/*" }
+         "Resource": [
+           "arn:aws:s3:::taskmaster-uploads/*",
+           "arn:aws:s3:::lms-content/*",
+           "arn:aws:s3:::lms-certificates/*"
+         ] }
      ]
    }
    ```
-3. **Configure CORS** on the bucket to allow `PUT`/`GET` from your
+3. **Configure CORS** on each bucket to allow `PUT`/`GET` from your
    `PUBLIC_URL` origin (the app uses presigned URLs from the browser).
 4. **Set a lifecycle rule**: expire noncurrent versions after 30 days,
    abort incomplete multipart uploads after 7 days.
