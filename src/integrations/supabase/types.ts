@@ -7286,6 +7286,59 @@ export type Database = {
           },
         ]
       }
+      lms_certificate_settings: {
+        Row: {
+          accent_color: string
+          background_color: string
+          created_at: string
+          footer_text: string | null
+          id: string
+          logo_url: string | null
+          organization_id: string
+          signatory_name: string | null
+          signatory_title: string | null
+          signature_image_url: string | null
+          template: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          footer_text?: string | null
+          id?: string
+          logo_url?: string | null
+          organization_id: string
+          signatory_name?: string | null
+          signatory_title?: string | null
+          signature_image_url?: string | null
+          template?: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          footer_text?: string | null
+          id?: string
+          logo_url?: string | null
+          organization_id?: string
+          signatory_name?: string | null
+          signatory_title?: string | null
+          signature_image_url?: string | null
+          template?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_certificate_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_certificates: {
         Row: {
           course_id: string
