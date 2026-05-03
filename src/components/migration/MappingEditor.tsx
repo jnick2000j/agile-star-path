@@ -21,6 +21,8 @@ import { toast } from "sonner";
 const INTERNAL_STATUSES = ["not_started", "in_progress", "blocked", "completed"] as const;
 const INTERNAL_PRIORITIES = ["low", "medium", "high"] as const;
 const INTERNAL_ENTITIES = ["task", "issue", "risk"] as const;
+/** Where a JSM request type can land. */
+const JSM_TARGETS = ["issue", "incident", "problem", "change", "task", "risk"] as const;
 
 export interface MappingValidationResult {
   ok: boolean;
@@ -44,6 +46,12 @@ interface Props {
   knownIssueTypes?: string[];
   /** Whether to render the Jira issue-type → internal entity panel. */
   showIssueTypeMapping?: boolean;
+  /** External JSM request type keys (ids) discovered from the source. */
+  knownRequestTypes?: string[];
+  /** Display labels for request type ids. */
+  requestTypeLabels?: Record<string, string>;
+  /** Whether to render the JSM request-type → register panel. */
+  showRequestTypeMapping?: boolean;
   value: FieldMapping;
   onChange: (m: FieldMapping) => void;
   onValidate?: (result: MappingValidationResult) => void;
@@ -57,6 +65,9 @@ export function MappingEditor({
   knownPriorities,
   knownIssueTypes,
   showIssueTypeMapping,
+  knownRequestTypes,
+  requestTypeLabels,
+  showRequestTypeMapping,
   value,
   onChange,
   onValidate,
