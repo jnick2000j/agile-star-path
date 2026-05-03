@@ -324,6 +324,7 @@ export function MigrationWizard({
             onStart={start}
             adapter={adapter}
             creds={creds}
+            files={files}
             scope={scope}
           />
         )}
