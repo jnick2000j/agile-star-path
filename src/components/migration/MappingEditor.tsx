@@ -279,13 +279,13 @@ export function MappingEditor({
       toast.error("Give the template a name first.");
       return;
     }
-    if (!currentOrganization?.id || !user?.id) return;
+    if (!effectiveOrgId || !user?.id) return;
     setSaving(true);
     try {
       const { data, error } = await supabase
         .from("migration_field_mappings")
         .insert({
-          organization_id: currentOrganization.id,
+          organization_id: effectiveOrgId,
           created_by: user.id,
           source,
           entity_type: "all",
