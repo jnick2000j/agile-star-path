@@ -1183,7 +1183,28 @@ export default function HelpdeskTicketDetail() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog
+      <Dialog open={peopleOpen} onOpenChange={setPeopleOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>People</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <TicketAssigneesPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
+            <TicketWatchersPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPeopleOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
         open={deleteOpen}
         onOpenChange={(open) => !deleting && setDeleteOpen(open)}
       >
