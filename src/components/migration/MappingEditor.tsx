@@ -73,6 +73,8 @@ interface Props {
   value: FieldMapping;
   onChange: (m: FieldMapping) => void;
   onValidate?: (result: MappingValidationResult) => void;
+  /** When set, scope template queries/inserts to this organization instead of the active one. */
+  organizationIdOverride?: string;
 }
 
 const DEFAULT_JIRA_TYPES = ["task", "story", "bug", "incident", "epic", "subtask", "risk"];
@@ -89,9 +91,11 @@ export function MappingEditor({
   value,
   onChange,
   onValidate,
+  organizationIdOverride,
 }: Props) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
+  const effectiveOrgId = organizationIdOverride ?? currentOrganization?.id ?? null;
 
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
