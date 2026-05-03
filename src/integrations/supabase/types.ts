@@ -8343,6 +8343,149 @@ export type Database = {
           },
         ]
       }
+      migration_field_mappings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_type: string
+          id: string
+          is_default: boolean
+          mapping: Json
+          name: string
+          organization_id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_type: string
+          id?: string
+          is_default?: boolean
+          mapping?: Json
+          name: string
+          organization_id: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_type?: string
+          id?: string
+          is_default?: boolean
+          mapping?: Json
+          name?: string
+          organization_id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      migration_items: {
+        Row: {
+          created_at: string
+          entity_type: string
+          error: string | null
+          external_id: string
+          external_key: string | null
+          id: string
+          internal_id: string | null
+          job_id: string
+          organization_id: string
+          payload: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type: string
+          error?: string | null
+          external_id: string
+          external_key?: string | null
+          id?: string
+          internal_id?: string | null
+          job_id: string
+          organization_id: string
+          payload?: Json | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string
+          error?: string | null
+          external_id?: string
+          external_key?: string | null
+          id?: string
+          internal_id?: string | null
+          job_id?: string
+          organization_id?: string
+          payload?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "migration_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "migration_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      migration_jobs: {
+        Row: {
+          completed_at: string | null
+          config: Json
+          created_at: string
+          created_by: string | null
+          error_summary: string | null
+          field_map: Json
+          id: string
+          organization_id: string
+          progress: Json
+          source: string
+          source_label: string | null
+          started_at: string | null
+          status: string
+          totals: Json
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          error_summary?: string | null
+          field_map?: Json
+          id?: string
+          organization_id: string
+          progress?: Json
+          source: string
+          source_label?: string | null
+          started_at?: string | null
+          status?: string
+          totals?: Json
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          error_summary?: string | null
+          field_map?: Json
+          id?: string
+          organization_id?: string
+          progress?: Json
+          source?: string
+          source_label?: string | null
+          started_at?: string | null
+          status?: string
+          totals?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       milestone_history: {
         Row: {
           changed_at: string
