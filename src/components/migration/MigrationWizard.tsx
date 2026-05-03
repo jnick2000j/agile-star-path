@@ -98,12 +98,12 @@ export function MigrationWizard({
   };
 
   const start = async () => {
-    if (!adapter || !currentOrganization?.id || !user?.id) return;
+    if (!adapter || !effectiveOrgId || !user?.id) return;
     setStep("running");
     setRunError(null);
     try {
       const job = await createMigrationJob({
-        organizationId: currentOrganization.id,
+        organizationId: effectiveOrgId,
         userId: user.id,
         source: adapter.id,
         sourceLabel: adapter.label,
@@ -113,7 +113,7 @@ export function MigrationWizard({
       const res = await runMigrationJob(
         job.id,
         {
-          organizationId: currentOrganization.id,
+          organizationId: effectiveOrgId,
           userId: user.id,
           source: adapter.id,
           sourceLabel: adapter.label,
