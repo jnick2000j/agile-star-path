@@ -844,7 +844,7 @@ export default function HelpdeskTicketDetail() {
               <TabsList className="flex w-full overflow-x-auto h-auto justify-start gap-1 bg-transparent p-0 rounded-none border-b">
                 <TabsTrigger value="conversation" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
                 
-                <TabsTrigger value="people" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
+                
                 <TabsTrigger value="links" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Link2 className="h-4 w-4 mr-2" />CI &amp; Problem Mgmt</TabsTrigger>
                 <TabsTrigger value="parent_child" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
                 <TabsTrigger value="catalog" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
