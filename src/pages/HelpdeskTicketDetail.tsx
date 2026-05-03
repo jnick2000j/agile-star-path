@@ -789,32 +789,32 @@ export default function HelpdeskTicketDetail() {
             </div>
           </div>
 
-          {/* Action buttons: square, single row, compact to fit without scroll */}
-          <div className="flex flex-wrap items-center gap-1 pt-2 border-t">
-            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} title="SLA / CSAT" className="shrink-0 rounded-none h-8 px-2 text-xs">
-              <Gauge className="h-3.5 w-3.5 mr-1" /> SLA/CSAT
+          {/* Action buttons: square, single row */}
+          <div className="flex items-center gap-2 pt-2 border-t overflow-x-auto">
+            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
+              <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} title="Log time" className="shrink-0 rounded-none h-8 px-2 text-xs">
-              <Clock className="h-3.5 w-3.5 mr-1" /> Log time
+            <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none">
+              <Clock className="h-4 w-4 mr-2" /> Log time
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)} title="Resolution" className="shrink-0 rounded-none h-8 px-2 text-xs">
-              <FileText className="h-3.5 w-3.5 mr-1" /> Resolution
+            <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)} className="shrink-0 rounded-none">
+              <FileText className="h-4 w-4 mr-2" /> Resolution
               {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
             </Button>
             {(ticket as any).converted_to_task_id ? (
-              <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)} title="Open task" className="shrink-0 rounded-none h-8 px-2 text-xs">
-                <ListChecks className="h-3.5 w-3.5 mr-1" /> Open task
+              <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)} className="shrink-0 rounded-none">
+                <ListChecks className="h-4 w-4 mr-2" /> Open task
               </Button>
             ) : (
-              <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)} title="Convert to task" className="shrink-0 rounded-none h-8 px-2 text-xs">
-                <ListChecks className="h-3.5 w-3.5 mr-1" /> To task
+              <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)} className="shrink-0 rounded-none">
+                <ListChecks className="h-4 w-4 mr-2" /> To task
               </Button>
             )}
-            <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)} title="Make Parent/Child" className="shrink-0 rounded-none h-8 px-2 text-xs">
-              <Network className="h-3.5 w-3.5 mr-1" /> Parent/Child
+            <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)} className="shrink-0 rounded-none">
+              <Network className="h-4 w-4 mr-2" /> Make Parent/Child
             </Button>
-            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive shrink-0 rounded-none h-8 px-2 text-xs" onClick={() => setDeclareMIOpen(true)} title="Declare Major Incident">
-              <Siren className="h-3.5 w-3.5 mr-1" /> Major Inc.
+            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive shrink-0 rounded-none" onClick={() => setDeclareMIOpen(true)}>
+              <Siren className="h-4 w-4 mr-2" /> Major Incident
             </Button>
           </div>
         </Card>
