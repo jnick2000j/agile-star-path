@@ -296,6 +296,7 @@ function LessonPlayer({
   course,
   completed,
   initialPosition,
+  watchedSeconds,
   onCompleted,
   onProgress,
 }: {
@@ -303,19 +304,51 @@ function LessonPlayer({
   course: LmsCourse;
   completed: boolean;
   initialPosition: number;
+  watchedSeconds: number;
   onCompleted: () => void;
-  onProgress: (seconds: number) => void;
+  onProgress: (seconds: number, deltaWatchSeconds: number) => void;
 }) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  // For non-video lessons, accumulate dwell time client-side and report a delta
+  // every ~10s so the watch_seconds counter reflects time spent on the page.
+  const [localWatch, setLocalWatch] = useState(0);
 
   useEffect(() => {
     setSignedUrl(null);
+    setLocalWatch(0);
     if (lesson.lesson_type === "video_upload" && lesson.storage_path) {
       getSignedContentUrl(lesson.storage_path).then(setSignedUrl);
     } else if (lesson.lesson_type === "document" && lesson.storage_path) {
       getSignedContentUrl(lesson.storage_path).then(setSignedUrl);
     }
   }, [lesson.id, lesson.storage_path, lesson.lesson_type]);
+
+  // Dwell-time ticker for non-uploaded-video lessons (embed / document / quiz).
+  useEffect(() => {
+    if (completed) return;
+    if (lesson.lesson_type === "video_upload") return; // tracked via timeupdate
+    const id = window.setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      setLocalWatch((w) => {
+        const next = w + 10;
+        onProgress(0, 10);
+        return next;
+      });
+    }, 10000);
+    return () => window.clearInterval(id);
+  }, [lesson.id, lesson.lesson_type, completed, onProgress]);
+
+  const minSecs = lesson.min_required_seconds ?? 0;
+  const effectiveWatched = watchedSeconds + localWatch;
+  const minMet = !minSecs || effectiveWatched >= minSecs;
+  const minRemainingMin = minSecs ? Math.max(0, Math.ceil((minSecs - effectiveWatched) / 60)) : 0;
+
+  // Track per-tick deltas for uploaded-video timeupdate events
+  const handleVideoTick = (currentTime: number, prevTime: number) => {
+    const delta = Math.max(0, Math.floor(currentTime - prevTime));
+    if (delta > 0 && delta < 60) onProgress(currentTime, delta);
+    else onProgress(currentTime, 0);
+  };
 
   return (
     <div className="space-y-4">
@@ -325,6 +358,12 @@ function LessonPlayer({
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground capitalize">
             <Badge variant="outline">{lesson.lesson_type.replace("_", " ")}</Badge>
             {lesson.duration_seconds && <span>{Math.round(lesson.duration_seconds / 60)} min</span>}
+            {minSecs > 0 && (
+              <span className="normal-case">
+                Min time: {Math.round(minSecs / 60)} min
+                {!completed && !minMet && ` · ${minRemainingMin} min remaining`}
+              </span>
+            )}
           </div>
         </div>
         {completed && <Badge>Completed</Badge>}
@@ -333,20 +372,12 @@ function LessonPlayer({
       {lesson.lesson_type === "video_upload" && (
         <div className="aspect-video bg-muted rounded-md overflow-hidden">
           {signedUrl ? (
-            <video
+            <VideoTracker
               key={lesson.id}
               src={signedUrl}
-              controls
-              className="w-full h-full"
-              onLoadedMetadata={(e) => {
-                const v = e.currentTarget;
-                if (initialPosition && initialPosition < v.duration - 5) v.currentTime = initialPosition;
-              }}
-              onTimeUpdate={(e) => {
-                const v = e.currentTarget;
-                if (Math.floor(v.currentTime) % 10 === 0) onProgress(v.currentTime);
-              }}
-              onEnded={() => onCompleted()}
+              initialPosition={initialPosition}
+              onTick={handleVideoTick}
+              onEnded={() => { if (minMet) onCompleted(); }}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
