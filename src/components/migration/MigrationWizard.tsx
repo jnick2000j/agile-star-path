@@ -147,22 +147,42 @@ export function MigrationWizard({
               Choose the system to import from. Each new run always creates new records — existing data is never overwritten.
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
-              {sources.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    setSourceId(s.id);
-                    setStep("connect");
-                  }}
-                  className="text-left rounded-lg border p-4 hover:bg-accent transition-colors"
-                >
-                  <div className="flex items-center gap-2 font-medium">
-                    <Plug className="h-4 w-4 text-primary" />
-                    {s.label}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
-                </button>
-              ))}
+              {sources.map((s) => {
+                const isJsm = s.id === "jira_service_management";
+                const isJira = s.id === "jira";
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      setSourceId(s.id);
+                      setStep("connect");
+                    }}
+                    className="text-left rounded-lg border p-4 hover:bg-accent transition-colors relative"
+                  >
+                    <div className="flex items-center gap-2 font-medium">
+                      <Plug className="h-4 w-4 text-primary" />
+                      {s.label}
+                      {isJsm && (
+                        <Badge variant="secondary" className="text-[10px] uppercase">ITSM</Badge>
+                      )}
+                      {isJira && (
+                        <Badge variant="outline" className="text-[10px] uppercase">Software / Work Mgmt</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
+                    {isJsm && (
+                      <p className="text-[11px] text-primary mt-2">
+                        Use this for service desks, customer requests &amp; ITIL tickets.
+                      </p>
+                    )}
+                    {isJira && (
+                      <p className="text-[11px] text-muted-foreground mt-2">
+                        Use this for Jira projects, epics, stories, bugs &amp; tasks.
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
