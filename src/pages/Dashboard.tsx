@@ -7,6 +7,7 @@ import { HelpdeskUsageCard } from "@/components/dashboard/HelpdeskUsageCard";
 import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
 import { JsmSlaSummary } from "@/components/dashboard/JsmSlaSummary";
+import { JsmContactsSummary } from "@/components/dashboard/JsmContactsSummary";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
 
@@ -157,6 +158,10 @@ export default function Dashboard() {
           <div className="grid gap-6 lg:grid-cols-2">
             <JsmSlaSummary />
             <HelpdeskUsageCard />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-1">
+            <JsmContactsSummary />
           </div>
         </TabsContent>
       </Tabs>
