@@ -21,6 +21,8 @@ import { toast } from "sonner";
 const INTERNAL_STATUSES = ["not_started", "in_progress", "blocked", "completed"] as const;
 const INTERNAL_PRIORITIES = ["low", "medium", "high"] as const;
 const INTERNAL_ENTITIES = ["task", "issue", "risk"] as const;
+/** Where a JSM request type can land. */
+const JSM_TARGETS = ["issue", "incident", "problem", "change", "task", "risk"] as const;
 
 export interface MappingValidationResult {
   ok: boolean;
@@ -44,6 +46,12 @@ interface Props {
   knownIssueTypes?: string[];
   /** Whether to render the Jira issue-type → internal entity panel. */
   showIssueTypeMapping?: boolean;
+  /** External JSM request type keys (ids) discovered from the source. */
+  knownRequestTypes?: string[];
+  /** Display labels for request type ids. */
+  requestTypeLabels?: Record<string, string>;
+  /** Whether to render the JSM request-type → register panel. */
+  showRequestTypeMapping?: boolean;
   value: FieldMapping;
   onChange: (m: FieldMapping) => void;
   onValidate?: (result: MappingValidationResult) => void;
@@ -57,6 +65,9 @@ export function MappingEditor({
   knownPriorities,
   knownIssueTypes,
   showIssueTypeMapping,
+  knownRequestTypes,
+  requestTypeLabels,
+  showRequestTypeMapping,
   value,
   onChange,
   onValidate,
@@ -112,6 +123,14 @@ export function MappingEditor({
     return Array.from(set).sort();
   }, [knownIssueTypes, value.extra]);
 
+  const requestTypeKeys = useMemo(() => {
+    const set = new Set<string>([
+      ...(knownRequestTypes ?? []),
+      ...Object.keys((value.extra?.requestType as Record<string, string>) ?? {}),
+    ]);
+    return Array.from(set).sort();
+  }, [knownRequestTypes, value.extra]);
+
   // Validation
   const validation = useMemo<MappingValidationResult>(() => {
     const errors: string[] = [];
@@ -140,8 +159,27 @@ export function MappingEditor({
           errors.push(`Issue type "${k}" maps to invalid entity "${v}".`);
       }
     }
+    if (showRequestTypeMapping) {
+      const rtMap = (value.extra?.requestType as Record<string, string>) ?? {};
+      for (const k of knownRequestTypes ?? []) {
+        const label = requestTypeLabels?.[k] ?? k;
+        const v = rtMap[k];
+        if (!v) errors.push(`Request type "${label}" is not mapped to a register.`);
+        else if (!JSM_TARGETS.includes(v as never))
+          errors.push(`Request type "${label}" maps to invalid target "${v}".`);
+      }
+    }
     return { ok: errors.length === 0, errors };
-  }, [value, knownStatuses, knownPriorities, knownIssueTypes, showIssueTypeMapping]);
+  }, [
+    value,
+    knownStatuses,
+    knownPriorities,
+    knownIssueTypes,
+    showIssueTypeMapping,
+    knownRequestTypes,
+    requestTypeLabels,
+    showRequestTypeMapping,
+  ]);
 
   useEffect(() => {
     onValidate?.(validation);
@@ -174,10 +212,23 @@ export function MappingEditor({
     delete cur[k];
     onChange({ ...value, extra: { ...(value.extra ?? {}), issueType: cur } });
   };
+  const setRequestType = (k: string, v: string) => {
+    const cur = (value.extra?.requestType as Record<string, string>) ?? {};
+    onChange({
+      ...value,
+      extra: { ...(value.extra ?? {}), requestType: { ...cur, [k]: v } },
+    });
+  };
+  const removeRequestType = (k: string) => {
+    const cur = { ...((value.extra?.requestType as Record<string, string>) ?? {}) };
+    delete cur[k];
+    onChange({ ...value, extra: { ...(value.extra ?? {}), requestType: cur } });
+  };
 
   const [newStatusKey, setNewStatusKey] = useState("");
   const [newPriorityKey, setNewPriorityKey] = useState("");
   const [newTypeKey, setNewTypeKey] = useState("");
+  const [newRequestTypeKey, setNewRequestTypeKey] = useState("");
 
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
@@ -320,6 +371,23 @@ export function MappingEditor({
           setNewKey={setNewTypeKey}
         />
       )}
+
+      {/* JSM request type → register */}
+      {showRequestTypeMapping && (
+        <MapSection
+          title="Request type → register"
+          helper="Route each Jira Service Management request type to the matching internal register and workflow. Incidents go to Major Incidents, Problems to the Problem register, Changes to Change Requests, and so on."
+          keys={requestTypeKeys}
+          knownKeys={knownRequestTypes}
+          displayLabels={requestTypeLabels}
+          getValue={(k) => (value.extra?.requestType as Record<string, string> | undefined)?.[k] ?? ""}
+          onSet={setRequestType}
+          onRemove={removeRequestType}
+          options={JSM_TARGETS}
+          newKey={newRequestTypeKey}
+          setNewKey={setNewRequestTypeKey}
+        />
+      )}
     </div>
   );
 }
@@ -329,6 +397,8 @@ interface MapSectionProps {
   helper: string;
   keys: string[];
   knownKeys?: string[];
+  /** Optional human-readable label per key (e.g. for opaque ids). */
+  displayLabels?: Record<string, string>;
   getValue: (k: string) => string;
   onSet: (k: string, v: string) => void;
   onRemove: (k: string) => void;
@@ -342,6 +412,7 @@ function MapSection({
   helper,
   keys,
   knownKeys,
+  displayLabels,
   getValue,
   onSet,
   onRemove,
@@ -367,7 +438,7 @@ function MapSection({
           return (
             <div key={k} className="flex items-center gap-1.5">
               <Label className="flex-1 text-xs truncate flex items-center gap-1">
-                <span className="truncate">{k}</span>
+                <span className="truncate">{displayLabels?.[k] ?? k}</span>
                 {required && <span className="text-destructive">*</span>}
                 {missing && <Badge variant="destructive" className="h-4 text-[9px] px-1">missing</Badge>}
               </Label>

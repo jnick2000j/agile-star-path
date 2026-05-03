@@ -785,8 +785,8 @@ async function runJsm(
 
   // Fetch + import customer requests per service desk
   for (const sd of chosen) {
-    const internalId = projMap.get(sd.id);
-    if (!internalId) continue;
+    const projectId = projMap.get(sd.id);
+    if (!projectId) continue;
 
     let start = 0;
     const pageSize = 50;
@@ -809,55 +809,168 @@ async function runJsm(
 
       ctx.setTotal(ctx.done + page.values.length);
 
+      const requestTypeMap =
+        ((req.mapping as { extra?: { requestType?: Record<string, string> } }).extra?.requestType) ?? {};
+      const requestTypeLabels =
+        ((req.mapping as { extra?: { requestTypeLabels?: Record<string, string> } }).extra?.requestTypeLabels) ?? {};
+
       for (const r of page.values) {
+        const summaryField = r.requestFieldValues?.find((f) => f.fieldId === "summary");
+        const descField = r.requestFieldValues?.find((f) => f.fieldId === "description");
+        const priorityField = r.requestFieldValues?.find((f) => f.fieldId === "priority");
+        const statusName = r.currentStatus?.status ?? "Open";
+        const status = mapStatus(statusName, req.mapping);
+        const priorityValue = (() => {
+          const v = priorityField?.value as { name?: string } | string | undefined;
+          if (typeof v === "string") return v;
+          return v?.name;
+        })();
+        const internalPriority = mapPriority(priorityValue, req.mapping);
+        const reporter = r.reporter
+          ? `\n\n_Reporter: ${r.reporter.displayName ?? ""} <${r.reporter.emailAddress ?? ""}>_`
+          : "";
+        const rtLabel = r.requestTypeId ? requestTypeLabels[r.requestTypeId] ?? r.requestTypeId : "";
+        const reqTypeNote = rtLabel ? `\n_Request type: ${rtLabel}_` : "";
+        const baseDescription = `${(descField?.value as string) ?? ""}${reporter}${reqTypeNote}`;
+        const title = ((summaryField?.value as string) ?? r.issueKey).slice(0, 240);
+
+        // Determine target register from request type mapping (default: issue)
+        const target = (r.requestTypeId && requestTypeMap[r.requestTypeId]) || "issue";
+
         try {
-          const summaryField = r.requestFieldValues?.find((f) => f.fieldId === "summary");
-          const descField = r.requestFieldValues?.find((f) => f.fieldId === "description");
-          const priorityField = r.requestFieldValues?.find((f) => f.fieldId === "priority");
-          const statusName = r.currentStatus?.status ?? "Open";
-          const status = mapStatus(statusName, req.mapping);
+          let internalEntityType = "issue";
+          let internalId: string | null = null;
 
-          const reporter = r.reporter
-            ? `\n\n_Reporter: ${r.reporter.displayName ?? ""} <${r.reporter.emailAddress ?? ""}>_`
-            : "";
-          const reqTypeNote = r.requestTypeId ? `\n_Request type: ${r.requestTypeId}_` : "";
-          const description = `${(descField?.value as string) ?? ""}${reporter}${reqTypeNote}`;
+          if (target === "incident") {
+            const severity =
+              internalPriority === "high" ? "sev1" :
+              internalPriority === "medium" ? "sev2" : "sev3";
+            const { data, error } = await supa
+              .from("major_incidents")
+              .insert({
+                organization_id: ctx.organizationId,
+                title,
+                description: baseDescription,
+                severity,
+                status: status === "completed" ? "closed" : "open",
+                created_by: ctx.userId,
+              })
+              .select("id")
+              .single();
+            if (error) throw error;
+            internalEntityType = "incident";
+            internalId = data.id;
+            summary.createdIssues += 1;
+          } else if (target === "problem") {
+            const { data, error } = await supa
+              .from("problems")
+              .insert({
+                organization_id: ctx.organizationId,
+                project_id: projectId,
+                title,
+                description: baseDescription,
+                status: status === "completed" ? "closed" : "open",
+                priority: internalPriority,
+                is_known_error: false,
+                created_by: ctx.userId,
+              })
+              .select("id")
+              .single();
+            if (error) throw error;
+            internalEntityType = "problem";
+            internalId = data.id;
+            summary.createdIssues += 1;
+          } else if (target === "change") {
+            const { data, error } = await supa
+              .from("change_requests")
+              .insert({
+                organization_id: ctx.organizationId,
+                project_id: projectId,
+                reference_number: r.issueKey,
+                title,
+                description: baseDescription,
+                change_type: "standard",
+                status: status === "completed" ? "implemented" : "draft",
+                priority: internalPriority,
+                date_raised: new Date().toISOString().slice(0, 10),
+                raised_by: ctx.userId,
+                created_by: ctx.userId,
+              })
+              .select("id")
+              .single();
+            if (error) throw error;
+            internalEntityType = "change";
+            internalId = data.id;
+            summary.createdIssues += 1;
+          } else if (target === "task") {
+            const { data, error } = await supa
+              .from("tasks")
+              .insert({
+                organization_id: ctx.organizationId,
+                project_id: projectId,
+                name: title,
+                description: baseDescription,
+                status,
+                priority: internalPriority,
+                created_by: ctx.userId,
+              })
+              .select("id")
+              .single();
+            if (error) throw error;
+            internalEntityType = "task";
+            internalId = data.id;
+            summary.createdTasks += 1;
+          } else if (target === "risk") {
+            const { data, error } = await supa
+              .from("risks")
+              .insert({
+                organization_id: ctx.organizationId,
+                project_id: projectId,
+                title,
+                description: baseDescription,
+                created_by: ctx.userId,
+              })
+              .select("id")
+              .single();
+            if (error) throw error;
+            internalEntityType = "risk";
+            internalId = data.id;
+            summary.createdRisks += 1;
+          } else {
+            // default → issue register
+            const { data, error } = await supa
+              .from("issues")
+              .insert({
+                organization_id: ctx.organizationId,
+                project_id: projectId,
+                title,
+                description: baseDescription,
+                type: "service_request",
+                priority: internalPriority,
+                status: status === "completed" ? "closed" : "open",
+                created_by: ctx.userId,
+              })
+              .select("id")
+              .single();
+            if (error) throw error;
+            internalEntityType = "issue";
+            internalId = data.id;
+            summary.createdIssues += 1;
+          }
 
-          const priorityValue = (() => {
-            const v = priorityField?.value as { name?: string } | string | undefined;
-            if (typeof v === "string") return v;
-            return v?.name;
-          })();
-
-          const { data, error } = await supa
-            .from("issues")
-            .insert({
-              organization_id: ctx.organizationId,
-              project_id: internalId,
-              title: ((summaryField?.value as string) ?? r.issueKey).slice(0, 240),
-              description,
-              type: "incident",
-              priority: mapPriority(priorityValue, req.mapping),
-              status: status === "completed" ? "closed" : "open",
-              created_by: ctx.userId,
-            })
-            .select("id")
-            .single();
-          if (error) throw error;
-          summary.createdIssues += 1;
           await ctx.recordItem({
-            entity_type: "issue",
+            entity_type: internalEntityType,
             external_id: r.issueId,
             external_key: r.issueKey,
-            internal_id: data.id,
+            internal_id: internalId ?? undefined,
             status: "created",
           });
-          await ctx.tick(`${r.issueKey}: ${(summaryField?.value as string) ?? ""}`);
+          await ctx.tick(`${r.issueKey} → ${target}: ${title}`);
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
-          summary.errors.push({ entity: "issue", externalId: r.issueId, message: msg });
+          summary.errors.push({ entity: target, externalId: r.issueId, message: msg });
           await ctx.recordItem({
-            entity_type: "issue",
+            entity_type: target,
             external_id: r.issueId,
             external_key: r.issueKey,
             status: "failed",
