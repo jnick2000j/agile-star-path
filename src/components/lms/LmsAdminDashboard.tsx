@@ -89,14 +89,14 @@ export function LmsAdminDashboard() {
       p.user_id,
       { name: [p.first_name, p.last_name].filter(Boolean).join(" ").trim() || p.email || p.user_id, email: p.email ?? "" },
     ]));
-    const enriched: EnrollmentRow[] = (eRes.data ?? []).map((e: any) => ({
+    const enriched: EnrollmentRow[] = ((eRes.data ?? []) as any[]).map((e) => ({
       ...e,
       course_title: courseMap.get(e.course_id),
       user_name: profMap.get(e.user_id)?.name,
       user_email: profMap.get(e.user_id)?.email,
     }));
     setRows(enriched);
-    setCourses((cRes.data ?? []) as any);
+    setCourses(((cRes.data ?? []) as any[]).map((c) => ({ id: c.id, title: c.title })));
     setLoading(false);
   };
 
