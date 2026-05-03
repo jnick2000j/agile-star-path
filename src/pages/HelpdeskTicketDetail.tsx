@@ -320,6 +320,43 @@ export default function HelpdeskTicketDetail() {
     enabled: !!currentOrganization?.id,
   });
 
+  const { data: programmeOptions = [] } = useQuery({
+    queryKey: ["ticket-programmes", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("programmes")
+        .select("id, name")
+        .eq("organization_id", currentOrganization!.id)
+        .order("name");
+      return data ?? [];
+    },
+  });
+  const { data: projectOptions = [] } = useQuery({
+    queryKey: ["ticket-projects", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("id, name, programme_id")
+        .eq("organization_id", currentOrganization!.id)
+        .order("name");
+      return data ?? [];
+    },
+  });
+  const { data: productOptions = [] } = useQuery({
+    queryKey: ["ticket-products", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, name, programme_id, project_id")
+        .eq("organization_id", currentOrganization!.id)
+        .order("name");
+      return data ?? [];
+    },
+  });
+
   const { data: childTickets = [] } = useQuery({
     queryKey: ["helpdesk-child-tickets", id],
     queryFn: async () => {
@@ -690,40 +727,70 @@ export default function HelpdeskTicketDetail() {
           <div className="flex flex-wrap items-end gap-4 pt-2 border-t">
             <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Programme</Label>
-              <p className="text-sm h-8 flex items-center truncate">
-                {ticket.programme_id ? <code className="text-xs">{ticket.programme_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
-              </p>
+              <Select
+                value={ticket.programme_id || "none"}
+                onValueChange={(v) => updateFields({ programme_id: v === "none" ? null : v })}
+              >
+                <SelectTrigger className="h-8"><SelectValue placeholder="None" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {programmeOptions.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Project</Label>
-              <p className="text-sm h-8 flex items-center truncate">
-                {ticket.project_id ? <code className="text-xs">{ticket.project_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
-              </p>
+              <Select
+                value={ticket.project_id || "none"}
+                onValueChange={(v) => updateFields({ project_id: v === "none" ? null : v })}
+              >
+                <SelectTrigger className="h-8"><SelectValue placeholder="None" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {projectOptions
+                    .filter((p: any) => !ticket.programme_id || !p.programme_id || p.programme_id === ticket.programme_id)
+                    .map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Product</Label>
-              <p className="text-sm h-8 flex items-center truncate">
-                {ticket.product_id ? <code className="text-xs">{ticket.product_id.slice(0, 8)}</code> : <span className="text-muted-foreground">—</span>}
-              </p>
+              <Select
+                value={ticket.product_id || "none"}
+                onValueChange={(v) => updateFields({ product_id: v === "none" ? null : v })}
+              >
+                <SelectTrigger className="h-8"><SelectValue placeholder="None" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {productOptions
+                    .filter((p: any) =>
+                      (!ticket.programme_id || !p.programme_id || p.programme_id === ticket.programme_id) &&
+                      (!ticket.project_id || !p.project_id || p.project_id === ticket.project_id)
+                    )
+                    .map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1 min-w-[140px]">
               <Label className="text-xs text-muted-foreground">&nbsp;</Label>
-              <div className="h-8 flex items-center">
+              <div className="h-8 flex items-center gap-2">
+                {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+                  <Button size="sm" onClick={() => setResolveOpen(true)} className="shrink-0 rounded-none">
+                    <Save className="h-4 w-4 mr-2" /> Mark as Resolved
+                  </Button>
+                )}
                 <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
                   <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
                 </Button>
               </div>
             </div>
           </div>
-
-          {/* Mark as Resolved row (below SLA/CSAT) */}
-          {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
-            <div className="flex items-center gap-2 pt-2 border-t">
-              <Button size="sm" onClick={() => setResolveOpen(true)} className="shrink-0 rounded-none">
-                <Save className="h-4 w-4 mr-2" /> Mark as Resolved
-              </Button>
-            </div>
-          )}
 
           {/* Action buttons: square, single row */}
           <div className="flex items-center gap-2 pt-2 border-t overflow-x-auto">
