@@ -71,6 +71,11 @@ End-to-end ticket lifecycle aligned with ITIL 4 + HDI + KCS.
   entries. Org admins toggle modules from **Helpdesk → Admin → Modules**;
   platform admins can override any org from **Platform Admin → Module
   Toggles**. The same row drives the in-app sidebar visibility.
+- **Activity / audit trail**: every parent-child change, catalog selection,
+  Programme/Project/Product reassignment, status transition and SLA/CSAT event
+  is written to `helpdesk_ticket_activity` and surfaced under the ticket's
+  **Activity** tab (formerly "Audit"). The legacy "Activity" tab was removed —
+  there is now a single source of truth.
 
 ---
 
