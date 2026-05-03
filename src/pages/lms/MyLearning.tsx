@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { downloadCertificate } from "@/lib/certificate";
 
 export default function MyLearning() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
