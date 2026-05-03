@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { MappingEditor, type MappingValidationResult } from "./MappingEditor";
+import { ContactMappingStep } from "./ContactMappingStep";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ import type {
 import { createMigrationJob, runMigrationJob } from "@/lib/migration/runner";
 import { toast } from "sonner";
 
-type Step = "source" | "connect" | "scope" | "mapping" | "preview" | "running" | "done";
+type Step = "source" | "connect" | "scope" | "mapping" | "contacts" | "preview" | "running" | "done";
 
 export function MigrationWizard({
   open,
