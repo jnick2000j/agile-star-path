@@ -31,13 +31,17 @@ export function MigrationWizard({
   open,
   onOpenChange,
   onCompleted,
+  organizationIdOverride,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onCompleted?: () => void;
+  /** When set, run the migration against this organization instead of the active one. */
+  organizationIdOverride?: string;
 }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
+  const effectiveOrgId = organizationIdOverride ?? currentOrganization?.id ?? null;
 
   const [step, setStep] = useState<Step>("source");
   const [sourceId, setSourceId] = useState<string | null>(null);
