@@ -39,6 +39,7 @@ interface PathCourse {
   course_id: string;
   position: number;
   required: boolean;
+  prerequisite_course_id: string | null;
 }
 
 export default function LmsAdmin() {
@@ -516,6 +517,15 @@ function ManagePathDialog({
     await reload();
   };
 
+  const setPrerequisite = async (item: PathCourse, prereqId: string | null) => {
+    const { error } = await supabase
+      .from("lms_learning_path_courses")
+      .update({ prerequisite_course_id: prereqId })
+      .eq("id", item.id);
+    if (error) return toast.error(error.message);
+    await reload();
+  };
+
   const move = async (idx: number, dir: -1 | 1) => {
     const target = idx + dir;
     if (target < 0 || target >= items.length) return;
@@ -567,22 +577,43 @@ function ManagePathDialog({
             <div className="space-y-2">
               {items.map((it, idx) => (
                 <Card key={it.id}>
-                  <CardContent className="py-3 flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-6 text-center">{idx + 1}</span>
-                    <span className="flex-1 truncate">{courseTitle(it.course_id)}</span>
-                    <label className="flex items-center gap-2 text-xs">
-                      <Checkbox checked={it.required} onCheckedChange={() => toggleRequired(it)} />
-                      Required
-                    </label>
-                    <Button size="icon" variant="ghost" onClick={() => move(idx, -1)} disabled={idx === 0}>
-                      <ArrowUp className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => move(idx, 1)} disabled={idx === items.length - 1}>
-                      <ArrowDown className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => removeItem(it.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <CardContent className="py-3 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground w-6 text-center">{idx + 1}</span>
+                      <span className="flex-1 truncate font-medium">{courseTitle(it.course_id)}</span>
+                      <label className="flex items-center gap-2 text-xs">
+                        <Checkbox checked={it.required} onCheckedChange={() => toggleRequired(it)} />
+                        Required
+                      </label>
+                      <Button size="icon" variant="ghost" onClick={() => move(idx, -1)} disabled={idx === 0}>
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => move(idx, 1)} disabled={idx === items.length - 1}>
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => removeItem(it.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2 pl-9">
+                      <Label className="text-xs text-muted-foreground shrink-0">Prerequisite:</Label>
+                      <Select
+                        value={it.prerequisite_course_id ?? "none"}
+                        onValueChange={(v) => setPrerequisite(it, v === "none" ? null : v)}
+                      >
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">— None —</SelectItem>
+                          {items
+                            .filter((other) => other.course_id !== it.course_id)
+                            .map((other) => (
+                              <SelectItem key={other.course_id} value={other.course_id}>
+                                {courseTitle(other.course_id)}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

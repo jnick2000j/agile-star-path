@@ -7524,6 +7524,7 @@ export type Database = {
           id: string
           path_id: string
           position: number
+          prerequisite_course_id: string | null
           required: boolean
         }
         Insert: {
@@ -7532,6 +7533,7 @@ export type Database = {
           id?: string
           path_id: string
           position?: number
+          prerequisite_course_id?: string | null
           required?: boolean
         }
         Update: {
@@ -7540,6 +7542,7 @@ export type Database = {
           id?: string
           path_id?: string
           position?: number
+          prerequisite_course_id?: string | null
           required?: boolean
         }
         Relationships: [
