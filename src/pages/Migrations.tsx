@@ -1,26 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, RefreshCcw, ArrowLeftRight } from "lucide-react";
 import { MigrationWizard } from "@/components/migration/MigrationWizard";
-import { listMigrationJobs } from "@/lib/migration/runner";
+import { listMigrationJobs, watchMigrationJob } from "@/lib/migration/runner";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
+
+type JobRow = {
+  id: string;
+  source: string;
+  source_label: string | null;
+  status: string;
+  totals: Record<string, number> | null;
+  progress: { done?: number; total?: number; message?: string } | null;
+  started_at: string | null;
+  error_summary: string | null;
+};
 
 export default function Migrations() {
   const { currentOrganization } = useOrganization();
   const [open, setOpen] = useState(false);
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<JobRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const watchersRef = useRef<Map<string, () => void>>(new Map());
 
   const refresh = async () => {
     if (!currentOrganization?.id) return;
     setLoading(true);
     try {
-      const data = await listMigrationJobs(currentOrganization.id);
+      const data = (await listMigrationJobs(currentOrganization.id)) as JobRow[];
       setJobs(data);
     } finally {
       setLoading(false);
@@ -31,6 +44,41 @@ export default function Migrations() {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentOrganization?.id]);
+
+  // Attach a poller for any running/draft job so progress updates live.
+  useEffect(() => {
+    const watchers = watchersRef.current;
+    for (const job of jobs) {
+      const isLive = job.status === "running" || job.status === "draft";
+      if (isLive && !watchers.has(job.id)) {
+        const stop = watchMigrationJob(job.id, (row) => {
+          setJobs((prev) =>
+            prev.map((j) =>
+              j.id === row.id
+                ? { ...j, status: row.status, progress: row.progress, totals: row.totals, error_summary: row.error_summary }
+                : j,
+            ),
+          );
+          if (row.status === "completed" || row.status === "failed") {
+            const stopFn = watchers.get(row.id);
+            stopFn?.();
+            watchers.delete(row.id);
+          }
+        });
+        watchers.set(job.id, stop);
+      }
+    }
+    return () => {
+      // no-op; cleanup happens on unmount below
+    };
+  }, [jobs]);
+
+  useEffect(() => {
+    return () => {
+      for (const stop of watchersRef.current.values()) stop();
+      watchersRef.current.clear();
+    };
+  }, []);
 
   const statusVariant = (s: string) =>
     s === "completed" ? "default" : s === "failed" ? "destructive" : s === "running" ? "secondary" : "outline";
@@ -74,6 +122,7 @@ export default function Migrations() {
                   <TableRow>
                     <TableHead>Source</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Progress</TableHead>
                     <TableHead>Totals</TableHead>
                     <TableHead>Started</TableHead>
                     <TableHead>Notes</TableHead>
@@ -81,12 +130,29 @@ export default function Migrations() {
                 </TableHeader>
                 <TableBody>
                   {jobs.map((j) => {
-                    const totals = j.totals as Record<string, number> | null;
+                    const totals = j.totals;
+                    const p = j.progress ?? {};
+                    const isLive = j.status === "running";
+                    const pct = p.total ? Math.min(100, Math.round(((p.done ?? 0) / p.total) * 100)) : 0;
                     return (
                       <TableRow key={j.id}>
                         <TableCell className="font-medium">{j.source_label ?? j.source}</TableCell>
                         <TableCell>
                           <Badge variant={statusVariant(j.status)}>{j.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs min-w-[180px]">
+                          {isLive ? (
+                            <div className="space-y-1">
+                              <Progress value={pct} className="h-1.5" />
+                              <p className="text-muted-foreground truncate">
+                                {p.done ?? 0} / {p.total ?? 0} — {p.message ?? ""}
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {p.total ? `${p.done ?? 0} / ${p.total}` : "—"}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="text-xs">
                           {totals
