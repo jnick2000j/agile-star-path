@@ -8343,12 +8343,82 @@ export type Database = {
           },
         ]
       }
+      migration_contact_directory: {
+        Row: {
+          contact_type: string
+          created_at: string
+          display_name: string | null
+          email: string | null
+          external_account_id: string | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          linked_stakeholder_id: string | null
+          organization_id: string
+          organization_name: string | null
+          raw: Json | null
+          source: string
+          ticket_count: number
+          updated_at: string
+        }
+        Insert: {
+          contact_type: string
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          external_account_id?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          linked_stakeholder_id?: string | null
+          organization_id: string
+          organization_name?: string | null
+          raw?: Json | null
+          source: string
+          ticket_count?: number
+          updated_at?: string
+        }
+        Update: {
+          contact_type?: string
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          external_account_id?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          linked_stakeholder_id?: string | null
+          organization_id?: string
+          organization_name?: string | null
+          raw?: Json | null
+          source?: string
+          ticket_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "migration_contact_directory_linked_stakeholder_id_fkey"
+            columns: ["linked_stakeholder_id"]
+            isOneToOne: false
+            referencedRelation: "stakeholders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "migration_contact_directory_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       migration_contacts: {
         Row: {
           account_id: string | null
           created_at: string
           customer_organization_id: string | null
           customer_organization_name: string | null
+          directory_id: string | null
           display_name: string | null
           email: string | null
           entity_id: string
@@ -8366,6 +8436,7 @@ export type Database = {
           created_at?: string
           customer_organization_id?: string | null
           customer_organization_name?: string | null
+          directory_id?: string | null
           display_name?: string | null
           email?: string | null
           entity_id: string
@@ -8383,6 +8454,7 @@ export type Database = {
           created_at?: string
           customer_organization_id?: string | null
           customer_organization_name?: string | null
+          directory_id?: string | null
           display_name?: string | null
           email?: string | null
           entity_id?: string
@@ -8396,6 +8468,13 @@ export type Database = {
           role?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "migration_contacts_directory_id_fkey"
+            columns: ["directory_id"]
+            isOneToOne: false
+            referencedRelation: "migration_contact_directory"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "migration_contacts_job_id_fkey"
             columns: ["job_id"]
