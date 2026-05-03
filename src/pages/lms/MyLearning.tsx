@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { downloadCertificate, loadCertificateBranding } from "@/lib/certificate";
+import { ExternalTrainingPanel } from "@/components/lms/ExternalTrainingPanel";
 
 export default function MyLearning() {
   const { user, userProfile } = useAuth();
