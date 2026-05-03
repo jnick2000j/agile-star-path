@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LmsImportWizard } from "@/components/lms/LmsImportWizard";
 import { LmsAdminDashboard } from "@/components/lms/LmsAdminDashboard";
+import { LmsCertificateSettings } from "@/components/lms/LmsCertificateSettings";
 
 type PathStatus = "draft" | "published" | "archived";
 interface LearningPath {
@@ -164,6 +165,7 @@ export default function LmsAdmin() {
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="courses">Courses ({courses.length})</TabsTrigger>
             <TabsTrigger value="paths">Learning paths ({paths.length})</TabsTrigger>
+            <TabsTrigger value="certificate">Certificate</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setImportOpen(true)}>
@@ -256,6 +258,10 @@ export default function LmsAdmin() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        <TabsContent value="certificate">
+          <LmsCertificateSettings />
         </TabsContent>
       </Tabs>
 

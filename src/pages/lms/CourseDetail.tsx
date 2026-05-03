@@ -28,7 +28,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 import { QuizPlayer } from "@/components/lms/QuizPlayer";
-import { downloadCertificate } from "@/lib/certificate";
+import { downloadCertificate, loadCertificateBranding } from "@/lib/certificate";
 
 export default function CourseDetail() {
   const { id: courseId } = useParams<{ id: string }>();
@@ -55,6 +55,9 @@ export default function CourseDetail() {
     async (cert: any, opts: { auto?: boolean } = {}) => {
       if (!course) return;
       try {
+        const branding = currentOrganization?.id
+          ? await loadCertificateBranding(supabase, currentOrganization.id)
+          : undefined;
         downloadCertificate({
           recipientName,
           courseTitle: course.title,
@@ -62,13 +65,14 @@ export default function CourseDetail() {
           serial: cert.serial,
           issuedAt: cert.issued_at ? new Date(cert.issued_at) : new Date(),
           finalScore: cert.final_score ?? null,
+          branding,
         });
         if (opts.auto) toast.success("Course complete — your certificate is downloading");
       } catch (e: any) {
         toast.error(e?.message ?? "Could not generate certificate");
       }
     },
-    [course, currentOrganization?.name, recipientName],
+    [course, currentOrganization?.id, currentOrganization?.name, recipientName],
   );
 
   const reload = useCallback(async () => {
