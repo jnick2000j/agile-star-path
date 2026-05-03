@@ -16,6 +16,7 @@ import type {
   FieldMapping,
   ImportSummary,
   MigrationCredentials,
+  MigrationFiles,
   MigrationScope,
   RemoteProject,
 } from "@/lib/migration/types";
