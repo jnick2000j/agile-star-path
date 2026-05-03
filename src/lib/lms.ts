@@ -18,6 +18,7 @@ export interface LmsCourse {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  min_required_seconds?: number | null;
 }
 
 export interface LmsModule {
@@ -26,6 +27,7 @@ export interface LmsModule {
   title: string;
   description: string | null;
   position: number;
+  min_required_seconds?: number | null;
 }
 
 export interface LmsLesson {
@@ -42,6 +44,7 @@ export interface LmsLesson {
   passing_score_percent: number | null;
   max_attempts: number | null;
   required: boolean;
+  min_required_seconds?: number | null;
 }
 
 export interface LmsEnrollment {
