@@ -320,6 +320,43 @@ export default function HelpdeskTicketDetail() {
     enabled: !!currentOrganization?.id,
   });
 
+  const { data: programmeOptions = [] } = useQuery({
+    queryKey: ["ticket-programmes", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("programmes")
+        .select("id, name")
+        .eq("organization_id", currentOrganization!.id)
+        .order("name");
+      return data ?? [];
+    },
+  });
+  const { data: projectOptions = [] } = useQuery({
+    queryKey: ["ticket-projects", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("id, name, programme_id")
+        .eq("organization_id", currentOrganization!.id)
+        .order("name");
+      return data ?? [];
+    },
+  });
+  const { data: productOptions = [] } = useQuery({
+    queryKey: ["ticket-products", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, name, programme_id, project_id")
+        .eq("organization_id", currentOrganization!.id)
+        .order("name");
+      return data ?? [];
+    },
+  });
+
   const { data: childTickets = [] } = useQuery({
     queryKey: ["helpdesk-child-tickets", id],
     queryFn: async () => {
