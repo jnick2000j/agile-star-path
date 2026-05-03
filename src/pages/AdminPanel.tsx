@@ -19,7 +19,6 @@ import {
   FolderKanban,
   Package,
   Layers,
-  ArrowLeftRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
@@ -63,7 +62,7 @@ import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EmailSettings } from "@/components/admin/EmailSettings";
-import { MigrationsPanel } from "@/components/migration/MigrationsPanel";
+
 
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
