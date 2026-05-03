@@ -3,12 +3,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { GraduationCap, AlertTriangle, Award, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
+import { ExternalTrainingPanel } from "@/components/lms/ExternalTrainingPanel";
 
 export default function PortalTraining() {
   const { user } = useAuth();
