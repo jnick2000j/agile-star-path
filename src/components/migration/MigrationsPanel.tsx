@@ -24,10 +24,13 @@ type JobRow = {
 
 interface MigrationsPanelProps {
   showHeader?: boolean;
+  /** When set, scope this panel to the given organization instead of the active one. */
+  organizationIdOverride?: string;
 }
 
-export function MigrationsPanel({ showHeader = true }: MigrationsPanelProps) {
+export function MigrationsPanel({ showHeader = true, organizationIdOverride }: MigrationsPanelProps) {
   const { currentOrganization } = useOrganization();
+  const effectiveOrgId = organizationIdOverride ?? currentOrganization?.id ?? null;
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [jobs, setJobs] = useState<JobRow[]>([]);
@@ -36,10 +39,10 @@ export function MigrationsPanel({ showHeader = true }: MigrationsPanelProps) {
   const watchersRef = useRef<Map<string, () => void>>(new Map());
 
   const refresh = async () => {
-    if (!currentOrganization?.id) return;
+    if (!effectiveOrgId) return;
     setLoading(true);
     try {
-      const data = (await listMigrationJobs(currentOrganization.id)) as JobRow[];
+      const data = (await listMigrationJobs(effectiveOrgId)) as JobRow[];
       setJobs(data);
     } finally {
       setLoading(false);
