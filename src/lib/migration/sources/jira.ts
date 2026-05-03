@@ -177,8 +177,51 @@ export const jiraAdapter: MigrationSourceAdapter = {
     return { projects: [], counts, warnings };
   },
 
-  async suggestMapping(): Promise<FieldMapping> {
-    return { status: { ...DEFAULT_STATUS_MAP }, priority: { ...DEFAULT_PRIORITY_MAP } };
+  async suggestMapping(creds): Promise<FieldMapping> {
+    const c = creds as JiraCreds;
+    const status: Record<string, string> = { ...DEFAULT_STATUS_MAP };
+    const priority: Record<string, string> = { ...DEFAULT_PRIORITY_MAP };
+    const issueType: Record<string, string> = {};
+    const discovered: { statuses: string[]; priorities: string[]; issueTypes: string[] } = {
+      statuses: [],
+      priorities: [],
+      issueTypes: [],
+    };
+
+    try {
+      const statuses = await jiraFetch<{ name: string }[]>(c, "/rest/api/3/status");
+      for (const s of statuses) {
+        const k = s.name.toLowerCase();
+        discovered.statuses.push(k);
+        if (!status[k]) status[k] = DEFAULT_STATUS_MAP[k] ?? "not_started";
+      }
+    } catch { /* optional */ }
+
+    try {
+      const prios = await jiraFetch<{ name: string }[]>(c, "/rest/api/3/priority");
+      for (const p of prios) {
+        const k = p.name.toLowerCase();
+        discovered.priorities.push(k);
+        if (!priority[k]) priority[k] = DEFAULT_PRIORITY_MAP[k] ?? "medium";
+      }
+    } catch { /* optional */ }
+
+    try {
+      const types = await jiraFetch<{ name: string }[]>(c, "/rest/api/3/issuetype");
+      for (const t of types) {
+        const k = t.name.toLowerCase();
+        discovered.issueTypes.push(k);
+        const isRisk = k === "risk";
+        const isIssue = k === "bug" || k === "incident" || k === "problem";
+        issueType[k] = isRisk ? "risk" : isIssue ? "issue" : "task";
+      }
+    } catch { /* optional */ }
+
+    return {
+      status,
+      priority,
+      extra: { issueType, discovered },
+    };
   },
 
   async run(creds, scope, mapping, ctx: MigrationContext): Promise<ImportSummary> {
