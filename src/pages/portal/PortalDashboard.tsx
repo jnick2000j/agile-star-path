@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
-import { Sparkles, BookOpen, Ticket, ArrowRight, Package } from "lucide-react";
+import { Sparkles, BookOpen, Ticket, ArrowRight, Package, GraduationCap, AlertTriangle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { STATUS_BADGE } from "@/lib/portalStatus";
 import { PortalServiceStatus } from "@/components/portal/PortalServiceStatus";
 
@@ -56,6 +57,22 @@ export default function PortalDashboard() {
         .eq("is_active", true)
         .order("sort_order")
         .limit(4);
+      return data ?? [];
+    },
+  });
+
+  const { data: pendingTraining = [] } = useQuery({
+    queryKey: ["portal-pending-training", user?.id, currentOrganization?.id],
+    enabled: !!user?.id && !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("lms_enrollments")
+        .select("id, course_id, status, progress_percent, due_at, mandatory, course:lms_courses(title)")
+        .eq("user_id", user!.id)
+        .eq("organization_id", currentOrganization!.id)
+        .neq("status", "completed")
+        .order("due_at", { ascending: true, nullsFirst: false })
+        .limit(5);
       return data ?? [];
     },
   });
