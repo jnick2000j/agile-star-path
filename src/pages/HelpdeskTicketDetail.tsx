@@ -1205,6 +1205,8 @@ export default function HelpdeskTicketDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
         open={deleteOpen}
         onOpenChange={(open) => !deleting && setDeleteOpen(open)}
       >
