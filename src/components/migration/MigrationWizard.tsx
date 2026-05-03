@@ -421,7 +421,7 @@ export function MigrationWizard({
 
         {step === "preview" && adapter && (
           <PreviewStep
-            onBack={() => setStep("mapping")}
+            onBack={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "mapping")}
             onStart={start}
             adapter={adapter}
             creds={creds}
