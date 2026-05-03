@@ -104,12 +104,12 @@ export function MappingEditor({
 
   // Load templates for this org+source
   useEffect(() => {
-    if (!currentOrganization?.id) return;
+    if (!effectiveOrgId) return;
     setLoadingTemplates(true);
     supabase
       .from("migration_field_mappings")
       .select("id,name,mapping,is_default")
-      .eq("organization_id", currentOrganization.id)
+      .eq("organization_id", effectiveOrgId)
       .eq("source", source)
       .eq("entity_type", "all")
       .order("is_default", { ascending: false })
@@ -118,7 +118,7 @@ export function MappingEditor({
         setTemplates((data ?? []) as SavedTemplate[]);
         setLoadingTemplates(false);
       });
-  }, [currentOrganization?.id, source]);
+  }, [effectiveOrgId, source]);
 
   // Combine known + user-added keys for display rows
   const statusKeys = useMemo(() => {
