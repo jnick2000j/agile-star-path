@@ -145,6 +145,14 @@ export default function LmsAdmin() {
     await reload();
   };
 
+  const deleteCourse = async (course: LmsCourse) => {
+    if (!confirm(`Delete course "${course.title}"? This permanently removes its modules, lessons, quizzes, enrollments, and progress. This cannot be undone.`)) return;
+    const { error } = await supabase.from("lms_courses").delete().eq("id", course.id);
+    if (error) return toast.error(error.message);
+    toast.success("Course deleted");
+    await reload();
+  };
+
   return (
     <AppLayout title="LMS Authoring" subtitle="Manage courses, learning paths, and quizzes">
       <Tabs defaultValue="courses" className="space-y-4">
@@ -197,6 +205,9 @@ export default function LmsAdmin() {
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => { setEditingCourse(c); setCourseOpen(true); }}>
                     <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => deleteCourse(c)}>
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
