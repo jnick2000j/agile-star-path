@@ -94,6 +94,7 @@ export default function MyLearning() {
             <TabsTrigger value="in_progress">In progress ({inProgress.length})</TabsTrigger>
             <TabsTrigger value="completed">Completed ({completed.length})</TabsTrigger>
             <TabsTrigger value="certificates">Certificates ({certificates.length})</TabsTrigger>
+            <TabsTrigger value="external">External training</TabsTrigger>
           </TabsList>
 
           <TabsContent value="in_progress" className="mt-4 space-y-3">
