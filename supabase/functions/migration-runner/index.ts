@@ -571,10 +571,14 @@ async function runJira(
 
       ctx.setTotal(ctx.done + (page.total - startAt));
 
+      const issueTypeMap =
+        ((req.mapping as { extra?: { issueType?: Record<string, string> } }).extra?.issueType) ?? {};
+
       for (const issue of page.issues) {
         const type = issue.fields.issuetype?.name?.toLowerCase() ?? "task";
-        const isRisk = type === "risk";
-        const isIssue = type === "bug" || type === "incident";
+        const target = issueTypeMap[type] ?? (type === "risk" ? "risk" : (type === "bug" || type === "incident") ? "issue" : "task");
+        const isRisk = target === "risk";
+        const isIssue = target === "issue";
         try {
           if (isRisk) {
             const { data, error } = await supa
