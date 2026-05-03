@@ -53,12 +53,18 @@ export async function runMigrationJob(
     .eq("id", jobId);
 
   try {
-    const summary = await adapter.run(input.creds, input.scope, input.mapping, {
-      organizationId: input.organizationId,
-      userId: input.userId,
-      jobId,
-      onProgress,
-    });
+    const summary = await adapter.run(
+      input.creds,
+      input.scope,
+      input.mapping,
+      {
+        organizationId: input.organizationId,
+        userId: input.userId,
+        jobId,
+        onProgress,
+      },
+      input.files,
+    );
 
     await supabase
       .from("migration_jobs")
