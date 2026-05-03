@@ -15,8 +15,9 @@ export interface StartJobInput {
   source: MigrationSourceId | string;
   sourceLabel?: string;
   scope: MigrationScope;
-  // creds are NOT persisted — they only live in memory for the job run
+  // creds and files are NOT persisted — they only live in memory for the job run
   creds: MigrationCredentials;
+  files?: MigrationFiles;
   mapping: FieldMapping;
 }
 
