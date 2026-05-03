@@ -12,7 +12,7 @@ import { Award, Calendar, Download, AlertTriangle, GraduationCap } from "lucide-
 import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { downloadCertificate } from "@/lib/certificate";
+import { downloadCertificate, loadCertificateBranding } from "@/lib/certificate";
 
 export default function MyLearning() {
   const { user, userProfile } = useAuth();
@@ -56,6 +56,9 @@ export default function MyLearning() {
       user?.email ||
       "Learner";
     try {
+      const branding = currentOrganization?.id
+        ? await loadCertificateBranding(supabase, currentOrganization.id)
+        : undefined;
       downloadCertificate({
         recipientName: recipient,
         courseTitle: cert.course?.title ?? "Course",
@@ -63,6 +66,7 @@ export default function MyLearning() {
         serial: cert.serial,
         issuedAt: cert.issued_at ? new Date(cert.issued_at) : new Date(),
         finalScore: cert.final_score ?? null,
+        branding,
       });
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate certificate");
