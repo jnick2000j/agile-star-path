@@ -795,6 +795,9 @@ export default function HelpdeskTicketDetail() {
             <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
               <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
             </Button>
+            <Button size="sm" variant="outline" onClick={() => setPeopleOpen(true)} className="shrink-0 rounded-none">
+              <Users className="h-4 w-4 mr-2" /> People
+            </Button>
             <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none">
               <Clock className="h-4 w-4 mr-2" /> Log time
             </Button>
