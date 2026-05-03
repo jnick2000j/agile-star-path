@@ -19,7 +19,6 @@ import {
   FolderKanban,
   Package,
   Layers,
-  ArrowLeftRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
@@ -63,7 +62,7 @@ import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EmailSettings } from "@/components/admin/EmailSettings";
-import { MigrationsPanel } from "@/components/migration/MigrationsPanel";
+
 
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
@@ -303,10 +302,6 @@ export default function AdminPanel() {
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
           <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
-          <TabsTrigger value="migrations" className="gap-1">
-            <ArrowLeftRight className="h-3.5 w-3.5" />
-            Migrations
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -605,10 +600,6 @@ export default function AdminPanel() {
 
         <TabsContent value="email">
           <EmailSettings />
-        </TabsContent>
-
-        <TabsContent value="migrations">
-          <MigrationsPanel />
         </TabsContent>
       </Tabs>
     </AppLayout>

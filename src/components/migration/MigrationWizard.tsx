@@ -31,13 +31,17 @@ export function MigrationWizard({
   open,
   onOpenChange,
   onCompleted,
+  organizationIdOverride,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onCompleted?: () => void;
+  /** When set, run the migration against this organization instead of the active one. */
+  organizationIdOverride?: string;
 }) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
+  const effectiveOrgId = organizationIdOverride ?? currentOrganization?.id ?? null;
 
   const [step, setStep] = useState<Step>("source");
   const [sourceId, setSourceId] = useState<string | null>(null);
@@ -94,12 +98,12 @@ export function MigrationWizard({
   };
 
   const start = async () => {
-    if (!adapter || !currentOrganization?.id || !user?.id) return;
+    if (!adapter || !effectiveOrgId || !user?.id) return;
     setStep("running");
     setRunError(null);
     try {
       const job = await createMigrationJob({
-        organizationId: currentOrganization.id,
+        organizationId: effectiveOrgId,
         userId: user.id,
         source: adapter.id,
         sourceLabel: adapter.label,
@@ -109,7 +113,7 @@ export function MigrationWizard({
       const res = await runMigrationJob(
         job.id,
         {
-          organizationId: currentOrganization.id,
+          organizationId: effectiveOrgId,
           userId: user.id,
           source: adapter.id,
           sourceLabel: adapter.label,
@@ -383,6 +387,7 @@ export function MigrationWizard({
               showRequestTypeMapping={adapter.id === "jira_service_management"}
               value={mapping}
               onChange={setMapping}
+              organizationIdOverride={organizationIdOverride}
               onValidate={handleValidate}
             />
             <DialogFooter>

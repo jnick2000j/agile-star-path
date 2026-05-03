@@ -73,6 +73,8 @@ interface Props {
   value: FieldMapping;
   onChange: (m: FieldMapping) => void;
   onValidate?: (result: MappingValidationResult) => void;
+  /** When set, scope template queries/inserts to this organization instead of the active one. */
+  organizationIdOverride?: string;
 }
 
 const DEFAULT_JIRA_TYPES = ["task", "story", "bug", "incident", "epic", "subtask", "risk"];
@@ -89,9 +91,11 @@ export function MappingEditor({
   value,
   onChange,
   onValidate,
+  organizationIdOverride,
 }: Props) {
   const { currentOrganization } = useOrganization();
   const { user } = useAuth();
+  const effectiveOrgId = organizationIdOverride ?? currentOrganization?.id ?? null;
 
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
@@ -100,12 +104,12 @@ export function MappingEditor({
 
   // Load templates for this org+source
   useEffect(() => {
-    if (!currentOrganization?.id) return;
+    if (!effectiveOrgId) return;
     setLoadingTemplates(true);
     supabase
       .from("migration_field_mappings")
       .select("id,name,mapping,is_default")
-      .eq("organization_id", currentOrganization.id)
+      .eq("organization_id", effectiveOrgId)
       .eq("source", source)
       .eq("entity_type", "all")
       .order("is_default", { ascending: false })
@@ -114,7 +118,7 @@ export function MappingEditor({
         setTemplates((data ?? []) as SavedTemplate[]);
         setLoadingTemplates(false);
       });
-  }, [currentOrganization?.id, source]);
+  }, [effectiveOrgId, source]);
 
   // Combine known + user-added keys for display rows
   const statusKeys = useMemo(() => {
@@ -275,13 +279,13 @@ export function MappingEditor({
       toast.error("Give the template a name first.");
       return;
     }
-    if (!currentOrganization?.id || !user?.id) return;
+    if (!effectiveOrgId || !user?.id) return;
     setSaving(true);
     try {
       const { data, error } = await supabase
         .from("migration_field_mappings")
         .insert({
-          organization_id: currentOrganization.id,
+          organization_id: effectiveOrgId,
           created_by: user.id,
           source,
           entity_type: "all",

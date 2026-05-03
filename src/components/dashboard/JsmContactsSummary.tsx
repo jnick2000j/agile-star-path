@@ -92,7 +92,7 @@ export function JsmContactsSummary() {
           Service Management Contacts
         </CardTitle>
         <Button asChild variant="ghost" size="sm" className="text-xs">
-          <Link to="/admin/migrations">
+          <Link to="/platform-admin?tab=migrations">
             View imports <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
         </Button>

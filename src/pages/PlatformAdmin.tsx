@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
 import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
+import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
@@ -101,6 +103,12 @@ export default function PlatformAdmin() {
   const [archiveTarget, setArchiveTarget] = useState<OrgOverview | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OrgOverview | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validTabs = [
+    "overview","tenants","licenses","plans","ai","support","sso","verticals","modules","migrations","audit",
+  ];
+  const requestedTab = searchParams.get("tab");
+  const activeTab = requestedTab && validTabs.includes(requestedTab) ? requestedTab : "overview";
 
   useEffect(() => {
     fetchData();
@@ -242,7 +250,16 @@ export default function PlatformAdmin() {
 
   return (
     <AppLayout title="Platform Admin" subtitle="Cross-tenant overview and management">
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => {
+          const next = new URLSearchParams(searchParams);
+          if (v === "overview") next.delete("tab");
+          else next.set("tab", v);
+          setSearchParams(next, { replace: true });
+        }}
+        className="space-y-6"
+      >
         <TabsList className="bg-secondary flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tenants">Tenant Management</TabsTrigger>
@@ -253,6 +270,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="modules">Module Toggles</TabsTrigger>
+          <TabsTrigger value="migrations">Migrations</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
@@ -480,6 +498,10 @@ export default function PlatformAdmin() {
 
         <TabsContent value="modules" className="space-y-4">
           <PlatformModuleToggles />
+        </TabsContent>
+
+        <TabsContent value="migrations" className="space-y-4">
+          <PlatformMigrationsManager />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">
