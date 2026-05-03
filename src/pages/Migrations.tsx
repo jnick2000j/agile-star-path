@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, RefreshCcw, ArrowLeftRight } from "lucide-react";
 import { MigrationWizard } from "@/components/migration/MigrationWizard";
-import { listMigrationJobs } from "@/lib/migration/runner";
+import { listMigrationJobs, watchMigrationJob } from "@/lib/migration/runner";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
 
