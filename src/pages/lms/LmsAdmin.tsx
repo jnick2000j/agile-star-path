@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LmsImportWizard } from "@/components/lms/LmsImportWizard";
 import { LmsAdminDashboard } from "@/components/lms/LmsAdminDashboard";
 import { LmsCertificateSettings } from "@/components/lms/LmsCertificateSettings";
+import { LmsExternalTrainingAdmin } from "@/components/lms/LmsExternalTrainingAdmin";
 
 type PathStatus = "draft" | "published" | "archived";
 interface LearningPath {
