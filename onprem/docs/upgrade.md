@@ -116,6 +116,8 @@ no manual action — they are listed here for operators auditing the diff:
 | `service_catalog_item_tasks`               | Predefined ordered fulfillment tasks per catalog item |
 | `helpdesk_spawn_next_catalog_task` fn      | Spawns next sequential child ticket |
 | `trg_helpdesk_catalog_task_close` trigger  | Fires next task when prior is resolved/closed |
+| `lms_*` tables + `lms_recompute_enrollment` fn | Optional LMS add-on — courses, lessons, quizzes, enrollments, certificates, vector chunks. See [features.md → LMS](./features.md#learning-management-lms--optional-add-on). |
+| `lms-content` and `lms-certificates` storage buckets | Auto-created by the MinIO bootstrap. **External-S3 operators**: create both buckets and re-attach the IAM policy before enabling the LMS module — see [object-storage.md](./object-storage.md). |
 
 If you maintain custom RLS or BI views over `service_catalog_*` or
 `helpdesk_tickets`, re-validate after upgrading — the catalog-task workflow
