@@ -126,6 +126,41 @@ export async function listMigrationJobs(organizationId: string) {
 }
 
 /**
+ * Optional client-side helper kept for backward compatibility with adapter
+ * `run` methods. Background execution happens in the migration-runner edge
+ * function — this stub lets adapter source files still compile and may be
+ * called for client-side dry runs.
+ */
+export async function recordMigrationItem(
+  jobId: string,
+  organizationId: string,
+  entry: {
+    entity_type: string;
+    external_id: string;
+    external_key?: string;
+    internal_id?: string;
+    status: "pending" | "created" | "skipped" | "failed";
+    error?: string;
+    payload?: unknown;
+  },
+) {
+  await supabase.from("migration_items").upsert(
+    {
+      job_id: jobId,
+      organization_id: organizationId,
+      entity_type: entry.entity_type,
+      external_id: entry.external_id,
+      external_key: entry.external_key ?? null,
+      internal_id: entry.internal_id ?? null,
+      status: entry.status,
+      error: entry.error ?? null,
+      payload: (entry.payload ?? null) as never,
+    },
+    { onConflict: "job_id,entity_type,external_id" },
+  );
+}
+
+/**
  * Lightweight live-progress watcher for the Migrations page. Returns an
  * unsubscribe function. Polls every `intervalMs` until the job is terminal.
  */
