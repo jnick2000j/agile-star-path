@@ -151,11 +151,17 @@ export default function PortalTraining() {
         </Card>
       )}
 
-      <div className="flex justify-end">
-        <Link to="/learning/my">
-          <Button variant="outline" size="sm">Open full learning area</Button>
-        </Link>
-      </div>
+          <div className="flex justify-end">
+            <Link to="/learning/my">
+              <Button variant="outline" size="sm">Open full learning area</Button>
+            </Link>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="external">
+          <ExternalTrainingPanel />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
