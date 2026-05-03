@@ -189,7 +189,23 @@ export function MigrationWizard({
 
         {step === "connect" && adapter && (
           <div className="space-y-4 overflow-y-auto pr-1">
-            {adapter.id !== "csv" && (
+            {adapter.id === "jira_service_management" && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Jira Service Management import</AlertTitle>
+                <AlertDescription className="text-xs space-y-1">
+                  <p>
+                    This connector imports <strong>service desks</strong> as projects and{" "}
+                    <strong>customer requests</strong> as internal Issues, including request type,
+                    reporter and current status.
+                  </p>
+                  <p className="text-muted-foreground">
+                    SLAs, approvals, queues, and customer-portal comments are not imported in this version.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            )}
+            {adapter.id !== "csv" && adapter.id !== "jira_service_management" && (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Browser-based connection</AlertTitle>
