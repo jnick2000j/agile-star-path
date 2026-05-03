@@ -373,6 +373,13 @@ export function MigrationWizard({
                 ((mapping.extra as { discovered?: { issueTypes?: string[] } } | undefined)?.discovered?.issueTypes)
               }
               showIssueTypeMapping={adapter.id === "jira"}
+              knownRequestTypes={
+                ((mapping.extra as { discovered?: { requestTypes?: string[] } } | undefined)?.discovered?.requestTypes)
+              }
+              requestTypeLabels={
+                ((mapping.extra as { requestTypeLabels?: Record<string, string> } | undefined)?.requestTypeLabels)
+              }
+              showRequestTypeMapping={adapter.id === "jira_service_management"}
               value={mapping}
               onChange={setMapping}
               onValidate={handleValidate}
