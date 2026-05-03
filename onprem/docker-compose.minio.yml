@@ -9,7 +9,10 @@
 #   docker compose -f docker-compose.yml -f docker-compose.minio.yml up -d
 #
 # After first boot, the `minio-bootstrap` job:
-#   1. Creates the `taskmaster-uploads` bucket
+#   1. Creates the `taskmaster-uploads`, `lms-content`, and
+#      `lms-certificates` buckets (LMS buckets are pre-provisioned even
+#      if the LMS add-on is currently OFF, so toggling it on is a no-op
+#      for storage)
 #   2. Creates a least-privilege service account for the app
 #   3. Writes a versioning + 30-day noncurrent-version lifecycle policy
 #   4. Blocks public access (bucket is private; app issues presigned URLs)
