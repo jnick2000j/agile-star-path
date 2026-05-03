@@ -173,6 +173,10 @@ export default function LmsAdmin() {
           </div>
         </div>
 
+        <TabsContent value="dashboard">
+          <LmsAdminDashboard />
+        </TabsContent>
+
         <TabsContent value="courses" className="space-y-3">
           {loading ? <p className="text-sm text-muted-foreground">Loading…</p> : courses.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No courses yet. Create your first one.</CardContent></Card>
