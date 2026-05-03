@@ -123,6 +123,14 @@ export function MappingEditor({
     return Array.from(set).sort();
   }, [knownIssueTypes, value.extra]);
 
+  const requestTypeKeys = useMemo(() => {
+    const set = new Set<string>([
+      ...(knownRequestTypes ?? []),
+      ...Object.keys((value.extra?.requestType as Record<string, string>) ?? {}),
+    ]);
+    return Array.from(set).sort();
+  }, [knownRequestTypes, value.extra]);
+
   // Validation
   const validation = useMemo<MappingValidationResult>(() => {
     const errors: string[] = [];
@@ -151,8 +159,27 @@ export function MappingEditor({
           errors.push(`Issue type "${k}" maps to invalid entity "${v}".`);
       }
     }
+    if (showRequestTypeMapping) {
+      const rtMap = (value.extra?.requestType as Record<string, string>) ?? {};
+      for (const k of knownRequestTypes ?? []) {
+        const label = requestTypeLabels?.[k] ?? k;
+        const v = rtMap[k];
+        if (!v) errors.push(`Request type "${label}" is not mapped to a register.`);
+        else if (!JSM_TARGETS.includes(v as never))
+          errors.push(`Request type "${label}" maps to invalid target "${v}".`);
+      }
+    }
     return { ok: errors.length === 0, errors };
-  }, [value, knownStatuses, knownPriorities, knownIssueTypes, showIssueTypeMapping]);
+  }, [
+    value,
+    knownStatuses,
+    knownPriorities,
+    knownIssueTypes,
+    showIssueTypeMapping,
+    knownRequestTypes,
+    requestTypeLabels,
+    showRequestTypeMapping,
+  ]);
 
   useEffect(() => {
     onValidate?.(validation);
@@ -185,10 +212,23 @@ export function MappingEditor({
     delete cur[k];
     onChange({ ...value, extra: { ...(value.extra ?? {}), issueType: cur } });
   };
+  const setRequestType = (k: string, v: string) => {
+    const cur = (value.extra?.requestType as Record<string, string>) ?? {};
+    onChange({
+      ...value,
+      extra: { ...(value.extra ?? {}), requestType: { ...cur, [k]: v } },
+    });
+  };
+  const removeRequestType = (k: string) => {
+    const cur = { ...((value.extra?.requestType as Record<string, string>) ?? {}) };
+    delete cur[k];
+    onChange({ ...value, extra: { ...(value.extra ?? {}), requestType: cur } });
+  };
 
   const [newStatusKey, setNewStatusKey] = useState("");
   const [newPriorityKey, setNewPriorityKey] = useState("");
   const [newTypeKey, setNewTypeKey] = useState("");
+  const [newRequestTypeKey, setNewRequestTypeKey] = useState("");
 
   const applyTemplate = (id: string) => {
     const t = templates.find((x) => x.id === id);
