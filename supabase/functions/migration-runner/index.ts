@@ -785,8 +785,8 @@ async function runJsm(
 
   // Fetch + import customer requests per service desk
   for (const sd of chosen) {
-    const internalId = projMap.get(sd.id);
-    if (!internalId) continue;
+    const projectId = projMap.get(sd.id);
+    if (!projectId) continue;
 
     let start = 0;
     const pageSize = 50;
