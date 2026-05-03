@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { MappingEditor, type MappingValidationResult } from "./MappingEditor";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,8 @@ export function MigrationWizard({
   const [remoteProjects, setRemoteProjects] = useState<RemoteProject[]>([]);
   const [scope, setScope] = useState<MigrationScope>({ selectedProjectIds: [], includeClosed: false });
   const [mapping, setMapping] = useState<FieldMapping>({});
+  const [mappingValid, setMappingValid] = useState<MappingValidationResult>({ ok: true, errors: [] });
+  const handleValidate = useCallback((r: MappingValidationResult) => setMappingValid(r), []);
   const [progress, setProgress] = useState({ done: 0, total: 0, message: "" });
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
@@ -288,30 +291,34 @@ export function MigrationWizard({
           </div>
         )}
 
-        {step === "mapping" && (
-          <div className="space-y-4 overflow-y-auto pr-1">
+        {step === "mapping" && adapter && (
+          <div className="space-y-3 overflow-y-auto pr-1">
             <p className="text-sm text-muted-foreground">
-              Default field mappings are applied automatically. You can fine-tune them later from the migration job detail.
+              Review and adjust how source values map into the platform. Required fields must all be mapped before continuing.
             </p>
-            <div className="rounded-md border p-3 text-xs space-y-2">
-              <div>
-                <p className="font-medium mb-1">Status mapping</p>
-                <p className="text-muted-foreground">
-                  {Object.entries(mapping.status ?? {}).map(([k, v]) => `${k} → ${v}`).join(", ") || "—"}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium mb-1">Priority mapping</p>
-                <p className="text-muted-foreground">
-                  {Object.entries(mapping.priority ?? {}).map(([k, v]) => `${k} → ${v}`).join(", ") || "—"}
-                </p>
-              </div>
-            </div>
+            <MappingEditor
+              source={adapter.id}
+              knownStatuses={
+                ((mapping.extra as { discovered?: { statuses?: string[] } } | undefined)?.discovered?.statuses) ??
+                Object.keys(mapping.status ?? {})
+              }
+              knownPriorities={
+                ((mapping.extra as { discovered?: { priorities?: string[] } } | undefined)?.discovered?.priorities) ??
+                Object.keys(mapping.priority ?? {})
+              }
+              knownIssueTypes={
+                ((mapping.extra as { discovered?: { issueTypes?: string[] } } | undefined)?.discovered?.issueTypes)
+              }
+              showIssueTypeMapping={adapter.id === "jira"}
+              value={mapping}
+              onChange={setMapping}
+              onValidate={handleValidate}
+            />
             <DialogFooter>
               <Button variant="ghost" onClick={() => setStep("scope")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
-              <Button onClick={() => setStep("preview")}>
+              <Button onClick={() => setStep("preview")} disabled={!mappingValid.ok}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </DialogFooter>
