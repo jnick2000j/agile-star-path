@@ -122,6 +122,7 @@ export default function Migrations() {
                   <TableRow>
                     <TableHead>Source</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Progress</TableHead>
                     <TableHead>Totals</TableHead>
                     <TableHead>Started</TableHead>
                     <TableHead>Notes</TableHead>
@@ -129,12 +130,29 @@ export default function Migrations() {
                 </TableHeader>
                 <TableBody>
                   {jobs.map((j) => {
-                    const totals = j.totals as Record<string, number> | null;
+                    const totals = j.totals;
+                    const p = j.progress ?? {};
+                    const isLive = j.status === "running";
+                    const pct = p.total ? Math.min(100, Math.round(((p.done ?? 0) / p.total) * 100)) : 0;
                     return (
                       <TableRow key={j.id}>
                         <TableCell className="font-medium">{j.source_label ?? j.source}</TableCell>
                         <TableCell>
                           <Badge variant={statusVariant(j.status)}>{j.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs min-w-[180px]">
+                          {isLive ? (
+                            <div className="space-y-1">
+                              <Progress value={pct} className="h-1.5" />
+                              <p className="text-muted-foreground truncate">
+                                {p.done ?? 0} / {p.total ?? 0} — {p.message ?? ""}
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {p.total ? `${p.done ?? 0} / ${p.total}` : "—"}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="text-xs">
                           {totals
