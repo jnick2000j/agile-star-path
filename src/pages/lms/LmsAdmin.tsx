@@ -19,6 +19,7 @@ import type { LmsCourse, CourseStatus } from "@/lib/lms";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LmsImportWizard } from "@/components/lms/LmsImportWizard";
+import { LmsAdminDashboard } from "@/components/lms/LmsAdminDashboard";
 
 type PathStatus = "draft" | "published" | "archived";
 interface LearningPath {
@@ -149,6 +150,7 @@ export default function LmsAdmin() {
       <Tabs defaultValue="courses" className="space-y-4">
         <div className="flex items-center justify-between">
           <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="courses">Courses ({courses.length})</TabsTrigger>
             <TabsTrigger value="paths">Learning paths ({paths.length})</TabsTrigger>
           </TabsList>
@@ -170,6 +172,10 @@ export default function LmsAdmin() {
             </Dialog>
           </div>
         </div>
+
+        <TabsContent value="dashboard">
+          <LmsAdminDashboard />
+        </TabsContent>
 
         <TabsContent value="courses" className="space-y-3">
           {loading ? <p className="text-sm text-muted-foreground">Loading…</p> : courses.length === 0 ? (
