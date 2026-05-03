@@ -284,6 +284,63 @@ are still in the bundle for hybrid deployments:
 
 ---
 
+## Learning Management (LMS) — optional add-on
+
+End-to-end internal training: courses, lessons, quizzes, certificates,
+learning paths, and manager analytics. Disabled by default — enable per org
+from **Helpdesk → Admin → Modules** or platform-wide from **Platform Admin
+→ Module Toggles** (`organization_module_toggles.lms`).
+
+| Capability                | Notes |
+|---------------------------|-------|
+| Courses & modules         | Markdown/video/file lessons grouped into modules; soft-delete safe |
+| Quizzes                   | Per-lesson quizzes with single/multi-choice, attempt tracking, pass thresholds |
+| Enrollments               | Self-enroll, manager-assign, or learning-path driven; auto-recompute progress |
+| Lesson progress           | Per-user, per-lesson; rolls up via `lms_recompute_enrollment` RPC |
+| Learning paths            | Ordered course bundles, progress aggregated across courses |
+| Certificates              | Issued on completion, stored in the private `lms-certificates` bucket |
+| Manager dashboard         | `/learning/dashboard` — completion rates, overdue assignments, training compliance |
+| Catalog                   | `/learning` — browseable course catalog filtered by org access |
+| Course editor             | `/learning/admin/courses/:id` — markdown editor, lesson reordering, quiz wiring |
+| Quiz editor               | `/learning/admin/lessons/:id/quiz` — question/option authoring |
+| AI: course recommend      | `/recommend-courses` chat command — vector search over `lms_course_chunks` |
+| AI: lesson complete       | `/complete-lesson` chat command — fuzzy matches lesson title and updates progress |
+| Vector search             | `lms_course_chunks` populated by `lms-embed-course` (chunked + embedded) |
+
+**Pages**: `LmsCatalog`, `MyLearning`, `CourseDetail`, `LmsAdmin`,
+`LmsCourseEditor`, `LmsQuizEditor`, `LmsManagerDashboard`.
+
+**Tables**: `lms_courses`, `lms_modules`, `lms_lessons`, `lms_lesson_progress`,
+`lms_enrollments`, `lms_assignments`, `lms_quiz_questions`, `lms_quiz_options`,
+`lms_quiz_attempts`, `lms_certificates`, `lms_learning_paths`,
+`lms_learning_path_courses`, `lms_course_chunks` (vector index).
+
+**Edge functions**: `lms-chat-command` (Task Master `/complete-lesson` and
+`/recommend-courses`), `lms-embed-course` (chunks lesson content and writes
+embeddings via `LOVABLE_API_KEY` → AI gateway).
+
+**Storage buckets**: `lms-content` (private — lesson media, attachments) and
+`lms-certificates` (private — generated PDFs). Both signed via
+`createSignedUrl`. See [object-storage.md](./object-storage.md).
+
+**RPC / DB function**: `lms_recompute_enrollment(_course_id uuid)` — call after
+lesson progress changes to roll up enrollment status.
+
+**Operator notes**:
+- LMS is an **add-on module** (`ADDON_MODULE_KEYS = ["lms"]`). It is OFF by
+  default; turn it on per org or globally before users see the **Learning**
+  sidebar entry.
+- AI features (`/recommend-courses`, `lms-embed-course`) reuse the same
+  `LOVABLE_API_KEY` / `AI_*` configuration as the rest of the platform — no
+  extra keys to issue. See [ai-provider.md](./ai-provider.md).
+- The two LMS storage buckets must exist on whatever S3-compatible backend
+  you've configured (`lms-content`, `lms-certificates`) — `scripts/install.sh`
+  provisions both alongside `taskmaster-uploads`.
+- After bulk-importing or editing course content, re-run the embedder:
+  `curl -X POST https://<host>/functions/v1/lms-embed-course -H "Authorization: Bearer $SERVICE_KEY" -d '{"course_id":"<uuid>"}'`.
+
+---
+
 ## Audit, compliance & SIEM
 
 | Capability               | Surface                  | Notes |
