@@ -8343,6 +8343,75 @@ export type Database = {
           },
         ]
       }
+      migration_contacts: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          customer_organization_id: string | null
+          customer_organization_name: string | null
+          display_name: string | null
+          email: string | null
+          entity_id: string
+          entity_type: string
+          external_id: string | null
+          external_key: string | null
+          id: string
+          job_id: string | null
+          organization_id: string
+          raw: Json | null
+          role: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          customer_organization_id?: string | null
+          customer_organization_name?: string | null
+          display_name?: string | null
+          email?: string | null
+          entity_id: string
+          entity_type: string
+          external_id?: string | null
+          external_key?: string | null
+          id?: string
+          job_id?: string | null
+          organization_id: string
+          raw?: Json | null
+          role: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          customer_organization_id?: string | null
+          customer_organization_name?: string | null
+          display_name?: string | null
+          email?: string | null
+          entity_id?: string
+          entity_type?: string
+          external_id?: string | null
+          external_key?: string | null
+          id?: string
+          job_id?: string | null
+          organization_id?: string
+          raw?: Json | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "migration_contacts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "migration_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "migration_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       migration_field_mappings: {
         Row: {
           created_at: string

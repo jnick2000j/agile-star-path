@@ -713,15 +713,26 @@ async function jsmFetch<T>(c: JsmCreds, path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+interface JsmUserDto {
+  accountId?: string;
+  emailAddress?: string;
+  displayName?: string;
+}
+
 interface JsmRequestDto {
   issueId: string;
   issueKey: string;
   requestTypeId?: string;
   serviceDeskId?: string;
   createdDate?: { iso8601?: string };
-  reporter?: { emailAddress?: string; displayName?: string };
+  reporter?: JsmUserDto;
   requestFieldValues?: { fieldId: string; label?: string; value?: unknown }[];
   currentStatus?: { status?: string; statusDate?: { iso8601?: string } };
+}
+
+interface JsmOrganizationDto {
+  id: number | string;
+  name: string;
 }
 
 async function runJsm(
@@ -1012,6 +1023,81 @@ async function runJsm(
             } catch {
               // SLAs are best-effort; ignore failures (no Service Desk Agent
               // permission, request type without SLAs, etc.)
+            }
+
+            // Fetch + persist contacts (reporter, participants, customer orgs)
+            try {
+              const contactRows: Record<string, unknown>[] = [];
+
+              // Reporter (already on the request payload)
+              if (r.reporter) {
+                contactRows.push({
+                  organization_id: ctx.organizationId,
+                  job_id: ctx.jobId,
+                  entity_type: internalEntityType,
+                  entity_id: internalId,
+                  external_id: r.issueId,
+                  external_key: r.issueKey,
+                  role: "reporter",
+                  account_id: r.reporter.accountId ?? null,
+                  display_name: r.reporter.displayName ?? null,
+                  email: r.reporter.emailAddress ?? null,
+                  raw: r.reporter as unknown as Record<string, unknown>,
+                });
+              }
+
+              // Participants
+              try {
+                const partResp = await jsmFetch<{ values: JsmUserDto[] }>(
+                  c,
+                  `/rest/servicedeskapi/request/${r.issueKey}/participant?limit=50`,
+                );
+                for (const p of partResp.values ?? []) {
+                  if (p.accountId && r.reporter?.accountId === p.accountId) continue;
+                  contactRows.push({
+                    organization_id: ctx.organizationId,
+                    job_id: ctx.jobId,
+                    entity_type: internalEntityType,
+                    entity_id: internalId,
+                    external_id: r.issueId,
+                    external_key: r.issueKey,
+                    role: "participant",
+                    account_id: p.accountId ?? null,
+                    display_name: p.displayName ?? null,
+                    email: p.emailAddress ?? null,
+                    raw: p as unknown as Record<string, unknown>,
+                  });
+                }
+              } catch { /* optional */ }
+
+              // Customer organizations linked to this request
+              try {
+                const orgResp = await jsmFetch<{ values: JsmOrganizationDto[] }>(
+                  c,
+                  `/rest/servicedeskapi/request/${r.issueKey}/organization?limit=50`,
+                );
+                for (const o of orgResp.values ?? []) {
+                  contactRows.push({
+                    organization_id: ctx.organizationId,
+                    job_id: ctx.jobId,
+                    entity_type: internalEntityType,
+                    entity_id: internalId,
+                    external_id: r.issueId,
+                    external_key: r.issueKey,
+                    role: "customer_organization",
+                    customer_organization_id: String(o.id),
+                    customer_organization_name: o.name,
+                    display_name: o.name,
+                    raw: o as unknown as Record<string, unknown>,
+                  });
+                }
+              } catch { /* optional */ }
+
+              if (contactRows.length > 0) {
+                await supa.from("migration_contacts").insert(contactRows);
+              }
+            } catch {
+              // Contacts are best-effort
             }
           }
 
