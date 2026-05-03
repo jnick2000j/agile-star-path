@@ -103,6 +103,12 @@ export default function PlatformAdmin() {
   const [archiveTarget, setArchiveTarget] = useState<OrgOverview | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OrgOverview | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validTabs = [
+    "overview","tenants","licenses","plans","ai","support","sso","verticals","modules","migrations","audit",
+  ];
+  const requestedTab = searchParams.get("tab");
+  const activeTab = requestedTab && validTabs.includes(requestedTab) ? requestedTab : "overview";
 
   useEffect(() => {
     fetchData();
@@ -244,7 +250,16 @@ export default function PlatformAdmin() {
 
   return (
     <AppLayout title="Platform Admin" subtitle="Cross-tenant overview and management">
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => {
+          const next = new URLSearchParams(searchParams);
+          if (v === "overview") next.delete("tab");
+          else next.set("tab", v);
+          setSearchParams(next, { replace: true });
+        }}
+        className="space-y-6"
+      >
         <TabsList className="bg-secondary flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tenants">Tenant Management</TabsTrigger>
