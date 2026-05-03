@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Route, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Route, Upload, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useLmsPermissions } from "@/hooks/useLmsPermissions";
@@ -118,6 +118,7 @@ export default function LmsAdmin() {
         title: form.title,
         description: form.description ?? null,
         status: form.status ?? "draft",
+        cover_image_url: form.cover_image_url ?? null,
       }).eq("id", editingPath.id);
       if (error) return toast.error(error.message);
       toast.success("Learning path updated");
@@ -128,6 +129,7 @@ export default function LmsAdmin() {
         title: form.title,
         description: form.description ?? null,
         status: (form.status ?? "draft") as PathStatus,
+        cover_image_url: form.cover_image_url ?? null,
       } as any);
       if (error) return toast.error(error.message);
       toast.success("Learning path created");
@@ -223,12 +225,21 @@ export default function LmsAdmin() {
           ) : paths.map((p) => (
             <Card key={p.id}>
               <CardContent className="py-4 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{p.title}</span>
-                    <Badge variant={p.status === "published" ? "default" : "outline"}>{p.status}</Badge>
+                <div className="flex items-center gap-3 min-w-0">
+                  {p.cover_image_url ? (
+                    <img src={p.cover_image_url} alt="" className="h-12 w-20 rounded object-cover border shrink-0" />
+                  ) : (
+                    <div className="h-12 w-20 rounded border bg-muted flex items-center justify-center shrink-0">
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{p.title}</span>
+                      <Badge variant={p.status === "published" ? "default" : "outline"}>{p.status}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.description}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.description}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button size="sm" variant="outline" onClick={() => setManagePath(p)}>
@@ -339,12 +350,36 @@ function CourseDialog({ editing, onSave }: { editing: LmsCourse | null; onSave: 
 }
 
 function PathDialog({ editing, onSave }: { editing: LearningPath | null; onSave: (f: Partial<LearningPath>) => void }) {
+  const { currentOrganization } = useOrganization();
   const [form, setForm] = useState<Partial<LearningPath>>(() => editing ?? {
-    title: "", description: "", status: "draft",
+    title: "", description: "", status: "draft", cover_image_url: null,
   });
+  const [uploading, setUploading] = useState(false);
   useEffect(() => {
-    setForm(editing ?? { title: "", description: "", status: "draft" });
+    setForm(editing ?? { title: "", description: "", status: "draft", cover_image_url: null });
   }, [editing]);
+
+  const handleCoverUpload = async (file: File) => {
+    if (!currentOrganization?.id) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please upload an image file");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Image must be under 5MB");
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${currentOrganization.id}/paths/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("lms-covers").upload(path, file, {
+        contentType: file.type, upsert: false,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("lms-covers").getPublicUrl(path);
+      setForm((f) => ({ ...f, cover_image_url: data.publicUrl }));
+      toast.success("Cover image uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <DialogContent>
@@ -369,6 +404,41 @@ function PathDialog({ editing, onSave }: { editing: LearningPath | null; onSave:
           />
         </div>
         <div>
+          <Label>Cover image</Label>
+          <div className="flex items-start gap-3 mt-1">
+            {form.cover_image_url ? (
+              <div className="relative">
+                <img src={form.cover_image_url} alt="Cover" className="h-24 w-40 rounded border object-cover" />
+                <Button
+                  type="button" size="icon" variant="destructive"
+                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                  onClick={() => setForm({ ...form, cover_image_url: null })}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="h-24 w-40 rounded border border-dashed bg-muted/40 flex items-center justify-center">
+                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                id="path-cover-input" type="file" accept="image/*" className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCoverUpload(f); e.target.value = ""; }}
+              />
+              <Button
+                type="button" variant="outline" size="sm" disabled={uploading}
+                onClick={() => document.getElementById("path-cover-input")?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {uploading ? "Uploading…" : form.cover_image_url ? "Replace image" : "Upload image"}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1">PNG, JPG, or WebP. Max 5 MB.</p>
+            </div>
+          </div>
+        </div>
+        <div>
           <Label>Status</Label>
           <Select value={form.status ?? "draft"} onValueChange={(v) => setForm({ ...form, status: v as PathStatus })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -381,7 +451,7 @@ function PathDialog({ editing, onSave }: { editing: LearningPath | null; onSave:
         </div>
       </div>
       <DialogFooter>
-        <Button onClick={() => onSave(form)}>Save</Button>
+        <Button onClick={() => onSave(form)} disabled={uploading}>Save</Button>
       </DialogFooter>
     </DialogContent>
   );
