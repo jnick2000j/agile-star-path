@@ -1302,6 +1302,9 @@ async function runJsm(
 
             // Fetch + persist contacts (reporter, participants, customer orgs)
             // — gated by the user's contactRouting choices on the wizard.
+            // Each contact is deduped against the migration_contact_directory
+            // so the same person/org is reused across every ticket where they
+            // appear, both within this run and across runs.
             try {
               const routingDefaults: Record<string, "attach_only" | "attach_and_stakeholder" | "skip"> = {
                 reporter: "attach_only",
@@ -1317,11 +1320,35 @@ async function runJsm(
                 "attach_only" | "attach_and_stakeholder" | "skip"
               >;
 
-              const contactRows: Record<string, unknown>[] = [];
-              const stakeholderRows: Record<string, unknown>[] = [];
+              const resolveDir = (ctx as unknown as {
+                _resolveDirectory: (
+                  contactType: "person" | "organization",
+                  payload: {
+                    external_account_id?: string | null;
+                    email?: string | null;
+                    display_name?: string | null;
+                    organization_name?: string | null;
+                    raw?: unknown;
+                  },
+                ) => Promise<{ id: string; linkedStakeholderId: string | null } | null>;
+              })._resolveDirectory;
+              const ensureStakeholder = (ctx as unknown as {
+                _ensureStakeholderForDirectory: (
+                  dirId: string,
+                  role: string,
+                  payload: {
+                    display_name?: string | null;
+                    email?: string | null;
+                    organization_name?: string | null;
+                  },
+                ) => Promise<string | null>;
+              })._ensureStakeholderForDirectory;
 
-              const pushContact = (
+              const contactRows: Record<string, unknown>[] = [];
+
+              const recordContact = async (
                 role: string,
+                contactType: "person" | "organization",
                 payload: {
                   account_id?: string | null;
                   display_name?: string | null;
@@ -1333,6 +1360,26 @@ async function runJsm(
               ) => {
                 const mode = routing[role] ?? "attach_only";
                 if (mode === "skip") return;
+
+                const dir = await resolveDir(contactType, {
+                  external_account_id:
+                    contactType === "person"
+                      ? payload.account_id
+                      : payload.customer_organization_id,
+                  email: payload.email,
+                  display_name: payload.display_name,
+                  organization_name: payload.customer_organization_name,
+                  raw: payload.raw,
+                });
+
+                if (mode === "attach_and_stakeholder" && dir) {
+                  await ensureStakeholder(dir.id, role, {
+                    display_name: payload.display_name,
+                    email: payload.email,
+                    organization_name: payload.customer_organization_name,
+                  });
+                }
+
                 contactRows.push({
                   organization_id: ctx.organizationId,
                   job_id: ctx.jobId,
@@ -1346,34 +1393,14 @@ async function runJsm(
                   email: payload.email ?? null,
                   customer_organization_id: payload.customer_organization_id ?? null,
                   customer_organization_name: payload.customer_organization_name ?? null,
+                  directory_id: dir?.id ?? null,
                   raw: payload.raw as Record<string, unknown>,
                 });
-                if (mode === "attach_and_stakeholder") {
-                  const name = payload.display_name
-                    ?? payload.customer_organization_name
-                    ?? payload.email
-                    ?? "Unknown contact";
-                  stakeholderRows.push({
-                    organization_id: ctx.organizationId,
-                    name,
-                    email: payload.email ?? null,
-                    organization: payload.customer_organization_name ?? null,
-                    role:
-                      role === "customer_organization" ? "Customer organization"
-                        : role === "reporter" ? "Service requester"
-                        : role === "participant" ? "Service participant"
-                        : "Service assignee",
-                    influence: "medium",
-                    interest: "medium",
-                    engagement: "neutral",
-                    created_by: ctx.userId,
-                  });
-                }
               };
 
               // Reporter
               if (r.reporter) {
-                pushContact("reporter", {
+                await recordContact("reporter", "person", {
                   account_id: r.reporter.accountId,
                   display_name: r.reporter.displayName,
                   email: r.reporter.emailAddress,
@@ -1390,7 +1417,7 @@ async function runJsm(
                   );
                   for (const p of partResp.values ?? []) {
                     if (p.accountId && r.reporter?.accountId === p.accountId) continue;
-                    pushContact("participant", {
+                    await recordContact("participant", "person", {
                       account_id: p.accountId,
                       display_name: p.displayName,
                       email: p.emailAddress,
@@ -1408,7 +1435,7 @@ async function runJsm(
                     `/rest/servicedeskapi/request/${r.issueKey}/organization?limit=50`,
                   );
                   for (const o of orgResp.values ?? []) {
-                    pushContact("customer_organization", {
+                    await recordContact("customer_organization", "organization", {
                       customer_organization_id: String(o.id),
                       customer_organization_name: o.name,
                       display_name: o.name,
@@ -1420,47 +1447,6 @@ async function runJsm(
 
               if (contactRows.length > 0) {
                 await supa.from("migration_contacts").insert(contactRows);
-              }
-              if (stakeholderRows.length > 0) {
-                // Best-effort dedupe: skip stakeholders that already exist for
-                // this org with the same email or organization name.
-                const emails = stakeholderRows
-                  .map((s) => s.email)
-                  .filter((e): e is string => typeof e === "string");
-                const orgs = stakeholderRows
-                  .map((s) => s.organization)
-                  .filter((o): o is string => typeof o === "string");
-                const existing = new Set<string>();
-                if (emails.length || orgs.length) {
-                  const { data: ex } = await supa
-                    .from("stakeholders")
-                    .select("email,organization")
-                    .eq("organization_id", ctx.organizationId)
-                    .or(
-                      [
-                        emails.length ? `email.in.(${emails.map((e) => `"${e}"`).join(",")})` : "",
-                        orgs.length ? `organization.in.(${orgs.map((o) => `"${o}"`).join(",")})` : "",
-                      ]
-                        .filter(Boolean)
-                        .join(","),
-                    );
-                  for (const row of (ex ?? []) as { email?: string; organization?: string }[]) {
-                    if (row.email) existing.add(`e:${row.email.toLowerCase()}`);
-                    if (row.organization) existing.add(`o:${row.organization.toLowerCase()}`);
-                  }
-                }
-                const fresh = stakeholderRows.filter((s) => {
-                  const e = (s.email as string | null)?.toLowerCase();
-                  const o = (s.organization as string | null)?.toLowerCase();
-                  if (e && existing.has(`e:${e}`)) return false;
-                  if (o && existing.has(`o:${o}`)) return false;
-                  if (e) existing.add(`e:${e}`);
-                  if (o) existing.add(`o:${o}`);
-                  return true;
-                });
-                if (fresh.length > 0) {
-                  await supa.from("stakeholders").insert(fresh);
-                }
               }
             } catch {
               // Contacts are best-effort
