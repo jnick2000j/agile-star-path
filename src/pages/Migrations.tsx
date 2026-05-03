@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, RefreshCcw, ArrowLeftRight } from "lucide-react";
+import { Plus, RefreshCcw, ArrowLeftRight, FileDown, FileJson } from "lucide-react";
 import { MigrationWizard } from "@/components/migration/MigrationWizard";
-import { listMigrationJobs, watchMigrationJob } from "@/lib/migration/runner";
+import { listMigrationJobs, watchMigrationJob, downloadMigrationErrorReport } from "@/lib/migration/runner";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 type JobRow = {
@@ -24,10 +25,34 @@ type JobRow = {
 
 export default function Migrations() {
   const { currentOrganization } = useOrganization();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const watchersRef = useRef<Map<string, () => void>>(new Map());
+
+  const handleDownload = async (jobId: string, fmt: "csv" | "json") => {
+    setDownloadingId(jobId + fmt);
+    try {
+      const count = await downloadMigrationErrorReport(jobId, fmt);
+      toast({
+        title: count === 0 ? "No errors to report" : `Exported ${count} row${count === 1 ? "" : "s"}`,
+        description:
+          count === 0
+            ? "This migration completed without skipped or failed rows."
+            : `Downloaded as ${fmt.toUpperCase()}.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Export failed",
+        description: e instanceof Error ? e.message : "Could not generate report.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const refresh = async () => {
     if (!currentOrganization?.id) return;
@@ -126,6 +151,7 @@ export default function Migrations() {
                     <TableHead>Totals</TableHead>
                     <TableHead>Started</TableHead>
                     <TableHead>Notes</TableHead>
+                    <TableHead className="text-right">Error report</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -134,6 +160,8 @@ export default function Migrations() {
                     const p = j.progress ?? {};
                     const isLive = j.status === "running";
                     const pct = p.total ? Math.min(100, Math.round(((p.done ?? 0) / p.total) * 100)) : 0;
+                    const skippedCount = (totals?.skipped ?? 0) + (totals?.failed ?? 0);
+                    const canDownload = j.status === "completed" || j.status === "failed";
                     return (
                       <TableRow key={j.id}>
                         <TableCell className="font-medium">{j.source_label ?? j.source}</TableCell>
@@ -167,6 +195,35 @@ export default function Migrations() {
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
                           {j.error_summary ?? ""}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs"
+                              disabled={!canDownload || downloadingId === j.id + "csv"}
+                              onClick={() => handleDownload(j.id, "csv")}
+                              title={
+                                skippedCount > 0
+                                  ? `Download ${skippedCount} skipped/failed rows as CSV`
+                                  : "No skipped or failed rows recorded"
+                              }
+                            >
+                              <FileDown className="h-3 w-3 mr-1" />
+                              CSV
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 text-xs"
+                              disabled={!canDownload || downloadingId === j.id + "json"}
+                              onClick={() => handleDownload(j.id, "json")}
+                            >
+                              <FileJson className="h-3 w-3 mr-1" />
+                              JSON
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

@@ -188,3 +188,74 @@ export function watchMigrationJob(
     cancelled = true;
   };
 }
+
+// ---------- Error report ----------
+
+export interface MigrationErrorRow {
+  entity_type: string;
+  external_id: string;
+  external_key: string | null;
+  status: string;
+  error: string | null;
+  created_at: string;
+}
+
+export async function fetchMigrationErrorRows(jobId: string): Promise<MigrationErrorRow[]> {
+  const { data, error } = await supabase
+    .from("migration_items")
+    .select("entity_type,external_id,external_key,status,error,created_at")
+    .eq("job_id", jobId)
+    .in("status", ["skipped", "failed"])
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as MigrationErrorRow[];
+}
+
+function csvEscape(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+export function rowsToCsv(rows: MigrationErrorRow[]): string {
+  const headers = ["entity_type", "external_id", "external_key", "status", "reason", "recorded_at"];
+  const lines = [headers.join(",")];
+  for (const r of rows) {
+    lines.push(
+      [r.entity_type, r.external_id, r.external_key ?? "", r.status, r.error ?? "", r.created_at]
+        .map(csvEscape)
+        .join(","),
+    );
+  }
+  return lines.join("\n");
+}
+
+export function downloadBlob(filename: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+export async function downloadMigrationErrorReport(
+  jobId: string,
+  fmt: "csv" | "json",
+): Promise<number> {
+  const rows = await fetchMigrationErrorRows(jobId);
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  if (fmt === "csv") {
+    downloadBlob(`migration-${jobId.slice(0, 8)}-errors-${stamp}.csv`, rowsToCsv(rows), "text/csv");
+  } else {
+    downloadBlob(
+      `migration-${jobId.slice(0, 8)}-errors-${stamp}.json`,
+      JSON.stringify({ jobId, generatedAt: new Date().toISOString(), count: rows.length, rows }, null, 2),
+      "application/json",
+    );
+  }
+  return rows.length;
+}
