@@ -736,7 +736,7 @@ Deno.serve(async (req) => {
     // Confirm caller has admin access to that org
     const { data: hasAccess } = await admin.rpc("has_org_access", {
       _user_id: userId,
-      _organization_id: job.organization_id,
+      _org_id: job.organization_id,
     });
     const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: userId });
     if (!hasAccess || !isAdmin) {
