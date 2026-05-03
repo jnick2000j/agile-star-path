@@ -72,17 +72,19 @@ export default function CourseDetail() {
 
   const reload = useCallback(async () => {
     if (!courseId || !user) return;
-    const [c, mods, less, enr, prog] = await Promise.all([
+    const [c, mods, less, enr, prog, certRes] = await Promise.all([
       supabase.from("lms_courses").select("*").eq("id", courseId).maybeSingle(),
       supabase.from("lms_modules").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_lessons").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_enrollments").select("*").eq("course_id", courseId).eq("user_id", user.id).maybeSingle(),
       supabase.from("lms_lesson_progress").select("lesson_id,completed,position_seconds,watch_seconds").eq("course_id", courseId).eq("user_id", user.id),
+      supabase.from("lms_certificates").select("*").eq("course_id", courseId).eq("user_id", user.id).maybeSingle(),
     ]);
     setCourse(c.data as LmsCourse | null);
     setModules((mods.data ?? []) as LmsModule[]);
     setLessons((less.data ?? []) as LmsLesson[]);
     setEnrollment(enr.data);
+    setCertificate(certRes.data ?? null);
     const pmap: Record<string, { completed: boolean; position_seconds: number; watch_seconds: number }> = {};
     (prog.data ?? []).forEach((p: any) => {
       pmap[p.lesson_id] = {
