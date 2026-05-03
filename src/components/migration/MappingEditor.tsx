@@ -242,6 +242,20 @@ export function MappingEditor({
     delete cur[k];
     onChange({ ...value, extra: { ...(value.extra ?? {}), requestType: cur } });
   };
+  const setRequestTypeStatus = (rtId: string, statusKey: string, internal: string) => {
+    const all = ((value.extra?.requestTypeStatus as Record<
+      string,
+      Record<string, string>
+    >) ?? {});
+    const forType = { ...(all[rtId] ?? {}), [statusKey.toLowerCase()]: internal };
+    onChange({
+      ...value,
+      extra: {
+        ...(value.extra ?? {}),
+        requestTypeStatus: { ...all, [rtId]: forType },
+      },
+    });
+  };
 
   const [newStatusKey, setNewStatusKey] = useState("");
   const [newPriorityKey, setNewPriorityKey] = useState("");
