@@ -167,6 +167,7 @@ export default function LmsAdmin() {
             <TabsTrigger value="courses">Courses ({courses.length})</TabsTrigger>
             <TabsTrigger value="paths">Learning paths ({paths.length})</TabsTrigger>
             <TabsTrigger value="certificate">Certificate</TabsTrigger>
+            <TabsTrigger value="external">External training</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setImportOpen(true)}>
