@@ -74,7 +74,7 @@ export function MigrationsPanel({ showHeader = true, organizationIdOverride }: M
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentOrganization?.id]);
+  }, [effectiveOrgId]);
 
   useEffect(() => {
     const watchers = watchersRef.current;
@@ -239,7 +239,7 @@ export function MigrationsPanel({ showHeader = true, organizationIdOverride }: M
         </CardContent>
       </Card>
 
-      <MigrationWizard open={open} onOpenChange={setOpen} onCompleted={refresh} />
+      <MigrationWizard open={open} onOpenChange={setOpen} onCompleted={refresh} organizationIdOverride={organizationIdOverride} />
     </div>
   );
 }
