@@ -1,6 +1,12 @@
 // Shared types for the migration framework.
 
-export type MigrationSourceId = "jira" | "csv" | "asana" | "linear" | "trello";
+export type MigrationSourceId =
+  | "jira"
+  | "jira_service_management"
+  | "csv"
+  | "asana"
+  | "linear"
+  | "trello";
 
 export type MigrationEntityType = "project" | "task" | "issue" | "risk";
 

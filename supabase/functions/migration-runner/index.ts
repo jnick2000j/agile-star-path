@@ -13,7 +13,7 @@ const corsHeaders = {
 
 interface RunRequest {
   jobId: string;
-  source: "jira" | "csv" | string;
+  source: "jira" | "jira_service_management" | "csv" | string;
   scope: {
     selectedProjectIds?: string[];
     includeClosed?: boolean;
@@ -687,7 +687,190 @@ async function runJira(
   }
 }
 
-// ---------- HTTP entry ----------
+// ---------- Jira Service Management runner ----------
+
+interface JsmCreds {
+  base_url?: string;
+  email?: string;
+  api_token?: string;
+}
+
+async function jsmFetch<T>(c: JsmCreds, path: string): Promise<T> {
+  const u = (c.base_url ?? "").trim().replace(/\/+$/, "");
+  if (!u) throw new Error("Atlassian site URL is required");
+  const auth = btoa(`${c.email}:${c.api_token}`);
+  const res = await fetch(`${u}${path}`, {
+    headers: {
+      Accept: "application/json",
+      "X-ExperimentalApi": "opt-in",
+      Authorization: `Basic ${auth}`,
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`JSM ${res.status}: ${body.slice(0, 200) || res.statusText}`);
+  }
+  return (await res.json()) as T;
+}
+
+interface JsmRequestDto {
+  issueId: string;
+  issueKey: string;
+  requestTypeId?: string;
+  serviceDeskId?: string;
+  createdDate?: { iso8601?: string };
+  reporter?: { emailAddress?: string; displayName?: string };
+  requestFieldValues?: { fieldId: string; label?: string; value?: unknown }[];
+  currentStatus?: { status?: string; statusDate?: { iso8601?: string } };
+}
+
+async function runJsm(
+  ctx: JobContext,
+  req: RunRequest,
+  summary: SummaryShape,
+): Promise<void> {
+  const c = req.creds as JsmCreds;
+  const supa = (ctx as unknown as { supa: SupabaseClient }).supa;
+  const serviceDeskIds = req.scope.selectedProjectIds ?? [];
+  if (serviceDeskIds.length === 0) return;
+
+  // Discover service desks for project metadata
+  const all = await jsmFetch<{
+    values: { id: string; projectId: string; projectKey: string; projectName: string }[];
+  }>(c, "/rest/servicedeskapi/servicedesk?limit=100");
+  const chosen = (all.values ?? []).filter((sd) => serviceDeskIds.includes(sd.id));
+  ctx.setTotal(chosen.length);
+
+  // Create one internal project per service desk
+  const projMap = new Map<string, string>(); // serviceDeskId -> internal project id
+  for (const sd of chosen) {
+    try {
+      const { data, error } = await supa
+        .from("projects")
+        .insert({
+          organization_id: ctx.organizationId,
+          name: `${sd.projectName} (Service Desk)`,
+          description: `Imported from Jira Service Management (${sd.projectKey})`,
+          stage: "executing",
+          priority: "medium",
+          health: "green",
+          methodology: "ITIL",
+          created_by: ctx.userId,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      projMap.set(sd.id, data.id);
+      summary.createdProjects += 1;
+      await ctx.recordItem({
+        entity_type: "project",
+        external_id: sd.id,
+        external_key: sd.projectKey,
+        internal_id: data.id,
+        status: "created",
+      });
+      await ctx.tick(`Service desk: ${sd.projectName}`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      summary.errors.push({ entity: "project", externalId: sd.id, message: msg });
+      await ctx.recordItem({
+        entity_type: "project",
+        external_id: sd.id,
+        external_key: sd.projectKey,
+        status: "failed",
+        error: msg,
+      });
+    }
+  }
+
+  // Fetch + import customer requests per service desk
+  for (const sd of chosen) {
+    const internalId = projMap.get(sd.id);
+    if (!internalId) continue;
+
+    let start = 0;
+    const pageSize = 50;
+    while (true) {
+      let page: { values: JsmRequestDto[]; isLastPage: boolean; size: number };
+      try {
+        page = await jsmFetch(
+          c,
+          `/rest/servicedeskapi/request?serviceDeskId=${sd.id}&expand=status,requestType&start=${start}&limit=${pageSize}`,
+        );
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        summary.errors.push({
+          entity: "issue",
+          externalId: `${sd.projectKey}@${start}`,
+          message: msg,
+        });
+        break;
+      }
+
+      ctx.setTotal(ctx.done + page.values.length);
+
+      for (const r of page.values) {
+        try {
+          const summaryField = r.requestFieldValues?.find((f) => f.fieldId === "summary");
+          const descField = r.requestFieldValues?.find((f) => f.fieldId === "description");
+          const priorityField = r.requestFieldValues?.find((f) => f.fieldId === "priority");
+          const statusName = r.currentStatus?.status ?? "Open";
+          const status = mapStatus(statusName, req.mapping);
+
+          const reporter = r.reporter
+            ? `\n\n_Reporter: ${r.reporter.displayName ?? ""} <${r.reporter.emailAddress ?? ""}>_`
+            : "";
+          const reqTypeNote = r.requestTypeId ? `\n_Request type: ${r.requestTypeId}_` : "";
+          const description = `${(descField?.value as string) ?? ""}${reporter}${reqTypeNote}`;
+
+          const priorityValue = (() => {
+            const v = priorityField?.value as { name?: string } | string | undefined;
+            if (typeof v === "string") return v;
+            return v?.name;
+          })();
+
+          const { data, error } = await supa
+            .from("issues")
+            .insert({
+              organization_id: ctx.organizationId,
+              project_id: internalId,
+              title: ((summaryField?.value as string) ?? r.issueKey).slice(0, 240),
+              description,
+              type: "incident",
+              priority: mapPriority(priorityValue, req.mapping),
+              status: status === "completed" ? "closed" : "open",
+              created_by: ctx.userId,
+            })
+            .select("id")
+            .single();
+          if (error) throw error;
+          summary.createdIssues += 1;
+          await ctx.recordItem({
+            entity_type: "issue",
+            external_id: r.issueId,
+            external_key: r.issueKey,
+            internal_id: data.id,
+            status: "created",
+          });
+          await ctx.tick(`${r.issueKey}: ${(summaryField?.value as string) ?? ""}`);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          summary.errors.push({ entity: "issue", externalId: r.issueId, message: msg });
+          await ctx.recordItem({
+            entity_type: "issue",
+            external_id: r.issueId,
+            external_key: r.issueKey,
+            status: "failed",
+            error: msg,
+          });
+        }
+      }
+
+      start += page.values.length;
+      if (page.isLastPage || page.values.length === 0) break;
+    }
+  }
+}
 
 declare const EdgeRuntime: { waitUntil: (p: Promise<unknown>) => void } | undefined;
 
@@ -801,6 +984,8 @@ Deno.serve(async (req) => {
           await runCsv(ctx, body, summary);
         } else if (body.source === "jira") {
           await runJira(ctx, body, summary);
+        } else if (body.source === "jira_service_management") {
+          await runJsm(ctx, body, summary);
         } else {
           throw new Error(`Unknown source: ${body.source}`);
         }
