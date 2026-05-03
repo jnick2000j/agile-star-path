@@ -302,10 +302,6 @@ export default function AdminPanel() {
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
           <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
-          <TabsTrigger value="migrations" className="gap-1">
-            <ArrowLeftRight className="h-3.5 w-3.5" />
-            Migrations
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -604,10 +600,6 @@ export default function AdminPanel() {
 
         <TabsContent value="email">
           <EmailSettings />
-        </TabsContent>
-
-        <TabsContent value="migrations">
-          <MigrationsPanel />
         </TabsContent>
       </Tabs>
     </AppLayout>
