@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertCircle, CheckCircle2, Loader2, ChevronRight, ChevronLeft, Plug } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ChevronRight, ChevronLeft, Plug, Download, FileSpreadsheet } from "lucide-react";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { listMigrationSources, getMigrationSource } from "@/lib/migration/registry";
@@ -178,6 +178,33 @@ export function MigrationWizard({
                   Credentials are kept in memory only and never stored.
                 </AlertDescription>
               </Alert>
+            )}
+            {adapter.id === "csv" && (
+              <div className="rounded-md border p-3 space-y-2 bg-accent/30">
+                <div className="flex items-start gap-2">
+                  <FileSpreadsheet className="h-4 w-4 text-primary mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium">Need a starting point?</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Download a template with the required headers and sample rows.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <Button asChild size="sm" variant="secondary" className="h-7 text-xs">
+                    <a href="/migration-templates/migration-templates.xlsx" download>
+                      <Download className="h-3 w-3 mr-1" /> All-in-one .xlsx
+                    </a>
+                  </Button>
+                  {(["projects", "tasks", "issues", "risks"] as const).map((k) => (
+                    <Button key={k} asChild size="sm" variant="outline" className="h-7 text-xs">
+                      <a href={`/migration-templates/${k}.csv`} download>
+                        <Download className="h-3 w-3 mr-1" /> {k}.csv
+                      </a>
+                    </Button>
+                  ))}
+                </div>
+              </div>
             )}
             {adapter.credentialFields.map((f) => (
               <div key={f.name} className="space-y-1">
