@@ -265,6 +265,10 @@ export default function LmsAdmin() {
         <TabsContent value="certificate">
           <LmsCertificateSettings />
         </TabsContent>
+
+        <TabsContent value="external">
+          <LmsExternalTrainingAdmin />
+        </TabsContent>
       </Tabs>
 
       {managePath && (
