@@ -28,19 +28,33 @@ export function JsmContactsSummary() {
     enabled: !!currentOrganization?.id,
     queryFn: async () => {
       const orgId = currentOrganization!.id;
-      const { data, error } = await supabase
+
+      // Per-ticket attachments — used for role mix + top customer orgs by ticket volume
+      const { data: contactData, error: contactErr } = await supabase
         .from("migration_contacts")
         .select(
           "role,display_name,email,customer_organization_name,entity_type",
         )
         .eq("organization_id", orgId)
         .limit(2000);
-      if (error) throw error;
-      const rows = (data ?? []) as ContactRow[];
+      if (contactErr) throw contactErr;
+      const rows = (contactData ?? []) as ContactRow[];
+
+      // Deduplicated directory — the source of truth for "unique people / orgs"
+      const { data: dirData, error: dirErr } = await supabase
+        .from("migration_contact_directory")
+        .select("contact_type,ticket_count,organization_name")
+        .eq("organization_id", orgId)
+        .limit(2000);
+      if (dirErr) throw dirErr;
+      const directory = (dirData ?? []) as {
+        contact_type: "person" | "organization";
+        ticket_count: number;
+        organization_name: string | null;
+      }[];
 
       const byRole = new Map<string, number>();
       const byOrg = new Map<string, number>();
-      const reporters = new Set<string>();
       for (const r of rows) {
         byRole.set(r.role, (byRole.get(r.role) ?? 0) + 1);
         if (r.customer_organization_name) {
@@ -49,10 +63,10 @@ export function JsmContactsSummary() {
             (byOrg.get(r.customer_organization_name) ?? 0) + 1,
           );
         }
-        if (r.role === "reporter" && (r.email || r.display_name)) {
-          reporters.add((r.email ?? r.display_name) as string);
-        }
       }
+
+      const uniquePeople = directory.filter((d) => d.contact_type === "person").length;
+      const uniqueOrgs = directory.filter((d) => d.contact_type === "organization").length;
 
       const topOrgs = [...byOrg.entries()]
         .sort((a, b) => b[1] - a[1])
@@ -60,9 +74,9 @@ export function JsmContactsSummary() {
 
       return {
         total: rows.length,
-        reporters: reporters.size,
+        uniquePeople,
+        uniqueOrgs,
         participants: byRole.get("participant") ?? 0,
-        customerOrgs: byRole.get("customer_organization") ?? 0,
         topOrgs,
       };
     },
