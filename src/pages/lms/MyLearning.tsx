@@ -137,6 +137,10 @@ export default function MyLearning() {
               ))
             )}
           </TabsContent>
+
+          <TabsContent value="external" className="mt-4">
+            <ExternalTrainingPanel />
+          </TabsContent>
         </Tabs>
       </div>
     </AppLayout>
