@@ -785,9 +785,6 @@ export default function HelpdeskTicketDetail() {
                     <Save className="h-4 w-4 mr-2" /> Mark as Resolved
                   </Button>
                 )}
-                <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
-                  <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
-                </Button>
               </div>
             </div>
           </div>
