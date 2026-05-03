@@ -350,12 +350,36 @@ function CourseDialog({ editing, onSave }: { editing: LmsCourse | null; onSave: 
 }
 
 function PathDialog({ editing, onSave }: { editing: LearningPath | null; onSave: (f: Partial<LearningPath>) => void }) {
+  const { currentOrganization } = useOrganization();
   const [form, setForm] = useState<Partial<LearningPath>>(() => editing ?? {
-    title: "", description: "", status: "draft",
+    title: "", description: "", status: "draft", cover_image_url: null,
   });
+  const [uploading, setUploading] = useState(false);
   useEffect(() => {
-    setForm(editing ?? { title: "", description: "", status: "draft" });
+    setForm(editing ?? { title: "", description: "", status: "draft", cover_image_url: null });
   }, [editing]);
+
+  const handleCoverUpload = async (file: File) => {
+    if (!currentOrganization?.id) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please upload an image file");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Image must be under 5MB");
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${currentOrganization.id}/paths/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("lms-covers").upload(path, file, {
+        contentType: file.type, upsert: false,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("lms-covers").getPublicUrl(path);
+      setForm((f) => ({ ...f, cover_image_url: data.publicUrl }));
+      toast.success("Cover image uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <DialogContent>
@@ -380,6 +404,41 @@ function PathDialog({ editing, onSave }: { editing: LearningPath | null; onSave:
           />
         </div>
         <div>
+          <Label>Cover image</Label>
+          <div className="flex items-start gap-3 mt-1">
+            {form.cover_image_url ? (
+              <div className="relative">
+                <img src={form.cover_image_url} alt="Cover" className="h-24 w-40 rounded border object-cover" />
+                <Button
+                  type="button" size="icon" variant="destructive"
+                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                  onClick={() => setForm({ ...form, cover_image_url: null })}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="h-24 w-40 rounded border border-dashed bg-muted/40 flex items-center justify-center">
+                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                id="path-cover-input" type="file" accept="image/*" className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCoverUpload(f); e.target.value = ""; }}
+              />
+              <Button
+                type="button" variant="outline" size="sm" disabled={uploading}
+                onClick={() => document.getElementById("path-cover-input")?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {uploading ? "Uploading…" : form.cover_image_url ? "Replace image" : "Upload image"}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1">PNG, JPG, or WebP. Max 5 MB.</p>
+            </div>
+          </div>
+        </div>
+        <div>
           <Label>Status</Label>
           <Select value={form.status ?? "draft"} onValueChange={(v) => setForm({ ...form, status: v as PathStatus })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -392,7 +451,7 @@ function PathDialog({ editing, onSave }: { editing: LearningPath | null; onSave:
         </div>
       </div>
       <DialogFooter>
-        <Button onClick={() => onSave(form)}>Save</Button>
+        <Button onClick={() => onSave(form)} disabled={uploading}>Save</Button>
       </DialogFooter>
     </DialogContent>
   );
