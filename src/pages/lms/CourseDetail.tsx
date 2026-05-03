@@ -32,7 +32,7 @@ import { downloadCertificate } from "@/lib/certificate";
 
 export default function CourseDetail() {
   const { id: courseId } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const [course, setCourse] = useState<LmsCourse | null>(null);
   const [modules, setModules] = useState<LmsModule[]>([]);
