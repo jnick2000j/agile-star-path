@@ -42,6 +42,7 @@ import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
 import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
+import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
@@ -253,6 +254,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="modules">Module Toggles</TabsTrigger>
+          <TabsTrigger value="migrations">Migrations</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
@@ -480,6 +482,10 @@ export default function PlatformAdmin() {
 
         <TabsContent value="modules" className="space-y-4">
           <PlatformModuleToggles />
+        </TabsContent>
+
+        <TabsContent value="migrations" className="space-y-4">
+          <PlatformMigrationsManager />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">
