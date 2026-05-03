@@ -147,15 +147,24 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
     return { projects: [], counts, warnings };
   },
 
-  async suggestMapping(creds): Promise<FieldMapping> {
+  async suggestMapping(creds, scope): Promise<FieldMapping> {
     const c = creds as JsmCreds;
     const status: Record<string, string> = { ...DEFAULT_STATUS_MAP };
     const priority: Record<string, string> = { ...DEFAULT_PRIORITY_MAP };
-    const discovered: { statuses: string[]; priorities: string[]; issueTypes: string[] } = {
+    const requestType: Record<string, string> = {};
+    const requestTypeLabels: Record<string, string> = {};
+    const discovered: {
+      statuses: string[];
+      priorities: string[];
+      issueTypes: string[];
+      requestTypes: string[];
+    } = {
       statuses: Object.keys(DEFAULT_STATUS_MAP),
       priorities: Object.keys(DEFAULT_PRIORITY_MAP),
       issueTypes: [],
+      requestTypes: [],
     };
+
     try {
       const statuses = await jsmFetch<{ name: string }[]>(c, "/rest/api/3/status");
       for (const s of statuses) {
@@ -164,7 +173,38 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
         if (!status[k]) status[k] = DEFAULT_STATUS_MAP[k] ?? "not_started";
       }
     } catch { /* optional */ }
-    return { status, priority, extra: { discovered } };
+
+    // Discover request types per chosen service desk
+    const sdIds = scope.selectedProjectIds ?? [];
+    for (const sdId of sdIds) {
+      try {
+        const rt = await jsmFetch<{
+          values: { id: string; name: string; description?: string }[];
+        }>(c, `/rest/servicedeskapi/servicedesk/${sdId}/requesttype?limit=100`);
+        for (const t of rt.values ?? []) {
+          // Use the request type id as the key (stable), but show the name.
+          const key = t.id;
+          requestTypeLabels[key] = t.name;
+          if (!discovered.requestTypes.includes(key)) discovered.requestTypes.push(key);
+          if (!requestType[key]) {
+            const lower = t.name.toLowerCase();
+            requestType[key] =
+              /incident|outage|down|emergency/.test(lower) ? "incident" :
+              /problem|root cause/.test(lower) ? "problem" :
+              /change|deployment|release/.test(lower) ? "change" :
+              /risk/.test(lower) ? "risk" :
+              /task|work|how[- ]to/.test(lower) ? "task" :
+              "issue";
+          }
+        }
+      } catch { /* optional per-desk */ }
+    }
+
+    return {
+      status,
+      priority,
+      extra: { discovered, requestType, requestTypeLabels },
+    };
   },
 
   async run(_creds, _scope, _mapping, _ctx: MigrationContext): Promise<ImportSummary> {
