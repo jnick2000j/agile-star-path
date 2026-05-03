@@ -984,6 +984,8 @@ Deno.serve(async (req) => {
           await runCsv(ctx, body, summary);
         } else if (body.source === "jira") {
           await runJira(ctx, body, summary);
+        } else if (body.source === "jira_service_management") {
+          await runJsm(ctx, body, summary);
         } else {
           throw new Error(`Unknown source: ${body.source}`);
         }
