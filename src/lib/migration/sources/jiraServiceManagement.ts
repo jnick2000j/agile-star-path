@@ -153,6 +153,10 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
     const priority: Record<string, string> = { ...DEFAULT_PRIORITY_MAP };
     const requestType: Record<string, string> = {};
     const requestTypeLabels: Record<string, string> = {};
+    /** Per-request-type status overrides: { [rtId]: { [statusName]: internalStatus } } */
+    const requestTypeStatus: Record<string, Record<string, string>> = {};
+    /** Per-request-type discovered status names so the UI knows what to render. */
+    const requestTypeStatusKeys: Record<string, string[]> = {};
     const discovered: {
       statuses: string[];
       priorities: string[];
@@ -174,7 +178,56 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
       }
     } catch { /* optional */ }
 
-    // Discover request types per chosen service desk
+    // Per-target default status guessers — used as starting suggestions for
+    // the per-request-type status overrides.
+    const guessByTarget = (target: string, name: string): string => {
+      const n = name.toLowerCase();
+      switch (target) {
+        case "incident":
+          if (/(triag|investigat|new|open|raised)/.test(n)) return "investigating";
+          if (/(identif|root cause)/.test(n)) return "identified";
+          if (/(monitor|recover|stabilis)/.test(n)) return "monitoring";
+          if (/(resolv|fixed|done)/.test(n)) return "resolved";
+          if (/(closed|cancel)/.test(n)) return "closed";
+          return "investigating";
+        case "problem":
+          if (/(new|open|raised)/.test(n)) return "new";
+          if (/(investig|analy)/.test(n)) return "investigating";
+          if (/(known.?error|workaround)/.test(n)) return "known_error";
+          if (/(resolv|fixed|implemented)/.test(n)) return "resolved";
+          if (/(closed|cancel)/.test(n)) return "closed";
+          return "new";
+        case "change":
+          if (/(draft|new|raised|open)/.test(n)) return "pending";
+          if (/(review|cab|assess)/.test(n)) return "under_review";
+          if (/(need.*info|waiting|pending.*info)/.test(n)) return "needs_information";
+          if (/(approv|authoris|authoriz)/.test(n)) return "approved";
+          if (/(reject|declin)/.test(n)) return "rejected";
+          if (/(withdraw|cancel)/.test(n)) return "withdrawn";
+          if (/(implement|deploy|done|complete|closed|resolv)/.test(n))
+            return "implemented";
+          return "pending";
+        case "risk":
+          if (/(open|new|identif)/.test(n)) return "open";
+          if (/(mitigat|treat|in progress)/.test(n)) return "mitigating";
+          if (/(accept)/.test(n)) return "accepted";
+          if (/(closed|resolv|cancel)/.test(n)) return "closed";
+          return "open";
+        case "task":
+          if (/(to ?do|open|new|backlog)/.test(n)) return "not_started";
+          if (/(in.?progress|doing|active)/.test(n)) return "in_progress";
+          if (/(block|wait)/.test(n)) return "blocked";
+          if (/(done|resolv|closed|complete)/.test(n)) return "completed";
+          return "not_started";
+        case "issue":
+        default:
+          if (/(done|resolv|closed|complete)/.test(n)) return "closed";
+          if (/(progress|investig|doing)/.test(n)) return "in_progress";
+          return "open";
+      }
+    };
+
+    // Discover request types per chosen service desk + their workflow statuses
     const sdIds = scope.selectedProjectIds ?? [];
     for (const sdId of sdIds) {
       try {
@@ -182,7 +235,6 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
           values: { id: string; name: string; description?: string }[];
         }>(c, `/rest/servicedeskapi/servicedesk/${sdId}/requesttype?limit=100`);
         for (const t of rt.values ?? []) {
-          // Use the request type id as the key (stable), but show the name.
           const key = t.id;
           requestTypeLabels[key] = t.name;
           if (!discovered.requestTypes.includes(key)) discovered.requestTypes.push(key);
@@ -196,6 +248,30 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
               /task|work|how[- ]to/.test(lower) ? "task" :
               "issue";
           }
+
+          // Discover the workflow statuses this request type can transition to
+          try {
+            const wf = await jsmFetch<{
+              values: { status: string }[];
+            }>(
+              c,
+              `/rest/servicedeskapi/servicedesk/${sdId}/requesttype/${key}/status?limit=100`,
+            );
+            const names = (wf.values ?? [])
+              .map((v) => v.status)
+              .filter((s): s is string => !!s);
+            // De-duplicate (some workflows repeat statuses)
+            const unique = Array.from(new Set(names));
+            if (unique.length > 0) {
+              requestTypeStatusKeys[key] = unique;
+              const target = requestType[key];
+              const overrides: Record<string, string> = {};
+              for (const name of unique) {
+                overrides[name.toLowerCase()] = guessByTarget(target, name);
+              }
+              requestTypeStatus[key] = overrides;
+            }
+          } catch { /* per-request-type workflow fetch is optional */ }
         }
       } catch { /* optional per-desk */ }
     }
@@ -203,7 +279,13 @@ export const jiraServiceManagementAdapter: MigrationSourceAdapter = {
     return {
       status,
       priority,
-      extra: { discovered, requestType, requestTypeLabels },
+      extra: {
+        discovered,
+        requestType,
+        requestTypeLabels,
+        requestTypeStatus,
+        requestTypeStatusKeys,
+      },
     };
   },
 
