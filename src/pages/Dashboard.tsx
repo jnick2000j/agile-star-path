@@ -153,7 +153,10 @@ export default function Dashboard() {
             <ChangeManagementSummary />
           </div>
 
-          <HelpdeskUsageCard />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <JsmSlaSummary />
+            <HelpdeskUsageCard />
+          </div>
         </TabsContent>
       </Tabs>
     </AppLayout>
