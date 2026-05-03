@@ -389,7 +389,30 @@ export function MigrationWizard({
               <Button variant="ghost" onClick={() => setStep("scope")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
-              <Button onClick={() => setStep("preview")} disabled={!mappingValid.ok}>
+              <Button onClick={() => setStep("contacts")} disabled={!mappingValid.ok}>
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+
+        {step === "contacts" && adapter && (
+          <div className="space-y-3 overflow-y-auto pr-1">
+            <p className="text-sm text-muted-foreground">
+              Confirm how the platform should treat each contact role coming
+              from the source. You can change this later by re-running the
+              wizard.
+            </p>
+            <ContactMappingStep
+              mapping={mapping}
+              onChange={setMapping}
+              enabled={adapter.id === "jira_service_management"}
+            />
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setStep("mapping")}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Back
+              </Button>
+              <Button onClick={() => setStep("preview")}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </DialogFooter>
