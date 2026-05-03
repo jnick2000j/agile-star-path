@@ -791,6 +791,9 @@ export default function HelpdeskTicketDetail() {
 
           {/* Action buttons: square, single row */}
           <div className="flex items-center gap-2 pt-2 border-t overflow-x-auto">
+            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
+              <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
+            </Button>
             <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none">
               <Clock className="h-4 w-4 mr-2" /> Log time
             </Button>
