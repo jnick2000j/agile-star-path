@@ -292,6 +292,20 @@ export default function CourseDetail() {
                     Passing score: {course.passing_score_percent}%
                   </p>
                 )}
+                {isCompleted && certificate && (
+                  <div className="pt-3 border-t mt-2 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Certificate serial: <span className="font-mono">{certificate.serial}</span>
+                    </p>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => issueAndDownloadCertificate(certificate)}
+                    >
+                      <Award className="h-4 w-4 mr-2" /> Download certificate
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
