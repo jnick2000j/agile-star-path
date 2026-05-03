@@ -112,6 +112,20 @@ export default function CourseDetail() {
     }
   }, [lessons, progress, activeLessonId]);
 
+  // Auto-issue + download the certificate the first time we see a completed enrollment
+  // with a certificate row available.
+  useEffect(() => {
+    if (
+      !certDownloadedRef.current &&
+      enrollment?.status === "completed" &&
+      certificate &&
+      course
+    ) {
+      certDownloadedRef.current = true;
+      issueAndDownloadCertificate(certificate, { auto: true });
+    }
+  }, [enrollment?.status, certificate, course, issueAndDownloadCertificate]);
+
   const activeLesson = useMemo(() => lessons.find((l) => l.id === activeLessonId) ?? null, [lessons, activeLessonId]);
 
   const totalLessons = lessons.filter((l) => l.required).length;
