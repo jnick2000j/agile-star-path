@@ -745,6 +745,234 @@ async function runJsm(
   const serviceDeskIds = req.scope.selectedProjectIds ?? [];
   if (serviceDeskIds.length === 0) return;
 
+  // ---- Contact directory dedupe cache (job-scoped) ----
+  // Key = "p:<accountId>" | "p:e:<lower(email)>" | "o:<extId>" | "o:n:<lower(name)>"
+  // Value = directory id + linked stakeholder id (if promoted)
+  type DirCacheEntry = { id: string; linkedStakeholderId: string | null };
+  const directoryCache = new Map<string, DirCacheEntry>();
+
+  const personKeys = (accountId?: string | null, email?: string | null) => {
+    const keys: string[] = [];
+    if (accountId) keys.push(`p:${accountId}`);
+    if (email) keys.push(`p:e:${email.toLowerCase()}`);
+    return keys;
+  };
+  const orgKeys = (extId?: string | null, name?: string | null) => {
+    const keys: string[] = [];
+    if (extId) keys.push(`o:${extId}`);
+    if (name) keys.push(`o:n:${name.toLowerCase()}`);
+    return keys;
+  };
+
+  /**
+   * Resolve (or create) a directory entry, returning its id. Updates
+   * last_seen_at + ticket_count and reuses any prior stakeholder link so the
+   * same person/org is reused across every ticket they appear on.
+   */
+  const resolveDirectory = async (
+    contactType: "person" | "organization",
+    payload: {
+      external_account_id?: string | null;
+      email?: string | null;
+      display_name?: string | null;
+      organization_name?: string | null;
+      raw?: unknown;
+    },
+  ): Promise<DirCacheEntry | null> => {
+    const keys =
+      contactType === "person"
+        ? personKeys(payload.external_account_id, payload.email)
+        : orgKeys(payload.external_account_id, payload.organization_name);
+    if (keys.length === 0) return null;
+
+    // Cache hit?
+    for (const k of keys) {
+      const hit = directoryCache.get(k);
+      if (hit) {
+        // Bump usage in DB but reuse cached id
+        await supa
+          .from("migration_contact_directory")
+          .update({
+            last_seen_at: new Date().toISOString(),
+            ticket_count: undefined,
+          })
+          .eq("id", hit.id);
+        // Increment via RPC-less pattern: small race is acceptable here
+        await supa.rpc("increment_directory_ticket_count", { _id: hit.id }).then(
+          () => {},
+          () => {},
+        );
+        return hit;
+      }
+    }
+
+    // DB lookup using our unique-index columns
+    let existing:
+      | { id: string; linked_stakeholder_id: string | null }
+      | null = null;
+    if (payload.external_account_id) {
+      const { data } = await supa
+        .from("migration_contact_directory")
+        .select("id,linked_stakeholder_id")
+        .eq("organization_id", ctx.organizationId)
+        .eq("source", "jira_service_management")
+        .eq("contact_type", contactType)
+        .eq("external_account_id", payload.external_account_id)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+    if (!existing && contactType === "person" && payload.email) {
+      const { data } = await supa
+        .from("migration_contact_directory")
+        .select("id,linked_stakeholder_id")
+        .eq("organization_id", ctx.organizationId)
+        .eq("source", "jira_service_management")
+        .eq("contact_type", "person")
+        .ilike("email", payload.email)
+        .is("external_account_id", null)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+    if (!existing && contactType === "organization" && payload.organization_name) {
+      const { data } = await supa
+        .from("migration_contact_directory")
+        .select("id,linked_stakeholder_id")
+        .eq("organization_id", ctx.organizationId)
+        .eq("source", "jira_service_management")
+        .eq("contact_type", "organization")
+        .ilike("organization_name", payload.organization_name)
+        .is("external_account_id", null)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+
+    let entry: DirCacheEntry;
+    if (existing) {
+      entry = { id: existing.id, linkedStakeholderId: existing.linked_stakeholder_id };
+      await supa
+        .from("migration_contact_directory")
+        .update({ last_seen_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      await supa.rpc("increment_directory_ticket_count", { _id: existing.id }).then(
+        () => {},
+        () => {},
+      );
+    } else {
+      const { data, error } = await supa
+        .from("migration_contact_directory")
+        .insert({
+          organization_id: ctx.organizationId,
+          source: "jira_service_management",
+          contact_type: contactType,
+          external_account_id: payload.external_account_id ?? null,
+          email: payload.email ?? null,
+          display_name: payload.display_name ?? null,
+          organization_name: payload.organization_name ?? null,
+          ticket_count: 1,
+          raw: (payload.raw ?? null) as Record<string, unknown> | null,
+        })
+        .select("id,linked_stakeholder_id")
+        .single();
+      if (error || !data) return null;
+      entry = { id: data.id, linkedStakeholderId: data.linked_stakeholder_id };
+    }
+
+    for (const k of keys) directoryCache.set(k, entry);
+    return entry;
+  };
+
+  /** Promote a directory entry to the Stakeholder register (idempotent). */
+  const ensureStakeholderForDirectory = async (
+    dirId: string,
+    role: string,
+    payload: {
+      display_name?: string | null;
+      email?: string | null;
+      organization_name?: string | null;
+    },
+  ): Promise<string | null> => {
+    const cached = [...directoryCache.values()].find((e) => e.id === dirId);
+    if (cached?.linkedStakeholderId) return cached.linkedStakeholderId;
+
+    // Re-check from DB in case another loop iteration already promoted it
+    const { data: dirRow } = await supa
+      .from("migration_contact_directory")
+      .select("linked_stakeholder_id")
+      .eq("id", dirId)
+      .maybeSingle();
+    if (dirRow?.linked_stakeholder_id) {
+      if (cached) cached.linkedStakeholderId = dirRow.linked_stakeholder_id;
+      return dirRow.linked_stakeholder_id;
+    }
+
+    const name = payload.display_name
+      ?? payload.organization_name
+      ?? payload.email
+      ?? "Unknown contact";
+
+    // Reuse pre-existing manually-created stakeholder with the same email
+    let stakeholderId: string | null = null;
+    if (payload.email) {
+      const { data } = await supa
+        .from("stakeholders")
+        .select("id")
+        .eq("organization_id", ctx.organizationId)
+        .ilike("email", payload.email)
+        .maybeSingle();
+      if (data) stakeholderId = data.id;
+    }
+    if (!stakeholderId && payload.organization_name && !payload.email) {
+      const { data } = await supa
+        .from("stakeholders")
+        .select("id")
+        .eq("organization_id", ctx.organizationId)
+        .is("email", null)
+        .ilike("organization", payload.organization_name)
+        .maybeSingle();
+      if (data) stakeholderId = data.id;
+    }
+
+    if (!stakeholderId) {
+      const { data, error } = await supa
+        .from("stakeholders")
+        .insert({
+          organization_id: ctx.organizationId,
+          name,
+          email: payload.email ?? null,
+          organization: payload.organization_name ?? null,
+          role:
+            role === "customer_organization" ? "Customer organization"
+              : role === "reporter" ? "Service requester"
+              : role === "participant" ? "Service participant"
+              : "Service assignee",
+          influence: "medium",
+          interest: "medium",
+          engagement: "neutral",
+          created_by: ctx.userId,
+        })
+        .select("id")
+        .single();
+      if (error || !data) return null;
+      stakeholderId = data.id;
+    }
+
+    await supa
+      .from("migration_contact_directory")
+      .update({ linked_stakeholder_id: stakeholderId })
+      .eq("id", dirId);
+    if (cached) cached.linkedStakeholderId = stakeholderId;
+    return stakeholderId;
+  };
+
+  // Expose for the per-ticket loop below via closure
+  (ctx as unknown as {
+    _resolveDirectory: typeof resolveDirectory;
+    _ensureStakeholderForDirectory: typeof ensureStakeholderForDirectory;
+  })._resolveDirectory = resolveDirectory;
+  (ctx as unknown as {
+    _ensureStakeholderForDirectory: typeof ensureStakeholderForDirectory;
+  })._ensureStakeholderForDirectory = ensureStakeholderForDirectory;
+
   // Discover service desks for project metadata
   const all = await jsmFetch<{
     values: { id: string; projectId: string; projectKey: string; projectName: string }[];
@@ -1074,6 +1302,9 @@ async function runJsm(
 
             // Fetch + persist contacts (reporter, participants, customer orgs)
             // — gated by the user's contactRouting choices on the wizard.
+            // Each contact is deduped against the migration_contact_directory
+            // so the same person/org is reused across every ticket where they
+            // appear, both within this run and across runs.
             try {
               const routingDefaults: Record<string, "attach_only" | "attach_and_stakeholder" | "skip"> = {
                 reporter: "attach_only",
@@ -1089,11 +1320,35 @@ async function runJsm(
                 "attach_only" | "attach_and_stakeholder" | "skip"
               >;
 
-              const contactRows: Record<string, unknown>[] = [];
-              const stakeholderRows: Record<string, unknown>[] = [];
+              const resolveDir = (ctx as unknown as {
+                _resolveDirectory: (
+                  contactType: "person" | "organization",
+                  payload: {
+                    external_account_id?: string | null;
+                    email?: string | null;
+                    display_name?: string | null;
+                    organization_name?: string | null;
+                    raw?: unknown;
+                  },
+                ) => Promise<{ id: string; linkedStakeholderId: string | null } | null>;
+              })._resolveDirectory;
+              const ensureStakeholder = (ctx as unknown as {
+                _ensureStakeholderForDirectory: (
+                  dirId: string,
+                  role: string,
+                  payload: {
+                    display_name?: string | null;
+                    email?: string | null;
+                    organization_name?: string | null;
+                  },
+                ) => Promise<string | null>;
+              })._ensureStakeholderForDirectory;
 
-              const pushContact = (
+              const contactRows: Record<string, unknown>[] = [];
+
+              const recordContact = async (
                 role: string,
+                contactType: "person" | "organization",
                 payload: {
                   account_id?: string | null;
                   display_name?: string | null;
@@ -1105,6 +1360,26 @@ async function runJsm(
               ) => {
                 const mode = routing[role] ?? "attach_only";
                 if (mode === "skip") return;
+
+                const dir = await resolveDir(contactType, {
+                  external_account_id:
+                    contactType === "person"
+                      ? payload.account_id
+                      : payload.customer_organization_id,
+                  email: payload.email,
+                  display_name: payload.display_name,
+                  organization_name: payload.customer_organization_name,
+                  raw: payload.raw,
+                });
+
+                if (mode === "attach_and_stakeholder" && dir) {
+                  await ensureStakeholder(dir.id, role, {
+                    display_name: payload.display_name,
+                    email: payload.email,
+                    organization_name: payload.customer_organization_name,
+                  });
+                }
+
                 contactRows.push({
                   organization_id: ctx.organizationId,
                   job_id: ctx.jobId,
@@ -1118,34 +1393,14 @@ async function runJsm(
                   email: payload.email ?? null,
                   customer_organization_id: payload.customer_organization_id ?? null,
                   customer_organization_name: payload.customer_organization_name ?? null,
+                  directory_id: dir?.id ?? null,
                   raw: payload.raw as Record<string, unknown>,
                 });
-                if (mode === "attach_and_stakeholder") {
-                  const name = payload.display_name
-                    ?? payload.customer_organization_name
-                    ?? payload.email
-                    ?? "Unknown contact";
-                  stakeholderRows.push({
-                    organization_id: ctx.organizationId,
-                    name,
-                    email: payload.email ?? null,
-                    organization: payload.customer_organization_name ?? null,
-                    role:
-                      role === "customer_organization" ? "Customer organization"
-                        : role === "reporter" ? "Service requester"
-                        : role === "participant" ? "Service participant"
-                        : "Service assignee",
-                    influence: "medium",
-                    interest: "medium",
-                    engagement: "neutral",
-                    created_by: ctx.userId,
-                  });
-                }
               };
 
               // Reporter
               if (r.reporter) {
-                pushContact("reporter", {
+                await recordContact("reporter", "person", {
                   account_id: r.reporter.accountId,
                   display_name: r.reporter.displayName,
                   email: r.reporter.emailAddress,
@@ -1162,7 +1417,7 @@ async function runJsm(
                   );
                   for (const p of partResp.values ?? []) {
                     if (p.accountId && r.reporter?.accountId === p.accountId) continue;
-                    pushContact("participant", {
+                    await recordContact("participant", "person", {
                       account_id: p.accountId,
                       display_name: p.displayName,
                       email: p.emailAddress,
@@ -1180,7 +1435,7 @@ async function runJsm(
                     `/rest/servicedeskapi/request/${r.issueKey}/organization?limit=50`,
                   );
                   for (const o of orgResp.values ?? []) {
-                    pushContact("customer_organization", {
+                    await recordContact("customer_organization", "organization", {
                       customer_organization_id: String(o.id),
                       customer_organization_name: o.name,
                       display_name: o.name,
@@ -1192,47 +1447,6 @@ async function runJsm(
 
               if (contactRows.length > 0) {
                 await supa.from("migration_contacts").insert(contactRows);
-              }
-              if (stakeholderRows.length > 0) {
-                // Best-effort dedupe: skip stakeholders that already exist for
-                // this org with the same email or organization name.
-                const emails = stakeholderRows
-                  .map((s) => s.email)
-                  .filter((e): e is string => typeof e === "string");
-                const orgs = stakeholderRows
-                  .map((s) => s.organization)
-                  .filter((o): o is string => typeof o === "string");
-                const existing = new Set<string>();
-                if (emails.length || orgs.length) {
-                  const { data: ex } = await supa
-                    .from("stakeholders")
-                    .select("email,organization")
-                    .eq("organization_id", ctx.organizationId)
-                    .or(
-                      [
-                        emails.length ? `email.in.(${emails.map((e) => `"${e}"`).join(",")})` : "",
-                        orgs.length ? `organization.in.(${orgs.map((o) => `"${o}"`).join(",")})` : "",
-                      ]
-                        .filter(Boolean)
-                        .join(","),
-                    );
-                  for (const row of (ex ?? []) as { email?: string; organization?: string }[]) {
-                    if (row.email) existing.add(`e:${row.email.toLowerCase()}`);
-                    if (row.organization) existing.add(`o:${row.organization.toLowerCase()}`);
-                  }
-                }
-                const fresh = stakeholderRows.filter((s) => {
-                  const e = (s.email as string | null)?.toLowerCase();
-                  const o = (s.organization as string | null)?.toLowerCase();
-                  if (e && existing.has(`e:${e}`)) return false;
-                  if (o && existing.has(`o:${o}`)) return false;
-                  if (e) existing.add(`e:${e}`);
-                  if (o) existing.add(`o:${o}`);
-                  return true;
-                });
-                if (fresh.length > 0) {
-                  await supa.from("stakeholders").insert(fresh);
-                }
               }
             } catch {
               // Contacts are best-effort
