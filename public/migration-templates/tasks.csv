@@ -1,0 +1,4 @@
+external_id,project_external_id,name,description,status,priority,planned_start,planned_end,assigned_to_email
+T-001,PRJ-001,Audit current site,Inventory pages and components,completed,medium,2026-01-15,2026-01-22,alice@example.com
+T-002,PRJ-001,Wireframe homepage,Low-fi wireframes for review,in_progress,high,2026-01-23,2026-02-05,bob@example.com
+T-003,PRJ-002,Map chart of accounts,Align legacy and target GL,not_started,high,2026-02-10,2026-02-28,
