@@ -713,15 +713,26 @@ async function jsmFetch<T>(c: JsmCreds, path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+interface JsmUserDto {
+  accountId?: string;
+  emailAddress?: string;
+  displayName?: string;
+}
+
 interface JsmRequestDto {
   issueId: string;
   issueKey: string;
   requestTypeId?: string;
   serviceDeskId?: string;
   createdDate?: { iso8601?: string };
-  reporter?: { emailAddress?: string; displayName?: string };
+  reporter?: JsmUserDto;
   requestFieldValues?: { fieldId: string; label?: string; value?: unknown }[];
   currentStatus?: { status?: string; statusDate?: { iso8601?: string } };
+}
+
+interface JsmOrganizationDto {
+  id: number | string;
+  name: string;
 }
 
 async function runJsm(
