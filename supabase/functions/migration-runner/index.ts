@@ -745,6 +745,234 @@ async function runJsm(
   const serviceDeskIds = req.scope.selectedProjectIds ?? [];
   if (serviceDeskIds.length === 0) return;
 
+  // ---- Contact directory dedupe cache (job-scoped) ----
+  // Key = "p:<accountId>" | "p:e:<lower(email)>" | "o:<extId>" | "o:n:<lower(name)>"
+  // Value = directory id + linked stakeholder id (if promoted)
+  type DirCacheEntry = { id: string; linkedStakeholderId: string | null };
+  const directoryCache = new Map<string, DirCacheEntry>();
+
+  const personKeys = (accountId?: string | null, email?: string | null) => {
+    const keys: string[] = [];
+    if (accountId) keys.push(`p:${accountId}`);
+    if (email) keys.push(`p:e:${email.toLowerCase()}`);
+    return keys;
+  };
+  const orgKeys = (extId?: string | null, name?: string | null) => {
+    const keys: string[] = [];
+    if (extId) keys.push(`o:${extId}`);
+    if (name) keys.push(`o:n:${name.toLowerCase()}`);
+    return keys;
+  };
+
+  /**
+   * Resolve (or create) a directory entry, returning its id. Updates
+   * last_seen_at + ticket_count and reuses any prior stakeholder link so the
+   * same person/org is reused across every ticket they appear on.
+   */
+  const resolveDirectory = async (
+    contactType: "person" | "organization",
+    payload: {
+      external_account_id?: string | null;
+      email?: string | null;
+      display_name?: string | null;
+      organization_name?: string | null;
+      raw?: unknown;
+    },
+  ): Promise<DirCacheEntry | null> => {
+    const keys =
+      contactType === "person"
+        ? personKeys(payload.external_account_id, payload.email)
+        : orgKeys(payload.external_account_id, payload.organization_name);
+    if (keys.length === 0) return null;
+
+    // Cache hit?
+    for (const k of keys) {
+      const hit = directoryCache.get(k);
+      if (hit) {
+        // Bump usage in DB but reuse cached id
+        await supa
+          .from("migration_contact_directory")
+          .update({
+            last_seen_at: new Date().toISOString(),
+            ticket_count: undefined,
+          })
+          .eq("id", hit.id);
+        // Increment via RPC-less pattern: small race is acceptable here
+        await supa.rpc("increment_directory_ticket_count", { _id: hit.id }).then(
+          () => {},
+          () => {},
+        );
+        return hit;
+      }
+    }
+
+    // DB lookup using our unique-index columns
+    let existing:
+      | { id: string; linked_stakeholder_id: string | null }
+      | null = null;
+    if (payload.external_account_id) {
+      const { data } = await supa
+        .from("migration_contact_directory")
+        .select("id,linked_stakeholder_id")
+        .eq("organization_id", ctx.organizationId)
+        .eq("source", "jira_service_management")
+        .eq("contact_type", contactType)
+        .eq("external_account_id", payload.external_account_id)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+    if (!existing && contactType === "person" && payload.email) {
+      const { data } = await supa
+        .from("migration_contact_directory")
+        .select("id,linked_stakeholder_id")
+        .eq("organization_id", ctx.organizationId)
+        .eq("source", "jira_service_management")
+        .eq("contact_type", "person")
+        .ilike("email", payload.email)
+        .is("external_account_id", null)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+    if (!existing && contactType === "organization" && payload.organization_name) {
+      const { data } = await supa
+        .from("migration_contact_directory")
+        .select("id,linked_stakeholder_id")
+        .eq("organization_id", ctx.organizationId)
+        .eq("source", "jira_service_management")
+        .eq("contact_type", "organization")
+        .ilike("organization_name", payload.organization_name)
+        .is("external_account_id", null)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+
+    let entry: DirCacheEntry;
+    if (existing) {
+      entry = { id: existing.id, linkedStakeholderId: existing.linked_stakeholder_id };
+      await supa
+        .from("migration_contact_directory")
+        .update({ last_seen_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      await supa.rpc("increment_directory_ticket_count", { _id: existing.id }).then(
+        () => {},
+        () => {},
+      );
+    } else {
+      const { data, error } = await supa
+        .from("migration_contact_directory")
+        .insert({
+          organization_id: ctx.organizationId,
+          source: "jira_service_management",
+          contact_type: contactType,
+          external_account_id: payload.external_account_id ?? null,
+          email: payload.email ?? null,
+          display_name: payload.display_name ?? null,
+          organization_name: payload.organization_name ?? null,
+          ticket_count: 1,
+          raw: (payload.raw ?? null) as Record<string, unknown> | null,
+        })
+        .select("id,linked_stakeholder_id")
+        .single();
+      if (error || !data) return null;
+      entry = { id: data.id, linkedStakeholderId: data.linked_stakeholder_id };
+    }
+
+    for (const k of keys) directoryCache.set(k, entry);
+    return entry;
+  };
+
+  /** Promote a directory entry to the Stakeholder register (idempotent). */
+  const ensureStakeholderForDirectory = async (
+    dirId: string,
+    role: string,
+    payload: {
+      display_name?: string | null;
+      email?: string | null;
+      organization_name?: string | null;
+    },
+  ): Promise<string | null> => {
+    const cached = [...directoryCache.values()].find((e) => e.id === dirId);
+    if (cached?.linkedStakeholderId) return cached.linkedStakeholderId;
+
+    // Re-check from DB in case another loop iteration already promoted it
+    const { data: dirRow } = await supa
+      .from("migration_contact_directory")
+      .select("linked_stakeholder_id")
+      .eq("id", dirId)
+      .maybeSingle();
+    if (dirRow?.linked_stakeholder_id) {
+      if (cached) cached.linkedStakeholderId = dirRow.linked_stakeholder_id;
+      return dirRow.linked_stakeholder_id;
+    }
+
+    const name = payload.display_name
+      ?? payload.organization_name
+      ?? payload.email
+      ?? "Unknown contact";
+
+    // Reuse pre-existing manually-created stakeholder with the same email
+    let stakeholderId: string | null = null;
+    if (payload.email) {
+      const { data } = await supa
+        .from("stakeholders")
+        .select("id")
+        .eq("organization_id", ctx.organizationId)
+        .ilike("email", payload.email)
+        .maybeSingle();
+      if (data) stakeholderId = data.id;
+    }
+    if (!stakeholderId && payload.organization_name && !payload.email) {
+      const { data } = await supa
+        .from("stakeholders")
+        .select("id")
+        .eq("organization_id", ctx.organizationId)
+        .is("email", null)
+        .ilike("organization", payload.organization_name)
+        .maybeSingle();
+      if (data) stakeholderId = data.id;
+    }
+
+    if (!stakeholderId) {
+      const { data, error } = await supa
+        .from("stakeholders")
+        .insert({
+          organization_id: ctx.organizationId,
+          name,
+          email: payload.email ?? null,
+          organization: payload.organization_name ?? null,
+          role:
+            role === "customer_organization" ? "Customer organization"
+              : role === "reporter" ? "Service requester"
+              : role === "participant" ? "Service participant"
+              : "Service assignee",
+          influence: "medium",
+          interest: "medium",
+          engagement: "neutral",
+          created_by: ctx.userId,
+        })
+        .select("id")
+        .single();
+      if (error || !data) return null;
+      stakeholderId = data.id;
+    }
+
+    await supa
+      .from("migration_contact_directory")
+      .update({ linked_stakeholder_id: stakeholderId })
+      .eq("id", dirId);
+    if (cached) cached.linkedStakeholderId = stakeholderId;
+    return stakeholderId;
+  };
+
+  // Expose for the per-ticket loop below via closure
+  (ctx as unknown as {
+    _resolveDirectory: typeof resolveDirectory;
+    _ensureStakeholderForDirectory: typeof ensureStakeholderForDirectory;
+  })._resolveDirectory = resolveDirectory;
+  (ctx as unknown as {
+    _ensureStakeholderForDirectory: typeof ensureStakeholderForDirectory;
+  })._ensureStakeholderForDirectory = ensureStakeholderForDirectory;
+
   // Discover service desks for project metadata
   const all = await jsmFetch<{
     values: { id: string; projectId: string; projectKey: string; projectName: string }[];
