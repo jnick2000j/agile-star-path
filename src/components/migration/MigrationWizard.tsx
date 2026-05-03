@@ -40,6 +40,7 @@ export function MigrationWizard({
   const [step, setStep] = useState<Step>("source");
   const [sourceId, setSourceId] = useState<string | null>(null);
   const [creds, setCreds] = useState<MigrationCredentials>({});
+  const [files, setFiles] = useState<MigrationFiles>({});
   const [testing, setTesting] = useState(false);
   const [testError, setTestError] = useState<string | null>(null);
   const [remoteProjects, setRemoteProjects] = useState<RemoteProject[]>([]);
