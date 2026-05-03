@@ -24,6 +24,24 @@ const INTERNAL_ENTITIES = ["task", "issue", "risk"] as const;
 /** Where a JSM request type can land. */
 const JSM_TARGETS = ["issue", "incident", "problem", "change", "task", "risk"] as const;
 
+/** Register-specific workflow status sets (must match the DB CHECK constraints). */
+const TARGET_STATUS_OPTIONS: Record<string, readonly string[]> = {
+  issue: ["open", "in_progress", "closed"],
+  incident: ["investigating", "identified", "monitoring", "resolved", "closed"],
+  problem: ["new", "investigating", "known_error", "resolved", "closed"],
+  change: [
+    "pending",
+    "under_review",
+    "needs_information",
+    "approved",
+    "rejected",
+    "implemented",
+    "withdrawn",
+  ],
+  task: ["not_started", "in_progress", "blocked", "completed"],
+  risk: ["open", "mitigating", "accepted", "closed"],
+};
+
 export interface MappingValidationResult {
   ok: boolean;
   errors: string[];
