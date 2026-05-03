@@ -426,11 +426,46 @@ function LessonPlayer({
       )}
 
       {lesson.lesson_type !== "quiz" && !completed && (
-        <div className="flex justify-end">
-          <Button onClick={onCompleted}>Mark complete & continue</Button>
+        <div className="flex justify-end items-center gap-3">
+          {minSecs > 0 && !minMet && (
+            <span className="text-xs text-muted-foreground">
+              {minRemainingMin} min of required time remaining
+            </span>
+          )}
+          <Button onClick={onCompleted} disabled={!minMet}>Mark complete & continue</Button>
         </div>
       )}
     </div>
+  );
+}
+
+function VideoTracker({
+  src, initialPosition, onTick, onEnded,
+}: {
+  src: string;
+  initialPosition: number;
+  onTick: (currentTime: number, prevTime: number) => void;
+  onEnded: () => void;
+}) {
+  const [prev, setPrev] = useState(initialPosition);
+  return (
+    <video
+      src={src}
+      controls
+      className="w-full h-full"
+      onLoadedMetadata={(e) => {
+        const v = e.currentTarget;
+        if (initialPosition && initialPosition < v.duration - 5) v.currentTime = initialPosition;
+      }}
+      onTimeUpdate={(e) => {
+        const v = e.currentTarget;
+        if (Math.floor(v.currentTime) % 5 === 0 && Math.floor(v.currentTime) !== Math.floor(prev)) {
+          onTick(v.currentTime, prev);
+          setPrev(v.currentTime);
+        }
+      }}
+      onEnded={onEnded}
+    />
   );
 }
 
