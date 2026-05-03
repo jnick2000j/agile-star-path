@@ -112,6 +112,7 @@ export function MigrationWizard({
           scope,
           mapping,
           creds,
+          files,
         },
         (done, total, message) => setProgress({ done, total, message }),
       );
