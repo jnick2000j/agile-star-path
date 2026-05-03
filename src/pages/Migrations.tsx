@@ -11,17 +11,29 @@ import { listMigrationJobs, watchMigrationJob } from "@/lib/migration/runner";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
 
+type JobRow = {
+  id: string;
+  source: string;
+  source_label: string | null;
+  status: string;
+  totals: Record<string, number> | null;
+  progress: { done?: number; total?: number; message?: string } | null;
+  started_at: string | null;
+  error_summary: string | null;
+};
+
 export default function Migrations() {
   const { currentOrganization } = useOrganization();
   const [open, setOpen] = useState(false);
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<JobRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const watchersRef = useRef<Map<string, () => void>>(new Map());
 
   const refresh = async () => {
     if (!currentOrganization?.id) return;
     setLoading(true);
     try {
-      const data = await listMigrationJobs(currentOrganization.id);
+      const data = (await listMigrationJobs(currentOrganization.id)) as JobRow[];
       setJobs(data);
     } finally {
       setLoading(false);
@@ -32,6 +44,41 @@ export default function Migrations() {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentOrganization?.id]);
+
+  // Attach a poller for any running/draft job so progress updates live.
+  useEffect(() => {
+    const watchers = watchersRef.current;
+    for (const job of jobs) {
+      const isLive = job.status === "running" || job.status === "draft";
+      if (isLive && !watchers.has(job.id)) {
+        const stop = watchMigrationJob(job.id, (row) => {
+          setJobs((prev) =>
+            prev.map((j) =>
+              j.id === row.id
+                ? { ...j, status: row.status, progress: row.progress, totals: row.totals, error_summary: row.error_summary }
+                : j,
+            ),
+          );
+          if (row.status === "completed" || row.status === "failed") {
+            const stopFn = watchers.get(row.id);
+            stopFn?.();
+            watchers.delete(row.id);
+          }
+        });
+        watchers.set(job.id, stop);
+      }
+    }
+    return () => {
+      // no-op; cleanup happens on unmount below
+    };
+  }, [jobs]);
+
+  useEffect(() => {
+    return () => {
+      for (const stop of watchersRef.current.values()) stop();
+      watchersRef.current.clear();
+    };
+  }, []);
 
   const statusVariant = (s: string) =>
     s === "completed" ? "default" : s === "failed" ? "destructive" : s === "running" ? "secondary" : "outline";
