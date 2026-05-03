@@ -153,6 +153,9 @@ export default function LmsAdmin() {
             <TabsTrigger value="paths">Learning paths ({paths.length})</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />Import
+            </Button>
             <Dialog open={pathOpen} onOpenChange={(o) => { setPathOpen(o); if (!o) setEditingPath(null); }}>
               <DialogTrigger asChild>
                 <Button variant="outline"><Route className="h-4 w-4 mr-2" />New path</Button>
