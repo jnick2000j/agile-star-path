@@ -54,6 +54,7 @@ export function MigrationWizard({
     setStep("source");
     setSourceId(null);
     setCreds({});
+    setFiles({});
     setTestError(null);
     setRemoteProjects([]);
     setScope({ selectedProjectIds: [], includeClosed: false });
