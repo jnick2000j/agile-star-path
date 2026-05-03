@@ -77,17 +77,20 @@ services:
           sleep 2
         done
 
-        echo ">> ensuring bucket: $$BUCKET"
-        mc mb --ignore-existing "local/$$BUCKET"
+        ALL_BUCKETS="$$BUCKET $$LMS_CONTENT_BUCKET $$LMS_CERTS_BUCKET"
 
-        echo ">> blocking public access"
-        mc anonymous set none "local/$$BUCKET"
+        for B in $$ALL_BUCKETS; do
+          echo ">> ensuring bucket: $$B"
+          mc mb --ignore-existing "local/$$B"
 
-        echo ">> enabling versioning (recovery from accidental deletes)"
-        mc version enable "local/$$BUCKET"
+          echo ">> blocking public access on $$B"
+          mc anonymous set none "local/$$B"
 
-        echo ">> lifecycle: expire noncurrent versions after 30d, abort stale multipart after 7d"
-        cat >/tmp/lifecycle.json <<JSON
+          echo ">> enabling versioning on $$B"
+          mc version enable "local/$$B"
+
+          echo ">> lifecycle on $$B: expire noncurrent 30d, abort stale multipart 7d"
+          cat >/tmp/lifecycle.json <<JSON
         {
           "Rules": [
             {
@@ -105,7 +108,8 @@ services:
           ]
         }
         JSON
-        mc ilm import "local/$$BUCKET" </tmp/lifecycle.json
+          mc ilm import "local/$$B" </tmp/lifecycle.json
+        done
 
         echo ">> writing least-privilege policy: taskmaster-app"
         cat >/tmp/policy.json <<JSON
