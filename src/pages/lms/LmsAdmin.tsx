@@ -55,6 +55,7 @@ export default function LmsAdmin() {
   const [editingPath, setEditingPath] = useState<LearningPath | null>(null);
 
   const [managePath, setManagePath] = useState<LearningPath | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const reload = async () => {
     if (!currentOrganization?.id) return;
