@@ -8486,6 +8486,81 @@ export type Database = {
         }
         Relationships: []
       }
+      migration_sla_metrics: {
+        Row: {
+          breached: boolean
+          completed_at: string | null
+          created_at: string
+          cycle_state: string | null
+          elapsed_minutes: number | null
+          entity_id: string
+          entity_type: string
+          external_id: string | null
+          external_key: string | null
+          goal_minutes: number | null
+          id: string
+          job_id: string | null
+          organization_id: string
+          remaining_minutes: number | null
+          sla_name: string
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          breached?: boolean
+          completed_at?: string | null
+          created_at?: string
+          cycle_state?: string | null
+          elapsed_minutes?: number | null
+          entity_id: string
+          entity_type: string
+          external_id?: string | null
+          external_key?: string | null
+          goal_minutes?: number | null
+          id?: string
+          job_id?: string | null
+          organization_id: string
+          remaining_minutes?: number | null
+          sla_name: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          breached?: boolean
+          completed_at?: string | null
+          created_at?: string
+          cycle_state?: string | null
+          elapsed_minutes?: number | null
+          entity_id?: string
+          entity_type?: string
+          external_id?: string | null
+          external_key?: string | null
+          goal_minutes?: number | null
+          id?: string
+          job_id?: string | null
+          organization_id?: string
+          remaining_minutes?: number | null
+          sla_name?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "migration_sla_metrics_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "migration_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "migration_sla_metrics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestone_history: {
         Row: {
           changed_at: string

@@ -6,6 +6,7 @@ import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
 import { HelpdeskUsageCard } from "@/components/dashboard/HelpdeskUsageCard";
 import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
+import { JsmSlaSummary } from "@/components/dashboard/JsmSlaSummary";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
 
@@ -153,7 +154,10 @@ export default function Dashboard() {
             <ChangeManagementSummary />
           </div>
 
-          <HelpdeskUsageCard />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <JsmSlaSummary />
+            <HelpdeskUsageCard />
+          </div>
         </TabsContent>
       </Tabs>
     </AppLayout>
