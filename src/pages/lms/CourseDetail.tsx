@@ -381,12 +381,9 @@ export default function CourseDetail() {
                                 <button
                                   onClick={() => enrollment && !prereqLock && setActiveLessonId(l.id)}
                                   disabled={!enrollment || !!prereqLock}
-                                  className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted/50 ${
-                                    activeLessonId === l.id ? "bg-muted" : ""
-                                  } ${!enrollment || prereqLock ? "opacity-60 cursor-not-allowed" : ""}`}
                                   className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent flex items-center gap-2 ${
                                     activeLessonId === l.id ? "bg-accent font-medium" : ""
-                                  } ${!enrollment ? "opacity-60 cursor-not-allowed" : ""}`}
+                                  } ${!enrollment || prereqLock ? "opacity-60 cursor-not-allowed" : ""}`}
                                 >
                                   {progress[l.id]?.completed ? (
                                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
