@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { MappingEditor, type MappingValidationResult } from "./MappingEditor";
+import { ContactMappingStep } from "./ContactMappingStep";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ import type {
 import { createMigrationJob, runMigrationJob } from "@/lib/migration/runner";
 import { toast } from "sonner";
 
-type Step = "source" | "connect" | "scope" | "mapping" | "preview" | "running" | "done";
+type Step = "source" | "connect" | "scope" | "mapping" | "contacts" | "preview" | "running" | "done";
 
 export function MigrationWizard({
   open,
@@ -388,7 +389,30 @@ export function MigrationWizard({
               <Button variant="ghost" onClick={() => setStep("scope")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
-              <Button onClick={() => setStep("preview")} disabled={!mappingValid.ok}>
+              <Button onClick={() => setStep("contacts")} disabled={!mappingValid.ok}>
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+
+        {step === "contacts" && adapter && (
+          <div className="space-y-3 overflow-y-auto pr-1">
+            <p className="text-sm text-muted-foreground">
+              Confirm how the platform should treat each contact role coming
+              from the source. You can change this later by re-running the
+              wizard.
+            </p>
+            <ContactMappingStep
+              mapping={mapping}
+              onChange={setMapping}
+              enabled={adapter.id === "jira_service_management"}
+            />
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setStep("mapping")}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Back
+              </Button>
+              <Button onClick={() => setStep("preview")}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </DialogFooter>
@@ -397,7 +421,7 @@ export function MigrationWizard({
 
         {step === "preview" && adapter && (
           <PreviewStep
-            onBack={() => setStep("mapping")}
+            onBack={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "mapping")}
             onStart={start}
             adapter={adapter}
             creds={creds}
