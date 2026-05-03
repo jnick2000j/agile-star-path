@@ -18,6 +18,7 @@ export interface LmsCourse {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  min_required_seconds?: number | null;
 }
 
 export interface LmsModule {
@@ -26,6 +27,7 @@ export interface LmsModule {
   title: string;
   description: string | null;
   position: number;
+  min_required_seconds?: number | null;
 }
 
 export interface LmsLesson {
@@ -42,6 +44,7 @@ export interface LmsLesson {
   passing_score_percent: number | null;
   max_attempts: number | null;
   required: boolean;
+  min_required_seconds?: number | null;
 }
 
 export interface LmsEnrollment {
@@ -94,11 +97,32 @@ export async function uploadLmsContent(orgId: string, courseId: string, file: Fi
   return path;
 }
 
-/** Mark a lesson complete and recompute course progress. */
-export async function completeLesson(orgId: string, courseId: string, lessonId: string) {
+/** Mark a lesson complete and recompute course progress.
+ *  If `minRequiredSeconds` is set, the user must have logged at least that
+ *  many `watch_seconds` on the lesson before it can be marked complete.
+ */
+export async function completeLesson(
+  orgId: string,
+  courseId: string,
+  lessonId: string,
+  minRequiredSeconds?: number | null,
+): Promise<{ ok: boolean; reason?: string; watched?: number; required?: number }> {
   const { data: u } = await supabase.auth.getUser();
   const userId = u?.user?.id;
-  if (!userId) return;
+  if (!userId) return { ok: false, reason: "Not signed in" };
+
+  if (minRequiredSeconds && minRequiredSeconds > 0) {
+    const { data: prog } = await supabase
+      .from("lms_lesson_progress")
+      .select("watch_seconds")
+      .eq("user_id", userId)
+      .eq("lesson_id", lessonId)
+      .maybeSingle();
+    const watched = prog?.watch_seconds ?? 0;
+    if (watched < minRequiredSeconds) {
+      return { ok: false, reason: "min_time_not_met", watched, required: minRequiredSeconds };
+    }
+  }
 
   await supabase
     .from("lms_lesson_progress")
@@ -117,18 +141,32 @@ export async function completeLesson(orgId: string, courseId: string, lessonId: 
 
   // Recompute enrollment + maybe issue certificate
   await supabase.rpc("lms_recompute_enrollment", { _course_id: courseId });
+  return { ok: true };
 }
 
-/** Update watch position without marking complete. */
+/** Update watch position and accumulate watch_seconds. */
 export async function updateLessonProgress(
   orgId: string,
   courseId: string,
   lessonId: string,
   positionSeconds: number,
+  deltaWatchSeconds = 0,
 ) {
   const { data: u } = await supabase.auth.getUser();
   const userId = u?.user?.id;
   if (!userId) return;
+
+  let nextWatch: number | undefined;
+  if (deltaWatchSeconds > 0) {
+    const { data: prog } = await supabase
+      .from("lms_lesson_progress")
+      .select("watch_seconds")
+      .eq("user_id", userId)
+      .eq("lesson_id", lessonId)
+      .maybeSingle();
+    nextWatch = (prog?.watch_seconds ?? 0) + Math.floor(deltaWatchSeconds);
+  }
+
   await supabase
     .from("lms_lesson_progress")
     .upsert(
@@ -139,6 +177,7 @@ export async function updateLessonProgress(
         lesson_id: lessonId,
         position_seconds: Math.floor(positionSeconds),
         last_accessed_at: new Date().toISOString(),
+        ...(nextWatch !== undefined ? { watch_seconds: nextWatch } : {}),
       },
       { onConflict: "user_id,lesson_id" },
     );

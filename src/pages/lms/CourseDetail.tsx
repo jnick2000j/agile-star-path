@@ -36,7 +36,7 @@ export default function CourseDetail() {
   const [course, setCourse] = useState<LmsCourse | null>(null);
   const [modules, setModules] = useState<LmsModule[]>([]);
   const [lessons, setLessons] = useState<LmsLesson[]>([]);
-  const [progress, setProgress] = useState<Record<string, { completed: boolean; position_seconds: number }>>({});
+  const [progress, setProgress] = useState<Record<string, { completed: boolean; position_seconds: number; watch_seconds: number }>>({});
   const [enrollment, setEnrollment] = useState<any | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,15 +48,19 @@ export default function CourseDetail() {
       supabase.from("lms_modules").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_lessons").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_enrollments").select("*").eq("course_id", courseId).eq("user_id", user.id).maybeSingle(),
-      supabase.from("lms_lesson_progress").select("lesson_id,completed,position_seconds").eq("course_id", courseId).eq("user_id", user.id),
+      supabase.from("lms_lesson_progress").select("lesson_id,completed,position_seconds,watch_seconds").eq("course_id", courseId).eq("user_id", user.id),
     ]);
     setCourse(c.data as LmsCourse | null);
     setModules((mods.data ?? []) as LmsModule[]);
     setLessons((less.data ?? []) as LmsLesson[]);
     setEnrollment(enr.data);
-    const pmap: Record<string, { completed: boolean; position_seconds: number }> = {};
+    const pmap: Record<string, { completed: boolean; position_seconds: number; watch_seconds: number }> = {};
     (prog.data ?? []).forEach((p: any) => {
-      pmap[p.lesson_id] = { completed: p.completed, position_seconds: p.position_seconds ?? 0 };
+      pmap[p.lesson_id] = {
+        completed: p.completed,
+        position_seconds: p.position_seconds ?? 0,
+        watch_seconds: p.watch_seconds ?? 0,
+      };
     });
     setProgress(pmap);
   }, [courseId, user]);
@@ -92,7 +96,57 @@ export default function CourseDetail() {
 
   const handleLessonCompleted = async () => {
     if (!currentOrganization?.id || !courseId || !activeLesson) return;
-    await completeLesson(currentOrganization.id, courseId, activeLesson.id);
+
+    // Enforce module-level minimum across the active lesson's module
+    const moduleLessons = lessons.filter((l) => l.module_id === activeLesson.module_id);
+    const moduleObj = modules.find((m) => m.id === activeLesson.module_id);
+    if (moduleObj?.min_required_seconds) {
+      const moduleWatch = moduleLessons.reduce((sum, l) => {
+        const w = progress[l.id]?.watch_seconds ?? 0;
+        // include the just-finished lesson's required minimum so completing the
+        // last lesson of a module doesn't fall short by a few seconds
+        return sum + (l.id === activeLesson.id ? Math.max(w, activeLesson.min_required_seconds ?? 0) : w);
+      }, 0);
+      if (moduleWatch < moduleObj.min_required_seconds) {
+        const remaining = Math.ceil((moduleObj.min_required_seconds - moduleWatch) / 60);
+        toast.error(`Spend at least ${remaining} more minute(s) on this module before completing this lesson.`);
+        return;
+      }
+    }
+
+    // Enforce course-wide minimum if completing this lesson would finish all required lessons
+    if (course?.min_required_seconds) {
+      const wouldFinishCourse = lessons
+        .filter((l) => l.required && l.id !== activeLesson.id)
+        .every((l) => progress[l.id]?.completed);
+      if (wouldFinishCourse && activeLesson.required) {
+        const totalWatch = lessons.reduce((sum, l) => {
+          const w = progress[l.id]?.watch_seconds ?? 0;
+          return sum + (l.id === activeLesson.id ? Math.max(w, activeLesson.min_required_seconds ?? 0) : w);
+        }, 0);
+        if (totalWatch < course.min_required_seconds) {
+          const remaining = Math.ceil((course.min_required_seconds - totalWatch) / 60);
+          toast.error(`Spend at least ${remaining} more minute(s) on this course before finishing.`);
+          return;
+        }
+      }
+    }
+
+    const result = await completeLesson(
+      currentOrganization.id,
+      courseId,
+      activeLesson.id,
+      activeLesson.min_required_seconds,
+    );
+    if (!result.ok) {
+      if (result.reason === "min_time_not_met") {
+        const remaining = Math.ceil(((result.required ?? 0) - (result.watched ?? 0)) / 60);
+        toast.error(`Spend at least ${remaining} more minute(s) on this lesson before completing.`);
+      } else {
+        toast.error(result.reason ?? "Could not complete lesson");
+      }
+      return;
+    }
     toast.success("Lesson complete");
     // Auto-advance
     const idx = lessons.findIndex((l) => l.id === activeLesson.id);
@@ -152,10 +206,21 @@ export default function CourseDetail() {
                     course={course}
                     completed={!!progress[activeLesson.id]?.completed}
                     initialPosition={progress[activeLesson.id]?.position_seconds ?? 0}
+                    watchedSeconds={progress[activeLesson.id]?.watch_seconds ?? 0}
                     onCompleted={handleLessonCompleted}
-                    onProgress={(secs) => {
+                    onProgress={(secs, deltaWatch) => {
                       if (currentOrganization?.id) {
-                        updateLessonProgress(currentOrganization.id, course.id, activeLesson.id, secs);
+                        updateLessonProgress(currentOrganization.id, course.id, activeLesson.id, secs, deltaWatch);
+                        if (deltaWatch && deltaWatch > 0) {
+                          setProgress((p) => ({
+                            ...p,
+                            [activeLesson.id]: {
+                              completed: p[activeLesson.id]?.completed ?? false,
+                              position_seconds: secs,
+                              watch_seconds: (p[activeLesson.id]?.watch_seconds ?? 0) + deltaWatch,
+                            },
+                          }));
+                        }
                       }
                     }}
                   />
@@ -249,6 +314,7 @@ function LessonPlayer({
   course,
   completed,
   initialPosition,
+  watchedSeconds,
   onCompleted,
   onProgress,
 }: {
@@ -256,19 +322,51 @@ function LessonPlayer({
   course: LmsCourse;
   completed: boolean;
   initialPosition: number;
+  watchedSeconds: number;
   onCompleted: () => void;
-  onProgress: (seconds: number) => void;
+  onProgress: (seconds: number, deltaWatchSeconds: number) => void;
 }) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  // For non-video lessons, accumulate dwell time client-side and report a delta
+  // every ~10s so the watch_seconds counter reflects time spent on the page.
+  const [localWatch, setLocalWatch] = useState(0);
 
   useEffect(() => {
     setSignedUrl(null);
+    setLocalWatch(0);
     if (lesson.lesson_type === "video_upload" && lesson.storage_path) {
       getSignedContentUrl(lesson.storage_path).then(setSignedUrl);
     } else if (lesson.lesson_type === "document" && lesson.storage_path) {
       getSignedContentUrl(lesson.storage_path).then(setSignedUrl);
     }
   }, [lesson.id, lesson.storage_path, lesson.lesson_type]);
+
+  // Dwell-time ticker for non-uploaded-video lessons (embed / document / quiz).
+  useEffect(() => {
+    if (completed) return;
+    if (lesson.lesson_type === "video_upload") return; // tracked via timeupdate
+    const id = window.setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      setLocalWatch((w) => {
+        const next = w + 10;
+        onProgress(0, 10);
+        return next;
+      });
+    }, 10000);
+    return () => window.clearInterval(id);
+  }, [lesson.id, lesson.lesson_type, completed, onProgress]);
+
+  const minSecs = lesson.min_required_seconds ?? 0;
+  const effectiveWatched = watchedSeconds + localWatch;
+  const minMet = !minSecs || effectiveWatched >= minSecs;
+  const minRemainingMin = minSecs ? Math.max(0, Math.ceil((minSecs - effectiveWatched) / 60)) : 0;
+
+  // Track per-tick deltas for uploaded-video timeupdate events
+  const handleVideoTick = (currentTime: number, prevTime: number) => {
+    const delta = Math.max(0, Math.floor(currentTime - prevTime));
+    if (delta > 0 && delta < 60) onProgress(currentTime, delta);
+    else onProgress(currentTime, 0);
+  };
 
   return (
     <div className="space-y-4">
@@ -278,6 +376,12 @@ function LessonPlayer({
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground capitalize">
             <Badge variant="outline">{lesson.lesson_type.replace("_", " ")}</Badge>
             {lesson.duration_seconds && <span>{Math.round(lesson.duration_seconds / 60)} min</span>}
+            {minSecs > 0 && (
+              <span className="normal-case">
+                Min time: {Math.round(minSecs / 60)} min
+                {!completed && !minMet && ` · ${minRemainingMin} min remaining`}
+              </span>
+            )}
           </div>
         </div>
         {completed && <Badge>Completed</Badge>}
@@ -286,20 +390,12 @@ function LessonPlayer({
       {lesson.lesson_type === "video_upload" && (
         <div className="aspect-video bg-muted rounded-md overflow-hidden">
           {signedUrl ? (
-            <video
+            <VideoTracker
               key={lesson.id}
               src={signedUrl}
-              controls
-              className="w-full h-full"
-              onLoadedMetadata={(e) => {
-                const v = e.currentTarget;
-                if (initialPosition && initialPosition < v.duration - 5) v.currentTime = initialPosition;
-              }}
-              onTimeUpdate={(e) => {
-                const v = e.currentTarget;
-                if (Math.floor(v.currentTime) % 10 === 0) onProgress(v.currentTime);
-              }}
-              onEnded={() => onCompleted()}
+              initialPosition={initialPosition}
+              onTick={handleVideoTick}
+              onEnded={() => { if (minMet) onCompleted(); }}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
@@ -348,11 +444,46 @@ function LessonPlayer({
       )}
 
       {lesson.lesson_type !== "quiz" && !completed && (
-        <div className="flex justify-end">
-          <Button onClick={onCompleted}>Mark complete & continue</Button>
+        <div className="flex justify-end items-center gap-3">
+          {minSecs > 0 && !minMet && (
+            <span className="text-xs text-muted-foreground">
+              {minRemainingMin} min of required time remaining
+            </span>
+          )}
+          <Button onClick={onCompleted} disabled={!minMet}>Mark complete & continue</Button>
         </div>
       )}
     </div>
+  );
+}
+
+function VideoTracker({
+  src, initialPosition, onTick, onEnded,
+}: {
+  src: string;
+  initialPosition: number;
+  onTick: (currentTime: number, prevTime: number) => void;
+  onEnded: () => void;
+}) {
+  const [prev, setPrev] = useState(initialPosition);
+  return (
+    <video
+      src={src}
+      controls
+      className="w-full h-full"
+      onLoadedMetadata={(e) => {
+        const v = e.currentTarget;
+        if (initialPosition && initialPosition < v.duration - 5) v.currentTime = initialPosition;
+      }}
+      onTimeUpdate={(e) => {
+        const v = e.currentTarget;
+        if (Math.floor(v.currentTime) % 5 === 0 && Math.floor(v.currentTime) !== Math.floor(prev)) {
+          onTick(v.currentTime, prev);
+          setPrev(v.currentTime);
+        }
+      }}
+      onEnded={onEnded}
+    />
   );
 }
 

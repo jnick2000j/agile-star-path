@@ -240,8 +240,13 @@ function CourseDialog({ editing, onSave }: { editing: LmsCourse | null; onSave: 
   const [form, setForm] = useState<Partial<LmsCourse>>(() => editing ?? {
     title: "", description: "", category: "", status: "draft" as CourseStatus,
     passing_score_percent: 80, issues_certificate: true, est_duration_minutes: 30,
+    min_required_seconds: null,
   });
   useEffect(() => { if (editing) setForm(editing); }, [editing]);
+
+  const minRequiredMinutes = form.min_required_seconds != null
+    ? Math.round((form.min_required_seconds as number) / 60)
+    : 0;
 
   return (
     <DialogContent>
@@ -280,6 +285,21 @@ function CourseDialog({ editing, onSave }: { editing: LmsCourse | null; onSave: 
           <div>
             <Label>Passing score (%)</Label>
             <Input type="number" min={0} max={100} value={form.passing_score_percent ?? 80} onChange={(e) => setForm({ ...form, passing_score_percent: Number(e.target.value) })} />
+          </div>
+          <div className="col-span-2">
+            <Label>Minimum time on course (min)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={minRequiredMinutes}
+              onChange={(e) => {
+                const mins = Number(e.target.value);
+                setForm({ ...form, min_required_seconds: mins > 0 ? mins * 60 : null });
+              }}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Learners must spend at least this much time across the course before it can be marked complete. Leave 0 to disable.
+            </p>
           </div>
         </div>
       </div>

@@ -299,6 +299,7 @@ from **Helpdesk → Admin → Modules** or platform-wide from **Platform Admin
 | Lesson progress           | Per-user, per-lesson; rolls up via `lms_recompute_enrollment` RPC |
 | Learning paths            | Ordered course bundles, progress aggregated across courses |
 | Certificates              | Issued on completion, stored in the private `lms-certificates` bucket |
+| Minimum time on content   | Authors can set `min_required_seconds` on lessons, modules, and courses; learners must accumulate that much `watch_seconds` (uploaded-video timeupdate or 10s page-dwell ticker) before they can mark complete |
 | Manager dashboard         | `/learning/dashboard` — completion rates, overdue assignments, training compliance |
 | Catalog                   | `/learning` — browseable course catalog filtered by org access |
 | Course editor             | `/learning/admin/courses/:id` — markdown editor, lesson reordering, quiz wiring |
