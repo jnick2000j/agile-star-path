@@ -3,12 +3,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { GraduationCap, AlertTriangle, Award, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
+import { ExternalTrainingPanel } from "@/components/lms/ExternalTrainingPanel";
 
 export default function PortalTraining() {
   const { user } = useAuth();
@@ -55,16 +57,23 @@ export default function PortalTraining() {
       <div>
         <h1 className="text-2xl font-semibold">Training</h1>
         <p className="text-sm text-muted-foreground">
-          Your assigned courses, progress, and certificates.
+          Your assigned courses, progress, certificates, and external training records.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="In progress" value={inProgress.length} />
-        <Stat label="Overdue" value={overdue.length} accent={overdue.length > 0 ? "danger" : undefined} />
-        <Stat label="Completed" value={completed.length} />
-        <Stat label="Available" value={recommended.length} />
-      </div>
+      <Tabs defaultValue="courses" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="courses">Courses & progress</TabsTrigger>
+          <TabsTrigger value="external">External training</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="courses" className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Stat label="In progress" value={inProgress.length} />
+            <Stat label="Overdue" value={overdue.length} accent={overdue.length > 0 ? "danger" : undefined} />
+            <Stat label="Completed" value={completed.length} />
+            <Stat label="Available" value={recommended.length} />
+          </div>
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
@@ -142,11 +151,17 @@ export default function PortalTraining() {
         </Card>
       )}
 
-      <div className="flex justify-end">
-        <Link to="/learning/my">
-          <Button variant="outline" size="sm">Open full learning area</Button>
-        </Link>
-      </div>
+          <div className="flex justify-end">
+            <Link to="/learning/my">
+              <Button variant="outline" size="sm">Open full learning area</Button>
+            </Link>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="external">
+          <ExternalTrainingPanel />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

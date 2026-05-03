@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LmsImportWizard } from "@/components/lms/LmsImportWizard";
 import { LmsAdminDashboard } from "@/components/lms/LmsAdminDashboard";
 import { LmsCertificateSettings } from "@/components/lms/LmsCertificateSettings";
+import { LmsExternalTrainingAdmin } from "@/components/lms/LmsExternalTrainingAdmin";
 
 type PathStatus = "draft" | "published" | "archived";
 interface LearningPath {
@@ -166,6 +167,7 @@ export default function LmsAdmin() {
             <TabsTrigger value="courses">Courses ({courses.length})</TabsTrigger>
             <TabsTrigger value="paths">Learning paths ({paths.length})</TabsTrigger>
             <TabsTrigger value="certificate">Certificate</TabsTrigger>
+            <TabsTrigger value="external">External training</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setImportOpen(true)}>
@@ -262,6 +264,10 @@ export default function LmsAdmin() {
 
         <TabsContent value="certificate">
           <LmsCertificateSettings />
+        </TabsContent>
+
+        <TabsContent value="external">
+          <LmsExternalTrainingAdmin />
         </TabsContent>
       </Tabs>
 
