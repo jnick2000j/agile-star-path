@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertCircle, CheckCircle2, Loader2, ChevronRight, ChevronLeft, Plug } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ChevronRight, ChevronLeft, Plug, Download, FileSpreadsheet } from "lucide-react";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { listMigrationSources, getMigrationSource } from "@/lib/migration/registry";
