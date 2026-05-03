@@ -188,10 +188,21 @@ export default function CourseDetail() {
                     course={course}
                     completed={!!progress[activeLesson.id]?.completed}
                     initialPosition={progress[activeLesson.id]?.position_seconds ?? 0}
+                    watchedSeconds={progress[activeLesson.id]?.watch_seconds ?? 0}
                     onCompleted={handleLessonCompleted}
-                    onProgress={(secs) => {
+                    onProgress={(secs, deltaWatch) => {
                       if (currentOrganization?.id) {
-                        updateLessonProgress(currentOrganization.id, course.id, activeLesson.id, secs);
+                        updateLessonProgress(currentOrganization.id, course.id, activeLesson.id, secs, deltaWatch);
+                        if (deltaWatch && deltaWatch > 0) {
+                          setProgress((p) => ({
+                            ...p,
+                            [activeLesson.id]: {
+                              completed: p[activeLesson.id]?.completed ?? false,
+                              position_seconds: secs,
+                              watch_seconds: (p[activeLesson.id]?.watch_seconds ?? 0) + deltaWatch,
+                            },
+                          }));
+                        }
                       }
                     }}
                   />
