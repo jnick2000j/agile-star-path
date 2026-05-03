@@ -43,6 +43,7 @@ import Updates from "./pages/Updates";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
+import Migrations from "./pages/Migrations";
 import BrandingSettings from "./pages/BrandingSettings";
 import TaskManagement from "./pages/TaskManagement";
 import Tasks from "./pages/Tasks";
@@ -194,6 +195,7 @@ const App = () => (
             <Route path="/branding" element={<ProtectedRoute><BrandingSettings /></ProtectedRoute>} />
             <Route path="/security" element={<ProtectedRoute><SecurityCenter /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><AdminPanel /></ProtectedRoute>} />
+            <Route path="/admin/migrations" element={<ProtectedRoute requiredRoles={["admin"]}><Migrations /></ProtectedRoute>} />
             <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={["admin"]}><PlatformAdmin /></ProtectedRoute>} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/prince2" element={<ProtectedRoute><PRINCE2Dashboard /></ProtectedRoute>} />

@@ -36,7 +36,7 @@ export default function Migrations() {
     s === "completed" ? "default" : s === "failed" ? "destructive" : s === "running" ? "secondary" : "outline";
 
   return (
-    <AppLayout>
+    <AppLayout title="Migrations">
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
