@@ -259,6 +259,10 @@ export default function LmsAdmin() {
             </Card>
           ))}
         </TabsContent>
+
+        <TabsContent value="certificate">
+          <LmsCertificateSettings />
+        </TabsContent>
       </Tabs>
 
       {managePath && (
