@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { CheckCircle2, Circle, FileText, Video, HelpCircle, ArrowLeft, Play } from "lucide-react";
+import { CheckCircle2, Circle, FileText, Video, HelpCircle, ArrowLeft, Play, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -28,10 +28,11 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 import { QuizPlayer } from "@/components/lms/QuizPlayer";
+import { downloadCertificate } from "@/lib/certificate";
 
 export default function CourseDetail() {
   const { id: courseId } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const [course, setCourse] = useState<LmsCourse | null>(null);
   const [modules, setModules] = useState<LmsModule[]>([]);
@@ -40,20 +41,50 @@ export default function CourseDetail() {
   const [enrollment, setEnrollment] = useState<any | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [certificate, setCertificate] = useState<any | null>(null);
+  const certDownloadedRef = useRef(false);
+
+  const recipientName =
+    [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(" ").trim() ||
+    userProfile?.full_name ||
+    user?.email ||
+    "Learner";
+
+  const issueAndDownloadCertificate = useCallback(
+    async (cert: any, opts: { auto?: boolean } = {}) => {
+      if (!course) return;
+      try {
+        downloadCertificate({
+          recipientName,
+          courseTitle: course.title,
+          organizationName: currentOrganization?.name ?? "Your Organization",
+          serial: cert.serial,
+          issuedAt: cert.issued_at ? new Date(cert.issued_at) : new Date(),
+          finalScore: cert.final_score ?? null,
+        });
+        if (opts.auto) toast.success("Course complete — your certificate is downloading");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Could not generate certificate");
+      }
+    },
+    [course, currentOrganization?.name, recipientName],
+  );
 
   const reload = useCallback(async () => {
     if (!courseId || !user) return;
-    const [c, mods, less, enr, prog] = await Promise.all([
+    const [c, mods, less, enr, prog, certRes] = await Promise.all([
       supabase.from("lms_courses").select("*").eq("id", courseId).maybeSingle(),
       supabase.from("lms_modules").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_lessons").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_enrollments").select("*").eq("course_id", courseId).eq("user_id", user.id).maybeSingle(),
       supabase.from("lms_lesson_progress").select("lesson_id,completed,position_seconds,watch_seconds").eq("course_id", courseId).eq("user_id", user.id),
+      supabase.from("lms_certificates").select("*").eq("course_id", courseId).eq("user_id", user.id).maybeSingle(),
     ]);
     setCourse(c.data as LmsCourse | null);
     setModules((mods.data ?? []) as LmsModule[]);
     setLessons((less.data ?? []) as LmsLesson[]);
     setEnrollment(enr.data);
+    setCertificate(certRes.data ?? null);
     const pmap: Record<string, { completed: boolean; position_seconds: number; watch_seconds: number }> = {};
     (prog.data ?? []).forEach((p: any) => {
       pmap[p.lesson_id] = {
@@ -80,6 +111,20 @@ export default function CourseDetail() {
       setActiveLessonId(next.id);
     }
   }, [lessons, progress, activeLessonId]);
+
+  // Auto-issue + download the certificate the first time we see a completed enrollment
+  // with a certificate row available.
+  useEffect(() => {
+    if (
+      !certDownloadedRef.current &&
+      enrollment?.status === "completed" &&
+      certificate &&
+      course
+    ) {
+      certDownloadedRef.current = true;
+      issueAndDownloadCertificate(certificate, { auto: true });
+    }
+  }, [enrollment?.status, certificate, course, issueAndDownloadCertificate]);
 
   const activeLesson = useMemo(() => lessons.find((l) => l.id === activeLessonId) ?? null, [lessons, activeLessonId]);
 
@@ -246,6 +291,20 @@ export default function CourseDetail() {
                   <p className="text-xs text-muted-foreground">
                     Passing score: {course.passing_score_percent}%
                   </p>
+                )}
+                {isCompleted && certificate && (
+                  <div className="pt-3 border-t mt-2 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Certificate serial: <span className="font-mono">{certificate.serial}</span>
+                    </p>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => issueAndDownloadCertificate(certificate)}
+                    >
+                      <Award className="h-4 w-4 mr-2" /> Download certificate
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

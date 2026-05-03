@@ -12,9 +12,10 @@ import { Award, Calendar, Download, AlertTriangle, GraduationCap } from "lucide-
 import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { downloadCertificate } from "@/lib/certificate";
 
 export default function MyLearning() {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { currentOrganization } = useOrganization();
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -49,18 +50,23 @@ export default function MyLearning() {
   const overdue = inProgress.filter((e) => e.due_at && new Date(e.due_at) < new Date());
 
   const downloadCert = async (cert: any) => {
-    if (!cert.storage_path) {
-      toast.info("Certificate file not yet generated");
-      return;
+    const recipient =
+      [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(" ").trim() ||
+      userProfile?.full_name ||
+      user?.email ||
+      "Learner";
+    try {
+      downloadCertificate({
+        recipientName: recipient,
+        courseTitle: cert.course?.title ?? "Course",
+        organizationName: currentOrganization?.name ?? "Your Organization",
+        serial: cert.serial,
+        issuedAt: cert.issued_at ? new Date(cert.issued_at) : new Date(),
+        finalScore: cert.final_score ?? null,
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not generate certificate");
     }
-    const { data, error } = await supabase.storage
-      .from("lms-certificates")
-      .createSignedUrl(cert.storage_path, 600);
-    if (error || !data?.signedUrl) {
-      toast.error("Could not generate download link");
-      return;
-    }
-    window.open(data.signedUrl, "_blank");
   };
 
   return (
