@@ -285,6 +285,18 @@ export default function CourseDetail() {
                     <p className="text-muted-foreground">Enroll to start this course</p>
                     <Button onClick={handleEnroll}>Enroll</Button>
                   </div>
+                ) : prereqLock ? (
+                  <div className="text-center py-12 space-y-3 max-w-md mx-auto">
+                    <Lock className="h-10 w-10 mx-auto text-muted-foreground" />
+                    <h3 className="font-semibold">Prerequisite required</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Complete <strong>{prereqLock.courseTitle}</strong> in the{" "}
+                      <em>{prereqLock.pathTitle}</em> learning path before starting this course.
+                    </p>
+                    <Button asChild size="sm">
+                      <Link to={`/learning/courses/${prereqLock.courseId}`}>Go to prerequisite</Link>
+                    </Button>
+                  </div>
                 ) : !activeLesson ? (
                   <div className="text-center py-12 text-muted-foreground">No lessons available yet.</div>
                 ) : (
@@ -367,8 +379,11 @@ export default function CourseDetail() {
                             {modLessons.map((l) => (
                               <li key={l.id}>
                                 <button
-                                  onClick={() => enrollment && setActiveLessonId(l.id)}
-                                  disabled={!enrollment}
+                                  onClick={() => enrollment && !prereqLock && setActiveLessonId(l.id)}
+                                  disabled={!enrollment || !!prereqLock}
+                                  className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted/50 ${
+                                    activeLessonId === l.id ? "bg-muted" : ""
+                                  } ${!enrollment || prereqLock ? "opacity-60 cursor-not-allowed" : ""}`}
                                   className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent flex items-center gap-2 ${
                                     activeLessonId === l.id ? "bg-accent font-medium" : ""
                                   } ${!enrollment ? "opacity-60 cursor-not-allowed" : ""}`}
