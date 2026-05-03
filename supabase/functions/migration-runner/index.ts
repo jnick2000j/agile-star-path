@@ -360,6 +360,12 @@ async function runCsv(
     const ext = row.external_id || row.id || row.title || `issue-${ctx.done}`;
     if (!projId) {
       summary.skipped += 1;
+      await ctx.recordItem({
+        entity_type: "issue",
+        external_id: ext,
+        status: "skipped",
+        error: "No matching project",
+      });
       await ctx.tick(`Skipped issue: ${ext}`);
       continue;
     }
@@ -406,6 +412,12 @@ async function runCsv(
     const ext = row.external_id || row.id || row.title || `risk-${ctx.done}`;
     if (!projId) {
       summary.skipped += 1;
+      await ctx.recordItem({
+        entity_type: "risk",
+        external_id: ext,
+        status: "skipped",
+        error: "No matching project",
+      });
       await ctx.tick(`Skipped risk: ${ext}`);
       continue;
     }
