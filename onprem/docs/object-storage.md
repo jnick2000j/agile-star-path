@@ -78,7 +78,12 @@ docker compose \
 
 The `minio-bootstrap` one-shot container automatically:
 
-1. Creates the `taskmaster-uploads` bucket
+1. Creates the buckets used by the app:
+   - `taskmaster-uploads` — general attachments, ticket files, signed exports
+   - `lms-content` — LMS lesson media & attachments (only used if the LMS
+     add-on module is enabled — created unconditionally so enabling the module
+     later requires no storage changes)
+   - `lms-certificates` — generated LMS completion certificates
 2. **Blocks anonymous/public access** (`mc anonymous set none`) — the app
    serves objects via short-lived presigned URLs, never public links
 3. Enables **versioning** (recovery from accidental deletes)
