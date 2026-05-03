@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Route } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Route, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useLmsPermissions } from "@/hooks/useLmsPermissions";
@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { LmsCourse, CourseStatus } from "@/lib/lms";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LmsImportWizard } from "@/components/lms/LmsImportWizard";
 
 type PathStatus = "draft" | "published" | "archived";
 interface LearningPath {
@@ -54,6 +55,7 @@ export default function LmsAdmin() {
   const [editingPath, setEditingPath] = useState<LearningPath | null>(null);
 
   const [managePath, setManagePath] = useState<LearningPath | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const reload = async () => {
     if (!currentOrganization?.id) return;
@@ -151,6 +153,9 @@ export default function LmsAdmin() {
             <TabsTrigger value="paths">Learning paths ({paths.length})</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />Import
+            </Button>
             <Dialog open={pathOpen} onOpenChange={(o) => { setPathOpen(o); if (!o) setEditingPath(null); }}>
               <DialogTrigger asChild>
                 <Button variant="outline"><Route className="h-4 w-4 mr-2" />New path</Button>
@@ -232,6 +237,12 @@ export default function LmsAdmin() {
           onClose={() => setManagePath(null)}
         />
       )}
+
+      <LmsImportWizard
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={reload}
+      />
     </AppLayout>
   );
 }
