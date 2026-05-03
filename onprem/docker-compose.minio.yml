@@ -62,6 +62,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       BUCKET: ${S3_BUCKET:-taskmaster-uploads}
+      LMS_CONTENT_BUCKET: ${LMS_CONTENT_BUCKET:-lms-content}
+      LMS_CERTS_BUCKET: ${LMS_CERTS_BUCKET:-lms-certificates}
       APP_ACCESS_KEY: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY in .env (20+ chars, alphanum)}
       APP_SECRET_KEY: ${S3_SECRET_KEY:?Set S3_SECRET_KEY in .env (40+ chars)}
     entrypoint: /bin/sh
