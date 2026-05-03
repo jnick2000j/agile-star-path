@@ -41,6 +41,34 @@ export default function CourseDetail() {
   const [enrollment, setEnrollment] = useState<any | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [certificate, setCertificate] = useState<any | null>(null);
+  const certDownloadedRef = useRef(false);
+
+  const recipientName =
+    [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(" ").trim() ||
+    userProfile?.full_name ||
+    user?.email ||
+    "Learner";
+
+  const issueAndDownloadCertificate = useCallback(
+    async (cert: any, opts: { auto?: boolean } = {}) => {
+      if (!course) return;
+      try {
+        downloadCertificate({
+          recipientName,
+          courseTitle: course.title,
+          organizationName: currentOrganization?.name ?? "Your Organization",
+          serial: cert.serial,
+          issuedAt: cert.issued_at ? new Date(cert.issued_at) : new Date(),
+          finalScore: cert.final_score ?? null,
+        });
+        if (opts.auto) toast.success("Course complete — your certificate is downloading");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Could not generate certificate");
+      }
+    },
+    [course, currentOrganization?.name, recipientName],
+  );
 
   const reload = useCallback(async () => {
     if (!courseId || !user) return;
