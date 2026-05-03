@@ -830,7 +830,7 @@ async function runJsm(
         const descField = r.requestFieldValues?.find((f) => f.fieldId === "description");
         const priorityField = r.requestFieldValues?.find((f) => f.fieldId === "priority");
         const statusName = r.currentStatus?.status ?? "Open";
-        const status = mapStatus(statusName, req.mapping);
+        const statusKey = statusName.toLowerCase().trim();
         const priorityValue = (() => {
           const v = priorityField?.value as { name?: string } | string | undefined;
           if (typeof v === "string") return v;
@@ -848,6 +848,50 @@ async function runJsm(
         // Determine target register from request type mapping (default: issue)
         const target = (r.requestTypeId && requestTypeMap[r.requestTypeId]) || "issue";
 
+        // Resolve register-specific workflow status:
+        //   1. Per-request-type override (highest precedence)
+        //   2. Global status map (fallback) translated into register-specific term
+        const requestTypeStatusMap = ((req.mapping as {
+          extra?: { requestTypeStatus?: Record<string, Record<string, string>> };
+        }).extra?.requestTypeStatus) ?? {};
+        const overrideForType = r.requestTypeId
+          ? requestTypeStatusMap[r.requestTypeId]
+          : undefined;
+        const overrideStatus = overrideForType?.[statusKey];
+        const genericStatus = mapStatus(statusName, req.mapping); // not_started|in_progress|blocked|completed
+
+        const resolveStatus = (forTarget: string): string => {
+          if (overrideStatus) return overrideStatus;
+          // Translate the generic status into the target register's vocabulary
+          switch (forTarget) {
+            case "incident":
+              return genericStatus === "completed" ? "resolved"
+                : genericStatus === "blocked" ? "monitoring"
+                : genericStatus === "in_progress" ? "identified"
+                : "investigating";
+            case "problem":
+              return genericStatus === "completed" ? "resolved"
+                : genericStatus === "in_progress" ? "investigating"
+                : "new";
+            case "change":
+              return genericStatus === "completed" ? "implemented"
+                : genericStatus === "in_progress" ? "under_review"
+                : genericStatus === "blocked" ? "needs_information"
+                : "pending";
+            case "risk":
+              return genericStatus === "completed" ? "closed"
+                : genericStatus === "in_progress" ? "mitigating"
+                : "open";
+            case "task":
+              return genericStatus; // already in task vocabulary
+            case "issue":
+            default:
+              return genericStatus === "completed" ? "closed"
+                : genericStatus === "in_progress" ? "in_progress"
+                : "open";
+          }
+        };
+
         try {
           let internalEntityType = "issue";
           let internalId: string | null = null;
@@ -863,7 +907,7 @@ async function runJsm(
                 title,
                 description: baseDescription,
                 severity,
-                status: status === "completed" ? "closed" : "open",
+                status: resolveStatus("incident"),
                 created_by: ctx.userId,
               })
               .select("id")
@@ -880,7 +924,7 @@ async function runJsm(
                 project_id: projectId,
                 title,
                 description: baseDescription,
-                status: status === "completed" ? "closed" : "open",
+                status: resolveStatus("problem"),
                 priority: internalPriority,
                 is_known_error: false,
                 created_by: ctx.userId,
@@ -901,7 +945,7 @@ async function runJsm(
                 title,
                 description: baseDescription,
                 change_type: "standard",
-                status: status === "completed" ? "implemented" : "draft",
+                status: resolveStatus("change"),
                 priority: internalPriority,
                 date_raised: new Date().toISOString().slice(0, 10),
                 raised_by: ctx.userId,
@@ -921,7 +965,7 @@ async function runJsm(
                 project_id: projectId,
                 name: title,
                 description: baseDescription,
-                status,
+                status: resolveStatus("task"),
                 priority: internalPriority,
                 created_by: ctx.userId,
               })
@@ -939,6 +983,7 @@ async function runJsm(
                 project_id: projectId,
                 title,
                 description: baseDescription,
+                status: resolveStatus("risk"),
                 created_by: ctx.userId,
               })
               .select("id")
@@ -949,6 +994,7 @@ async function runJsm(
             summary.createdRisks += 1;
           } else {
             // default → issue register
+            const issueStatus = resolveStatus("issue");
             const { data, error } = await supa
               .from("issues")
               .insert({
@@ -958,7 +1004,8 @@ async function runJsm(
                 description: baseDescription,
                 type: "problem",
                 priority: internalPriority,
-                status: status === "completed" ? "closed" : "open",
+                // issues table only has open/closed/in_progress in practice
+                status: issueStatus === "in_progress" ? "open" : issueStatus,
                 created_by: ctx.userId,
               })
               .select("id")

@@ -24,6 +24,24 @@ const INTERNAL_ENTITIES = ["task", "issue", "risk"] as const;
 /** Where a JSM request type can land. */
 const JSM_TARGETS = ["issue", "incident", "problem", "change", "task", "risk"] as const;
 
+/** Register-specific workflow status sets (must match the DB CHECK constraints). */
+const TARGET_STATUS_OPTIONS: Record<string, readonly string[]> = {
+  issue: ["open", "in_progress", "closed"],
+  incident: ["investigating", "identified", "monitoring", "resolved", "closed"],
+  problem: ["new", "investigating", "known_error", "resolved", "closed"],
+  change: [
+    "pending",
+    "under_review",
+    "needs_information",
+    "approved",
+    "rejected",
+    "implemented",
+    "withdrawn",
+  ],
+  task: ["not_started", "in_progress", "blocked", "completed"],
+  risk: ["open", "mitigating", "accepted", "closed"],
+};
+
 export interface MappingValidationResult {
   ok: boolean;
   errors: string[];
@@ -224,6 +242,20 @@ export function MappingEditor({
     delete cur[k];
     onChange({ ...value, extra: { ...(value.extra ?? {}), requestType: cur } });
   };
+  const setRequestTypeStatus = (rtId: string, statusKey: string, internal: string) => {
+    const all = ((value.extra?.requestTypeStatus as Record<
+      string,
+      Record<string, string>
+    >) ?? {});
+    const forType = { ...(all[rtId] ?? {}), [statusKey.toLowerCase()]: internal };
+    onChange({
+      ...value,
+      extra: {
+        ...(value.extra ?? {}),
+        requestTypeStatus: { ...all, [rtId]: forType },
+      },
+    });
+  };
 
   const [newStatusKey, setNewStatusKey] = useState("");
   const [newPriorityKey, setNewPriorityKey] = useState("");
@@ -388,6 +420,106 @@ export function MappingEditor({
           setNewKey={setNewRequestTypeKey}
         />
       )}
+
+      {/* Per-request-type status overrides */}
+      {showRequestTypeMapping && (
+        <RequestTypeStatusPanel
+          requestTypeKeys={requestTypeKeys}
+          requestTypeLabels={requestTypeLabels}
+          requestTypeMap={(value.extra?.requestType as Record<string, string> | undefined) ?? {}}
+          requestTypeStatus={
+            (value.extra?.requestTypeStatus as Record<string, Record<string, string>> | undefined) ?? {}
+          }
+          requestTypeStatusKeys={
+            (value.extra?.requestTypeStatusKeys as Record<string, string[]> | undefined) ?? {}
+          }
+          onSet={setRequestTypeStatus}
+        />
+      )}
+    </div>
+  );
+}
+
+interface RequestTypeStatusPanelProps {
+  requestTypeKeys: string[];
+  requestTypeLabels?: Record<string, string>;
+  requestTypeMap: Record<string, string>;
+  requestTypeStatus: Record<string, Record<string, string>>;
+  requestTypeStatusKeys: Record<string, string[]>;
+  onSet: (rtId: string, statusKey: string, internal: string) => void;
+}
+
+function RequestTypeStatusPanel({
+  requestTypeKeys,
+  requestTypeLabels,
+  requestTypeMap,
+  requestTypeStatus,
+  requestTypeStatusKeys,
+  onSet,
+}: RequestTypeStatusPanelProps) {
+  const typesWithStatuses = requestTypeKeys.filter(
+    (rtId) => (requestTypeStatusKeys[rtId]?.length ?? 0) > 0,
+  );
+
+  return (
+    <div className="rounded-md border p-3 space-y-3">
+      <div>
+        <p className="text-sm font-medium">Workflow status mapping per request type</p>
+        <p className="text-[11px] text-muted-foreground">
+          Each Jira Service Management request type has its own workflow.
+          Map each step to the matching status in the destination register so
+          imported tickets land in the correct lifecycle state (e.g. an
+          incident "Monitoring" status, a change "Approved" status).
+        </p>
+      </div>
+
+      {typesWithStatuses.length === 0 && (
+        <p className="text-xs text-muted-foreground italic">
+          No per-request-type workflow statuses were discovered. The global
+          status map will be applied to every imported ticket using sensible
+          defaults for each register.
+        </p>
+      )}
+
+      {typesWithStatuses.map((rtId) => {
+        const target = requestTypeMap[rtId] ?? "issue";
+        const options = TARGET_STATUS_OPTIONS[target] ?? TARGET_STATUS_OPTIONS.issue;
+        const statuses = requestTypeStatusKeys[rtId] ?? [];
+        const overrides = requestTypeStatus[rtId] ?? {};
+        return (
+          <div key={rtId} className="rounded-md border bg-muted/30 p-2.5 space-y-1.5">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <p className="text-xs font-medium truncate">
+                {requestTypeLabels?.[rtId] ?? rtId}
+              </p>
+              <Badge variant="outline" className="text-[10px]">
+                → {target}
+              </Badge>
+            </div>
+            {statuses.map((statusName) => {
+              const k = statusName.toLowerCase();
+              const v = overrides[k] ?? "";
+              return (
+                <div key={statusName} className="flex items-center gap-1.5">
+                  <Label className="flex-1 text-xs truncate">{statusName}</Label>
+                  <Select value={v} onValueChange={(nv) => onSet(rtId, k, nv)}>
+                    <SelectTrigger className="h-7 w-44 text-xs">
+                      <SelectValue placeholder="Select…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {options.map((o) => (
+                        <SelectItem key={o} value={o} className="text-xs">
+                          {o}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
