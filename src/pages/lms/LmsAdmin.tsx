@@ -225,12 +225,21 @@ export default function LmsAdmin() {
           ) : paths.map((p) => (
             <Card key={p.id}>
               <CardContent className="py-4 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{p.title}</span>
-                    <Badge variant={p.status === "published" ? "default" : "outline"}>{p.status}</Badge>
+                <div className="flex items-center gap-3 min-w-0">
+                  {p.cover_image_url ? (
+                    <img src={p.cover_image_url} alt="" className="h-12 w-20 rounded object-cover border shrink-0" />
+                  ) : (
+                    <div className="h-12 w-20 rounded border bg-muted flex items-center justify-center shrink-0">
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{p.title}</span>
+                      <Badge variant={p.status === "published" ? "default" : "outline"}>{p.status}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.description}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.description}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button size="sm" variant="outline" onClick={() => setManagePath(p)}>
