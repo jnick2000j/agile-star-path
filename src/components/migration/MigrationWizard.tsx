@@ -387,6 +387,7 @@ export function MigrationWizard({
               showRequestTypeMapping={adapter.id === "jira_service_management"}
               value={mapping}
               onChange={setMapping}
+              organizationIdOverride={organizationIdOverride}
               onValidate={handleValidate}
             />
             <DialogFooter>
