@@ -78,7 +78,12 @@ docker compose \
 
 The `minio-bootstrap` one-shot container automatically:
 
-1. Creates the `taskmaster-uploads` bucket
+1. Creates the buckets used by the app:
+   - `taskmaster-uploads` — general attachments, ticket files, signed exports
+   - `lms-content` — LMS lesson media & attachments (only used if the LMS
+     add-on module is enabled — created unconditionally so enabling the module
+     later requires no storage changes)
+   - `lms-certificates` — generated LMS completion certificates
 2. **Blocks anonymous/public access** (`mc anonymous set none`) — the app
    serves objects via short-lived presigned URLs, never public links
 3. Enables **versioning** (recovery from accidental deletes)
@@ -87,7 +92,7 @@ The `minio-bootstrap` one-shot container automatically:
    - Incomplete multipart uploads abort after 7 days
 5. Creates an IAM **least-privilege policy** (`taskmaster-app`) that grants
    only `ListBucket`, `GetObject`, `PutObject`, `DeleteObject`, and
-   multipart APIs — scoped to `arn:aws:s3:::taskmaster-uploads/*`
+   multipart APIs — scoped to all three buckets above
 6. Creates a **dedicated service account** with that policy attached and
    binds it to the access/secret keys you set in `.env`
 
@@ -177,25 +182,38 @@ S3_SECRET_KEY=...
 
 You still need to:
 
-1. **Create the bucket** in the provider's console (private, versioning ON,
-   block public access ON).
+1. **Create the buckets** in the provider's console (private, versioning ON,
+   block public access ON):
+   - `taskmaster-uploads` (required)
+   - `lms-content` and `lms-certificates` (required if the LMS add-on module
+     will be enabled — create them up-front so toggling the module later is a
+     no-op for the storage team)
 2. **Create an IAM user/service account** with the same least-privilege
-   policy as the bootstrap script writes:
+   policy as the bootstrap script writes — replicate the two statements below
+   for each bucket you provisioned:
    ```json
    {
      "Version": "2012-10-17",
      "Statement": [
        { "Effect": "Allow",
          "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
-         "Resource": "arn:aws:s3:::taskmaster-uploads" },
+         "Resource": [
+           "arn:aws:s3:::taskmaster-uploads",
+           "arn:aws:s3:::lms-content",
+           "arn:aws:s3:::lms-certificates"
+         ] },
        { "Effect": "Allow",
          "Action": ["s3:PutObject","s3:GetObject","s3:DeleteObject",
                     "s3:AbortMultipartUpload","s3:ListMultipartUploadParts"],
-         "Resource": "arn:aws:s3:::taskmaster-uploads/*" }
+         "Resource": [
+           "arn:aws:s3:::taskmaster-uploads/*",
+           "arn:aws:s3:::lms-content/*",
+           "arn:aws:s3:::lms-certificates/*"
+         ] }
      ]
    }
    ```
-3. **Configure CORS** on the bucket to allow `PUT`/`GET` from your
+3. **Configure CORS** on each bucket to allow `PUT`/`GET` from your
    `PUBLIC_URL` origin (the app uses presigned URLs from the browser).
 4. **Set a lifecycle rule**: expire noncurrent versions after 30 days,
    abort incomplete multipart uploads after 7 days.

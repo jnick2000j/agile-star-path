@@ -9,7 +9,10 @@
 #   docker compose -f docker-compose.yml -f docker-compose.minio.yml up -d
 #
 # After first boot, the `minio-bootstrap` job:
-#   1. Creates the `taskmaster-uploads` bucket
+#   1. Creates the `taskmaster-uploads`, `lms-content`, and
+#      `lms-certificates` buckets (LMS buckets are pre-provisioned even
+#      if the LMS add-on is currently OFF, so toggling it on is a no-op
+#      for storage)
 #   2. Creates a least-privilege service account for the app
 #   3. Writes a versioning + 30-day noncurrent-version lifecycle policy
 #   4. Blocks public access (bucket is private; app issues presigned URLs)
@@ -62,6 +65,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       BUCKET: ${S3_BUCKET:-taskmaster-uploads}
+      LMS_CONTENT_BUCKET: ${LMS_CONTENT_BUCKET:-lms-content}
+      LMS_CERTS_BUCKET: ${LMS_CERTS_BUCKET:-lms-certificates}
       APP_ACCESS_KEY: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY in .env (20+ chars, alphanum)}
       APP_SECRET_KEY: ${S3_SECRET_KEY:?Set S3_SECRET_KEY in .env (40+ chars)}
     entrypoint: /bin/sh
@@ -75,17 +80,20 @@ services:
           sleep 2
         done
 
-        echo ">> ensuring bucket: $$BUCKET"
-        mc mb --ignore-existing "local/$$BUCKET"
+        ALL_BUCKETS="$$BUCKET $$LMS_CONTENT_BUCKET $$LMS_CERTS_BUCKET"
 
-        echo ">> blocking public access"
-        mc anonymous set none "local/$$BUCKET"
+        for B in $$ALL_BUCKETS; do
+          echo ">> ensuring bucket: $$B"
+          mc mb --ignore-existing "local/$$B"
 
-        echo ">> enabling versioning (recovery from accidental deletes)"
-        mc version enable "local/$$BUCKET"
+          echo ">> blocking public access on $$B"
+          mc anonymous set none "local/$$B"
 
-        echo ">> lifecycle: expire noncurrent versions after 30d, abort stale multipart after 7d"
-        cat >/tmp/lifecycle.json <<JSON
+          echo ">> enabling versioning on $$B"
+          mc version enable "local/$$B"
+
+          echo ">> lifecycle on $$B: expire noncurrent 30d, abort stale multipart 7d"
+          cat >/tmp/lifecycle.json <<JSON
         {
           "Rules": [
             {
@@ -103,7 +111,8 @@ services:
           ]
         }
         JSON
-        mc ilm import "local/$$BUCKET" </tmp/lifecycle.json
+          mc ilm import "local/$$B" </tmp/lifecycle.json
+        done
 
         echo ">> writing least-privilege policy: taskmaster-app"
         cat >/tmp/policy.json <<JSON
@@ -111,13 +120,17 @@ services:
           "Version": "2012-10-17",
           "Statement": [
             {
-              "Sid": "ListOwnBucket",
+              "Sid": "ListOwnBuckets",
               "Effect": "Allow",
               "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
-              "Resource": ["arn:aws:s3:::$$BUCKET"]
+              "Resource": [
+                "arn:aws:s3:::$$BUCKET",
+                "arn:aws:s3:::$$LMS_CONTENT_BUCKET",
+                "arn:aws:s3:::$$LMS_CERTS_BUCKET"
+              ]
             },
             {
-              "Sid": "RWObjectsInOwnBucket",
+              "Sid": "RWObjectsInOwnBuckets",
               "Effect": "Allow",
               "Action": [
                 "s3:PutObject",
@@ -126,7 +139,11 @@ services:
                 "s3:AbortMultipartUpload",
                 "s3:ListMultipartUploadParts"
               ],
-              "Resource": ["arn:aws:s3:::$$BUCKET/*"]
+              "Resource": [
+                "arn:aws:s3:::$$BUCKET/*",
+                "arn:aws:s3:::$$LMS_CONTENT_BUCKET/*",
+                "arn:aws:s3:::$$LMS_CERTS_BUCKET/*"
+              ]
             }
           ]
         }
@@ -140,7 +157,7 @@ services:
         fi
         mc admin policy attach local taskmaster-app --user "$$APP_ACCESS_KEY" || true
 
-        echo ">> done. bucket=$$BUCKET access_key=$$APP_ACCESS_KEY"
+        echo ">> done. buckets=$$BUCKET,$$LMS_CONTENT_BUCKET,$$LMS_CERTS_BUCKET access_key=$$APP_ACCESS_KEY"
     networks:
       - taskmaster
     restart: "no"
