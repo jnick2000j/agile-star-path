@@ -36,7 +36,7 @@ export default function CourseDetail() {
   const [course, setCourse] = useState<LmsCourse | null>(null);
   const [modules, setModules] = useState<LmsModule[]>([]);
   const [lessons, setLessons] = useState<LmsLesson[]>([]);
-  const [progress, setProgress] = useState<Record<string, { completed: boolean; position_seconds: number }>>({});
+  const [progress, setProgress] = useState<Record<string, { completed: boolean; position_seconds: number; watch_seconds: number }>>({});
   const [enrollment, setEnrollment] = useState<any | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,15 +48,19 @@ export default function CourseDetail() {
       supabase.from("lms_modules").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_lessons").select("*").eq("course_id", courseId).order("position"),
       supabase.from("lms_enrollments").select("*").eq("course_id", courseId).eq("user_id", user.id).maybeSingle(),
-      supabase.from("lms_lesson_progress").select("lesson_id,completed,position_seconds").eq("course_id", courseId).eq("user_id", user.id),
+      supabase.from("lms_lesson_progress").select("lesson_id,completed,position_seconds,watch_seconds").eq("course_id", courseId).eq("user_id", user.id),
     ]);
     setCourse(c.data as LmsCourse | null);
     setModules((mods.data ?? []) as LmsModule[]);
     setLessons((less.data ?? []) as LmsLesson[]);
     setEnrollment(enr.data);
-    const pmap: Record<string, { completed: boolean; position_seconds: number }> = {};
+    const pmap: Record<string, { completed: boolean; position_seconds: number; watch_seconds: number }> = {};
     (prog.data ?? []).forEach((p: any) => {
-      pmap[p.lesson_id] = { completed: p.completed, position_seconds: p.position_seconds ?? 0 };
+      pmap[p.lesson_id] = {
+        completed: p.completed,
+        position_seconds: p.position_seconds ?? 0,
+        watch_seconds: p.watch_seconds ?? 0,
+      };
     });
     setProgress(pmap);
   }, [courseId, user]);
