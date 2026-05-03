@@ -172,6 +172,7 @@ export default function HelpdeskTicketDetail() {
   const [convertOpen, setConvertOpen] = useState(false);
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
+  const [peopleOpen, setPeopleOpen] = useState(false);
   const [declareMIOpen, setDeclareMIOpen] = useState(false);
   const [hierarchyOpen, setHierarchyOpen] = useState(false);
   
@@ -794,6 +795,9 @@ export default function HelpdeskTicketDetail() {
             <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
               <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
             </Button>
+            <Button size="sm" variant="outline" onClick={() => setPeopleOpen(true)} className="shrink-0 rounded-none">
+              <Users className="h-4 w-4 mr-2" /> People
+            </Button>
             <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none">
               <Clock className="h-4 w-4 mr-2" /> Log time
             </Button>
@@ -840,7 +844,7 @@ export default function HelpdeskTicketDetail() {
               <TabsList className="flex w-full overflow-x-auto h-auto justify-start gap-1 bg-transparent p-0 rounded-none border-b">
                 <TabsTrigger value="conversation" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><MessageSquare className="h-4 w-4 mr-2" />Conversation ({comments.length})</TabsTrigger>
                 
-                <TabsTrigger value="people" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Users className="h-4 w-4 mr-2" />People</TabsTrigger>
+                
                 <TabsTrigger value="links" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Link2 className="h-4 w-4 mr-2" />CI &amp; Problem Mgmt</TabsTrigger>
                 <TabsTrigger value="parent_child" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Network className="h-4 w-4 mr-2" />Parent/Child</TabsTrigger>
                 <TabsTrigger value="catalog" className="shrink-0 rounded-none border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Package className="h-4 w-4 mr-2" />Catalog</TabsTrigger>
@@ -918,18 +922,6 @@ export default function HelpdeskTicketDetail() {
                      </div>
                    </div>
                 </Card>
-              </TabsContent>
-              <TabsContent value="people" className="space-y-4">
-                <TicketAssigneesPanel
-                  ticketId={ticket.id}
-                  organizationId={ticket.organization_id}
-                  orgUsers={orgUsers as any}
-                />
-                <TicketWatchersPanel
-                  ticketId={ticket.id}
-                  organizationId={ticket.organization_id}
-                  orgUsers={orgUsers as any}
-                />
               </TabsContent>
               <TabsContent value="links" className="space-y-4">
 
@@ -1187,6 +1179,29 @@ export default function HelpdeskTicketDetail() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSlaCsatOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={peopleOpen} onOpenChange={setPeopleOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>People</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <TicketAssigneesPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
+            <TicketWatchersPanel
+              ticketId={ticket.id}
+              organizationId={ticket.organization_id}
+              orgUsers={orgUsers as any}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPeopleOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
