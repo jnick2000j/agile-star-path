@@ -945,7 +945,7 @@ async function runJsm(
                 project_id: projectId,
                 title,
                 description: baseDescription,
-                type: "service_request",
+                type: "problem",
                 priority: internalPriority,
                 status: status === "completed" ? "closed" : "open",
                 created_by: ctx.userId,
@@ -956,6 +956,63 @@ async function runJsm(
             internalEntityType = "issue";
             internalId = data.id;
             summary.createdIssues += 1;
+          }
+
+          // Fetch + persist SLA metrics for this request (best-effort)
+          if (internalId) {
+            try {
+              const slaResp = await jsmFetch<{
+                values: {
+                  name: string;
+                  ongoingCycle?: {
+                    breached?: boolean;
+                    elapsedTime?: { millis?: number };
+                    remainingTime?: { millis?: number };
+                    goalDuration?: { millis?: number };
+                    startTime?: { iso8601?: string };
+                  };
+                  completedCycles?: {
+                    breached?: boolean;
+                    elapsedTime?: { millis?: number };
+                    remainingTime?: { millis?: number };
+                    goalDuration?: { millis?: number };
+                    startTime?: { iso8601?: string };
+                    stopTime?: { iso8601?: string };
+                  }[];
+                }[];
+              }>(c, `/rest/servicedeskapi/request/${r.issueKey}/sla`);
+
+              const slaRows = (slaResp.values ?? []).map((s) => {
+                const last = s.completedCycles?.[s.completedCycles.length - 1];
+                const cyc = s.ongoingCycle ?? last;
+                const cycleState = s.ongoingCycle ? "ongoing" : last ? "completed" : null;
+                const minutes = (ms?: number) =>
+                  typeof ms === "number" ? Math.round(ms / 60000) : null;
+                return {
+                  organization_id: ctx.organizationId,
+                  job_id: ctx.jobId,
+                  entity_type: internalEntityType,
+                  entity_id: internalId,
+                  external_id: r.issueId,
+                  external_key: r.issueKey,
+                  sla_name: s.name,
+                  elapsed_minutes: minutes(cyc?.elapsedTime?.millis),
+                  remaining_minutes: minutes(cyc?.remainingTime?.millis),
+                  goal_minutes: minutes(cyc?.goalDuration?.millis),
+                  breached: !!cyc?.breached,
+                  cycle_state: cycleState,
+                  started_at: cyc?.startTime?.iso8601 ?? null,
+                  completed_at: last?.stopTime?.iso8601 ?? null,
+                };
+              });
+
+              if (slaRows.length > 0) {
+                await supa.from("migration_sla_metrics").insert(slaRows);
+              }
+            } catch {
+              // SLAs are best-effort; ignore failures (no Service Desk Agent
+              // permission, request type without SLAs, etc.)
+            }
           }
 
           await ctx.recordItem({
