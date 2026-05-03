@@ -39,6 +39,7 @@ interface PathCourse {
   course_id: string;
   position: number;
   required: boolean;
+  prerequisite_course_id: string | null;
 }
 
 export default function LmsAdmin() {
