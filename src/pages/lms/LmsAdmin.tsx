@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Route, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Route, Upload, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useLmsPermissions } from "@/hooks/useLmsPermissions";
@@ -118,6 +118,7 @@ export default function LmsAdmin() {
         title: form.title,
         description: form.description ?? null,
         status: form.status ?? "draft",
+        cover_image_url: form.cover_image_url ?? null,
       }).eq("id", editingPath.id);
       if (error) return toast.error(error.message);
       toast.success("Learning path updated");
@@ -128,6 +129,7 @@ export default function LmsAdmin() {
         title: form.title,
         description: form.description ?? null,
         status: (form.status ?? "draft") as PathStatus,
+        cover_image_url: form.cover_image_url ?? null,
       } as any);
       if (error) return toast.error(error.message);
       toast.success("Learning path created");
