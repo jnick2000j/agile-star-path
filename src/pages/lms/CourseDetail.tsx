@@ -96,7 +96,39 @@ export default function CourseDetail() {
 
   const handleLessonCompleted = async () => {
     if (!currentOrganization?.id || !courseId || !activeLesson) return;
-    await completeLesson(currentOrganization.id, courseId, activeLesson.id);
+
+    // Enforce module-level minimum across the active lesson's module
+    const moduleLessons = lessons.filter((l) => l.module_id === activeLesson.module_id);
+    const moduleObj = modules.find((m) => m.id === activeLesson.module_id);
+    if (moduleObj?.min_required_seconds) {
+      const moduleWatch = moduleLessons.reduce((sum, l) => {
+        const w = progress[l.id]?.watch_seconds ?? 0;
+        // include the just-finished lesson's required minimum so completing the
+        // last lesson of a module doesn't fall short by a few seconds
+        return sum + (l.id === activeLesson.id ? Math.max(w, activeLesson.min_required_seconds ?? 0) : w);
+      }, 0);
+      if (moduleWatch < moduleObj.min_required_seconds) {
+        const remaining = Math.ceil((moduleObj.min_required_seconds - moduleWatch) / 60);
+        toast.error(`Spend at least ${remaining} more minute(s) on this module before completing this lesson.`);
+        return;
+      }
+    }
+
+    const result = await completeLesson(
+      currentOrganization.id,
+      courseId,
+      activeLesson.id,
+      activeLesson.min_required_seconds,
+    );
+    if (!result.ok) {
+      if (result.reason === "min_time_not_met") {
+        const remaining = Math.ceil(((result.required ?? 0) - (result.watched ?? 0)) / 60);
+        toast.error(`Spend at least ${remaining} more minute(s) on this lesson before completing.`);
+      } else {
+        toast.error(result.reason ?? "Could not complete lesson");
+      }
+      return;
+    }
     toast.success("Lesson complete");
     // Auto-advance
     const idx = lessons.findIndex((l) => l.id === activeLesson.id);
