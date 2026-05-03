@@ -17,6 +17,9 @@ export interface MigrationCredentials {
   [key: string]: string | undefined;
 }
 
+/** In-memory file payloads for adapters that take uploads (e.g. CSV). */
+export type MigrationFiles = Record<string, { name: string; text: string }>;
+
 /** Scope chosen by the user (e.g. which projects/boards to import). */
 export interface MigrationScope {
   selectedProjectIds?: string[];
@@ -75,22 +78,25 @@ export interface MigrationSourceAdapter {
   credentialFields: {
     name: string;
     label: string;
-    type: "text" | "password" | "url" | "email";
+    type: "text" | "password" | "url" | "email" | "file";
     placeholder?: string;
     helpText?: string;
     required?: boolean;
+    accept?: string; // for file inputs
+    multiple?: boolean; // for file inputs
   }[];
   /** Validate creds + return a list of remote projects/boards. */
-  testConnection(creds: MigrationCredentials): Promise<RemoteProject[]>;
+  testConnection(creds: MigrationCredentials, files?: MigrationFiles): Promise<RemoteProject[]>;
   /** Estimate counts for the chosen scope, plus any warnings. */
-  preview(creds: MigrationCredentials, scope: MigrationScope): Promise<PreviewResult>;
+  preview(creds: MigrationCredentials, scope: MigrationScope, files?: MigrationFiles): Promise<PreviewResult>;
   /** Suggest a default field mapping (status / priority / etc.) given a sample. */
-  suggestMapping(creds: MigrationCredentials, scope: MigrationScope): Promise<FieldMapping>;
+  suggestMapping(creds: MigrationCredentials, scope: MigrationScope, files?: MigrationFiles): Promise<FieldMapping>;
   /** Run the actual import, writing to the database via Supabase. */
   run(
     creds: MigrationCredentials,
     scope: MigrationScope,
     mapping: FieldMapping,
     ctx: MigrationContext,
+    files?: MigrationFiles,
   ): Promise<ImportSummary>;
 }

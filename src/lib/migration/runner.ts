@@ -4,6 +4,7 @@ import type {
   FieldMapping,
   ImportSummary,
   MigrationCredentials,
+  MigrationFiles,
   MigrationScope,
   MigrationSourceId,
 } from "./types";
@@ -14,8 +15,9 @@ export interface StartJobInput {
   source: MigrationSourceId | string;
   sourceLabel?: string;
   scope: MigrationScope;
-  // creds are NOT persisted — they only live in memory for the job run
+  // creds and files are NOT persisted — they only live in memory for the job run
   creds: MigrationCredentials;
+  files?: MigrationFiles;
   mapping: FieldMapping;
 }
 
@@ -51,12 +53,18 @@ export async function runMigrationJob(
     .eq("id", jobId);
 
   try {
-    const summary = await adapter.run(input.creds, input.scope, input.mapping, {
-      organizationId: input.organizationId,
-      userId: input.userId,
-      jobId,
-      onProgress,
-    });
+    const summary = await adapter.run(
+      input.creds,
+      input.scope,
+      input.mapping,
+      {
+        organizationId: input.organizationId,
+        userId: input.userId,
+        jobId,
+        onProgress,
+      },
+      input.files,
+    );
 
     await supabase
       .from("migration_jobs")

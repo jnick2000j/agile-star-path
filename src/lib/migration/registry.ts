@@ -1,7 +1,9 @@
 import type { MigrationSourceAdapter, MigrationSourceId } from "./types";
 import { jiraAdapter } from "./sources/jira";
+import { csvAdapter } from "./sources/csv";
 
 const adapters: Record<string, MigrationSourceAdapter> = {
+  [csvAdapter.id]: csvAdapter,
   [jiraAdapter.id]: jiraAdapter,
 };
 

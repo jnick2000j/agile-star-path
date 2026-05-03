@@ -16,6 +16,7 @@ import type {
   FieldMapping,
   ImportSummary,
   MigrationCredentials,
+  MigrationFiles,
   MigrationScope,
   RemoteProject,
 } from "@/lib/migration/types";
@@ -39,6 +40,7 @@ export function MigrationWizard({
   const [step, setStep] = useState<Step>("source");
   const [sourceId, setSourceId] = useState<string | null>(null);
   const [creds, setCreds] = useState<MigrationCredentials>({});
+  const [files, setFiles] = useState<MigrationFiles>({});
   const [testing, setTesting] = useState(false);
   const [testError, setTestError] = useState<string | null>(null);
   const [remoteProjects, setRemoteProjects] = useState<RemoteProject[]>([]);
@@ -52,6 +54,7 @@ export function MigrationWizard({
     setStep("source");
     setSourceId(null);
     setCreds({});
+    setFiles({});
     setTestError(null);
     setRemoteProjects([]);
     setScope({ selectedProjectIds: [], includeClosed: false });
@@ -74,9 +77,9 @@ export function MigrationWizard({
     setTesting(true);
     setTestError(null);
     try {
-      const projects = await adapter.testConnection(creds);
+      const projects = await adapter.testConnection(creds, files);
       setRemoteProjects(projects);
-      const sug = await adapter.suggestMapping(creds, scope);
+      const sug = await adapter.suggestMapping(creds, scope, files);
       setMapping(sug);
       setStep("scope");
     } catch (e: unknown) {
@@ -109,6 +112,7 @@ export function MigrationWizard({
           scope,
           mapping,
           creds,
+          files,
         },
         (done, total, message) => setProgress({ done, total, message }),
       );
@@ -162,27 +166,55 @@ export function MigrationWizard({
 
         {step === "connect" && adapter && (
           <div className="space-y-4 overflow-y-auto pr-1">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Browser-based connection</AlertTitle>
-              <AlertDescription className="text-xs">
-                For larger imports we recommend running through a backend proxy to avoid CORS and rate limits.
-                Credentials are kept in memory only and never stored.
-              </AlertDescription>
-            </Alert>
+            {adapter.id !== "csv" && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Browser-based connection</AlertTitle>
+                <AlertDescription className="text-xs">
+                  For larger imports we recommend running through a backend proxy to avoid CORS and rate limits.
+                  Credentials are kept in memory only and never stored.
+                </AlertDescription>
+              </Alert>
+            )}
             {adapter.credentialFields.map((f) => (
               <div key={f.name} className="space-y-1">
                 <Label htmlFor={`mig-${f.name}`}>
                   {f.label}
                   {f.required && <span className="text-destructive"> *</span>}
                 </Label>
-                <Input
-                  id={`mig-${f.name}`}
-                  type={f.type === "password" ? "password" : "text"}
-                  placeholder={f.placeholder}
-                  value={creds[f.name] ?? ""}
-                  onChange={(e) => setCreds({ ...creds, [f.name]: e.target.value })}
-                />
+                {f.type === "file" ? (
+                  <>
+                    <Input
+                      id={`mig-${f.name}`}
+                      type="file"
+                      accept={f.accept}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) {
+                          const next = { ...files };
+                          delete next[f.name];
+                          setFiles(next);
+                          return;
+                        }
+                        const text = await file.text();
+                        setFiles({ ...files, [f.name]: { name: file.name, text } });
+                      }}
+                    />
+                    {files[f.name] && (
+                      <p className="text-[11px] text-muted-foreground">
+                        Loaded: {files[f.name].name}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <Input
+                    id={`mig-${f.name}`}
+                    type={f.type === "password" ? "password" : "text"}
+                    placeholder={f.placeholder}
+                    value={creds[f.name] ?? ""}
+                    onChange={(e) => setCreds({ ...creds, [f.name]: e.target.value })}
+                  />
+                )}
                 {f.helpText && <p className="text-[11px] text-muted-foreground">{f.helpText}</p>}
               </div>
             ))}
@@ -292,6 +324,7 @@ export function MigrationWizard({
             onStart={start}
             adapter={adapter}
             creds={creds}
+            files={files}
             scope={scope}
           />
         )}
@@ -356,12 +389,14 @@ export function MigrationWizard({
 function PreviewStep({
   adapter,
   creds,
+  files,
   scope,
   onBack,
   onStart,
 }: {
   adapter: ReturnType<typeof getMigrationSource>;
   creds: MigrationCredentials;
+  files?: MigrationFiles;
   scope: MigrationScope;
   onBack: () => void;
   onStart: () => void;
@@ -376,7 +411,7 @@ function PreviewStep({
     setLoading(true);
     setError(null);
     try {
-      const r = await adapter.preview(creds, scope);
+      const r = await adapter.preview(creds, scope, files);
       setCounts(r.counts as Record<string, number>);
       setWarnings(r.warnings ?? []);
     } catch (e: unknown) {
