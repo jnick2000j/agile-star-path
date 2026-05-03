@@ -154,7 +154,7 @@ services:
         fi
         mc admin policy attach local taskmaster-app --user "$$APP_ACCESS_KEY" || true
 
-        echo ">> done. bucket=$$BUCKET access_key=$$APP_ACCESS_KEY"
+        echo ">> done. buckets=$$BUCKET,$$LMS_CONTENT_BUCKET,$$LMS_CERTS_BUCKET access_key=$$APP_ACCESS_KEY"
     networks:
       - taskmaster
     restart: "no"
