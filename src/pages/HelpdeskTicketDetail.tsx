@@ -172,6 +172,7 @@ export default function HelpdeskTicketDetail() {
   const [convertOpen, setConvertOpen] = useState(false);
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
+  const [peopleOpen, setPeopleOpen] = useState(false);
   const [declareMIOpen, setDeclareMIOpen] = useState(false);
   const [hierarchyOpen, setHierarchyOpen] = useState(false);
   
