@@ -84,8 +84,8 @@ export function LmsAdminDashboard() {
       supabase.from("profiles").select("user_id,first_name,last_name,email").eq("organization_id", orgId),
     ]);
     if (eRes.error) { toast.error(eRes.error.message); setLoading(false); return; }
-    const courseMap = new Map((cRes.data ?? []).map((c: any) => [c.id, c.title]));
-    const profMap = new Map((pRes.data ?? []).map((p: any) => [
+    const courseMap = new Map<string, string>(((cRes.data ?? []) as any[]).map((c) => [c.id, c.title]));
+    const profMap = new Map<string, { name: string; email: string }>(((pRes.data ?? []) as any[]).map((p) => [
       p.user_id,
       { name: [p.first_name, p.last_name].filter(Boolean).join(" ").trim() || p.email || p.user_id, email: p.email ?? "" },
     ]));
