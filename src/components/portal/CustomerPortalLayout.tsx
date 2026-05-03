@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LifeBuoy, Sparkles, BookOpen, Ticket, LogOut, Home, Package } from "lucide-react";
+import { LifeBuoy, Sparkles, BookOpen, Ticket, LogOut, Home, Package, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,6 +58,9 @@ export function CustomerPortalLayout() {
           </NavLink>
           <NavLink to="/portal/tickets" className={({ isActive }) => link(isActive)}>
             <Ticket className="h-4 w-4" /> My Tickets
+          </NavLink>
+          <NavLink to="/portal/training" className={({ isActive }) => link(isActive)}>
+            <GraduationCap className="h-4 w-4" /> Training
           </NavLink>
           <NavLink to="/portal/kb" className={({ isActive }) => link(isActive)}>
             <BookOpen className="h-4 w-4" /> Knowledge Base

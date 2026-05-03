@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { format } from "date-fns";
-import { Sparkles, BookOpen, Ticket, ArrowRight, Package } from "lucide-react";
+import { Sparkles, BookOpen, Ticket, ArrowRight, Package, GraduationCap, AlertTriangle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { STATUS_BADGE } from "@/lib/portalStatus";
 import { PortalServiceStatus } from "@/components/portal/PortalServiceStatus";
 
@@ -60,6 +61,22 @@ export default function PortalDashboard() {
     },
   });
 
+  const { data: pendingTraining = [] } = useQuery({
+    queryKey: ["portal-pending-training", user?.id, currentOrganization?.id],
+    enabled: !!user?.id && !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("lms_enrollments")
+        .select("id, course_id, status, progress_percent, due_at, mandatory, course:lms_courses(title)")
+        .eq("user_id", user!.id)
+        .eq("organization_id", currentOrganization!.id)
+        .neq("status", "completed")
+        .order("due_at", { ascending: true, nullsFirst: false })
+        .limit(5);
+      return data ?? [];
+    },
+  });
+
   const open = tickets.filter((t: any) => !["resolved", "closed", "cancelled"].includes(t.status));
   const closed = tickets.filter((t: any) => ["resolved", "closed", "cancelled"].includes(t.status));
 
@@ -107,6 +124,53 @@ export default function PortalDashboard() {
           <div className="text-sm text-muted-foreground">Recently resolved</div>
         </Card>
       </div>
+
+      {pendingTraining.length > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" /> Pending Training
+            </h2>
+            <Link to="/portal/training" className="text-sm text-primary hover:underline">
+              View all →
+            </Link>
+          </div>
+          <div className="divide-y">
+            {pendingTraining.map((e: any) => {
+              const overdue = e.due_at && new Date(e.due_at).getTime() < Date.now();
+              return (
+                <Link
+                  key={e.id}
+                  to={`/learning/courses/${e.course_id}`}
+                  className="flex items-center gap-3 py-2 px-2 -mx-2 rounded hover:bg-accent/50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium truncate">{e.course?.title ?? "Course"}</span>
+                      {e.mandatory && <Badge variant="secondary" className="text-xs">Mandatory</Badge>}
+                      {overdue && (
+                        <Badge variant="destructive" className="text-xs">
+                          <AlertTriangle className="h-3 w-3 mr-1" />Overdue
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Progress value={e.progress_percent ?? 0} className="h-1.5 flex-1 max-w-xs" />
+                      <span className="text-xs text-muted-foreground">{e.progress_percent ?? 0}%</span>
+                      {e.due_at && (
+                        <span className={`text-xs ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
+                          Due {format(new Date(e.due_at), "PP")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">

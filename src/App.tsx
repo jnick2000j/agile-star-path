@@ -101,6 +101,7 @@ import PortalNewTicket from "./pages/portal/PortalNewTicket";
 import PortalKB from "./pages/portal/PortalKB";
 import PortalKBArticle from "./pages/portal/PortalKBArticle";
 import PortalCatalog from "./pages/portal/PortalCatalog";
+import PortalTraining from "./pages/portal/PortalTraining";
 import ChangeManagement from "./pages/ChangeManagement";
 import ChangeManagementDetail from "./pages/ChangeManagementDetail";
 import ChangeControlPortal from "./pages/ChangeControlPortal";
@@ -243,6 +244,7 @@ const App = () => (
               <Route path="kb" element={<PortalKB />} />
               <Route path="kb/:id" element={<PortalKBArticle />} />
               <Route path="catalog" element={<PortalCatalog />} />
+              <Route path="training" element={<PortalTraining />} />
             </Route>
             <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
             <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
