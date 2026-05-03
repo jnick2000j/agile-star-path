@@ -57,16 +57,23 @@ export default function PortalTraining() {
       <div>
         <h1 className="text-2xl font-semibold">Training</h1>
         <p className="text-sm text-muted-foreground">
-          Your assigned courses, progress, and certificates.
+          Your assigned courses, progress, certificates, and external training records.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="In progress" value={inProgress.length} />
-        <Stat label="Overdue" value={overdue.length} accent={overdue.length > 0 ? "danger" : undefined} />
-        <Stat label="Completed" value={completed.length} />
-        <Stat label="Available" value={recommended.length} />
-      </div>
+      <Tabs defaultValue="courses" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="courses">Courses & progress</TabsTrigger>
+          <TabsTrigger value="external">External training</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="courses" className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Stat label="In progress" value={inProgress.length} />
+            <Stat label="Overdue" value={overdue.length} accent={overdue.length > 0 ? "danger" : undefined} />
+            <Stat label="Completed" value={completed.length} />
+            <Stat label="Available" value={recommended.length} />
+          </div>
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
