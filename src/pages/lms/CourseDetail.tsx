@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { CheckCircle2, Circle, FileText, Video, HelpCircle, ArrowLeft, Play, Award } from "lucide-react";
+import { CheckCircle2, Circle, FileText, Video, HelpCircle, ArrowLeft, Play, Award, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -42,6 +42,7 @@ export default function CourseDetail() {
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [certificate, setCertificate] = useState<any | null>(null);
+  const [prereqLock, setPrereqLock] = useState<{ courseId: string; courseTitle: string; pathTitle: string } | null>(null);
   const certDownloadedRef = useRef(false);
 
   const recipientName =
@@ -94,6 +95,47 @@ export default function CourseDetail() {
       };
     });
     setProgress(pmap);
+
+    // Prerequisite enforcement: if this course is part of a learning path the
+    // user is enrolled into, check whether a prerequisite course (also in that
+    // path) has been completed by this user.
+    const pathId = (enr.data as any)?.path_id;
+    if (pathId && courseId) {
+      const { data: pcRow } = await supabase
+        .from("lms_learning_path_courses")
+        .select("prerequisite_course_id, lms_learning_paths(title)")
+        .eq("path_id", pathId)
+        .eq("course_id", courseId)
+        .maybeSingle();
+      const prereqId = (pcRow as any)?.prerequisite_course_id;
+      const pathTitle = (pcRow as any)?.lms_learning_paths?.title ?? "Learning path";
+      if (prereqId) {
+        const { data: prereqEnr } = await supabase
+          .from("lms_enrollments")
+          .select("status")
+          .eq("user_id", user.id)
+          .eq("course_id", prereqId)
+          .maybeSingle();
+        if (prereqEnr?.status !== "completed") {
+          const { data: prereqCourse } = await supabase
+            .from("lms_courses")
+            .select("title")
+            .eq("id", prereqId)
+            .maybeSingle();
+          setPrereqLock({
+            courseId: prereqId,
+            courseTitle: (prereqCourse as any)?.title ?? "the prerequisite course",
+            pathTitle,
+          });
+        } else {
+          setPrereqLock(null);
+        }
+      } else {
+        setPrereqLock(null);
+      }
+    } else {
+      setPrereqLock(null);
+    }
   }, [courseId, user]);
 
   useEffect(() => {
