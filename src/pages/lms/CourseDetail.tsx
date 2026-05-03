@@ -114,6 +114,24 @@ export default function CourseDetail() {
       }
     }
 
+    // Enforce course-wide minimum if completing this lesson would finish all required lessons
+    if (course?.min_required_seconds) {
+      const wouldFinishCourse = lessons
+        .filter((l) => l.required && l.id !== activeLesson.id)
+        .every((l) => progress[l.id]?.completed);
+      if (wouldFinishCourse && activeLesson.required) {
+        const totalWatch = lessons.reduce((sum, l) => {
+          const w = progress[l.id]?.watch_seconds ?? 0;
+          return sum + (l.id === activeLesson.id ? Math.max(w, activeLesson.min_required_seconds ?? 0) : w);
+        }, 0);
+        if (totalWatch < course.min_required_seconds) {
+          const remaining = Math.ceil((course.min_required_seconds - totalWatch) / 60);
+          toast.error(`Spend at least ${remaining} more minute(s) on this course before finishing.`);
+          return;
+        }
+      }
+    }
+
     const result = await completeLesson(
       currentOrganization.id,
       courseId,
