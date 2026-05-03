@@ -371,6 +371,23 @@ export function MappingEditor({
           setNewKey={setNewTypeKey}
         />
       )}
+
+      {/* JSM request type → register */}
+      {showRequestTypeMapping && (
+        <MapSection
+          title="Request type → register"
+          helper="Route each Jira Service Management request type to the matching internal register and workflow. Incidents go to Major Incidents, Problems to the Problem register, Changes to Change Requests, and so on."
+          keys={requestTypeKeys}
+          knownKeys={knownRequestTypes}
+          displayLabels={requestTypeLabels}
+          getValue={(k) => (value.extra?.requestType as Record<string, string> | undefined)?.[k] ?? ""}
+          onSet={setRequestType}
+          onRemove={removeRequestType}
+          options={JSM_TARGETS}
+          newKey={newRequestTypeKey}
+          setNewKey={setNewRequestTypeKey}
+        />
+      )}
     </div>
   );
 }
@@ -380,6 +397,8 @@ interface MapSectionProps {
   helper: string;
   keys: string[];
   knownKeys?: string[];
+  /** Optional human-readable label per key (e.g. for opaque ids). */
+  displayLabels?: Record<string, string>;
   getValue: (k: string) => string;
   onSet: (k: string, v: string) => void;
   onRemove: (k: string) => void;
@@ -393,6 +412,7 @@ function MapSection({
   helper,
   keys,
   knownKeys,
+  displayLabels,
   getValue,
   onSet,
   onRemove,
@@ -418,7 +438,7 @@ function MapSection({
           return (
             <div key={k} className="flex items-center gap-1.5">
               <Label className="flex-1 text-xs truncate flex items-center gap-1">
-                <span className="truncate">{k}</span>
+                <span className="truncate">{displayLabels?.[k] ?? k}</span>
                 {required && <span className="text-destructive">*</span>}
                 {missing && <Badge variant="destructive" className="h-4 text-[9px] px-1">missing</Badge>}
               </Label>
