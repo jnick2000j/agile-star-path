@@ -40,14 +40,18 @@ End-to-end ticket lifecycle aligned with ITIL 4 + HDI + KCS.
 | Capability                | Notes |
 |---------------------------|-------|
 | Tickets                   | Incident / Service Request / Problem / Question / Support |
-| Sub-tickets / parent      | Drag & drop reparenting, bulk parent set, cascade delete with reparent |
+| Ticket detail header      | Status / Priority / Type on row 1; editable Programme / Project / Product dropdowns on row 2 (changes audited via `helpdesk_ticket_activity`) |
+| Action bar                | Single-row square buttons: **SLA / CSAT**, **People**, **Log time**, **Resolution**, **Mark as Resolved**, convert-to-task, declare major incident |
+| Tabs (single row)         | Conversation, CI & Problem Mgmt (linked CIs + catalog request + linked problem + approvals), Parent/Child, Catalog, Knowledge, Attachments, Activity |
+| Sub-tickets / parent      | Parent/Child dialog persists `parent_ticket_id` immediately, supports drag & drop reparenting, bulk parent set, cascade delete with reparent; every change written to the activity log |
 | AI Ticket Intake          | Conversation → categorised ticket, suggested KB articles |
 | SLA policies              | Response & resolution targets per priority/type; pause on customer-pending |
 | Helpdesk workflows        | Visual rule editor: triggers → conditions → actions → approvals |
 | Approval chains           | Sequential approvers, technical/business/security triad slots |
 | Inbound email             | Tickets/comments via the helpdesk email address |
 | Macros                    | Pre-canned replies and bulk-action templates |
-| CSAT                      | Survey on resolution; feeds the dashboard |
+| CSAT                      | Survey on resolution; feeds the dashboard. Opened from the **SLA / CSAT** action button |
+| People dialog             | Assignees + watchers managed from a single dialog launched from the action bar |
 | Service Requests tab      | Dedicated agent view filtered to service-request tickets |
 | Module toggles            | Per-org enable/disable for Problem Mgmt, CMDB, Service Catalog, Status Page, Major Incident Management |
 
