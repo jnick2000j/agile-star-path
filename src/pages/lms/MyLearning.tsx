@@ -12,6 +12,7 @@ import { Award, Calendar, Download, AlertTriangle, GraduationCap } from "lucide-
 import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { downloadCertificate } from "@/lib/certificate";
 
 export default function MyLearning() {
   const { user } = useAuth();
