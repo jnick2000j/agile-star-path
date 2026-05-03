@@ -7570,6 +7570,152 @@ export type Database = {
           },
         ]
       }
+      lms_external_training: {
+        Row: {
+          approval_required: boolean
+          category: string | null
+          cost_amount: number | null
+          cpd_credits: number | null
+          created_at: string
+          delivery_mode: string | null
+          description: string | null
+          end_date: string | null
+          event_type: string
+          hours: number
+          id: string
+          location: string | null
+          organization_id: string
+          provider: string | null
+          purpose: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          skills: string[] | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_required?: boolean
+          category?: string | null
+          cost_amount?: number | null
+          cpd_credits?: number | null
+          created_at?: string
+          delivery_mode?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string
+          hours?: number
+          id?: string
+          location?: string | null
+          organization_id: string
+          provider?: string | null
+          purpose?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skills?: string[] | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_required?: boolean
+          category?: string | null
+          cost_amount?: number | null
+          cpd_credits?: number | null
+          created_at?: string
+          delivery_mode?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string
+          hours?: number
+          id?: string
+          location?: string | null
+          organization_id?: string
+          provider?: string | null
+          purpose?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skills?: string[] | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lms_external_training_attachments: {
+        Row: {
+          created_at: string
+          external_training_id: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          organization_id: string
+          size_bytes: number | null
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          external_training_id: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          organization_id: string
+          size_bytes?: number | null
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          external_training_id?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          organization_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_external_training_attachments_external_training_id_fkey"
+            columns: ["external_training_id"]
+            isOneToOne: false
+            referencedRelation: "lms_external_training"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_external_training_settings: {
+        Row: {
+          created_at: string
+          organization_id: string
+          require_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          organization_id: string
+          require_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          organization_id?: string
+          require_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lms_learning_path_courses: {
         Row: {
           course_id: string
