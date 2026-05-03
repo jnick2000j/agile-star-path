@@ -111,26 +111,26 @@ export function JsmContactsSummary() {
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="rounded-md border p-2">
                 <p className="text-[10px] uppercase text-muted-foreground">
-                  Reporters
+                  Unique people
                 </p>
                 <p className="text-base font-semibold flex items-center gap-1">
                   <UserCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  {data!.reporters}
+                  {data!.uniquePeople}
                 </p>
               </div>
               <div className="rounded-md border p-2">
                 <p className="text-[10px] uppercase text-muted-foreground">
-                  Participants
+                  Participant links
                 </p>
                 <p className="text-base font-semibold">{data!.participants}</p>
               </div>
               <div className="rounded-md border p-2">
                 <p className="text-[10px] uppercase text-muted-foreground">
-                  Customer orgs
+                  Unique customer orgs
                 </p>
                 <p className="text-base font-semibold flex items-center gap-1">
                   <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  {data!.customerOrgs}
+                  {data!.uniqueOrgs}
                 </p>
               </div>
             </div>
