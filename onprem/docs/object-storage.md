@@ -92,7 +92,7 @@ The `minio-bootstrap` one-shot container automatically:
    - Incomplete multipart uploads abort after 7 days
 5. Creates an IAM **least-privilege policy** (`taskmaster-app`) that grants
    only `ListBucket`, `GetObject`, `PutObject`, `DeleteObject`, and
-   multipart APIs — scoped to `arn:aws:s3:::taskmaster-uploads/*`
+   multipart APIs — scoped to all three buckets above
 6. Creates a **dedicated service account** with that policy attached and
    binds it to the access/secret keys you set in `.env`
 
