@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { CheckCircle2, Circle, FileText, Video, HelpCircle, ArrowLeft, Play } from "lucide-react";
+import { CheckCircle2, Circle, FileText, Video, HelpCircle, ArrowLeft, Play, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 import { QuizPlayer } from "@/components/lms/QuizPlayer";
+import { downloadCertificate } from "@/lib/certificate";
 
 export default function CourseDetail() {
   const { id: courseId } = useParams<{ id: string }>();
