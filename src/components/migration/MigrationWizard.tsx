@@ -166,27 +166,55 @@ export function MigrationWizard({
 
         {step === "connect" && adapter && (
           <div className="space-y-4 overflow-y-auto pr-1">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Browser-based connection</AlertTitle>
-              <AlertDescription className="text-xs">
-                For larger imports we recommend running through a backend proxy to avoid CORS and rate limits.
-                Credentials are kept in memory only and never stored.
-              </AlertDescription>
-            </Alert>
+            {adapter.id !== "csv" && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Browser-based connection</AlertTitle>
+                <AlertDescription className="text-xs">
+                  For larger imports we recommend running through a backend proxy to avoid CORS and rate limits.
+                  Credentials are kept in memory only and never stored.
+                </AlertDescription>
+              </Alert>
+            )}
             {adapter.credentialFields.map((f) => (
               <div key={f.name} className="space-y-1">
                 <Label htmlFor={`mig-${f.name}`}>
                   {f.label}
                   {f.required && <span className="text-destructive"> *</span>}
                 </Label>
-                <Input
-                  id={`mig-${f.name}`}
-                  type={f.type === "password" ? "password" : "text"}
-                  placeholder={f.placeholder}
-                  value={creds[f.name] ?? ""}
-                  onChange={(e) => setCreds({ ...creds, [f.name]: e.target.value })}
-                />
+                {f.type === "file" ? (
+                  <>
+                    <Input
+                      id={`mig-${f.name}`}
+                      type="file"
+                      accept={f.accept}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) {
+                          const next = { ...files };
+                          delete next[f.name];
+                          setFiles(next);
+                          return;
+                        }
+                        const text = await file.text();
+                        setFiles({ ...files, [f.name]: { name: file.name, text } });
+                      }}
+                    />
+                    {files[f.name] && (
+                      <p className="text-[11px] text-muted-foreground">
+                        Loaded: {files[f.name].name}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <Input
+                    id={`mig-${f.name}`}
+                    type={f.type === "password" ? "password" : "text"}
+                    placeholder={f.placeholder}
+                    value={creds[f.name] ?? ""}
+                    onChange={(e) => setCreds({ ...creds, [f.name]: e.target.value })}
+                  />
+                )}
                 {f.helpText && <p className="text-[11px] text-muted-foreground">{f.helpText}</p>}
               </div>
             ))}
