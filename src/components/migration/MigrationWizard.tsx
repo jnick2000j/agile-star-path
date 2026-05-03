@@ -389,12 +389,14 @@ export function MigrationWizard({
 function PreviewStep({
   adapter,
   creds,
+  files,
   scope,
   onBack,
   onStart,
 }: {
   adapter: ReturnType<typeof getMigrationSource>;
   creds: MigrationCredentials;
+  files?: MigrationFiles;
   scope: MigrationScope;
   onBack: () => void;
   onStart: () => void;
@@ -409,7 +411,7 @@ function PreviewStep({
     setLoading(true);
     setError(null);
     try {
-      const r = await adapter.preview(creds, scope);
+      const r = await adapter.preview(creds, scope, files);
       setCounts(r.counts as Record<string, number>);
       setWarnings(r.warnings ?? []);
     } catch (e: unknown) {
