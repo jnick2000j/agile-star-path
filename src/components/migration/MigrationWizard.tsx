@@ -47,6 +47,8 @@ export function MigrationWizard({
   const [remoteProjects, setRemoteProjects] = useState<RemoteProject[]>([]);
   const [scope, setScope] = useState<MigrationScope>({ selectedProjectIds: [], includeClosed: false });
   const [mapping, setMapping] = useState<FieldMapping>({});
+  const [mappingValid, setMappingValid] = useState<MappingValidationResult>({ ok: true, errors: [] });
+  const handleValidate = useCallback((r: MappingValidationResult) => setMappingValid(r), []);
   const [progress, setProgress] = useState({ done: 0, total: 0, message: "" });
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
