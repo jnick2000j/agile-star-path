@@ -237,6 +237,12 @@ export default function LmsAdmin() {
           onClose={() => setManagePath(null)}
         />
       )}
+
+      <LmsImportWizard
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={reload}
+      />
     </AppLayout>
   );
 }
