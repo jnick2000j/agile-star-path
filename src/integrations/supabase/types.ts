@@ -7403,6 +7403,7 @@ export type Database = {
           issues_certificate: boolean
           kb_index_status: string
           kb_indexed_at: string | null
+          min_required_seconds: number | null
           organization_id: string
           passing_score_percent: number
           status: string
@@ -7420,6 +7421,7 @@ export type Database = {
           issues_certificate?: boolean
           kb_index_status?: string
           kb_indexed_at?: string | null
+          min_required_seconds?: number | null
           organization_id: string
           passing_score_percent?: number
           status?: string
@@ -7437,6 +7439,7 @@ export type Database = {
           issues_certificate?: boolean
           kb_index_status?: string
           kb_indexed_at?: string | null
+          min_required_seconds?: number | null
           organization_id?: string
           passing_score_percent?: number
           status?: string
@@ -7656,6 +7659,7 @@ export type Database = {
           id: string
           lesson_type: string
           max_attempts: number | null
+          min_required_seconds: number | null
           module_id: string
           passing_score_percent: number | null
           position: number
@@ -7673,6 +7677,7 @@ export type Database = {
           id?: string
           lesson_type: string
           max_attempts?: number | null
+          min_required_seconds?: number | null
           module_id: string
           passing_score_percent?: number | null
           position?: number
@@ -7690,6 +7695,7 @@ export type Database = {
           id?: string
           lesson_type?: string
           max_attempts?: number | null
+          min_required_seconds?: number | null
           module_id?: string
           passing_score_percent?: number | null
           position?: number
@@ -7721,6 +7727,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          min_required_seconds: number | null
           position: number
           title: string
         }
@@ -7729,6 +7736,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          min_required_seconds?: number | null
           position?: number
           title: string
         }
@@ -7737,6 +7745,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          min_required_seconds?: number | null
           position?: number
           title?: string
         }
