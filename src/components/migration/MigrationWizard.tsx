@@ -77,9 +77,9 @@ export function MigrationWizard({
     setTesting(true);
     setTestError(null);
     try {
-      const projects = await adapter.testConnection(creds);
+      const projects = await adapter.testConnection(creds, files);
       setRemoteProjects(projects);
-      const sug = await adapter.suggestMapping(creds, scope);
+      const sug = await adapter.suggestMapping(creds, scope, files);
       setMapping(sug);
       setStep("scope");
     } catch (e: unknown) {
