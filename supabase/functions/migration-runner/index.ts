@@ -866,7 +866,7 @@ async function runJsm(
               .from("problems")
               .insert({
                 organization_id: ctx.organizationId,
-                project_id: internalId,
+                project_id: projectId,
                 title,
                 description: baseDescription,
                 status: status === "completed" ? "closed" : "open",
@@ -885,7 +885,7 @@ async function runJsm(
               .from("change_requests")
               .insert({
                 organization_id: ctx.organizationId,
-                project_id: internalId,
+                project_id: projectId,
                 reference_number: r.issueKey,
                 title,
                 description: baseDescription,
@@ -907,7 +907,7 @@ async function runJsm(
               .from("tasks")
               .insert({
                 organization_id: ctx.organizationId,
-                project_id: internalId,
+                project_id: projectId,
                 name: title,
                 description: baseDescription,
                 status,
@@ -925,7 +925,7 @@ async function runJsm(
               .from("risks")
               .insert({
                 organization_id: ctx.organizationId,
-                project_id: internalId,
+                project_id: projectId,
                 title,
                 description: baseDescription,
                 created_by: ctx.userId,
@@ -942,7 +942,7 @@ async function runJsm(
               .from("issues")
               .insert({
                 organization_id: ctx.organizationId,
-                project_id: internalId,
+                project_id: projectId,
                 title,
                 description: baseDescription,
                 type: "service_request",
