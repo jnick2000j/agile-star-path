@@ -923,18 +923,6 @@ export default function HelpdeskTicketDetail() {
                    </div>
                 </Card>
               </TabsContent>
-              <TabsContent value="people" className="space-y-4">
-                <TicketAssigneesPanel
-                  ticketId={ticket.id}
-                  organizationId={ticket.organization_id}
-                  orgUsers={orgUsers as any}
-                />
-                <TicketWatchersPanel
-                  ticketId={ticket.id}
-                  organizationId={ticket.organization_id}
-                  orgUsers={orgUsers as any}
-                />
-              </TabsContent>
               <TabsContent value="links" className="space-y-4">
 
                 <Card className="p-4 space-y-3">
