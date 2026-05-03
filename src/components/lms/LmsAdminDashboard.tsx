@@ -78,9 +78,10 @@ export function LmsAdminDashboard() {
     if (!currentOrganization?.id) return;
     setLoading(true);
     const orgId = currentOrganization.id;
-    const eRes: any = await supabase.from("lms_enrollments").select("*").eq("organization_id", orgId).order("enrolled_at", { ascending: false }).limit(1000);
-    const cRes: any = await supabase.from("lms_courses").select("id,title").eq("organization_id", orgId);
-    const pRes: any = await supabase.from("profiles").select("user_id,first_name,last_name,email").eq("organization_id", orgId);
+    const sb: any = supabase;
+    const eRes: any = await sb.from("lms_enrollments").select("*").eq("organization_id", orgId).order("enrolled_at", { ascending: false }).limit(1000);
+    const cRes: any = await sb.from("lms_courses").select("id,title").eq("organization_id", orgId);
+    const pRes: any = await sb.from("profiles").select("user_id,first_name,last_name,email").eq("organization_id", orgId);
     if (eRes.error) { toast.error(eRes.error.message); setLoading(false); return; }
     const courseMap = new Map<string, string>(((cRes.data ?? []) as any[]).map((c) => [c.id, c.title]));
     const profMap = new Map<string, { name: string; email: string }>(((pRes.data ?? []) as any[]).map((p) => [
