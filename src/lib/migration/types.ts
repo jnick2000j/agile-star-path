@@ -17,6 +17,9 @@ export interface MigrationCredentials {
   [key: string]: string | undefined;
 }
 
+/** In-memory file payloads for adapters that take uploads (e.g. CSV). */
+export type MigrationFiles = Record<string, { name: string; text: string }>;
+
 /** Scope chosen by the user (e.g. which projects/boards to import). */
 export interface MigrationScope {
   selectedProjectIds?: string[];
