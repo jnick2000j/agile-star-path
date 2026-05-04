@@ -8712,6 +8712,71 @@ export type Database = {
         }
         Relationships: []
       }
+      migration_requests: {
+        Row: {
+          completed_at: string | null
+          contact_email: string | null
+          created_at: string
+          expected_record_count: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          provisioning_notes: string | null
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          scope: string | null
+          source_details: string | null
+          source_system: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          contact_email?: string | null
+          created_at?: string
+          expected_record_count?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          provisioning_notes?: string | null
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scope?: string | null
+          source_details?: string | null
+          source_system: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          contact_email?: string | null
+          created_at?: string
+          expected_record_count?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          provisioning_notes?: string | null
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scope?: string | null
+          source_details?: string | null
+          source_system?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "migration_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       migration_sla_metrics: {
         Row: {
           breached: boolean
