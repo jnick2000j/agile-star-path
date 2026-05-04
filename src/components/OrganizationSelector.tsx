@@ -12,14 +12,14 @@ import {
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
 
-function OrgLogo({ stored, name, primaryColor, size = "h-5 w-5" }: { stored?: string | null; name?: string; primaryColor?: string | null; size?: string }) {
+function OrgLogo({ stored, name, primaryColor, size = "h-7 w-7" }: { stored?: string | null; name?: string; primaryColor?: string | null; size?: string }) {
   const url = useSignedLogo(stored);
   if (url) {
     return <img src={url} alt={name || ""} className={`${size} rounded object-contain`} />;
   }
   return (
     <div className={`${size} rounded flex items-center justify-center`} style={{ backgroundColor: primaryColor || "#2563eb" }}>
-      <Building2 className="h-3 w-3 text-white" />
+      <Building2 className="h-4 w-4 text-white" />
     </div>
   );
 }
