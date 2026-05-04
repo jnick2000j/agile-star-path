@@ -73,6 +73,7 @@ import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
 import { MacroPicker } from "@/components/helpdesk/MacroPicker";
 import { ApprovalsPanel } from "@/components/helpdesk/ApprovalsPanel";
 import { ConvertTicketToTaskDialog } from "@/components/helpdesk/ConvertTicketToTaskDialog";
+import { ConvertTicketToFeatureDialog } from "@/components/helpdesk/ConvertTicketToFeatureDialog";
 import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
 import { TicketAssigneesPanel } from "@/components/helpdesk/TicketAssigneesPanel";
 import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
