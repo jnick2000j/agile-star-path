@@ -44,6 +44,7 @@ import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
 import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
+import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
@@ -105,7 +106,7 @@ export default function PlatformAdmin() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = [
-    "overview","tenants","licenses","plans","ai","support","sso","verticals","modules","migrations","audit",
+    "overview","tenants","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
   ];
   const requestedTab = searchParams.get("tab");
   const activeTab = requestedTab && validTabs.includes(requestedTab) ? requestedTab : "overview";
@@ -270,6 +271,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="modules">Module Toggles</TabsTrigger>
+          <TabsTrigger value="migration-requests">Migration Requests</TabsTrigger>
           <TabsTrigger value="migrations">Migrations</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
@@ -498,6 +500,10 @@ export default function PlatformAdmin() {
 
         <TabsContent value="modules" className="space-y-4">
           <PlatformModuleToggles />
+        </TabsContent>
+
+        <TabsContent value="migration-requests" className="space-y-4">
+          <PlatformMigrationRequestsQueue />
         </TabsContent>
 
         <TabsContent value="migrations" className="space-y-4">
