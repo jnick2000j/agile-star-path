@@ -42,11 +42,11 @@ export function OrganizationSelector() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="gap-2 w-full justify-between bg-sidebar-accent/60 hover:bg-sidebar-accent text-sidebar-foreground border-sidebar-border"
+          className="gap-2 w-full justify-between bg-sidebar-accent/60 hover:bg-sidebar-accent text-sidebar-foreground border-sidebar-border h-12 px-3 text-base"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
             <OrgLogo stored={currentOrganization?.logo_url} name={currentOrganization?.name} primaryColor={currentOrganization?.primary_color} />
-            <span className="truncate">
+            <span className="truncate font-medium">
               {currentOrganization?.name || "Select Organization"}
             </span>
           </div>
