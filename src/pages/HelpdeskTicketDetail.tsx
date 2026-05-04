@@ -171,6 +171,7 @@ export default function HelpdeskTicketDetail() {
   const [deleting, setDeleting] = useState(false);
   const [catalogEditing, setCatalogEditing] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [convertFeatureOpen, setConvertFeatureOpen] = useState(false);
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
   const [peopleOpen, setPeopleOpen] = useState(false);
