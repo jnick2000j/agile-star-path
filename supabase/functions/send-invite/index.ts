@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
+import { sendTransactionalEmail } from "../_shared/send-transactional.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,20 +141,19 @@ Deno.serve(async (req) => {
 
     if (invErr) throw invErr;
 
-    // Send email via configured transport (SMTP for on-prem, Resend for cloud)
+    // Send invite email via Lovable Cloud's transactional email queue.
     const origin =
       req.headers.get("origin") || req.headers.get("referer") || "";
     const baseUrl = origin.replace(/\/$/, "");
     const acceptUrl = `${baseUrl}/accept-invite?token=${invite.token}`;
 
     let emailSent = false;
-    if (isEmailConfigured()) {
-      const inviterName =
-        inviter.user_metadata?.full_name || inviter.email || "A teammate";
-      const result = await sendEmail({
-        to: [email],
-        subject: `${inviterName} invited you to join ${org?.name || "their organization"}`,
-        html: `
+    const inviterName =
+      inviter.user_metadata?.full_name || inviter.email || "A teammate";
+    const result = await sendTransactionalEmail({
+      to: email,
+      subject: `${inviterName} invited you to join ${org?.name || "their organization"}`,
+      html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width:560px; margin:0 auto; padding:32px;">
               <h2 style="color:#0f172a;">You're invited to join ${org?.name || "an organization"}</h2>
               <p style="color:#475569; font-size:15px; line-height:1.6;">
@@ -175,10 +174,10 @@ Deno.serve(async (req) => {
               </p>
             </div>
           `,
-      });
-      emailSent = result.ok;
-      if (!result.ok) console.error("send-invite email failed:", result.error);
-    }
+      idempotencyKey: `org-invite-${invite.id}`,
+    });
+    emailSent = result.ok;
+    if (!result.ok) console.error("send-invite email failed:", result.error);
 
     return new Response(
       JSON.stringify({
