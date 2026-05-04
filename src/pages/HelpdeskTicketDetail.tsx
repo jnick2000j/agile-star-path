@@ -792,44 +792,44 @@ export default function HelpdeskTicketDetail() {
             </div>
           </div>
 
-          {/* Action buttons: square, single row */}
-          <div className="flex items-center gap-2 pt-2 border-t overflow-x-auto">
-            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none">
-              <Gauge className="h-4 w-4 mr-2" /> SLA / CSAT
+          {/* Action buttons: wrap to multi-row, allow in-button text wrap */}
+          <div className="flex flex-wrap items-stretch gap-2 pt-2 border-t">
+            <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
+              <Gauge className="h-4 w-4 mr-2 shrink-0" /> SLA / CSAT
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setPeopleOpen(true)} className="shrink-0 rounded-none">
-              <Users className="h-4 w-4 mr-2" /> People
+            <Button size="sm" variant="outline" onClick={() => setPeopleOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
+              <Users className="h-4 w-4 mr-2 shrink-0" /> People
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none">
-              <Clock className="h-4 w-4 mr-2" /> Log time
+            <Button size="sm" variant="outline" onClick={() => navigate(`/timesheets?ticketId=${ticket.id}`)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
+              <Clock className="h-4 w-4 mr-2 shrink-0" /> Log time
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)} className="shrink-0 rounded-none">
-              <FileText className="h-4 w-4 mr-2" /> Resolution
+            <Button size="sm" variant="outline" onClick={() => setResolutionOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
+              <FileText className="h-4 w-4 mr-2 shrink-0" /> Resolution
               {(ticket as any).resolution_code && <span className="ml-1 text-[10px] opacity-70">●</span>}
             </Button>
             {(ticket as any).converted_to_task_id ? (
-              <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)} className="shrink-0 rounded-none">
-                <ListChecks className="h-4 w-4 mr-2" /> Open task
+              <Button size="sm" variant="outline" onClick={() => navigate(`/tasks?focus=${(ticket as any).converted_to_task_id}`)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
+                <ListChecks className="h-4 w-4 mr-2 shrink-0" /> Open task
               </Button>
             ) : (
-              <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)} className="shrink-0 rounded-none">
-                <ListChecks className="h-4 w-4 mr-2" /> To task
+              <Button size="sm" variant="outline" onClick={() => setConvertOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
+                <ListChecks className="h-4 w-4 mr-2 shrink-0" /> To task
               </Button>
             )}
             {(ticket as any).converted_to_feature_id ? (
-              <Button size="sm" variant="outline" onClick={() => navigate(`/products/features?focus=${(ticket as any).converted_to_feature_id}`)} className="shrink-0 rounded-none">
-                <Lightbulb className="h-4 w-4 mr-2" /> Open feature request
+              <Button size="sm" variant="outline" onClick={() => navigate(`/products/features?focus=${(ticket as any).converted_to_feature_id}`)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight max-w-[160px]">
+                <Lightbulb className="h-4 w-4 mr-2 shrink-0" /> Open feature request
               </Button>
             ) : (
-              <Button size="sm" variant="outline" onClick={() => setConvertFeatureOpen(true)} className="shrink-0 rounded-none">
-                <Lightbulb className="h-4 w-4 mr-2" /> To Feature Request
+              <Button size="sm" variant="outline" onClick={() => setConvertFeatureOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight max-w-[160px]">
+                <Lightbulb className="h-4 w-4 mr-2 shrink-0" /> To Feature Request
               </Button>
             )}
-            <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)} className="shrink-0 rounded-none">
-              <Network className="h-4 w-4 mr-2" /> Make Parent/Child
+            <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight max-w-[140px]">
+              <Network className="h-4 w-4 mr-2 shrink-0" /> Make Parent/Child
             </Button>
-            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive shrink-0 rounded-none" onClick={() => setDeclareMIOpen(true)}>
-              <Siren className="h-4 w-4 mr-2" /> Major Incident
+            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight max-w-[140px]" onClick={() => setDeclareMIOpen(true)}>
+              <Siren className="h-4 w-4 mr-2 shrink-0" /> Major Incident
             </Button>
           </div>
         </Card>
