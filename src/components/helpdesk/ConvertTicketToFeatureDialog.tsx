@@ -250,7 +250,7 @@ export function ConvertTicketToFeatureDialog({ open, onOpenChange, ticket, onCon
       toast.success(`Feature request created${copiedCount ? ` with ${copiedCount} attachment(s)` : ""}`);
       onOpenChange(false);
       onConverted?.(featureId);
-      navigate(`/feature-backlog?focus=${featureId}`);
+      navigate(`/products/features?focus=${featureId}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Conversion failed";
       toast.error(msg);

@@ -817,7 +817,7 @@ export default function HelpdeskTicketDetail() {
               </Button>
             )}
             {(ticket as any).converted_to_feature_id ? (
-              <Button size="sm" variant="outline" onClick={() => navigate(`/feature-backlog?focus=${(ticket as any).converted_to_feature_id}`)} className="shrink-0 rounded-none">
+              <Button size="sm" variant="outline" onClick={() => navigate(`/products/features?focus=${(ticket as any).converted_to_feature_id}`)} className="shrink-0 rounded-none">
                 <Lightbulb className="h-4 w-4 mr-2" /> Open feature request
               </Button>
             ) : (
