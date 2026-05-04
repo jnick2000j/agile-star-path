@@ -58,6 +58,7 @@ import { EditOrganizationDialog } from "@/components/dialogs/EditOrganizationDia
 import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
 import { UserAccessList } from "@/components/admin/UserAccessList";
 import { RoleTypesManager } from "@/components/admin/RoleTypesManager";
+import { RequestMigrationCard } from "@/components/migration/RequestMigrationCard";
 import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
@@ -302,6 +303,7 @@ export default function AdminPanel() {
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
           <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="migration">Migration</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -600,6 +602,10 @@ export default function AdminPanel() {
 
         <TabsContent value="email">
           <EmailSettings />
+        </TabsContent>
+
+        <TabsContent value="migration">
+          <RequestMigrationCard />
         </TabsContent>
       </Tabs>
     </AppLayout>
