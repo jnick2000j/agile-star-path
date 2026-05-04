@@ -28,13 +28,19 @@ export default function HelpdeskQueues({ embedded = false }: { embedded?: boolea
     if (!currentOrganization?.id) return;
     setLoading(true);
     const orgId = currentOrganization.id;
-    const [{ data: q }, { data: prof }, { data: ib }] = await Promise.all([
+    const [{ data: q }, { data: access }, { data: ib }] = await Promise.all([
       (supabase as any).from("helpdesk_queues").select("*").eq("organization_id", orgId).order("name"),
-      (supabase as any).from("organization_members").select("user_id, profiles(id, first_name, last_name, email)").eq("organization_id", orgId),
+      (supabase as any).from("user_organization_access").select("user_id").eq("organization_id", orgId).eq("is_disabled", false),
       (supabase as any).from("helpdesk_email_inboxes").select("id, email_address, queue_id").eq("organization_id", orgId),
     ]);
     setQueues(q || []);
-    setProfiles((prof || []).map((p: any) => p.profiles).filter(Boolean));
+    const userIds = (access || []).map((a: any) => a.user_id);
+    let profs: any[] = [];
+    if (userIds.length) {
+      const { data: pp } = await (supabase as any).from("profiles").select("user_id, first_name, last_name, full_name, email").in("user_id", userIds);
+      profs = (pp || []).map((p: any) => ({ ...p, id: p.user_id }));
+    }
+    setProfiles(profs);
     setInboxes(ib || []);
     if (q?.length) {
       const { data: m } = await (supabase as any)
