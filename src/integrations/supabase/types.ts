@@ -5752,6 +5752,74 @@ export type Database = {
           },
         ]
       }
+      helpdesk_ticket_feature_conversions: {
+        Row: {
+          attachments_copied: number
+          converted_by: string
+          created_at: string
+          feature_id: string
+          feature_priority: string | null
+          id: string
+          organization_id: string
+          product_id: string | null
+          reason: string
+          ticket_id: string
+        }
+        Insert: {
+          attachments_copied?: number
+          converted_by: string
+          created_at?: string
+          feature_id: string
+          feature_priority?: string | null
+          id?: string
+          organization_id: string
+          product_id?: string | null
+          reason: string
+          ticket_id: string
+        }
+        Update: {
+          attachments_copied?: number
+          converted_by?: string
+          created_at?: string
+          feature_id?: string
+          feature_priority?: string | null
+          id?: string
+          organization_id?: string
+          product_id?: string | null
+          reason?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_ticket_feature_conversions_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "product_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_feature_conversions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_feature_conversions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_ticket_feature_conversions_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpdesk_ticket_task_conversions: {
         Row: {
           attachments_copied: number
@@ -5887,6 +5955,7 @@ export type Database = {
           assignee_id: string | null
           category: string | null
           closed_at: string | null
+          converted_to_feature_id: string | null
           converted_to_task_id: string | null
           created_at: string
           created_by: string | null
@@ -5928,6 +5997,7 @@ export type Database = {
           assignee_id?: string | null
           category?: string | null
           closed_at?: string | null
+          converted_to_feature_id?: string | null
           converted_to_task_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -5969,6 +6039,7 @@ export type Database = {
           assignee_id?: string | null
           category?: string | null
           closed_at?: string | null
+          converted_to_feature_id?: string | null
           converted_to_task_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -6007,6 +6078,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "helpdesk_tickets_converted_to_feature_id_fkey"
+            columns: ["converted_to_feature_id"]
+            isOneToOne: false
+            referencedRelation: "product_features"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "helpdesk_tickets_converted_to_task_id_fkey"
             columns: ["converted_to_task_id"]
@@ -9882,6 +9960,7 @@ export type Database = {
           product_id: string
           reach_score: number | null
           reference_number: string | null
+          source_ticket_id: string | null
           sprint_id: string | null
           status: string
           story_points: number | null
@@ -9904,6 +9983,7 @@ export type Database = {
           product_id: string
           reach_score?: number | null
           reference_number?: string | null
+          source_ticket_id?: string | null
           sprint_id?: string | null
           status?: string
           story_points?: number | null
@@ -9926,6 +10006,7 @@ export type Database = {
           product_id?: string
           reach_score?: number | null
           reference_number?: string | null
+          source_ticket_id?: string | null
           sprint_id?: string | null
           status?: string
           story_points?: number | null
@@ -9945,6 +10026,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_features_source_ticket_id_fkey"
+            columns: ["source_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_tickets"
             referencedColumns: ["id"]
           },
           {

@@ -73,11 +73,12 @@ import { AIReplyDraftButton } from "@/components/helpdesk/AIReplyDraftButton";
 import { MacroPicker } from "@/components/helpdesk/MacroPicker";
 import { ApprovalsPanel } from "@/components/helpdesk/ApprovalsPanel";
 import { ConvertTicketToTaskDialog } from "@/components/helpdesk/ConvertTicketToTaskDialog";
+import { ConvertTicketToFeatureDialog } from "@/components/helpdesk/ConvertTicketToFeatureDialog";
 import { TicketWatchersPanel } from "@/components/helpdesk/TicketWatchersPanel";
 import { TicketAssigneesPanel } from "@/components/helpdesk/TicketAssigneesPanel";
 import { CommentComposer, renderBodyWithMentions, type PendingFile } from "@/components/helpdesk/CommentComposer";
 import { Link } from "react-router-dom";
-import { ListChecks, Download, FileText, Image as ImageIcon, Siren } from "lucide-react";
+import { ListChecks, Download, FileText, Image as ImageIcon, Siren, Lightbulb } from "lucide-react";
 import { DeclareMajorIncidentDialog } from "@/components/major-incidents/DeclareMajorIncidentDialog";
 
 
@@ -170,6 +171,7 @@ export default function HelpdeskTicketDetail() {
   const [deleting, setDeleting] = useState(false);
   const [catalogEditing, setCatalogEditing] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [convertFeatureOpen, setConvertFeatureOpen] = useState(false);
   const [resolutionOpen, setResolutionOpen] = useState(false);
   const [slaCsatOpen, setSlaCsatOpen] = useState(false);
   const [peopleOpen, setPeopleOpen] = useState(false);
@@ -814,6 +816,15 @@ export default function HelpdeskTicketDetail() {
                 <ListChecks className="h-4 w-4 mr-2" /> To task
               </Button>
             )}
+            {(ticket as any).converted_to_feature_id ? (
+              <Button size="sm" variant="outline" onClick={() => navigate(`/products/features?focus=${(ticket as any).converted_to_feature_id}`)} className="shrink-0 rounded-none">
+                <Lightbulb className="h-4 w-4 mr-2" /> Open feature request
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => setConvertFeatureOpen(true)} className="shrink-0 rounded-none">
+                <Lightbulb className="h-4 w-4 mr-2" /> To Feature Request
+              </Button>
+            )}
             <Button size="sm" variant="outline" onClick={() => setHierarchyOpen(true)} className="shrink-0 rounded-none">
               <Network className="h-4 w-4 mr-2" /> Make Parent/Child
             </Button>
@@ -1068,6 +1079,13 @@ export default function HelpdeskTicketDetail() {
       <ConvertTicketToTaskDialog
         open={convertOpen}
         onOpenChange={setConvertOpen}
+        ticket={ticket as any}
+        onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
+      />
+
+      <ConvertTicketToFeatureDialog
+        open={convertFeatureOpen}
+        onOpenChange={setConvertFeatureOpen}
         ticket={ticket as any}
         onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
       />
