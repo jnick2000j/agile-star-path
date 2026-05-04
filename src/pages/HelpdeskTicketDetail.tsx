@@ -1083,6 +1083,13 @@ export default function HelpdeskTicketDetail() {
         onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
       />
 
+      <ConvertTicketToFeatureDialog
+        open={convertFeatureOpen}
+        onOpenChange={setConvertFeatureOpen}
+        ticket={ticket as any}
+        onConverted={() => qc.invalidateQueries({ queryKey: ["helpdesk-ticket", id] })}
+      />
+
       <DeclareMajorIncidentDialog
         open={declareMIOpen}
         onOpenChange={setDeclareMIOpen}
