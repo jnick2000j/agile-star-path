@@ -218,6 +218,25 @@ Deno.serve(async (req) => {
   if (!ticketId) {
     const refSuffix = Math.random().toString(36).slice(2, 8).toUpperCase();
     const reference = `T-${Date.now().toString(36).toUpperCase()}-${refSuffix}`;
+
+    // Resolve queue defaults if inbox is linked to a queue
+    let queueId: string | null = inbox.queue_id || null;
+    let queueDefaultAssignee: string | null = null;
+    let queueDefaultPriority: string | null = null;
+    if (queueId) {
+      const { data: q } = await supabase
+        .from("helpdesk_queues")
+        .select("id, default_assignee_id, default_priority, is_active")
+        .eq("id", queueId)
+        .maybeSingle();
+      if (q && q.is_active) {
+        queueDefaultAssignee = q.default_assignee_id || null;
+        queueDefaultPriority = q.default_priority || null;
+      } else {
+        queueId = null;
+      }
+    }
+
     const { data: ticket, error: tErr } = await supabase
       .from("helpdesk_tickets")
       .insert({
@@ -227,12 +246,13 @@ Deno.serve(async (req) => {
         description: payload.text || (payload.html ? payload.html.replace(/<[^>]+>/g, " ").trim() : null),
         ticket_type: "incident",
         category: inbox.default_category || null,
-        priority: inbox.default_priority || "medium",
+        priority: inbox.default_priority || queueDefaultPriority || "medium",
         status: "new",
         source: "email",
         reporter_email: fromParsed.email,
         reporter_name: fromParsed.name || null,
-        assignee_id: inbox.default_assignee_id || null,
+        assignee_id: inbox.default_assignee_id || queueDefaultAssignee || null,
+        queue_id: queueId,
         metadata: {
           inbound_email_inbox_id: inbox.id,
           inbound_email_message_id: payload.message_id,
