@@ -90,6 +90,7 @@ import CSATDashboard from "./pages/CSATDashboard";
 import CSATSurvey from "./pages/CSATSurvey";
 import TicketIntake from "./pages/TicketIntake";
 import EmailIntake from "./pages/EmailIntake";
+import HelpdeskQueues from "./pages/HelpdeskQueues";
 import MacrosPage from "./pages/MacrosPage";
 import SLAEscalationRules from "./pages/SLAEscalationRules";
 import ApprovalChainsPage from "./pages/ApprovalChainsPage";
@@ -234,6 +235,7 @@ const App = () => (
             <Route path="/csat/:token" element={<CSATSurvey />} />
             <Route path="/support/intake" element={<ProtectedRoute><TicketIntake /></ProtectedRoute>} />
             <Route path="/support/email-intake" element={<ProtectedRoute><EmailIntake /></ProtectedRoute>} />
+            <Route path="/support/queues" element={<ProtectedRoute><HelpdeskQueues /></ProtectedRoute>} />
             <Route path="/support/macros" element={<ProtectedRoute><MacrosPage /></ProtectedRoute>} />
             <Route path="/support/sla-escalation" element={<ProtectedRoute><SLAEscalationRules /></ProtectedRoute>} />
             <Route path="/support/approvals" element={<ProtectedRoute><ApprovalChainsPage /></ProtectedRoute>} />
