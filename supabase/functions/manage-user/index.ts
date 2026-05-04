@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { sendEmail, isEmailConfigured } from "../_shared/email.ts";
+import { sendTransactionalEmail } from "../_shared/send-transactional.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -129,32 +129,28 @@ Deno.serve(async (req) => {
         (linkData as any)?.action_link ||
         redirectTo;
 
-      // 3. Actually send the email via the configured transport.
+      // 3. Enqueue the invite email via Lovable Cloud's transactional email queue.
       let emailSent = false;
       let emailError: string | undefined;
 
-      if (isEmailConfigured()) {
-        const inviterName =
-          (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
-        const appName = Deno.env.get("APP_NAME") || "TaskMaster";
-        const result = await sendEmail({
-          to: [email],
-          subject: `${inviterName} invited you to ${appName}`,
-          html: inviteEmailHtml({
-            inviterName,
-            appName,
-            acceptUrl,
-            tempPassword: password,
-          }),
-        });
-        emailSent = result.ok;
-        if (!result.ok) {
-          emailError = result.error;
-          console.error("manage-user invite email failed:", result.error);
-        }
-      } else {
-        emailError = "No email transport configured (set SMTP_HOST or RESEND_API_KEY)";
-        console.warn("manage-user: email transport not configured; returning accept_url only");
+      const inviterName =
+        (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
+      const appName = Deno.env.get("APP_NAME") || "TaskMaster";
+      const result = await sendTransactionalEmail({
+        to: email,
+        subject: `${inviterName} invited you to ${appName}`,
+        html: inviteEmailHtml({
+          inviterName,
+          appName,
+          acceptUrl,
+          tempPassword: password,
+        }),
+        idempotencyKey: `manage-user-invite-${newUser.user?.id ?? email}`,
+      });
+      emailSent = result.ok;
+      if (!result.ok) {
+        emailError = result.error;
+        console.error("manage-user invite email failed:", result.error);
       }
 
       return new Response(
@@ -207,20 +203,17 @@ Deno.serve(async (req) => {
 
       let emailSent = false;
       let emailError: string | undefined;
-      if (isEmailConfigured()) {
-        const inviterName =
-          (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
-        const appName = Deno.env.get("APP_NAME") || "TaskMaster";
-        const result = await sendEmail({
-          to: [targetUser.email!],
-          subject: `${inviterName} re-sent your invite to ${appName}`,
-          html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
-        });
-        emailSent = result.ok;
-        if (!result.ok) emailError = result.error;
-      } else {
-        emailError = "No email transport configured";
-      }
+      const inviterName =
+        (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
+      const appName = Deno.env.get("APP_NAME") || "TaskMaster";
+      const result = await sendTransactionalEmail({
+        to: targetUser.email!,
+        subject: `${inviterName} re-sent your invite to ${appName}`,
+        html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
+        idempotencyKey: `manage-user-resend-${user_id}-${Date.now()}`,
+      });
+      emailSent = result.ok;
+      if (!result.ok) emailError = result.error;
 
       return new Response(
         JSON.stringify({
@@ -230,7 +223,7 @@ Deno.serve(async (req) => {
           accept_url: acceptUrl,
           message: emailSent
             ? "Invite email resent"
-            : "Email transport not configured — share accept_url manually.",
+            : `Email queue error — ${emailError ?? "unknown"} (share accept_url manually).`,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
