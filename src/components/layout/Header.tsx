@@ -135,7 +135,7 @@ export function Header({ title, subtitle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="hidden md:block w-56">
+        <div className="hidden md:block w-80">
           <OrganizationSelector />
         </div>
         <RegionBadge />
