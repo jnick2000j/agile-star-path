@@ -207,7 +207,16 @@ function CreateInboxDialog({ orgId, onClose }: { orgId?: string; onClose: () => 
   const [autoReplySubject, setAutoReplySubject] = useState("We've received your request");
   const [autoReplyBody, setAutoReplyBody] = useState("Thanks for contacting support. We've created a ticket and will respond shortly.\n\nReference: {{ticket_reference}}");
   const [spam, setSpam] = useState(true);
+  const [queueId, setQueueId] = useState<string>("");
+  const [queues, setQueues] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!orgId) return;
+    (supabase as any).from("helpdesk_queues").select("id, name").eq("organization_id", orgId).eq("is_active", true).order("name").then(({ data }: any) => {
+      setQueues(data || []);
+    });
+  }, [orgId]);
 
   const create = async () => {
     if (!email || !orgId) return;
@@ -221,6 +230,7 @@ function CreateInboxDialog({ orgId, onClose }: { orgId?: string; onClose: () => 
       auto_reply_subject: autoReplySubject,
       auto_reply_body: autoReplyBody,
       spam_filter_enabled: spam,
+      queue_id: queueId || null,
     });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
@@ -239,6 +249,20 @@ function CreateInboxDialog({ orgId, onClose }: { orgId?: string; onClose: () => 
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{["low","medium","high","urgent"].map(p => <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>)}</SelectContent>
           </Select>
+        </div>
+        <div>
+          <Label>Route to Queue (optional)</Label>
+          <Select value={queueId || "__none"} onValueChange={(v) => setQueueId(v === "__none" ? "" : v)}>
+            <SelectTrigger><SelectValue placeholder="No queue (unassigned)" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none">No queue (unassigned)</SelectItem>
+              {queues.map((q) => <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-1">
+            Tickets created from this inbox will be assigned to the queue and all members notified.{" "}
+            <Link to="/support/queues" className="underline">Manage queues</Link>
+          </p>
         </div>
         <div className="flex items-center justify-between"><Label>Auto-reply to sender</Label><Switch checked={autoReply} onCheckedChange={setAutoReply} /></div>
         {autoReply && <>
