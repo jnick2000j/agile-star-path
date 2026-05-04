@@ -203,20 +203,17 @@ Deno.serve(async (req) => {
 
       let emailSent = false;
       let emailError: string | undefined;
-      if (isEmailConfigured()) {
-        const inviterName =
-          (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
-        const appName = Deno.env.get("APP_NAME") || "TaskMaster";
-        const result = await sendEmail({
-          to: [targetUser.email!],
-          subject: `${inviterName} re-sent your invite to ${appName}`,
-          html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
-        });
-        emailSent = result.ok;
-        if (!result.ok) emailError = result.error;
-      } else {
-        emailError = "No email transport configured";
-      }
+      const inviterName =
+        (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
+      const appName = Deno.env.get("APP_NAME") || "TaskMaster";
+      const result = await sendTransactionalEmail({
+        to: targetUser.email!,
+        subject: `${inviterName} re-sent your invite to ${appName}`,
+        html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
+        idempotencyKey: `manage-user-resend-${user_id}-${Date.now()}`,
+      });
+      emailSent = result.ok;
+      if (!result.ok) emailError = result.error;
 
       return new Response(
         JSON.stringify({
@@ -226,7 +223,7 @@ Deno.serve(async (req) => {
           accept_url: acceptUrl,
           message: emailSent
             ? "Invite email resent"
-            : "Email transport not configured — share accept_url manually.",
+            : `Email queue error — ${emailError ?? "unknown"} (share accept_url manually).`,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
