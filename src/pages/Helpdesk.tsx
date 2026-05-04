@@ -11,10 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket, Wrench, ToggleLeft } from "lucide-react";
+import { Search, Plus, LifeBuoy, Mail, Filter, Headset, Sparkles, Inbox, Settings2, ChevronRight, ChevronDown, CornerDownRight, Trash2, MoreHorizontal, GitBranch, Package, Globe, AtSign, FileText, AlarmClock, ShieldCheck, Ticket, Wrench, ToggleLeft, Users } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import TicketIntake from "@/pages/TicketIntake";
 import EmailIntake from "@/pages/EmailIntake";
+import HelpdeskQueues from "@/pages/HelpdeskQueues";
 import MacrosPage from "@/pages/MacrosPage";
 import SLAEscalationRules from "@/pages/SLAEscalationRules";
 import ApprovalChainsPage from "@/pages/ApprovalChainsPage";
@@ -388,12 +389,13 @@ export default function Helpdesk() {
 
           {view === "admin" && isAdmin ? (
             <div className="space-y-6">
-              <div className="grid grid-cols-7 gap-2 w-full">
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-2 w-full">
                 {[
                   { key: "modules", label: "Modules", icon: ToggleLeft },
                   { key: "catalog", label: "Service Catalog", icon: Package },
                   { key: "intake", label: "Intake Channels", icon: Globe },
                   { key: "email", label: "Email-to-Ticket", icon: AtSign },
+                  { key: "queues", label: "Queues", icon: Users },
                   { key: "macros", label: "Macros", icon: FileText },
                   { key: "sla", label: "SLA Escalation", icon: AlarmClock },
                   { key: "approvals", label: "Approvals", icon: ShieldCheck },
@@ -427,6 +429,7 @@ export default function Helpdesk() {
                 {adminTab === "catalog" && <ServiceCatalogAdmin embedded />}
                 {adminTab === "intake" && <TicketIntake embedded />}
                 {adminTab === "email" && <EmailIntake embedded />}
+                {adminTab === "queues" && <HelpdeskQueues embedded />}
                 {adminTab === "macros" && <MacrosPage embedded />}
                 {adminTab === "sla" && <SLAEscalationRules embedded />}
                 {adminTab === "approvals" && <ApprovalChainsPage embedded />}
