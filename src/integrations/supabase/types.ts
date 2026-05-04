@@ -4622,6 +4622,7 @@ export type Database = {
           id: string
           is_active: boolean
           organization_id: string
+          queue_id: string | null
           spam_filter_enabled: boolean
           updated_at: string
         }
@@ -4640,6 +4641,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           organization_id: string
+          queue_id?: string | null
           spam_filter_enabled?: boolean
           updated_at?: string
         }
@@ -4658,6 +4660,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           organization_id?: string
+          queue_id?: string | null
           spam_filter_enabled?: boolean
           updated_at?: string
         }
@@ -4667,6 +4670,13 @@ export type Database = {
             columns: ["default_channel_id"]
             isOneToOne: false
             referencedRelation: "helpdesk_intake_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_email_inboxes_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_queues"
             referencedColumns: ["id"]
           },
         ]
@@ -5212,6 +5222,88 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_queue_members: {
+        Row: {
+          created_at: string
+          id: string
+          queue_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          queue_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          queue_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_queue_members_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helpdesk_queues: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          default_assignee_id: string | null
+          default_priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_assignee_id?: string | null
+          default_priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpdesk_queues_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -5971,6 +6063,7 @@ export type Database = {
           product_id: string | null
           programme_id: string | null
           project_id: string | null
+          queue_id: string | null
           reference_number: string | null
           reporter_email: string | null
           reporter_name: string | null
@@ -6013,6 +6106,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          queue_id?: string | null
           reference_number?: string | null
           reporter_email?: string | null
           reporter_name?: string | null
@@ -6055,6 +6149,7 @@ export type Database = {
           product_id?: string | null
           programme_id?: string | null
           project_id?: string | null
+          queue_id?: string | null
           reference_number?: string | null
           reporter_email?: string | null
           reporter_name?: string | null
@@ -6132,6 +6227,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_queues"
             referencedColumns: ["id"]
           },
         ]
