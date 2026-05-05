@@ -212,7 +212,18 @@ export function EditProgrammeDialog({ programme, open, onOpenChange, onSuccess }
             </div>
             <div>
               <Label>Sponsor</Label>
-              <Input value={formData.sponsor} onChange={(e) => setFormData({ ...formData, sponsor: e.target.value })} disabled={!canEdit} />
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })} disabled={!canEdit}>
+                <SelectTrigger><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                  {formData.sponsor && !teamMembers.some((m) => m.user_id === formData.sponsor) && (
+                    <SelectItem value={formData.sponsor}>{formData.sponsor} (legacy)</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Budget</Label>

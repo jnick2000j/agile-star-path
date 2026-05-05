@@ -28,6 +28,7 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ user_id: string; full_name: string | null; email: string }[]>([]);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
@@ -54,11 +55,13 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
   });
 
   useEffect(() => {
-    const fetchOrganizations = async () => {
-      const { data } = await supabase.from("organizations").select("id, name").order("name");
+    if (!open) return;
+    supabase.from("organizations").select("id, name").order("name").then(({ data }) => {
       if (data) setOrganizations(data);
-    };
-    if (open) fetchOrganizations();
+    });
+    supabase.from("profiles").select("user_id, full_name, email").eq("archived", false).then(({ data }) => {
+      if (data) setTeamMembers(data);
+    });
   }, [open]);
 
   // Pre-fill organization with the current active organization when dialog opens
@@ -198,11 +201,15 @@ export function CreateProgrammeDialog({ onSuccess }: CreateProgrammeDialogProps)
             </div>
             <div>
               <Label htmlFor="sponsor">Sponsor</Label>
-              <Input
-                id="sponsor"
-                value={formData.sponsor}
-                onChange={(e) => setFormData({ ...formData, sponsor: e.target.value })}
-              />
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })}>
+                <SelectTrigger id="sponsor"><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="budget">Budget</Label>

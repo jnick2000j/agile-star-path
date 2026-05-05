@@ -68,10 +68,20 @@ export default function Programmes() {
   const { hasFullOrgAccess } = useOrgAccessLevel();
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [editingProgramme, setEditingProgramme] = useState<Program | null>(null);
+  const [userMap, setUserMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchProgrammes();
   }, [currentOrganization, user, hasFullOrgAccess]);
+
+  useEffect(() => {
+    supabase.from("profiles").select("user_id, full_name, email").then(({ data }) => {
+      if (!data) return;
+      const m: Record<string, string> = {};
+      data.forEach((p: any) => { m[p.user_id] = p.full_name || p.email; });
+      setUserMap(m);
+    });
+  }, []);
 
   const fetchProgrammes = async () => {
     setLoading(true);
@@ -299,7 +309,7 @@ export default function Programmes() {
             <div className="pt-4 border-t border-border flex items-center justify-between">
               <div className="text-sm">
                 <span className="text-muted-foreground">Sponsor: </span>
-                <span className="font-medium">{programme.sponsor || "Unassigned"}</span>
+                <span className="font-medium">{programme.sponsor ? (userMap[programme.sponsor] || programme.sponsor) : "Unassigned"}</span>
               </div>
               <Button 
                 variant="ghost" 
