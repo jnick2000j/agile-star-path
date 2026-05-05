@@ -816,7 +816,7 @@ export default function HelpdeskTicketDetail() {
               <Button
                 size="sm"
                 onClick={() => setResolveOpen(true)}
-                className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight"
+                className="rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight max-w-[140px]"
               >
                 <Save className="h-4 w-4 mr-2 shrink-0" /> Mark as Resolved
               </Button>
