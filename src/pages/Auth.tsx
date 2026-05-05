@@ -412,8 +412,8 @@ export default function Auth() {
               <button type="button" onClick={() => { setStep("request"); setOtp(""); setErrors({}); }} className="text-muted-foreground hover:text-foreground flex items-center gap-1">
                 <ArrowLeft className="h-3 w-3" /> Use a different email
               </button>
-              <button type="button" onClick={handleResendCode} disabled={resending} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
-                {resending ? "Sending…" : "Resend code"}
+              <button type="button" onClick={handleResendCode} disabled={resending || resendCooldown > 0} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
+                {resending ? "Sending…" : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
               </button>
             </div>
           </div>
