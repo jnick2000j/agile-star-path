@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { EmailTemplatesPanel } from "./EmailTemplatesPanel";
 import { Loader2, Mail, Send, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -134,7 +136,12 @@ export function EmailSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="settings" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="templates">Templates</TabsTrigger>
+      </TabsList>
+      <TabsContent value="settings" className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -280,7 +287,11 @@ export function EmailSettings() {
             </Alert>
           )}
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </TabsContent>
+      <TabsContent value="templates">
+        <EmailTemplatesPanel />
+      </TabsContent>
+    </Tabs>
   );
 }
