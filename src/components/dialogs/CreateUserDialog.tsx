@@ -181,7 +181,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         body: {
           action: "invite",
           email: formData.email,
-          password: formData.password,
+          password: formData.password || undefined,
           full_name: fullName || formData.email.split('@')[0],
           redirect_to: `${window.location.origin}/auth`,
           organization_id: formData.organization_id || null,
