@@ -6,11 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
-  Shield, 
-  UserCog, 
   Users,
   Crown,
-  Briefcase,
   Building2,
   Palette,
   ArrowRight,
@@ -19,6 +16,8 @@ import {
   FolderKanban,
   Package,
   Layers,
+  Tag,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
@@ -42,13 +41,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -64,12 +56,16 @@ import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplian
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EmailSettings } from "@/components/admin/EmailSettings";
 import { EmailTriggerSettings } from "@/components/admin/EmailTriggerSettings";
-
-
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
 
-type AppRole = Database["public"]["Enums"]["app_role"];
+type AccessLevel = "admin" | "editor" | "viewer";
+
+interface UserCustomRoleAssignment {
+  organization_id: string;
+  role_name: string;
+  is_system: boolean;
+}
 
 interface UserWithRole {
   id: string;
@@ -84,7 +80,9 @@ interface UserWithRole {
   location: string | null;
   department: string | null;
   archived: boolean;
-  role: AppRole;
+  job_title: string | null;
+  highest_access: AccessLevel | null;
+  custom_roles: UserCustomRoleAssignment[];
   created_at: string;
   org_count: number;
 }
@@ -101,20 +99,13 @@ interface Organization {
   product_count: number;
 }
 
-const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; className: string }> = {
-  admin: { label: "Platform Administrator", icon: Crown, className: "bg-primary/10 text-primary" },
-  org_admin: { label: "Org Administrator", icon: Building2, className: "bg-primary/10 text-primary" },
-  programme_owner: { label: "Program Owner", icon: Briefcase, className: "bg-success/10 text-success" },
-  project_manager: { label: "Project Manager", icon: UserCog, className: "bg-warning/10 text-warning" },
-  product_manager: { label: "Product Manager", icon: Briefcase, className: "bg-accent/10 text-accent-foreground" },
-  product_team_member: { label: "Product Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
-  project_team_member: { label: "Project Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
-  org_stakeholder: { label: "Org Stakeholder", icon: Building2, className: "bg-muted text-muted-foreground" },
-  programme_stakeholder: { label: "Program Stakeholder", icon: Briefcase, className: "bg-muted text-muted-foreground" },
-  project_stakeholder: { label: "Project Stakeholder", icon: FolderKanban, className: "bg-muted text-muted-foreground" },
-  product_stakeholder: { label: "Product Stakeholder", icon: Package, className: "bg-muted text-muted-foreground" },
-  stakeholder: { label: "Stakeholder", icon: Users, className: "bg-muted text-muted-foreground" },
+const accessLevelConfig: Record<AccessLevel, { label: string; className: string }> = {
+  admin:  { label: "Org Admin",  className: "bg-primary/10 text-primary border-primary/20" },
+  editor: { label: "Editor",     className: "bg-success/10 text-success border-success/20" },
+  viewer: { label: "Viewer",     className: "bg-muted text-muted-foreground" },
 };
+
+const accessRank: Record<AccessLevel, number> = { viewer: 1, editor: 2, admin: 3 };
 
 export default function AdminPanel() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,49 +117,65 @@ export default function AdminPanel() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [
+        { data: profiles, error: profileError },
+        { data: orgAccess, error: orgAccessError },
+        { data: customRoleAssignments, error: customRoleError },
+      ] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_organization_access").select("user_id, organization_id, access_level"),
+        supabase
+          .from("user_organization_custom_roles")
+          .select("user_id, organization_id, custom_roles(name, is_system)"),
+      ]);
 
       if (profileError) throw profileError;
+      if (orgAccessError) throw orgAccessError;
+      if (customRoleError) throw customRoleError;
 
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
-
-      if (rolesError) throw rolesError;
-
-      // Get org access counts
-      const { data: orgAccess } = await supabase
-        .from("user_organization_access")
-        .select("user_id");
-
+      // Aggregate per user
       const orgCountMap: Record<string, number> = {};
-      orgAccess?.forEach((a) => {
+      const highestAccessMap: Record<string, AccessLevel> = {};
+      orgAccess?.forEach((a: any) => {
         orgCountMap[a.user_id] = (orgCountMap[a.user_id] || 0) + 1;
+        const lvl = a.access_level as AccessLevel;
+        const current = highestAccessMap[a.user_id];
+        if (!current || accessRank[lvl] > accessRank[current]) {
+          highestAccessMap[a.user_id] = lvl;
+        }
       });
 
-      const usersWithRoles: UserWithRole[] = (profiles || []).map((profile) => {
-        const userRole = roles?.find((r) => r.user_id === profile.user_id);
-        return {
-          id: profile.id,
-          user_id: profile.user_id,
-          email: profile.email,
-          full_name: profile.full_name,
-          first_name: (profile as any).first_name,
-          last_name: (profile as any).last_name,
-          phone_number: profile.phone_number,
-          address: profile.address,
-          mailing_address: profile.mailing_address,
-          location: profile.location,
-          department: profile.department,
-          archived: profile.archived || false,
-          role: userRole?.role || "org_stakeholder",
-          created_at: profile.created_at,
-          org_count: orgCountMap[profile.user_id] || 0,
-        };
+      const customRolesMap: Record<string, UserCustomRoleAssignment[]> = {};
+      customRoleAssignments?.forEach((row: any) => {
+        const cr = row.custom_roles;
+        if (!cr) return;
+        const list = customRolesMap[row.user_id] || (customRolesMap[row.user_id] = []);
+        list.push({
+          organization_id: row.organization_id,
+          role_name: cr.name,
+          is_system: !!cr.is_system,
+        });
       });
+
+      const usersWithRoles: UserWithRole[] = (profiles || []).map((profile: any) => ({
+        id: profile.id,
+        user_id: profile.user_id,
+        email: profile.email,
+        full_name: profile.full_name,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        phone_number: profile.phone_number,
+        address: profile.address,
+        mailing_address: profile.mailing_address,
+        location: profile.location,
+        department: profile.department,
+        archived: profile.archived || false,
+        job_title: profile.job_title || null,
+        highest_access: highestAccessMap[profile.user_id] || null,
+        custom_roles: customRolesMap[profile.user_id] || [],
+        created_at: profile.created_at,
+        org_count: orgCountMap[profile.user_id] || 0,
+      }));
 
       setUsers(usersWithRoles);
     } catch (error) {
@@ -188,7 +195,6 @@ export default function AdminPanel() {
 
       if (error) throw error;
 
-      // Fetch counts for each organization
       const orgsWithCounts = await Promise.all(
         (orgs || []).map(async (org) => {
           const [programmes, projects, products] = await Promise.all([
@@ -222,45 +228,9 @@ export default function AdminPanel() {
     fetchOrganizations();
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: AppRole) => {
-    try {
-      const { data: existing } = await supabase
-        .from("user_roles")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (existing) {
-        const { error } = await supabase
-          .from("user_roles")
-          .update({ role: newRole })
-          .eq("user_id", userId);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: newRole });
-
-        if (error) throw error;
-      }
-
-      await supabase
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("user_id", userId);
-
-      toast.success("Role updated successfully");
-      fetchUsers();
-    } catch (error) {
-      console.error("Error updating role:", error);
-      toast.error("Failed to update role. You may not have admin permissions.");
-    }
-  };
-
   const filteredUsers = users.filter((u) => {
-    const displayName = u.first_name && u.last_name 
-      ? `${u.first_name} ${u.last_name}` 
+    const displayName = u.first_name && u.last_name
+      ? `${u.first_name} ${u.last_name}`
       : u.full_name || "";
     const matchesSearch =
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -269,14 +239,11 @@ export default function AdminPanel() {
     return matchesSearch && matchesArchived;
   });
 
-  const roleCounts = {
-    admin: users.filter((u) => u.role === "admin" && !u.archived).length,
-    programme_owner: users.filter((u) => u.role === "programme_owner" && !u.archived).length,
-    project_manager: users.filter((u) => u.role === "project_manager" && !u.archived).length,
-    org_stakeholder: users.filter((u) => u.role === "org_stakeholder" && !u.archived).length,
-  };
-
+  const totalActive = users.filter((u) => !u.archived).length;
+  const orgAdminCount = users.filter((u) => !u.archived && u.highest_access === "admin").length;
+  const withCustomRoleCount = users.filter((u) => !u.archived && u.custom_roles.length > 0).length;
   const archivedCount = users.filter((u) => u.archived).length;
+
 
   const getUserDisplayName = (user: UserWithRole) => {
     if (user.first_name && user.last_name) {
@@ -307,48 +274,37 @@ export default function AdminPanel() {
 
         <TabsContent value="users">
           {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-5 mb-6">
-            <div className="metric-card">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Crown className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold">{roleCounts.admin}</p>
-                  <p className="text-sm text-muted-foreground">Admins</p>
-                </div>
-              </div>
-            </div>
-            <div className="metric-card">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                  <Briefcase className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold">{roleCounts.programme_owner}</p>
-                  <p className="text-sm text-muted-foreground">Program Owners</p>
-                </div>
-              </div>
-            </div>
-            <div className="metric-card">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-                  <UserCog className="h-5 w-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold">{roleCounts.project_manager}</p>
-                  <p className="text-sm text-muted-foreground">Project Managers</p>
-                </div>
-              </div>
-            </div>
+          <div className="grid gap-4 md:grid-cols-4 mb-6">
             <div className="metric-card">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                   <Users className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-2xl font-semibold">{roleCounts.org_stakeholder}</p>
-                  <p className="text-sm text-muted-foreground">Stakeholders</p>
+                  <p className="text-2xl font-semibold">{totalActive}</p>
+                  <p className="text-sm text-muted-foreground">Total Members</p>
+                </div>
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Crown className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold">{orgAdminCount}</p>
+                  <p className="text-sm text-muted-foreground">Org Admins</p>
+                </div>
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <Tag className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold">{withCustomRoleCount}</p>
+                  <p className="text-sm text-muted-foreground">With Custom Role</p>
                 </div>
               </div>
             </div>
@@ -416,85 +372,102 @@ export default function AdminPanel() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user, index) => {
-                    const RoleIcon = roleConfig[user.role].icon;
-                    return (
-                      <TableRow
-                        key={user.id}
-                        className={cn("animate-fade-in", user.archived && "opacity-60")}
-                        style={{ animationDelay: `${index * 0.03}s` }}
-                      >
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-sm font-medium text-primary">
-                                {getUserInitials(user)}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="font-medium block">
-                                {getUserDisplayName(user)}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {user.email}
-                              </span>
-                            </div>
+                  filteredUsers.map((user, index) => (
+                    <TableRow
+                      key={user.id}
+                      className={cn("animate-fade-in", user.archived && "opacity-60")}
+                      style={{ animationDelay: `${index * 0.03}s` }}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-medium text-primary">
+                              {getUserInitials(user)}
+                            </span>
                           </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          <div className="text-sm">
-                            {user.phone_number && <div>{user.phone_number}</div>}
-                            {user.location && <div className="text-xs">{user.location}</div>}
-                            {!user.phone_number && !user.location && "-"}
+                          <div>
+                            <span className="font-medium block">
+                              {getUserDisplayName(user)}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {user.email}
+                            </span>
+                            {user.job_title && (
+                              <span className="text-xs text-muted-foreground italic block">
+                                {user.job_title}
+                              </span>
+                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {user.org_count}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={user.role}
-                            onValueChange={(value: AppRole) =>
-                              handleRoleChange(user.user_id, value)
-                            }
-                            disabled={user.archived}
-                          >
-                            <SelectTrigger className="w-[160px]">
-                              <div className="flex items-center gap-2">
-                                <RoleIcon className="h-3 w-3" />
-                                <SelectValue />
-                              </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="org_admin">Org Administrator</SelectItem>
-                              <SelectItem value="programme_owner">Program Owner</SelectItem>
-                              <SelectItem value="project_manager">Project Manager</SelectItem>
-                              <SelectItem value="product_manager">Product Manager</SelectItem>
-                              <SelectItem value="product_team_member">Product Team Member</SelectItem>
-                              <SelectItem value="project_team_member">Project Team Member</SelectItem>
-                              <SelectItem value="org_stakeholder">Org Stakeholder</SelectItem>
-                              <SelectItem value="programme_stakeholder">Program Stakeholder</SelectItem>
-                              <SelectItem value="project_stakeholder">Project Stakeholder</SelectItem>
-                              <SelectItem value="product_stakeholder">Product Stakeholder</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          {user.archived ? (
-                            <Badge variant="destructive">Archived</Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="text-sm">
+                          {user.phone_number && <div>{user.phone_number}</div>}
+                          {user.location && <div className="text-xs">{user.location}</div>}
+                          {!user.phone_number && !user.location && "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {user.org_count}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1.5 max-w-[280px]">
+                          {user.highest_access ? (
+                            <Badge
+                              variant="outline"
+                              className={cn("w-fit gap-1", accessLevelConfig[user.highest_access].className)}
+                            >
+                              {user.highest_access === "admin" && <Crown className="h-3 w-3" />}
+                              {accessLevelConfig[user.highest_access].label}
+                            </Badge>
                           ) : (
-                            <Badge variant="default" className="bg-success">Active</Badge>
+                            <Badge variant="outline" className="w-fit text-muted-foreground">
+                              No access
+                            </Badge>
                           )}
-                        </TableCell>
-                        <TableCell>
+                          {user.custom_roles.length > 0 && (() => {
+                            const unique = Array.from(new Set(user.custom_roles.map((r) => r.role_name)));
+                            return (
+                              <div className="flex flex-wrap gap-1">
+                                {unique.slice(0, 4).map((name) => (
+                                  <Badge key={name} variant="secondary" className="text-[10px] gap-1 font-normal">
+                                    <Tag className="h-2.5 w-2.5" />
+                                    {name}
+                                  </Badge>
+                                ))}
+                                {unique.length > 4 && (
+                                  <Badge variant="secondary" className="text-[10px] font-normal">
+                                    +{unique.length - 4}
+                                  </Badge>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {user.archived ? (
+                          <Badge variant="destructive">Archived</Badge>
+                        ) : (
+                          <Badge variant="default" className="bg-success">Active</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
                           <EditUserDialog user={user} onSuccess={fetchUsers} />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                          <Link to="/admin?tab=roles-access">
+                            <Button variant="outline" size="sm" className="gap-1.5">
+                              <Settings2 className="h-3.5 w-3.5" />
+                              Edit access
+                            </Button>
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
