@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, APP_URL } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2, ShieldCheck, Apple } from "lucide-react";
+import { Mail, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2, KeyRound } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { applyBrandingCssVars, DEFAULT_BRANDING } from "@/lib/branding";
 import { lovable } from "@/integrations/lovable/index";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface LoginBranding {
   logo_url: string | null;
