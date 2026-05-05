@@ -130,8 +130,31 @@ export default function HelpdeskQueues({ embedded = false }: { embedded?: boolea
                   <Switch checked={q.is_active} onCheckedChange={() => toggleActive(q)} />
                   <Button size="sm" variant="outline" onClick={() => setEditing(q)}>Edit</Button>
                   <Button size="sm" variant="ghost" onClick={() => deleteQueue(q.id)}><Trash2 className="h-4 w-4" /></Button>
-                </div>
-              </div>
+        </div>
+
+        <div className="border-t pt-3 space-y-3">
+          <div>
+            <Label className="text-sm font-semibold">Email overrides (optional)</Label>
+            <p className="text-xs text-muted-foreground">
+              Override the From / Reply-To used for notifications on tickets in this queue. Leaves the org default if blank.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>From name</Label>
+              <Input value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="Tier 1 Support" />
+            </div>
+            <div>
+              <Label>From address</Label>
+              <Input type="email" value={fromAddress} onChange={(e) => setFromAddress(e.target.value)} placeholder="tier1@yourcompany.com" />
+            </div>
+          </div>
+          <div>
+            <Label>Reply-To address</Label>
+            <Input type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="tier1@yourcompany.com" />
+          </div>
+        </div>
+      </div>
 
               <QueueMembersEditor
                 queueId={q.id}
