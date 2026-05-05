@@ -468,9 +468,41 @@ export default function Auth() {
           </div>
         )}
 
-        <Button type="submit" className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm" disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{getButtonText()} <ArrowRight className="h-3.5 w-3.5" /></>}
-        </Button>
+        {step === "check_email" && (
+          <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm space-y-3">
+            <div className="flex items-start gap-3">
+              <Mail className="h-5 w-5 text-primary mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Confirmation email sent</p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  Once you click the link in your email, your account will be marked active and you can sign in.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <button type="button" onClick={() => { setStep("request"); setOtp(""); setErrors({}); }} className="text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" /> Use a different email
+              </button>
+              <button type="button" onClick={handleResendCode} disabled={resending || resendCooldown > 0} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
+                {resending ? "Sending…" : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend link"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "check_email" ? (
+          <Button
+            type="button"
+            className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm"
+            onClick={() => { switchMode("login"); }}
+          >
+            Back to sign in <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        ) : (
+          <Button type="submit" className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm" disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{getButtonText()} <ArrowRight className="h-3.5 w-3.5" /></>}
+          </Button>
+        )}
       </form>
 
       <div className="mt-6 pt-5 border-t border-border/60 text-center">
