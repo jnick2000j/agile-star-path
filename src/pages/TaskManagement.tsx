@@ -955,6 +955,17 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                               <SelectItem value="cancelled">Cancelled</SelectItem>
                             </SelectContent>
                           </Select>
+                          {!isSubtask && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openCreateSubtaskFor(task)}
+                              title="Add subtask"
+                            >
+                              <PlusIcon className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
