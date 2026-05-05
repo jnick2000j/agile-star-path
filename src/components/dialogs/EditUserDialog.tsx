@@ -339,77 +339,17 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
             />
           </div>
 
-          {/* Organization Access */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-muted-foreground" />
-              <Label className="text-base font-medium">Organization Access</Label>
+          {/* Access is managed via role assignments — see the "Edit access" button on the user row */}
+          <div className="rounded-lg border border-dashed border-border p-4 bg-muted/30">
+            <div className="flex items-center gap-2 mb-1">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+              <Label className="text-sm font-medium">Access &amp; Roles</Label>
             </div>
-
-            {userOrgAccess.length > 0 && (
-              <div className="space-y-2">
-                {userOrgAccess.map((access) => (
-                  <div key={access.id} className="flex items-center justify-between bg-secondary/50 rounded-lg p-3">
-                    <span className="font-medium">{access.organization_name}</span>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={access.access_level}
-                        onValueChange={(value) => handleUpdateAccessLevel(access.id, value)}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="viewer">Viewer</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveOrgAccess(access.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {availableOrgs.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Select value={selectedOrgToAdd} onValueChange={setSelectedOrgToAdd}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select organization to add" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableOrgs.map((org) => (
-                      <SelectItem key={org.id} value={org.id}>
-                        {org.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={selectedAccessLevel} onValueChange={setSelectedAccessLevel}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                    <SelectItem value="editor">Editor</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button type="button" variant="outline" onClick={handleAddOrgAccess} disabled={!selectedOrgToAdd}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+            <p className="text-xs text-muted-foreground">
+              Organization, programme, project and product access is now governed entirely by
+              the role catalog. Close this dialog and click <span className="font-medium">Edit access</span>
+              on the user's row to assign or remove roles.
+            </p>
           </div>
 
           {/* Archive Toggle */}
