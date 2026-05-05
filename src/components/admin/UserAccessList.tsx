@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trash2, Pencil, Building2, Briefcase, FolderKanban, Package } from "lucide-react";
+import { Trash2, Building2, Briefcase, FolderKanban, Package, Tag } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,13 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,124 +24,119 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface AccessAssignment {
+type Scope = "organization" | "programme" | "project" | "product";
+
+interface RoleAssignment {
   id: string;
   user_id: string;
   user_email: string;
   user_name: string | null;
-  entity_type: "organization" | "program" | "project" | "product";
+  scope: Scope;
   entity_id: string;
   entity_name: string;
-  access_level: string;
+  role_id: string;
+  role_name: string;
+  is_system: boolean;
 }
 
-const accessLevelColors: Record<string, string> = {
-  admin: "bg-primary/10 text-primary",
-  owner: "bg-primary/10 text-primary",
-  manager: "bg-success/10 text-success",
-  editor: "bg-warning/10 text-warning",
-  viewer: "bg-muted text-muted-foreground",
-};
-
-const entityIcons: Record<string, React.ElementType> = {
+const scopeIcon: Record<Scope, React.ElementType> = {
   organization: Building2,
   programme: Briefcase,
   project: FolderKanban,
   product: Package,
 };
 
+const scopeLabel: Record<Scope, string> = {
+  organization: "Organization",
+  programme: "Programme",
+  project: "Project",
+  product: "Product",
+};
+
+const tableForScope: Record<Scope, string> = {
+  organization: "user_organization_custom_roles",
+  programme: "user_programme_custom_roles",
+  project: "user_project_custom_roles",
+  product: "user_product_custom_roles",
+};
+
 export function UserAccessList() {
-  const [assignments, setAssignments] = useState<AccessAssignment[]>([]);
+  const [assignments, setAssignments] = useState<RoleAssignment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const [orgAccess, progAccess, projAccess, prodAccess] = await Promise.all([
+      const [orgRes, progRes, projRes, prodRes, profilesRes] = await Promise.all([
         supabase
-          .from("user_organization_access")
-          .select("id, user_id, access_level, organization_id, organizations(name)")
-          .order("created_at", { ascending: false }),
+          .from("user_organization_custom_roles")
+          .select("id, user_id, organization_id, custom_role_id, organizations(name), custom_roles(name, is_system)"),
         supabase
-          .from("user_programme_access")
-          .select("id, user_id, access_level, programme_id, programmes(name)")
-          .order("created_at", { ascending: false }),
+          .from("user_programme_custom_roles")
+          .select("id, user_id, programme_id, custom_role_id, programmes(name), custom_roles(name, is_system)"),
         supabase
-          .from("user_project_access")
-          .select("id, user_id, access_level, project_id, projects(name)")
-          .order("created_at", { ascending: false }),
+          .from("user_project_custom_roles")
+          .select("id, user_id, project_id, custom_role_id, projects(name), custom_roles(name, is_system)"),
         supabase
-          .from("user_product_access")
-          .select("id, user_id, access_level, product_id, products(name)")
-          .order("created_at", { ascending: false }),
+          .from("user_product_custom_roles")
+          .select("id, user_id, product_id, custom_role_id, products(name), custom_roles(name, is_system)"),
+        supabase.from("profiles").select("user_id, email, first_name, last_name, full_name"),
       ]);
 
-      const { data: profiles } = await supabase.from("profiles").select("user_id, email, full_name");
-      const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+      const profileMap = new Map(
+        (profilesRes.data || []).map((p: any) => [
+          p.user_id,
+          {
+            email: p.email,
+            name:
+              p.first_name && p.last_name ? `${p.first_name} ${p.last_name}` : p.full_name || null,
+          },
+        ])
+      );
 
-      const allAssignments: AccessAssignment[] = [];
+      const all: RoleAssignment[] = [];
 
-      orgAccess.data?.forEach((a: any) => {
-        const profile = profileMap.get(a.user_id);
-        allAssignments.push({
-          id: a.id,
-          user_id: a.user_id,
-          user_email: profile?.email || "Unknown",
-          user_name: profile?.full_name || null,
-          entity_type: "organization",
-          entity_id: a.organization_id,
-          entity_name: a.organizations?.name || "Unknown",
-          access_level: a.access_level,
+      const push = (
+        scope: Scope,
+        rows: any[] | null,
+        entityIdKey: string,
+        entityRel: string
+      ) => {
+        rows?.forEach((r) => {
+          const profile = profileMap.get(r.user_id);
+          if (!r.custom_roles) return;
+          all.push({
+            id: r.id,
+            user_id: r.user_id,
+            user_email: profile?.email || "Unknown",
+            user_name: profile?.name || null,
+            scope,
+            entity_id: r[entityIdKey],
+            entity_name: r[entityRel]?.name || "Unknown",
+            role_id: r.custom_role_id,
+            role_name: r.custom_roles.name,
+            is_system: !!r.custom_roles.is_system,
+          });
         });
-      });
+      };
 
-      progAccess.data?.forEach((a: any) => {
-        const profile = profileMap.get(a.user_id);
-        allAssignments.push({
-          id: a.id,
-          user_id: a.user_id,
-          user_email: profile?.email || "Unknown",
-          user_name: profile?.full_name || null,
-          entity_type: "program",
-          entity_id: a.programme_id,
-          entity_name: a.programmes?.name || "Unknown",
-          access_level: a.access_level,
-        });
-      });
+      push("organization", orgRes.data as any[], "organization_id", "organizations");
+      push("programme", progRes.data as any[], "programme_id", "programmes");
+      push("project", projRes.data as any[], "project_id", "projects");
+      push("product", prodRes.data as any[], "product_id", "products");
 
-      projAccess.data?.forEach((a: any) => {
-        const profile = profileMap.get(a.user_id);
-        allAssignments.push({
-          id: a.id,
-          user_id: a.user_id,
-          user_email: profile?.email || "Unknown",
-          user_name: profile?.full_name || null,
-          entity_type: "project",
-          entity_id: a.project_id,
-          entity_name: a.projects?.name || "Unknown",
-          access_level: a.access_level,
-        });
-      });
+      // Sort: scope hierarchy, then user, then entity
+      const scopeOrder: Record<Scope, number> = { organization: 0, programme: 1, project: 2, product: 3 };
+      all.sort((a, b) =>
+        scopeOrder[a.scope] - scopeOrder[b.scope] ||
+        (a.user_name || a.user_email).localeCompare(b.user_name || b.user_email) ||
+        a.entity_name.localeCompare(b.entity_name)
+      );
 
-      prodAccess.data?.forEach((a: any) => {
-        const profile = profileMap.get(a.user_id);
-        allAssignments.push({
-          id: a.id,
-          user_id: a.user_id,
-          user_email: profile?.email || "Unknown",
-          user_name: profile?.full_name || null,
-          entity_type: "product",
-          entity_id: a.product_id,
-          entity_name: a.products?.name || "Unknown",
-          access_level: a.access_level,
-        });
-      });
-
-      setAssignments(allAssignments);
+      setAssignments(all);
     } catch (error) {
-      console.error("Error fetching assignments:", error);
-      toast.error("Failed to load access assignments");
+      console.error("Error fetching role assignments:", error);
+      toast.error("Failed to load role assignments");
     } finally {
       setLoading(false);
     }
@@ -158,62 +146,22 @@ export function UserAccessList() {
     fetchAssignments();
   }, []);
 
-  const handleUpdateAccess = async (assignment: AccessAssignment, newLevel: string) => {
+  const handleRevoke = async (a: RoleAssignment) => {
     try {
-      const table =
-        assignment.entity_type === "organization"
-          ? "user_organization_access"
-          : assignment.entity_type === "program"
-          ? "user_programme_access"
-          : assignment.entity_type === "product"
-          ? "user_product_access"
-          : "user_project_access";
-
-      const { error } = await supabase.from(table).update({ access_level: newLevel }).eq("id", assignment.id);
-
+      const { error } = await supabase.from(tableForScope[a.scope] as any).delete().eq("id", a.id);
       if (error) throw error;
-
-      toast.success("Access level updated");
-      setEditingId(null);
+      toast.success("Role revoked");
       fetchAssignments();
-    } catch (error) {
-      console.error("Error updating access:", error);
-      toast.error("Failed to update access level");
+    } catch (err) {
+      console.error("Error revoking role:", err);
+      toast.error("Failed to revoke role");
     }
-  };
-
-  const handleRevokeAccess = async (assignment: AccessAssignment) => {
-    try {
-      const table =
-        assignment.entity_type === "organization"
-          ? "user_organization_access"
-          : assignment.entity_type === "program"
-          ? "user_programme_access"
-          : assignment.entity_type === "product"
-          ? "user_product_access"
-          : "user_project_access";
-
-      const { error } = await supabase.from(table).delete().eq("id", assignment.id);
-
-      if (error) throw error;
-
-      toast.success("Access revoked successfully");
-      fetchAssignments();
-    } catch (error) {
-      console.error("Error revoking access:", error);
-      toast.error("Failed to revoke access");
-    }
-  };
-
-  const getAccessLevels = (_entityType: string) => {
-    // Unified 3-tier model — see Phase 1 of role consolidation.
-    return ["admin", "editor", "viewer"];
   };
 
   if (loading) {
     return (
       <div className="metric-card">
-        <div className="text-center py-8 text-muted-foreground">Loading access assignments...</div>
+        <div className="text-center py-8 text-muted-foreground">Loading role assignments...</div>
       </div>
     );
   }
@@ -222,8 +170,7 @@ export function UserAccessList() {
     return (
       <div className="metric-card">
         <div className="text-center py-8 text-muted-foreground">
-          No access assignments yet. Use "Assign Access" to grant users access to organizations, programmes, or
-          projects.
+          No role assignments yet. Use "Assign Role" to grant a user access via a catalog role.
         </div>
       </div>
     );
@@ -235,102 +182,74 @@ export function UserAccessList() {
         <TableHeader>
           <TableRow>
             <TableHead>User</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>Scope</TableHead>
             <TableHead>Entity</TableHead>
-            <TableHead>Access Level</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assignments.map((assignment) => {
-            const Icon = entityIcons[assignment.entity_type];
+          {assignments.map((a) => {
+            const Icon = scopeIcon[a.scope];
             return (
-              <TableRow key={`${assignment.entity_type}-${assignment.id}`}>
+              <TableRow key={`${a.scope}-${a.id}`}>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <span className="text-xs font-medium text-primary">
-                        {(assignment.user_name || assignment.user_email)[0].toUpperCase()}
+                        {(a.user_name || a.user_email)[0].toUpperCase()}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{assignment.user_name || "No name"}</p>
-                      <p className="text-xs text-muted-foreground">{assignment.user_email}</p>
+                      <p className="font-medium text-sm">{a.user_name || "No name"}</p>
+                      <p className="text-xs text-muted-foreground">{a.user_email}</p>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="gap-1 capitalize">
+                  <Badge variant="outline" className="gap-1">
                     <Icon className="h-3 w-3" />
-                    {assignment.entity_type}
+                    {scopeLabel[a.scope]}
                   </Badge>
                 </TableCell>
-                <TableCell className="font-medium">{assignment.entity_name}</TableCell>
+                <TableCell className="font-medium">{a.entity_name}</TableCell>
                 <TableCell>
-                  {editingId === `${assignment.entity_type}-${assignment.id}` ? (
-                    <Select
-                      defaultValue={assignment.access_level}
-                      onValueChange={(value) => handleUpdateAccess(assignment, value)}
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAccessLevels(assignment.entity_type).map((level) => (
-                          <SelectItem key={level} value={level} className="capitalize">
-                            {level}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={accessLevelColors[assignment.access_level] || "bg-muted"}>
-                      {assignment.access_level}
-                    </Badge>
-                  )}
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 font-normal"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {a.role_name}
+                    {!a.is_system && <span className="text-[10px] opacity-70 ml-1">(custom)</span>}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() =>
-                        setEditingId(
-                          editingId === `${assignment.entity_type}-${assignment.id}`
-                            ? null
-                            : `${assignment.entity_type}-${assignment.id}`
-                        )
-                      }
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Revoke Access</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to revoke {assignment.user_name || assignment.user_email}'s access to{" "}
-                            {assignment.entity_name}? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleRevokeAccess(assignment)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Revoke Access
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Revoke Role</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Remove the <strong>{a.role_name}</strong> role from{" "}
+                          {a.user_name || a.user_email} on {scopeLabel[a.scope].toLowerCase()}{" "}
+                          <strong>{a.entity_name}</strong>?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleRevoke(a)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Revoke
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             );
