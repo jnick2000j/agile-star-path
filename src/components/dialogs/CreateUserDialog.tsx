@@ -32,10 +32,17 @@ interface OrgOption {
   name: string;
 }
 
+interface RoleOption {
+  id: string;
+  name: string;
+  is_system: boolean;
+}
+
 export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orgs, setOrgs] = useState<OrgOption[]>([]);
+  const [roles, setRoles] = useState<RoleOption[]>([]);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -46,7 +53,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     department: "",
     location: "",
     organization_id: "",
-    access_level: "editor",
+    custom_role_id: "",
     create_as_platform_admin: false,
   });
 
@@ -57,6 +64,11 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       .select("id, name")
       .order("name")
       .then(({ data }) => setOrgs((data as OrgOption[]) || []));
+    supabase
+      .from("custom_roles")
+      .select("id, name, is_system")
+      .order("name")
+      .then(({ data }) => setRoles((data as RoleOption[]) || []));
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const { data: role } = await supabase
@@ -68,6 +80,13 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       setIsPlatformAdmin(!!role);
     });
   }, [open]);
+
+  const deriveAccessLevel = (roleName?: string): string => {
+    if (!roleName) return "viewer";
+    if (roleName === "Org Admin") return "admin";
+    if (roleName === "Org Editor") return "editor";
+    return "viewer";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,10 +106,17 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       return;
     }
 
+    if (formData.organization_id && !formData.custom_role_id && !formData.create_as_platform_admin) {
+      toast.error("Select a role from the catalog for this user.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const fullName = `${formData.first_name} ${formData.last_name}`.trim();
+      const selectedRole = roles.find((r) => r.id === formData.custom_role_id);
+      const derivedAccessLevel = deriveAccessLevel(selectedRole?.name);
 
       // Create user via the manage-user edge function (uses admin API)
       const { data, error } = await supabase.functions.invoke("manage-user", {
@@ -101,13 +127,28 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           full_name: fullName || formData.email.split('@')[0],
           redirect_to: `${window.location.origin}/auth`,
           organization_id: formData.organization_id || null,
-          access_level: formData.access_level,
+          access_level: derivedAccessLevel,
           create_as_platform_admin: formData.create_as_platform_admin,
         },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // Assign the catalog role at organization scope
+      if (data?.user_id && formData.organization_id && formData.custom_role_id && !formData.create_as_platform_admin) {
+        const { error: roleErr } = await supabase
+          .from("user_organization_custom_roles")
+          .upsert(
+            {
+              user_id: data.user_id,
+              organization_id: formData.organization_id,
+              custom_role_id: formData.custom_role_id,
+            },
+            { onConflict: "user_id,organization_id,custom_role_id" }
+          );
+        if (roleErr) console.error("Failed to assign role:", roleErr);
+      }
 
       // Update the profile with additional info after a short delay
       if (data?.user_id) {
@@ -148,7 +189,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         department: "",
         location: "",
         organization_id: "",
-        access_level: "editor",
+        custom_role_id: "",
         create_as_platform_admin: false,
       });
       onSuccess();
@@ -276,22 +317,26 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="access_level">Access level</Label>
+                <Label htmlFor="custom_role_id">Role (from catalog)</Label>
                 <Select
-                  value={formData.access_level}
-                  onValueChange={(v) => setFormData({ ...formData, access_level: v })}
+                  value={formData.custom_role_id}
+                  onValueChange={(v) => setFormData({ ...formData, custom_role_id: v })}
                   disabled={formData.create_as_platform_admin}
                 >
-                  <SelectTrigger id="access_level">
-                    <SelectValue />
+                  <SelectTrigger id="custom_role_id">
+                    <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                    <SelectItem value="editor">Editor</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Org Admin</SelectItem>
+                    {roles.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}{r.is_system ? "" : " (custom)"}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Manage the catalog under Roles &amp; Access → Role Catalog.
+                </p>
               </div>
             </div>
             {isPlatformAdmin && (
