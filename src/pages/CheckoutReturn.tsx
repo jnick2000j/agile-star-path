@@ -9,9 +9,9 @@ import { useOrganization } from "@/hooks/useOrganization";
 
 const ADDON_META: Record<string, { label: string; icon: typeof Headphones; features: string[]; route: string; routeLabel: string }> = {
   helpdesk: {
-    label: "Helpdesk",
+    label: "Helpdesk + Learning",
     icon: Headphones,
-    features: ["feature_helpdesk"],
+    features: ["feature_helpdesk", "feature_lms"],
     route: "/helpdesk",
     routeLabel: "Open Helpdesk",
   },
@@ -23,9 +23,9 @@ const ADDON_META: Record<string, { label: string; icon: typeof Headphones; featu
     routeLabel: "Open Change Management",
   },
   itsm: {
-    label: "ITSM Suite (Helpdesk + Change Management)",
+    label: "ITSM + Learning Suite (Helpdesk + Change Management + LMS)",
     icon: Layers,
-    features: ["feature_helpdesk", "feature_change_management"],
+    features: ["feature_helpdesk", "feature_change_management", "feature_lms"],
     route: "/helpdesk",
     routeLabel: "Open Helpdesk",
   },

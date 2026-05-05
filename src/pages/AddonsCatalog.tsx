@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, ArrowLeft, Loader2, Headphones, GitBranch, Layers } from "lucide-react";
+import { Check, ArrowLeft, Loader2, Headphones, GitBranch, Layers, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -30,17 +30,33 @@ interface AddonPlan {
 }
 
 const ICON_MAP: Record<string, any> = {
+  "Helpdesk + Learning Add-on": Headphones,
   "Helpdesk Add-on": Headphones,
   "Change Management Add-on": GitBranch,
+  "ITSM + Learning Suite Add-on": Layers,
   "ITSM Suite Add-on": Layers,
 };
 
+const LMS_HIGHLIGHTS = [
+  "Learning Management included (courses, quizzes, certificates)",
+  "5 GB of LMS video & training storage included",
+  "Extra storage billed at $0.25 / GB / month",
+];
+
 const FEATURE_HIGHLIGHTS: Record<string, string[]> = {
+  "Helpdesk + Learning Add-on": [
+    "Unlimited tickets and agents",
+    "SLA policies + email intake",
+    "Customer portal",
+    "Entity linking (projects, programmes, products)",
+    ...LMS_HIGHLIGHTS,
+  ],
   "Helpdesk Add-on": [
     "Unlimited tickets and agents",
     "SLA policies + email intake",
     "Customer portal",
     "Entity linking (projects, programmes, products)",
+    ...LMS_HIGHLIGHTS,
   ],
   "Change Management Add-on": [
     "Full CAB workflow",
@@ -48,11 +64,19 @@ const FEATURE_HIGHLIGHTS: Record<string, string[]> = {
     "Risk scoring + rollback plans",
     "Audit trail + compliance reporting",
   ],
+  "ITSM + Learning Suite Add-on": [
+    "Everything in Helpdesk + Change Management",
+    "Save ~20% vs buying separately",
+    "Unified ticket → change workflow",
+    "Best for IT-heavy operations",
+    ...LMS_HIGHLIGHTS,
+  ],
   "ITSM Suite Add-on": [
     "Everything in Helpdesk + Change Management",
     "Save ~20% vs buying separately",
     "Unified ticket → change workflow",
     "Best for IT-heavy operations",
+    ...LMS_HIGHLIGHTS,
   ],
 };
 
