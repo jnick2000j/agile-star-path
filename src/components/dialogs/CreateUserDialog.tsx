@@ -265,6 +265,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         department: "",
         location: "",
         organization_id: "",
+        assignment_scope: "organization",
+        scoped_entity_id: "",
         custom_role_id: "",
         create_as_platform_admin: false,
       });
