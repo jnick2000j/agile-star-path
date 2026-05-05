@@ -97,10 +97,11 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
 
   useEffect(() => {
     if (open) {
+      setNewEmail(user.email);
       fetchOrganizations();
       fetchUserOrgAccess();
     }
-  }, [open, user.user_id]);
+  }, [open, user.user_id, user.email]);
 
   const fetchOrganizations = async () => {
     const { data } = await supabase
