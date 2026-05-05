@@ -603,20 +603,6 @@ export default function AdminPanel() {
           </div>
         </TabsContent>
 
-        <TabsContent value="access">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-lg font-semibold">Access Control</h3>
-              <p className="text-sm text-muted-foreground">
-                Configure granular access permissions for users to specific programmes and projects.
-              </p>
-            </div>
-            <AssignUserAccessDialog onSuccess={() => window.location.reload()} />
-          </div>
-          
-          <UserAccessList />
-        </TabsContent>
-
         <TabsContent value="residency">
           <ResidencyComplianceManager />
         </TabsContent>
