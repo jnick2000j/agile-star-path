@@ -92,8 +92,31 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
   });
 
   const messageId = args.idempotencyKey;
-  const text = args.text ?? htmlToText(args.html);
+  let subject = args.subject;
+  let html = args.html;
+  let text = args.text ?? htmlToText(args.html);
   const label = args.label ?? "transactional";
+
+  // Per-org copy override (matches EmailTemplatesPanel editor).
+  if (args.templateKey && args.organizationId) {
+    try {
+      const rendered = await tryRenderOrgOverride(
+        args.organizationId,
+        args.templateKey,
+        args.templateData ?? {},
+      );
+      if (rendered) {
+        subject = rendered.subject;
+        html = rendered.html;
+        text = rendered.text;
+        console.log(
+          `applied org override '${args.templateKey}' for org ${args.organizationId}`,
+        );
+      }
+    } catch (e) {
+      console.warn("org override render failed; falling back to default:", e);
+    }
+  }
 
   // Admin trigger gate: if a triggerKey + organizationId is provided and the
   // trigger is disabled for that org, do not send and do not log.
