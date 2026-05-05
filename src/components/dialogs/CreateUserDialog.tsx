@@ -250,6 +250,69 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
             />
           </div>
 
+          <div className="space-y-3 rounded-md border p-3">
+            <Label className="text-sm font-semibold">Organization assignment *</Label>
+            <p className="text-xs text-muted-foreground">
+              Every user must belong to at least one organization. Platform administrators are the only exception.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="organization_id">Organization</Label>
+                <Select
+                  value={formData.organization_id}
+                  onValueChange={(v) => setFormData({ ...formData, organization_id: v })}
+                  disabled={formData.create_as_platform_admin}
+                >
+                  <SelectTrigger id="organization_id">
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {orgs.map((o) => (
+                      <SelectItem key={o.id} value={o.id}>
+                        {o.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="access_level">Access level</Label>
+                <Select
+                  value={formData.access_level}
+                  onValueChange={(v) => setFormData({ ...formData, access_level: v })}
+                  disabled={formData.create_as_platform_admin}
+                >
+                  <SelectTrigger id="access_level">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                    <SelectItem value="editor">Editor</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="admin">Org Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {isPlatformAdmin && (
+              <label className="flex items-start gap-2 pt-1 text-sm">
+                <Checkbox
+                  checked={formData.create_as_platform_admin}
+                  onCheckedChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      create_as_platform_admin: v === true,
+                      organization_id: v === true ? "" : formData.organization_id,
+                    })
+                  }
+                />
+                <span>
+                  Create as <strong>Platform Administrator</strong> (no organization required; full system access).
+                </span>
+              </label>
+            )}
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
