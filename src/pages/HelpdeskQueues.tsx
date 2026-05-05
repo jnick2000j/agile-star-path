@@ -214,6 +214,9 @@ function QueueDialog({ orgId, profiles, existing, onClose }: { orgId?: string; p
   const [color, setColor] = useState(existing?.color || "#3b82f6");
   const [priority, setPriority] = useState(existing?.default_priority || "medium");
   const [defaultAssignee, setDefaultAssignee] = useState(existing?.default_assignee_id || "");
+  const [fromAddress, setFromAddress] = useState(existing?.from_address || "");
+  const [fromName, setFromName] = useState(existing?.from_name || "");
+  const [replyTo, setReplyTo] = useState(existing?.reply_to || "");
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -226,6 +229,9 @@ function QueueDialog({ orgId, profiles, existing, onClose }: { orgId?: string; p
       color,
       default_priority: priority,
       default_assignee_id: defaultAssignee || null,
+      from_address: fromAddress.trim() || null,
+      from_name: fromName.trim() || null,
+      reply_to: replyTo.trim() || null,
     };
     const { error } = existing
       ? await (supabase as any).from("helpdesk_queues").update(payload).eq("id", existing.id)
