@@ -45,6 +45,7 @@ import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles"
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
+import { OrphanUsersPanel } from "@/components/platform-admin/OrphanUsersPanel";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
