@@ -232,19 +232,29 @@ export default function Auth() {
     if (step === "request") {
       if (!validateRequest()) return;
       setLoading(true);
-      const { error } = await requestEmailOtp(email, {
-        firstName: mode === "signup" ? firstName : undefined,
-        lastName: mode === "signup" ? lastName : undefined,
-        fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
-        orgName: mode === "signup" ? orgName.trim() : undefined,
-        shouldCreateUser: mode === "signup",
-      });
-      if (!error) {
-        if (mode === "signup") {
+
+      if (mode === "signup") {
+        // Signup uses a confirmation link (NOT auto sign-in). The user
+        // confirms their email first, then must log in separately.
+        const { error } = await requestSignupConfirmation(email, {
+          firstName,
+          lastName,
+          fullName: `${firstName} ${lastName}`.trim(),
+          orgName: orgName.trim(),
+        });
+        if (!error) {
           sessionStorage.setItem(SIGNUP_ONBOARDING_EMAIL_KEY, email.toLowerCase());
-        } else {
-          sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
+          setStep("check_email");
+          setResendCooldown(60);
         }
+        setLoading(false);
+        return;
+      }
+
+      // Login flow: keep OTP code entry for returning users
+      const { error } = await requestEmailOtp(email, { shouldCreateUser: false });
+      if (!error) {
+        sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
         setStep("verify");
         setResendCooldown(60);
       }
