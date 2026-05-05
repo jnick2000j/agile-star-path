@@ -89,6 +89,7 @@ export function EmailSettings() {
       active_transport: transport,
       from_address: fromAddress || null,
       from_name: fromName || null,
+      reply_to: replyTo || null,
     };
     const { error } = await (supabase as any)
       .from("email_settings")
