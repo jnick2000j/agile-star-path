@@ -38,11 +38,22 @@ interface RoleOption {
   is_system: boolean;
 }
 
+interface ScopedEntity {
+  id: string;
+  name: string;
+  organization_id: string;
+}
+
+type AssignmentScope = "organization" | "programme" | "project" | "product";
+
 export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orgs, setOrgs] = useState<OrgOption[]>([]);
   const [roles, setRoles] = useState<RoleOption[]>([]);
+  const [programmes, setProgrammes] = useState<ScopedEntity[]>([]);
+  const [projects, setProjects] = useState<ScopedEntity[]>([]);
+  const [products, setProducts] = useState<ScopedEntity[]>([]);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -53,6 +64,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     department: "",
     location: "",
     organization_id: "",
+    assignment_scope: "organization" as AssignmentScope,
+    scoped_entity_id: "",
     custom_role_id: "",
     create_as_platform_admin: false,
   });
