@@ -46,6 +46,7 @@ import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { PlatformAdminsPanel } from "@/components/platform-admin/PlatformAdminsPanel";
+import { PlatformSettingsPanel } from "@/components/platform-admin/PlatformSettingsPanel";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
@@ -274,6 +275,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="modules">Module Toggles</TabsTrigger>
           <TabsTrigger value="migrations">Migrations</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
@@ -520,6 +522,10 @@ export default function PlatformAdmin() {
               <PlatformMigrationsManager />
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <PlatformSettingsPanel />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">
