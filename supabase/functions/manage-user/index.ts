@@ -369,8 +369,96 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (action === "change_email") {
+      // Validate new email
+      const trimmed = (new_email ?? "").trim().toLowerCase();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+      if (!emailOk) {
+        return new Response(
+          JSON.stringify({ error: "A valid new_email is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Look up the target user and their identities to detect SSO/auto-provisioning
+      const { data: targetWrap, error: targetErr } = await supabaseAdmin.auth.admin.getUserById(user_id);
+      if (targetErr || !targetWrap?.user) {
+        return new Response(
+          JSON.stringify({ error: "Target user not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const target = targetWrap.user as any;
+
+      // SSO detection: any SAML/OIDC identity, or app_metadata.provider set to one of those
+      const ssoProviders = new Set(["saml", "oidc", "sso"]);
+      const identities: Array<{ provider?: string }> = target.identities ?? [];
+      const hasSsoIdentity = identities.some((i) => ssoProviders.has((i?.provider ?? "").toLowerCase()));
+      const appProvider = (target.app_metadata?.provider ?? "").toLowerCase();
+      const appProviders: string[] = (target.app_metadata?.providers ?? []).map((p: string) => p.toLowerCase());
+      const isSsoUser =
+        hasSsoIdentity ||
+        ssoProviders.has(appProvider) ||
+        appProviders.some((p) => ssoProviders.has(p)) ||
+        !!target.app_metadata?.provider_id; // SAML provider_id present
+
+      if (isSsoUser) {
+        return new Response(
+          JSON.stringify({
+            error:
+              "This account is managed by your identity provider (SSO/auto-provisioning). The email address must be changed in the identity provider, not here.",
+            reason: "sso_managed",
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Org admins must share an organization with the target
+      if (!isPlatformAdmin) {
+        const { data: targetMembership } = await supabaseAdmin
+          .from("user_organization_access")
+          .select("organization_id")
+          .eq("user_id", user_id)
+          .eq("organization_id", organization_id);
+        if (!targetMembership || targetMembership.length === 0) {
+          return new Response(
+            JSON.stringify({ error: "Target user is not a member of this organization" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // Update auth email (mark confirmed so the user isn't locked out)
+      const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(user_id, {
+        email: trimmed,
+        email_confirm: true,
+      });
+      if (updErr) {
+        const msg = updErr.message ?? "Failed to update email";
+        const status = msg.toLowerCase().includes("already") ? 409 : 400;
+        return new Response(
+          JSON.stringify({ error: msg }),
+          { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Mirror change in profile
+      const { error: profErr } = await supabaseAdmin
+        .from("profiles")
+        .update({ email: trimmed })
+        .eq("user_id", user_id);
+      if (profErr) {
+        console.warn("change_email: profile mirror failed", profErr.message);
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Email address updated", email: trimmed }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: "Invalid action. Use 'invite', 'resend_invite', 'archive', 'unarchive', or 'delete'" }),
+      JSON.stringify({ error: "Invalid action. Use 'invite', 'resend_invite', 'archive', 'unarchive', 'delete', or 'change_email'" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
