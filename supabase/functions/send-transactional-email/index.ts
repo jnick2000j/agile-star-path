@@ -4,6 +4,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailTransport, sendViaSmtp } from '../_shared/smtp-transport.ts'
 import { tryRenderOrgOverride } from '../_shared/email-overrides.tsx'
+import { resolveEmailBranding } from '../_shared/email-branding.ts'
+import { BrandContext } from '../_shared/email-templates/_brand.tsx'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
