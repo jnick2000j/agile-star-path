@@ -404,13 +404,47 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   });
 
   // Filter tasks
-  const filteredTasks = tasks.filter((task) => {
+  const matchesFilters = (task: Task) => {
     if (statusFilter !== "all" && task.status !== statusFilter) return false;
     if (entityFilter === "project" && !task.project_id) return false;
     if (entityFilter === "program" && !task.programme_id) return false;
     if (entityFilter === "product" && !task.product_id) return false;
     return true;
-  });
+  };
+
+  // Group: render parents (or orphan subtasks whose parent is filtered out) followed by their subtasks
+  const tasksById = new Map(tasks.map((t) => [t.id, t]));
+  const childrenByParent = new Map<string, Task[]>();
+  for (const t of tasks) {
+    if (t.parent_task_id) {
+      const arr = childrenByParent.get(t.parent_task_id) || [];
+      arr.push(t);
+      childrenByParent.set(t.parent_task_id, arr);
+    }
+  }
+  const filteredTasksFlat: Array<{ task: Task; depth: number }> = [];
+  const seen = new Set<string>();
+  // Top-level first: tasks without a parent (or whose parent is missing)
+  for (const t of tasks) {
+    const isTopLevel = !t.parent_task_id || !tasksById.has(t.parent_task_id);
+    if (!isTopLevel) continue;
+    const childMatches = (childrenByParent.get(t.id) || []).some(matchesFilters);
+    if (!matchesFilters(t) && !childMatches) continue;
+    filteredTasksFlat.push({ task: t, depth: 0 });
+    seen.add(t.id);
+    for (const child of childrenByParent.get(t.id) || []) {
+      if (!matchesFilters(child)) continue;
+      filteredTasksFlat.push({ task: child, depth: 1 });
+      seen.add(child.id);
+    }
+  }
+  // Any matching subtasks whose parent didn't render (e.g. parent filtered out and we still want the child shown)
+  for (const t of tasks) {
+    if (seen.has(t.id)) continue;
+    if (matchesFilters(t)) filteredTasksFlat.push({ task: t, depth: 0 });
+  }
+  const filteredTasks = filteredTasksFlat.map((x) => x.task);
+  const depthByTaskId = new Map(filteredTasksFlat.map((x) => [x.task.id, x.depth]));
 
   // Calculate stats
   const stats = {
