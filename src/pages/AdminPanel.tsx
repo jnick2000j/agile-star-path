@@ -373,7 +373,7 @@ export default function AdminPanel() {
                   </TableRow>
                 ) : (
                   filteredUsers.map((user, index) => {
-                    const RoleIcon = roleConfig[user.role].icon;
+                    const _unused = null;
                     return (
                       <TableRow
                         key={user.id}
