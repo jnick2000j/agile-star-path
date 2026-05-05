@@ -179,16 +179,18 @@ export default function Auth() {
           return;
         }
         if (cfg.saml_provider_id) {
+          const siteUrl = await getSiteUrl();
           const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
             providerId: cfg.saml_provider_id,
-            options: { redirectTo: APP_URL },
+            options: { redirectTo: siteUrl },
           });
           if (ssoError) throw ssoError;
         } else {
           const domain = email.split("@")[1];
+          const siteUrl = await getSiteUrl();
           const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
             domain,
-            options: { redirectTo: APP_URL },
+            options: { redirectTo: siteUrl },
           });
           if (ssoError) throw ssoError;
         }
