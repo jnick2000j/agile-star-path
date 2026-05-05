@@ -636,7 +636,14 @@ export default function Auth() {
                   <img
                     src={branding!.logo_url!}
                     alt={appName}
-                    className={logoOnly ? "max-h-20 w-auto object-contain" : "h-8 w-auto object-contain"}
+                    style={customLogoStyle ?? undefined}
+                    className={
+                      customLogoStyle
+                        ? ""
+                        : logoOnly
+                          ? "max-h-20 w-auto object-contain"
+                          : "h-8 w-auto object-contain"
+                    }
                   />
                 ) : (
                   <div className="h-8 w-8 rounded-lg bg-primary-foreground/20 flex items-center justify-center"><Layers className="h-4 w-4" /></div>
@@ -675,7 +682,14 @@ export default function Auth() {
                 <img
                   src={branding!.logo_url!}
                   alt={appName}
-                  className={logoOnly ? "max-h-28 w-auto object-contain" : `${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`}
+                  style={customLogoStyle ?? undefined}
+                  className={
+                    customLogoStyle
+                      ? ""
+                      : logoOnly
+                        ? "max-h-28 w-auto object-contain"
+                        : `${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`
+                  }
                 />
               ) : (
                 <div className="h-10 w-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center"><Layers className="h-5 w-5" /></div>
