@@ -61,7 +61,7 @@ const logoSizeClasses: Record<string, string> = {
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const nameSchema = z.string().min(1, "Name is required");
-const otpSchema = z.string().regex(/^\d{6}$/, "Enter the 6-digit code");
+const otpSchema = z.string().regex(/^\d{6,8}$/, "Enter the verification code");
 
 type AuthMode = "login" | "signup" | "sso";
 type AuthStep = "request" | "verify";
@@ -296,7 +296,7 @@ export default function Auth() {
   };
 
   const getSubtitle = () => {
-    if (step === "verify") return `We sent a 6-digit code to ${email}. It expires in a few minutes.`;
+    if (step === "verify") return `We sent a verification code to ${email}. It expires in a few minutes.`;
     switch (mode) {
       case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your email and we'll send you a one-time code.") : "Enter your email and we'll send you a one-time code.";
       case "signup": return "Tell us about you. We'll email a one-time code to confirm your address.";
@@ -378,9 +378,9 @@ export default function Auth() {
         {step === "verify" && (
           <div className="space-y-3">
             <Label htmlFor="otp" className="text-xs font-medium flex items-center gap-1.5">
-              <KeyRound className="h-3.5 w-3.5" /> 6-digit verification code
+              <KeyRound className="h-3.5 w-3.5" /> Verification code
             </Label>
-            <InputOTP maxLength={6} value={otp} onChange={setOtp} containerClassName="justify-start">
+            <InputOTP maxLength={8} value={otp} onChange={setOtp} containerClassName="justify-start">
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -388,6 +388,8 @@ export default function Auth() {
                 <InputOTPSlot index={3} />
                 <InputOTPSlot index={4} />
                 <InputOTPSlot index={5} />
+                <InputOTPSlot index={6} />
+                <InputOTPSlot index={7} />
               </InputOTPGroup>
             </InputOTP>
             {errors.otp && <p className="text-xs text-destructive">{errors.otp}</p>}
