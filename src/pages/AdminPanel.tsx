@@ -372,85 +372,102 @@ export default function AdminPanel() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user, index) => {
-                    const _unused = null;
-                    return (
-                      <TableRow
-                        key={user.id}
-                        className={cn("animate-fade-in", user.archived && "opacity-60")}
-                        style={{ animationDelay: `${index * 0.03}s` }}
-                      >
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-sm font-medium text-primary">
-                                {getUserInitials(user)}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="font-medium block">
-                                {getUserDisplayName(user)}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {user.email}
-                              </span>
-                            </div>
+                  filteredUsers.map((user, index) => (
+                    <TableRow
+                      key={user.id}
+                      className={cn("animate-fade-in", user.archived && "opacity-60")}
+                      style={{ animationDelay: `${index * 0.03}s` }}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-medium text-primary">
+                              {getUserInitials(user)}
+                            </span>
                           </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          <div className="text-sm">
-                            {user.phone_number && <div>{user.phone_number}</div>}
-                            {user.location && <div className="text-xs">{user.location}</div>}
-                            {!user.phone_number && !user.location && "-"}
+                          <div>
+                            <span className="font-medium block">
+                              {getUserDisplayName(user)}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {user.email}
+                            </span>
+                            {user.job_title && (
+                              <span className="text-xs text-muted-foreground italic block">
+                                {user.job_title}
+                              </span>
+                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {user.org_count}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={user.role}
-                            onValueChange={(value: AppRole) =>
-                              handleRoleChange(user.user_id, value)
-                            }
-                            disabled={user.archived}
-                          >
-                            <SelectTrigger className="w-[160px]">
-                              <div className="flex items-center gap-2">
-                                <RoleIcon className="h-3 w-3" />
-                                <SelectValue />
-                              </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="org_admin">Org Administrator</SelectItem>
-                              <SelectItem value="programme_owner">Program Owner</SelectItem>
-                              <SelectItem value="project_manager">Project Manager</SelectItem>
-                              <SelectItem value="product_manager">Product Manager</SelectItem>
-                              <SelectItem value="product_team_member">Product Team Member</SelectItem>
-                              <SelectItem value="project_team_member">Project Team Member</SelectItem>
-                              <SelectItem value="org_stakeholder">Org Stakeholder</SelectItem>
-                              <SelectItem value="programme_stakeholder">Program Stakeholder</SelectItem>
-                              <SelectItem value="project_stakeholder">Project Stakeholder</SelectItem>
-                              <SelectItem value="product_stakeholder">Product Stakeholder</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          {user.archived ? (
-                            <Badge variant="destructive">Archived</Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="text-sm">
+                          {user.phone_number && <div>{user.phone_number}</div>}
+                          {user.location && <div className="text-xs">{user.location}</div>}
+                          {!user.phone_number && !user.location && "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {user.org_count}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1.5 max-w-[280px]">
+                          {user.highest_access ? (
+                            <Badge
+                              variant="outline"
+                              className={cn("w-fit gap-1", accessLevelConfig[user.highest_access].className)}
+                            >
+                              {user.highest_access === "admin" && <Crown className="h-3 w-3" />}
+                              {accessLevelConfig[user.highest_access].label}
+                            </Badge>
                           ) : (
-                            <Badge variant="default" className="bg-success">Active</Badge>
+                            <Badge variant="outline" className="w-fit text-muted-foreground">
+                              No access
+                            </Badge>
                           )}
-                        </TableCell>
-                        <TableCell>
+                          {user.custom_roles.length > 0 && (() => {
+                            const unique = Array.from(new Set(user.custom_roles.map((r) => r.role_name)));
+                            return (
+                              <div className="flex flex-wrap gap-1">
+                                {unique.slice(0, 4).map((name) => (
+                                  <Badge key={name} variant="secondary" className="text-[10px] gap-1 font-normal">
+                                    <Tag className="h-2.5 w-2.5" />
+                                    {name}
+                                  </Badge>
+                                ))}
+                                {unique.length > 4 && (
+                                  <Badge variant="secondary" className="text-[10px] font-normal">
+                                    +{unique.length - 4}
+                                  </Badge>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {user.archived ? (
+                          <Badge variant="destructive">Archived</Badge>
+                        ) : (
+                          <Badge variant="default" className="bg-success">Active</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
                           <EditUserDialog user={user} onSuccess={fetchUsers} />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                          <Link to="/admin?tab=roles-access">
+                            <Button variant="outline" size="sm" className="gap-1.5">
+                              <Settings2 className="h-3.5 w-3.5" />
+                              Edit access
+                            </Button>
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
