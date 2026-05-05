@@ -27,11 +27,11 @@ export const HELPDESK_MODULE_CATALOG: HelpdeskModuleDef[] = [
   { key: "analytics", label: "Analytics", description: "Helpdesk performance dashboards.", href: "/support/analytics" },
   { key: "reports", label: "Reports & Exports", description: "Scheduled reports and data exports.", href: "/support/reports" },
   { key: "workflows", label: "Workflows", description: "Automation rules and ticket workflows.", href: "/support/workflows" },
-  { key: "lms", label: "Learning (LMS)", description: "Optional add-on: courses, learning paths, quizzes, certificates and training compliance.", href: "/learning", defaultEnabled: false },
+  { key: "lms", label: "Learning (LMS)", description: "Courses, learning paths, quizzes, certificates and training compliance. Bundled with Helpdesk + Learning add-ons.", href: "/learning", defaultEnabled: true },
 ];
 
 /** Module keys that are opt-in add-ons (default OFF unless explicitly enabled). */
-export const ADDON_MODULE_KEYS = new Set<string>(["lms"]);
+export const ADDON_MODULE_KEYS = new Set<string>([]);
 
 export function useModuleToggles(orgId?: string | null) {
   const { currentOrganization } = useOrganization();
