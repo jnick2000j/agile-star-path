@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSiteUrl } from "@/lib/site-url";
@@ -109,12 +109,26 @@ export default function Auth() {
 
   const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
+  const orgProvisioningRef = useRef(false);
+
+  const provisionFirstOrganization = async (name: string) => {
+    if (!name.trim() || orgProvisioningRef.current) return;
+    orgProvisioningRef.current = true;
+    const { data, error } = await supabase.rpc("create_org_for_new_user", { _org_name: name.trim() });
+    if (error) {
+      orgProvisioningRef.current = false;
+      throw error;
+    }
+    if (data) localStorage.setItem("currentOrganizationId", data as string);
+  };
 
   useEffect(() => {
     if (user) {
       const orgNameMeta = user.user_metadata?.org_name;
       if (orgNameMeta) {
-        supabase.rpc('create_org_for_new_user', { _org_name: orgNameMeta }).then(() => navigate("/"));
+        provisionFirstOrganization(orgNameMeta)
+          .then(() => navigate("/"))
+          .catch((error) => toast.error(error.message || "Failed to create organization"));
       } else {
         navigate("/");
       }
@@ -224,7 +238,16 @@ export default function Auth() {
     if (!validateVerify()) return;
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
-    if (!error) navigate("/");
+    if (!error) {
+      try {
+        if (mode === "signup" && orgName.trim()) {
+          await provisionFirstOrganization(orgName.trim());
+        }
+        navigate("/");
+      } catch (err: any) {
+        toast.error(err.message || "Failed to create organization");
+      }
+    }
     setLoading(false);
   };
 
