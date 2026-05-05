@@ -75,8 +75,12 @@ export async function resolveEmailBranding(
     const logoHeight = pickNumber(org?.logo_email_height, platform?.logo_email_height)
 
     const siteName =
-      (org?.site_name as string | null) ??
-      (platform?.site_name as string | null) ??
+      (org?.app_name as string | null) ??
+      (platform?.app_name as string | null) ??
+      null
+    const tagline =
+      (org?.app_tagline as string | null) ??
+      (platform?.app_tagline as string | null) ??
       null
 
     return {
