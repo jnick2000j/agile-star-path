@@ -80,9 +80,11 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
   const [userOrgAccess, setUserOrgAccess] = useState<UserOrgAccess[]>([]);
   const [selectedOrgToAdd, setSelectedOrgToAdd] = useState<string>("");
   const [selectedAccessLevel, setSelectedAccessLevel] = useState<string>("viewer");
-  
+  const [newEmail, setNewEmail] = useState(user.email);
+  const [changingEmail, setChangingEmail] = useState(false);
+
   const isAdmin = userRole === "admin";
-  
+
   const [formData, setFormData] = useState({
     full_name: user.full_name || "",
     phone_number: user.phone_number || "",
@@ -95,10 +97,11 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
 
   useEffect(() => {
     if (open) {
+      setNewEmail(user.email);
       fetchOrganizations();
       fetchUserOrgAccess();
     }
-  }, [open, user.user_id]);
+  }, [open, user.user_id, user.email]);
 
   const fetchOrganizations = async () => {
     const { data } = await supabase
@@ -200,6 +203,55 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
       toast.error(errorMessage);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleChangeEmail = async () => {
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (trimmed === user.email.toLowerCase()) {
+      toast.info("That's already the user's current email.");
+      return;
+    }
+    if (!confirm(`Change the sign-in email for ${user.email} to ${trimmed}? They will use the new address to sign in immediately.`)) {
+      return;
+    }
+    setChangingEmail(true);
+    try {
+      // Pass the first organization the target belongs to so org-admin callers pass the membership check.
+      const orgIdForCheck = userOrgAccess[0]?.organization_id;
+      const response = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "change_email",
+          user_id: user.user_id,
+          new_email: trimmed,
+          organization_id: orgIdForCheck,
+        },
+      });
+      if (response.error) {
+        const fnErr: any = response.error;
+        const ctx = fnErr?.context;
+        let msg = fnErr?.message || "Failed to change email";
+        try {
+          const body = ctx ? await ctx.json() : null;
+          if (body?.error) msg = body.error;
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      const data: any = response.data;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Email updated to ${data?.email ?? trimmed}`);
+      onSuccess();
+      setOpen(false);
+    } catch (error: unknown) {
+      console.error("Change email failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to change email";
+      toast.error(errorMessage);
+    } finally {
+      setChangingEmail(false);
     }
   };
 
@@ -337,6 +389,35 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
               onChange={(e) => setFormData({ ...formData, mailing_address: e.target.value })}
               rows={2}
             />
+          </div>
+
+          {/* Sign-in email — admins can change for non-SSO accounts */}
+          <div className="rounded-lg border border-border p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="user_email" className="text-base">Sign-in Email</Label>
+              <span className="text-xs text-muted-foreground">Current: {user.email}</span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                id="user_email"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="new.address@example.com"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleChangeEmail}
+                disabled={changingEmail || newEmail.trim().toLowerCase() === user.email.toLowerCase()}
+              >
+                {changingEmail ? "Updating..." : "Change email"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Updates the user's sign-in address immediately and marks it confirmed. Accounts managed
+              by SSO or auto-provisioning cannot be changed here — update them in your identity provider.
+            </p>
           </div>
 
           {/* Access is managed via role assignments — see the "Edit access" button on the user row */}
