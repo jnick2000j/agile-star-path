@@ -80,9 +80,11 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
   const [userOrgAccess, setUserOrgAccess] = useState<UserOrgAccess[]>([]);
   const [selectedOrgToAdd, setSelectedOrgToAdd] = useState<string>("");
   const [selectedAccessLevel, setSelectedAccessLevel] = useState<string>("viewer");
-  
+  const [newEmail, setNewEmail] = useState(user.email);
+  const [changingEmail, setChangingEmail] = useState(false);
+
   const isAdmin = userRole === "admin";
-  
+
   const [formData, setFormData] = useState({
     full_name: user.full_name || "",
     phone_number: user.phone_number || "",
