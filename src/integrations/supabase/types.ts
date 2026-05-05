@@ -9346,6 +9346,50 @@ export type Database = {
         }
         Relationships: []
       }
+      org_email_template_overrides: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          fields: Json
+          id: string
+          organization_id: string
+          subject: string | null
+          template_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          fields?: Json
+          id?: string
+          organization_id: string
+          subject?: string | null
+          template_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          fields?: Json
+          id?: string
+          organization_id?: string
+          subject?: string | null
+          template_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_email_template_overrides_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_mfa_policies: {
         Row: {
           allow_recovery_codes: boolean
@@ -16172,10 +16216,9 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
-      is_org_admin_of: {
-        Args: { _caller: string; _target_user: string }
-        Returns: boolean
-      }
+      is_org_admin_of:
+        | { Args: { _caller: string; _target_user: string }; Returns: boolean }
+        | { Args: { _org_id: string }; Returns: boolean }
       is_org_manager_of: {
         Args: { _caller: string; _target_user: string }
         Returns: boolean
