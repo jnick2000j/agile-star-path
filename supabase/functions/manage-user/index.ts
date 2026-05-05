@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
 
       const redirectTo =
         redirect_to ||
-        `${supabaseUrl.replace(".supabase.co", ".lovable.app")}/auth`;
+        `${supabaseUrl.replace(".supabase.co", ".lovable.app")}/auth/confirm`;
 
       // 1. Create the user. If a temp password was supplied use it, otherwise
       //    create with email_confirm=false and rely on the invite link.
@@ -259,7 +259,7 @@ Deno.serve(async (req) => {
         );
       }
 
-      const redirectTo = redirect_to || `${req.headers.get("origin") || ""}/auth`;
+      const redirectTo = redirect_to || `${req.headers.get("origin") || ""}/auth/confirm`;
 
       const { data: linkData, error: resendError } = await supabaseAdmin.auth.admin.generateLink({
         type: "signup",
