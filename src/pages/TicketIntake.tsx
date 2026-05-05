@@ -232,6 +232,7 @@ function CreateChannelDialog({ orgId, onClose }: { orgId?: string; onClose: () =
   const [type, setType] = useState("widget");
   const [priority, setPriority] = useState("medium");
   const [requireEmail, setRequireEmail] = useState(true);
+  const [requireAuth, setRequireAuth] = useState(false);
   const [rateLimit, setRateLimit] = useState(30);
   const [saving, setSaving] = useState(false);
 
@@ -244,6 +245,7 @@ function CreateChannelDialog({ orgId, onClose }: { orgId?: string; onClose: () =
       channel_type: type,
       default_priority: priority,
       require_email: requireEmail,
+      require_authenticated: requireAuth,
       rate_limit_per_hour: rateLimit,
     });
     setSaving(false);
@@ -278,6 +280,13 @@ function CreateChannelDialog({ orgId, onClose }: { orgId?: string; onClose: () =
         <div className="flex items-center justify-between">
           <Label>Require email address</Label>
           <Switch checked={requireEmail} onCheckedChange={setRequireEmail} />
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Restrict to organization members only</Label>
+            <p className="text-xs text-muted-foreground">When on, only signed-in users who belong to this organization can submit. When off, anyone with the link can submit.</p>
+          </div>
+          <Switch checked={requireAuth} onCheckedChange={setRequireAuth} />
         </div>
       </div>
       <DialogFooter>
