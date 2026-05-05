@@ -59,10 +59,11 @@ const logoSizeClasses: Record<string, string> = {
 };
 
 const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(1, "Name is required");
+const otpSchema = z.string().regex(/^\d{6}$/, "Enter the 6-digit code");
 
-type AuthMode = "login" | "signup" | "forgot-password" | "sso";
+type AuthMode = "login" | "signup" | "sso";
+type AuthStep = "request" | "verify";
 
 const defaultFeatures = [
   { icon: Layers, title: "Programme Management", description: "Track programmes, projects, and products with full lifecycle governance." },
