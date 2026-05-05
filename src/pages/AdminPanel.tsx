@@ -18,6 +18,8 @@ import {
   Layers,
   Tag,
   Settings2,
+  Mail,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
