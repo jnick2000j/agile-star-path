@@ -173,6 +173,7 @@ serve(async (req) => {
             to: [stakeholder.email],
             subject: `Weekly Programme Report - ${new Date().toLocaleDateString('en-GB')}`,
             html: emailHtml,
+            triggerKey: "weekly_report",
           });
           if (result.ok) {
             emailsSent++;
