@@ -14,6 +14,17 @@ import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 type Intent = "ppm" | "helpdesk" | "itsm";
 type Step = "intent" | "vertical" | "org" | "invite" | "plan" | "done";
 
+const INTENT_OPTIONS = [
+  { id: "ppm" as Intent, icon: Layers, title: "Program, Product and/or Project Management", desc: "PRINCE2, MSP programmes, projects, products, agile" },
+  { id: "helpdesk" as Intent, icon: Headphones, title: "Helpdesk & Learning", desc: "Tickets, SLA, portal, email intake, LMS courses, training content, quizzes and certificates" },
+  { id: "itsm" as Intent, icon: GitBranch, title: "ITSM & Learning", desc: "Helpdesk, change management, CAB workflow, LMS training paths and compliance learning" },
+];
+
+const PLAN_LMS_COPY: Record<string, string[]> = {
+  helpdesk: ["Learning paths, courses, quizzes and certificates included", "5 GB LMS storage included; $0.25/GB/month overage"],
+  itsm: ["ITSM training library for change, service and support teams", "5 GB LMS storage included; $0.25/GB/month overage"],
+};
+
 interface VerticalOpt {
   id: string;
   name: string;
@@ -194,11 +205,7 @@ export default function Onboarding() {
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              {[
-                { id: "ppm" as Intent, icon: Layers, title: "Program, Product and/or Project Management", desc: "PRINCE2, MSP programmes, projects, products, agile" },
-                { id: "helpdesk" as Intent, icon: Headphones, title: "Helpdesk only", desc: "Tickets, SLA, customer portal, email intake" },
-                { id: "itsm" as Intent, icon: GitBranch, title: "ITSM", desc: "Helpdesk + Change Management, CAB workflow" },
-              ].map(({ id, icon: Icon, title, desc }) => (
+              {INTENT_OPTIONS.map(({ id, icon: Icon, title, desc }) => (
                 <Card
                   key={id}
                   className={`p-4 cursor-pointer transition-all hover:border-primary text-left ${
@@ -339,7 +346,9 @@ export default function Onboarding() {
                   }`}
                   onClick={() => handleSelectPlan(plan.id)}
                 >
-                  <h3 className="text-lg font-bold mb-1">{plan.name}</h3>
+                  <h3 className="text-lg font-bold mb-1">
+                    {intent === "helpdesk" ? plan.name.replace(/Helpdesk/gi, "Helpdesk & Learning") : plan.name}
+                  </h3>
                   <p className="text-sm text-muted-foreground mb-3">{plan.description}</p>
                   <div className="text-2xl font-bold mb-3">
                     ${plan.price_monthly}<span className="text-sm font-normal text-muted-foreground">/mo</span>
@@ -348,6 +357,9 @@ export default function Onboarding() {
                     <p>{plan.max_users === -1 ? "Unlimited" : plan.max_users} users</p>
                     <p>{plan.max_programmes === -1 ? "Unlimited" : plan.max_programmes} programmes</p>
                     <p>{plan.max_projects === -1 ? "Unlimited" : plan.max_projects} projects</p>
+                    {(PLAN_LMS_COPY[intent] ?? []).map((item) => (
+                      <p key={item}>{item}</p>
+                    ))}
                   </div>
                   {selectedPlan === plan.id && (
                     <Badge className="mt-3 bg-primary">Selected</Badge>
