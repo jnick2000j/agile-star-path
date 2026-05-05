@@ -41,6 +41,15 @@ interface SendArgs {
   from?: string;
   /** Optional Reply-To address. */
   replyTo?: string;
+  /**
+   * If set together with `organizationId`, looks up the per-org copy override
+   * for this template_key (matching the editor in EmailTemplatesPanel) and,
+   * when enabled, replaces `subject` + `html` + `text` with the override
+   * rendering. `templateData` is used for {{var}} substitution.
+   */
+  templateKey?: string;
+  /** Variables substituted into override copy ({{user_name}} etc). */
+  templateData?: Record<string, unknown>;
 }
 
 interface SendResult {
