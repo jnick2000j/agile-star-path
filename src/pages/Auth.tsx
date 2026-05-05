@@ -115,8 +115,9 @@ export default function Auth() {
     const trimmedName = name.trim();
     if (!trimmedName) return null;
     if (!orgProvisioningRef.current) {
-      orgProvisioningRef.current = supabase
-        .rpc("create_org_for_new_user", { _org_name: trimmedName })
+      orgProvisioningRef.current = Promise.resolve(
+        supabase.rpc("create_org_for_new_user", { _org_name: trimmedName })
+      )
         .then(({ data, error }) => {
           if (error) throw error;
           if (data) localStorage.setItem("currentOrganizationId", data as string);
