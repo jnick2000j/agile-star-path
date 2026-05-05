@@ -47,6 +47,7 @@ import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrations
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { PlatformAdminsPanel } from "@/components/platform-admin/PlatformAdminsPanel";
 import { PlatformSettingsPanel } from "@/components/platform-admin/PlatformSettingsPanel";
+import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
