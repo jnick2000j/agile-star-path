@@ -285,7 +285,11 @@ export function EmailSettings() {
             </Alert>
           )}
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </TabsContent>
+      <TabsContent value="templates">
+        <EmailTemplatesPanel />
+      </TabsContent>
+    </Tabs>
   );
 }
