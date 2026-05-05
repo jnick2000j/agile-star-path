@@ -58,14 +58,21 @@ Deno.serve(async (req) => {
     });
 
     // Verify caller is admin
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized", reason: "missing_auth_header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const token = authHeader.replace("Bearer ", "");
 
     const { data: { user: callerUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !callerUser) {
+      console.error("manage-user auth failed:", authError?.message);
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Unauthorized", reason: "invalid_or_expired_session" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
