@@ -130,10 +130,10 @@ export default function AddonsCatalog() {
         <div className="text-center mb-10">
           <Badge variant="secondary" className="mb-3">14-day free trial • Cancel anytime</Badge>
           <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
-            Power up with Helpdesk &amp; Change Management
+            Power up with Helpdesk, Change Management &amp; Learning
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Add ITSM modules to your existing plan. They unlock automatically the moment your subscription is active.
+            Add ITSM and LMS modules to your existing plan. They unlock automatically the moment your subscription is active.
           </p>
 
           <div className="inline-flex gap-1 p-1 bg-muted rounded-lg mt-6">
