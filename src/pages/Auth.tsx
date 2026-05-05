@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSiteUrl } from "@/lib/site-url";
@@ -109,17 +109,40 @@ export default function Auth() {
 
   const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
+  const orgProvisioningRef = useRef<Promise<string | null> | null>(null);
+
+  const provisionFirstOrganization = useCallback(async (name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return null;
+    if (!orgProvisioningRef.current) {
+      orgProvisioningRef.current = Promise.resolve(
+        supabase.rpc("create_org_for_new_user", { _org_name: trimmedName })
+      )
+        .then(({ data, error }) => {
+          if (error) throw error;
+          if (data) localStorage.setItem("currentOrganizationId", data as string);
+          return (data as string | null) ?? null;
+        })
+        .catch((error) => {
+          orgProvisioningRef.current = null;
+          throw error;
+        });
+    }
+    return orgProvisioningRef.current;
+  }, []);
 
   useEffect(() => {
     if (user) {
       const orgNameMeta = user.user_metadata?.org_name;
       if (orgNameMeta) {
-        supabase.rpc('create_org_for_new_user', { _org_name: orgNameMeta }).then(() => navigate("/"));
+        provisionFirstOrganization(orgNameMeta)
+          .then(() => navigate("/"))
+          .catch((error) => toast.error(error.message || "Failed to create organization"));
       } else {
         navigate("/");
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, provisionFirstOrganization]);
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
@@ -224,7 +247,16 @@ export default function Auth() {
     if (!validateVerify()) return;
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
-    if (!error) navigate("/");
+    if (!error) {
+      try {
+        if (mode === "signup" && orgName.trim()) {
+          await provisionFirstOrganization(orgName.trim());
+        }
+        navigate("/");
+      } catch (err: any) {
+        toast.error(err.message || "Failed to create organization");
+      }
+    }
     setLoading(false);
   };
 
