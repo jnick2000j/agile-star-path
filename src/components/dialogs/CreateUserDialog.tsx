@@ -147,6 +147,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         phone_number: "",
         department: "",
         location: "",
+        organization_id: "",
+        access_level: "editor",
+        create_as_platform_admin: false,
       });
       onSuccess();
     } catch (error: any) {
