@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserPlus } from "lucide-react";
@@ -19,9 +27,16 @@ interface CreateUserDialogProps {
   onSuccess: () => void;
 }
 
+interface OrgOption {
+  id: string;
+  name: string;
+}
+
 export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [orgs, setOrgs] = useState<OrgOption[]>([]);
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -30,7 +45,29 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     phone_number: "",
     department: "",
     location: "",
+    organization_id: "",
+    access_level: "editor",
+    create_as_platform_admin: false,
   });
+
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from("organizations")
+      .select("id, name")
+      .order("name")
+      .then(({ data }) => setOrgs((data as OrgOption[]) || []));
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: role } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsPlatformAdmin(!!role);
+    });
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
