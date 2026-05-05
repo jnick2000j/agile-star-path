@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
         const result = await sendEmail({
           to: adminEmails,
           subject: `New SSO Request: ${body.organization_name}`,
+          triggerKey: "sso_request",
           html: `
               <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width:560px; margin:0 auto; padding:32px;">
                 <h2 style="color:#0f172a;">New SSO/SAML Setup Request</h2>
