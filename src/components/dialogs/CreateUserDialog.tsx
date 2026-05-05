@@ -71,7 +71,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       toast.error("Email and password are required");
       return;
@@ -82,11 +82,16 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       return;
     }
 
+    if (!formData.organization_id && !formData.create_as_platform_admin) {
+      toast.error("Select an organization, or mark this user as a platform administrator.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const fullName = `${formData.first_name} ${formData.last_name}`.trim();
-      
+
       // Create user via the manage-user edge function (uses admin API)
       const { data, error } = await supabase.functions.invoke("manage-user", {
         body: {
@@ -95,6 +100,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           password: formData.password,
           full_name: fullName || formData.email.split('@')[0],
           redirect_to: `${window.location.origin}/auth`,
+          organization_id: formData.organization_id || null,
+          access_level: formData.access_level,
+          create_as_platform_admin: formData.create_as_platform_admin,
         },
       });
 
