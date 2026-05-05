@@ -104,6 +104,8 @@ export default function AddonsCatalog() {
       ? "helpdesk"
       : purchasingAddon.name.toLowerCase().includes("change")
       ? "change_management"
+      : purchasingAddon.name.toLowerCase().includes("learning")
+      ? "lms"
       : "addon";
     return `${base}&addon=${key}&addon_name=${encodeURIComponent(purchasingAddon.name)}`;
   };
@@ -114,6 +116,7 @@ export default function AddonsCatalog() {
     }
     if (addon.name.includes("Helpdesk")) return hasFeature("feature_helpdesk");
     if (addon.name.includes("Change Management")) return hasFeature("feature_change_management");
+    if (addon.name.includes("Learning")) return hasFeature("feature_lms");
     return false;
   };
 
