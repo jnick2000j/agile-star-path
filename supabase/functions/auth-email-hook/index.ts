@@ -54,10 +54,12 @@ const SAMPLE_DATA: Record<string, object> = {
     siteUrl: SAMPLE_PROJECT_URL,
     recipient: SAMPLE_EMAIL,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: '123456',
   },
   magiclink: {
     siteName: SITE_NAME,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: '123456',
   },
   recovery: {
     siteName: SITE_NAME,
@@ -77,21 +79,6 @@ const SAMPLE_DATA: Record<string, object> = {
   reauthentication: {
     token: '123456',
   },
-}
-
-function buildUserConfirmedActionUrl(actionUrl: string, emailType: string): string {
-  if (emailType !== 'signup') return actionUrl
-
-  try {
-    const verifyUrl = new URL(actionUrl)
-    const redirectTo = verifyUrl.searchParams.get('redirect_to')
-    const appOrigin = redirectTo ? new URL(redirectTo).origin : SAMPLE_PROJECT_URL
-    const confirmUrl = new URL('/auth/confirm', appOrigin)
-    confirmUrl.searchParams.set('verify_url', actionUrl)
-    return confirmUrl.toString()
-  } catch (_error) {
-    return actionUrl
-  }
 }
 
 // Preview endpoint handler - returns rendered HTML without sending email
