@@ -405,6 +405,11 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
                   <TableCell>
                     {user.archived ? (
                       <Badge variant="destructive">Archived</Badge>
+                    ) : user.account_status === "pending" ? (
+                      <Badge variant="outline" className="border-warning text-warning gap-1">
+                        <Clock className="h-3 w-3" />
+                        Pending
+                      </Badge>
                     ) : (
                       <Badge variant="default" className="bg-success">Active</Badge>
                     )}
@@ -436,6 +441,21 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
                             ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             : <Mail className="h-3.5 w-3.5" />}
                           Resend invite
+                        </Button>
+                      )}
+                      {!user.archived && user.account_status === "active" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          disabled={resettingFor === user.user_id}
+                          onClick={() => handleResetToPending(user)}
+                          title="Force user to re-confirm their email address"
+                        >
+                          {resettingFor === user.user_id
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            : <RotateCcw className="h-3.5 w-3.5" />}
+                          Reset to pending
                         </Button>
                       )}
                     </div>
