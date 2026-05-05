@@ -347,6 +347,7 @@ export default function Auth() {
   });
 
   const getTitle = () => {
+    if (step === "check_email") return "Check your email";
     if (step === "verify") return "Enter your code";
     switch (mode) {
       case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "Sign in";
@@ -356,19 +357,22 @@ export default function Auth() {
   };
 
   const getSubtitle = () => {
+    if (step === "check_email")
+      return `We sent a confirmation link to ${email}. Click the link in your inbox to confirm your email — then come back and sign in.`;
     if (step === "verify") return `We sent a verification code to ${email}. It expires in a few minutes.`;
     switch (mode) {
       case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your email and we'll send you a one-time code.") : "Enter your email and we'll send you a one-time code.";
-      case "signup": return "Tell us about you. We'll email a one-time code to confirm your address.";
+      case "signup": return "Tell us about you. We'll email a confirmation link to verify your address.";
       case "sso": return "Enter your work email and we'll route you to your identity provider.";
     }
   };
 
   const getButtonText = () => {
+    if (step === "check_email") return "Back to sign in";
     if (step === "verify") return "Verify & sign in";
     switch (mode) {
       case "login": return branding?.login_button_text || "Email me a code";
-      case "signup": return "Send verification code";
+      case "signup": return "Send confirmation link";
       case "sso": return "Continue with SSO";
     }
   };
