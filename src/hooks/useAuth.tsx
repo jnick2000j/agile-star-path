@@ -161,6 +161,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: err };
     }
   };
+
+  const requestEmailOtp = async (email: string, options: OtpRequestOptions = {}) => {
     try {
       const { firstName, lastName, fullName, orgName, shouldCreateUser = true } = options;
       const siteUrl = await getSiteUrl();
@@ -237,6 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         roleLoading,
         requestEmailOtp,
         verifyEmailOtp,
+        requestSignupConfirmation,
         signOut,
         userRole,
         userProfile,
