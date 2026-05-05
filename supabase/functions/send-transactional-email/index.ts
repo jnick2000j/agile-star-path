@@ -286,20 +286,29 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 4. Render React Email template to HTML and plain text
-  const html = await renderAsync(
-    React.createElement(template.component, templateData)
-  )
-  const plainText = await renderAsync(
-    React.createElement(template.component, templateData),
-    { plainText: true }
-  )
+  // 4. Render: try per-org copy override first, fall back to React template.
+  // The override editor uses the same template_key as the registry name.
+  const override = await tryRenderOrgOverride(organizationId, templateName, templateData)
 
-  // Resolve subject — supports static string or dynamic function
-  const resolvedSubject =
-    typeof template.subject === 'function'
-      ? template.subject(templateData)
-      : template.subject
+  let html: string
+  let plainText: string
+  let resolvedSubject: string
+  if (override) {
+    html = override.html
+    plainText = override.text
+    resolvedSubject = override.subject
+    console.log('Transactional email using org override', { templateName, organizationId })
+  } else {
+    html = await renderAsync(React.createElement(template.component, templateData))
+    plainText = await renderAsync(
+      React.createElement(template.component, templateData),
+      { plainText: true }
+    )
+    resolvedSubject =
+      typeof template.subject === 'function'
+        ? template.subject(templateData)
+        : template.subject
+  }
 
   // 5. Send the email.
   //   - On Lovable Cloud (default): enqueue for async dispatch + retries.
