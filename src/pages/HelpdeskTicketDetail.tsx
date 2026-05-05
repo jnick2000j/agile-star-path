@@ -359,6 +359,19 @@ export default function HelpdeskTicketDetail() {
       return data ?? [];
     },
   });
+  const { data: queueOptions = [] } = useQuery({
+    queryKey: ["ticket-queues", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("helpdesk_queues")
+        .select("id, name, is_active")
+        .eq("organization_id", currentOrganization!.id)
+        .eq("is_active", true)
+        .order("name");
+      return data ?? [];
+    },
+  });
 
   const { data: childTickets = [] } = useQuery({
     queryKey: ["helpdesk-child-tickets", id],
