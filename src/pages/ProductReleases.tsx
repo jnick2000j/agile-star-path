@@ -159,16 +159,7 @@ export default function ProductReleases() {
   return (
     <AppLayout title="Software Releases" subtitle="Plan, gate, promote and ship product releases">
       <div className="p-4 md:p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-              <Rocket className="h-7 w-7 text-primary" />
-              Software Releases
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Plan, gate, promote and ship product releases.
-            </p>
-          </div>
+        <div className="flex items-center justify-end">
           <Button onClick={() => setCreateOpen(true)} disabled={products.length === 0}>
             <Plus className="h-4 w-4 mr-2" /> New Release
           </Button>
