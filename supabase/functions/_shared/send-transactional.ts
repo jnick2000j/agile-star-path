@@ -32,38 +32,34 @@ interface SendResult {
 export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   if (!supabaseUrl || !serviceKey) {
     return { ok: false, error: "Missing Supabase env vars" };
   }
 
-  const admin = createClient(supabaseUrl, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-    global: {
-      headers: { Authorization: `Bearer ${serviceKey}` },
-    },
-  });
-
   try {
-    const { data, error } = await admin.functions.invoke(
-      "send-transactional-email",
-      {
-        body: {
-          templateName: "generic-html",
-          recipientEmail: args.to,
-          idempotencyKey: args.idempotencyKey,
-          templateData: {
-            subject: args.subject,
-            html: args.html,
-          },
-        },
-        headers: { Authorization: `Bearer ${serviceKey}` },
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: anonKey ?? serviceKey,
       },
-    );
-    if (error) {
-      return { ok: false, error: error.message ?? String(error) };
+      body: JSON.stringify({
+        templateName: "generic-html",
+        recipientEmail: args.to,
+        idempotencyKey: args.idempotencyKey,
+        templateData: { subject: args.subject, html: args.html },
+      }),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, error: `send-transactional-email ${res.status}: ${text}` };
     }
-    if (data && typeof data === "object" && "error" in data && data.error) {
-      return { ok: false, error: String(data.error) };
+    let parsed: any = {};
+    try { parsed = JSON.parse(text); } catch { /* ignore */ }
+    if (parsed && parsed.error) {
+      return { ok: false, error: String(parsed.error) };
     }
     return { ok: true };
   } catch (e) {
