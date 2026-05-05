@@ -10450,6 +10450,7 @@ export type Database = {
           state: string | null
           updated_at: string
           user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
           zip: string | null
         }
         Insert: {
@@ -10474,6 +10475,7 @@ export type Database = {
           state?: string | null
           updated_at?: string
           user_id: string
+          user_type?: Database["public"]["Enums"]["user_type"]
           zip?: string | null
         }
         Update: {
@@ -10498,6 +10500,7 @@ export type Database = {
           state?: string | null
           updated_at?: string
           user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
           zip?: string | null
         }
         Relationships: [
@@ -14601,6 +14604,48 @@ export type Database = {
           },
         ]
       }
+      user_organization_custom_roles: {
+        Row: {
+          custom_role_id: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          custom_role_id: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          custom_role_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_organization_custom_roles_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_organization_custom_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_organization_roles: {
         Row: {
           created_at: string
@@ -15795,6 +15840,15 @@ export type Database = {
         Args: { _min_level?: string; _org_id: string; _user_id: string }
         Returns: boolean
       }
+      has_org_module_permission: {
+        Args: {
+          _action?: string
+          _module_key: string
+          _org_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_paid_plan: { Args: { _org_id: string }; Returns: boolean }
       has_product_access: {
         Args: { _product_id: string; _user_id: string }
@@ -16131,6 +16185,7 @@ export type Database = {
         | "completed"
         | "cancelled"
       timesheet_status: "draft" | "submitted" | "approved" | "rejected"
+      user_type: "staff" | "portal" | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -16378,6 +16433,7 @@ export const Constants = {
         "cancelled",
       ],
       timesheet_status: ["draft", "submitted", "approved", "rejected"],
+      user_type: ["staff", "portal", "system"],
     },
   },
 } as const
