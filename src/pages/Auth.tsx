@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, APP_URL } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2, ShieldCheck, Apple } from "lucide-react";
+import { Mail, User, ArrowRight, Loader2, ArrowLeft, Shield, BarChart3, Users, Layers, Building2, KeyRound } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { applyBrandingCssVars, DEFAULT_BRANDING } from "@/lib/branding";
 import { lovable } from "@/integrations/lovable/index";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface LoginBranding {
   logo_url: string | null;
@@ -58,10 +59,11 @@ const logoSizeClasses: Record<string, string> = {
 };
 
 const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(1, "Name is required");
+const otpSchema = z.string().regex(/^\d{6}$/, "Enter the 6-digit code");
 
-type AuthMode = "login" | "signup" | "forgot-password" | "sso";
+type AuthMode = "login" | "signup" | "sso";
+type AuthStep = "request" | "verify";
 
 const defaultFeatures = [
   { icon: Layers, title: "Programme Management", description: "Track programmes, projects, and products with full lifecycle governance." },
@@ -92,16 +94,18 @@ function PatternOverlay({ pattern }: { pattern: string }) {
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
+  const [step, setStep] = useState<AuthStep>("request");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; firstName?: string; lastName?: string; orgName?: string }>({});
+  const [resending, setResending] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; otp?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<LoginBranding | null>(null);
 
-  const { signIn, signUp, user } = useAuth();
+  const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,8 +121,6 @@ export default function Auth() {
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
-      // Use the public edge function so anonymous visitors get fresh signed URLs
-      // for the logo and login background (the 'logos' bucket is private).
       const { data: payload, error } = await supabase.functions.invoke("get-public-branding");
       const data = !error ? (payload as any)?.branding : null;
 
@@ -135,12 +137,16 @@ export default function Auth() {
     fetchGlobalBranding();
   }, []);
 
-  const validateForm = () => {
+  const switchMode = (next: AuthMode) => {
+    setMode(next);
+    setStep("request");
+    setOtp("");
+    setErrors({});
+  };
+
+  const validateRequest = () => {
     const newErrors: typeof errors = {};
     try { emailSchema.parse(email); } catch (e) { if (e instanceof z.ZodError) newErrors.email = e.errors[0].message; }
-    if (mode !== "forgot-password") {
-      try { passwordSchema.parse(password); } catch (e) { if (e instanceof z.ZodError) newErrors.password = e.errors[0].message; }
-    }
     if (mode === "signup") {
       try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
       try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
@@ -150,52 +156,81 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateVerify = () => {
+    const newErrors: typeof errors = {};
+    try { otpSchema.parse(otp); } catch (e) { if (e instanceof z.ZodError) newErrors.otp = e.errors[0].message; }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
-    setLoading(true);
-    if (mode === "login") {
-      const { error } = await signIn(email, password);
-      if (!error) navigate("/");
-    } else if (mode === "signup") {
-      const fullName = `${firstName} ${lastName}`.trim();
-      const { error } = await signUp(email, password, fullName, firstName, lastName, orgName.trim());
-      if (!error) { setMode("login"); setPassword(""); }
-    } else if (mode === "forgot-password") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
-      if (error) toast.error(error.message);
-      else { toast.success("Password reset email sent. Check your inbox."); setMode("login"); }
-    } else if (mode === "sso") {
+    if (mode === "sso") {
+      if (!validateRequest()) return;
+      setLoading(true);
       try {
         const { data, error } = await supabase.rpc("get_org_sso_config_by_domain", { _email: email });
         if (error) throw error;
         const cfg = Array.isArray(data) ? data[0] : data;
         if (!cfg?.saml_provider_id && !cfg?.oidc_issuer_url) {
-          toast.error("No SSO configured for this email domain. Use email + password or contact your admin.");
+          toast.error("No SSO configured for this email domain. Use email sign-in or contact your admin.");
           setLoading(false);
           return;
         }
-        // SAML path via signInWithSSO (provider id was returned by Supabase admin API)
         if (cfg.saml_provider_id) {
           const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
             providerId: cfg.saml_provider_id,
-            options: { redirectTo: `${window.location.origin}/` },
+            options: { redirectTo: APP_URL },
           });
           if (ssoError) throw ssoError;
         } else {
-          // OIDC fallback — also via signInWithSSO domain-based
           const domain = email.split("@")[1];
           const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
             domain,
-            options: { redirectTo: `${window.location.origin}/` },
+            options: { redirectTo: APP_URL },
           });
           if (ssoError) throw ssoError;
         }
-      } catch (e: any) {
-        toast.error(e.message || "SSO sign-in failed");
+      } catch (err: any) {
+        toast.error(err.message || "SSO sign-in failed");
       }
+      setLoading(false);
+      return;
     }
+
+    if (step === "request") {
+      if (!validateRequest()) return;
+      setLoading(true);
+      const { error } = await requestEmailOtp(email, {
+        firstName: mode === "signup" ? firstName : undefined,
+        lastName: mode === "signup" ? lastName : undefined,
+        fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
+        orgName: mode === "signup" ? orgName.trim() : undefined,
+        shouldCreateUser: mode === "signup",
+      });
+      if (!error) setStep("verify");
+      setLoading(false);
+      return;
+    }
+
+    // step === "verify"
+    if (!validateVerify()) return;
+    setLoading(true);
+    const { error } = await verifyEmailOtp(email, otp);
+    if (!error) navigate("/");
     setLoading(false);
+  };
+
+  const handleResendCode = async () => {
+    setResending(true);
+    await requestEmailOtp(email, {
+      firstName: mode === "signup" ? firstName : undefined,
+      lastName: mode === "signup" ? lastName : undefined,
+      fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
+      orgName: mode === "signup" ? orgName.trim() : undefined,
+      shouldCreateUser: mode === "signup",
+    });
+    setResending(false);
   };
 
   const handleOAuth = async (provider: "google" | "apple") => {
@@ -249,35 +284,34 @@ export default function Auth() {
   });
 
   const getTitle = () => {
+    if (step === "verify") return "Enter your code";
     switch (mode) {
-      case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "";
+      case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "Sign in";
       case "signup": return "Create your account";
-      case "forgot-password": return "Reset your password";
       case "sso": return "Sign in with SSO";
     }
   };
 
   const getSubtitle = () => {
+    if (step === "verify") return `We sent a 6-digit code to ${email}. It expires in a few minutes.`;
     switch (mode) {
-      case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your credentials to access your dashboard.") : "";
-      case "signup": return "Get started with your programme management journey.";
-      case "forgot-password": return "Enter your email and we'll send you a reset link.";
+      case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your email and we'll send you a one-time code.") : "Enter your email and we'll send you a one-time code.";
+      case "signup": return "Tell us about you. We'll email a one-time code to confirm your address.";
       case "sso": return "Enter your work email and we'll route you to your identity provider.";
     }
   };
 
   const getButtonText = () => {
+    if (step === "verify") return "Verify & sign in";
     switch (mode) {
-      case "login": return branding?.login_button_text || "Sign In";
-      case "signup": return "Create Account";
-      case "forgot-password": return "Send Reset Link";
+      case "login": return branding?.login_button_text || "Email me a code";
+      case "signup": return "Send verification code";
       case "sso": return "Continue with SSO";
     }
   };
 
   const formContent = (
     <div className="w-full max-w-[420px]" style={{ color: formTextColor }}>
-      {/* Mobile logo */}
       <div className={`mb-10 lg:hidden ${logoOnly ? "flex justify-center" : "flex items-center gap-2.5"}`}>
         {hasLogo ? (
           <img
@@ -299,7 +333,7 @@ export default function Auth() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === "signup" && (
+        {step === "request" && mode === "signup" && (
           <>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -326,45 +360,59 @@ export default function Auth() {
             </div>
           </>
         )}
-        <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-xs font-medium">Email address</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
-            <Input id="email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-          </div>
-          {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-        </div>
-        {mode !== "forgot-password" && (
+
+        {step === "request" && (
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-xs font-medium">Password</Label>
-              {mode === "login" && (
-                <button type="button" onClick={() => { setMode("forgot-password"); setErrors({}); }} className="text-xs text-primary hover:text-primary/80 font-medium transition-colors">
-                  Forgot password?
-                </button>
-              )}
-            </div>
+            <Label htmlFor="email" className="text-xs font-medium">Email address</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+              <Input id="email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors" />
             </div>
-            {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+            {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
         )}
+
+        {step === "verify" && (
+          <div className="space-y-3">
+            <Label htmlFor="otp" className="text-xs font-medium flex items-center gap-1.5">
+              <KeyRound className="h-3.5 w-3.5" /> 6-digit verification code
+            </Label>
+            <InputOTP maxLength={6} value={otp} onChange={setOtp} containerClassName="justify-start">
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            {errors.otp && <p className="text-xs text-destructive">{errors.otp}</p>}
+            <div className="flex items-center justify-between text-xs">
+              <button type="button" onClick={() => { setStep("request"); setOtp(""); setErrors({}); }} className="text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" /> Use a different email
+              </button>
+              <button type="button" onClick={handleResendCode} disabled={resending} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
+                {resending ? "Sending…" : "Resend code"}
+              </button>
+            </div>
+          </div>
+        )}
+
         <Button type="submit" className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm" disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{getButtonText()} <ArrowRight className="h-3.5 w-3.5" /></>}
         </Button>
       </form>
 
       <div className="mt-6 pt-5 border-t border-border/60 text-center">
-        {mode === "forgot-password" || mode === "sso" ? (
-          <button type="button" onClick={() => { setMode("login"); setErrors({}); }} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 mx-auto font-medium">
+        {mode === "sso" ? (
+          <button type="button" onClick={() => switchMode("login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 mx-auto font-medium">
             <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
           </button>
         ) : (
           <p className="text-sm text-muted-foreground">
             {mode === "login" ? "Don't have an account? " : "Already have an account? "}
-            <button type="button" onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErrors({}); }} className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <button type="button" onClick={() => switchMode(mode === "login" ? "signup" : "login")} className="text-primary hover:text-primary/80 font-medium transition-colors">
               {mode === "login" ? "Sign up" : "Sign in"}
             </button>
           </p>

@@ -1,8 +1,11 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+// Always send users back to the published site after email verification.
+// Preview/sandbox URLs go stale and show a Lovable fallback page.
+export const APP_URL = "https://thetaskmaster.lovable.app";
 
 interface UserProfile {
   first_name: string | null;
@@ -10,13 +13,23 @@ interface UserProfile {
   full_name: string | null;
 }
 
+interface OtpRequestOptions {
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  orgName?: string;
+  shouldCreateUser?: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   roleLoading: boolean;
-  signUp: (email: string, password: string, fullName: string, firstName?: string, lastName?: string, orgName?: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  /** Send a 6-digit one-time code to the user's email. */
+  requestEmailOtp: (email: string, options?: OtpRequestOptions) => Promise<{ error: Error | null }>;
+  /** Verify the 6-digit code the user received by email. */
+  verifyEmailOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   userRole: string | null;
   userProfile: UserProfile | null;
@@ -33,15 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log("Auth state changed:", event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
-          // Defer Supabase calls with setTimeout
           setRoleLoading(true);
           setTimeout(() => {
             fetchUserRole(session.user.id);
@@ -54,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -77,19 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq("user_id", userId)
           .eq("role", "admin"),
         supabase
-        .from("profiles")
-        .select("role, first_name, last_name, full_name")
-        .eq("user_id", userId)
+          .from("profiles")
+          .select("role, first_name, last_name, full_name")
+          .eq("user_id", userId)
           .single(),
       ]);
 
-      if (platformRoleError) {
-        console.error("Error fetching platform role:", platformRoleError);
-      }
-
-      if (error) {
-        console.error("Error fetching user role:", error);
-      }
+      if (platformRoleError) console.error("Error fetching platform role:", platformRoleError);
+      if (error) console.error("Error fetching user role:", error);
 
       setUserRole((platformRoles?.length ?? 0) > 0 ? "admin" : data?.role || "org_stakeholder");
       setUserProfile({
@@ -105,34 +110,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, firstName?: string, lastName?: string, orgName?: string) => {
+  const requestEmailOtp = async (email: string, options: OtpRequestOptions = {}) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
+      const { firstName, lastName, fullName, orgName, shouldCreateUser = true } = options;
+
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
         options: {
-          emailRedirectTo: redirectUrl,
+          shouldCreateUser,
+          emailRedirectTo: APP_URL,
+          // user_metadata is only applied on first creation
           data: {
-            full_name: fullName,
-            first_name: firstName || fullName.split(' ')[0] || '',
-            last_name: lastName || fullName.split(' ').slice(1).join(' ') || '',
-            org_name: orgName || '',
+            full_name: fullName || `${firstName ?? ""} ${lastName ?? ""}`.trim() || undefined,
+            first_name: firstName || undefined,
+            last_name: lastName || undefined,
+            org_name: orgName || undefined,
           },
         },
       });
 
       if (error) {
-        if (error.message.includes("already registered")) {
-          toast.error("This email is already registered. Please sign in instead.");
+        if (error.message.toLowerCase().includes("signups not allowed")) {
+          toast.error("This email isn't registered yet. Please sign up first.");
         } else {
           toast.error(error.message);
         }
         return { error };
       }
 
-      toast.success("Account created successfully! You can now sign in.");
+      toast.success("We emailed you a 6-digit code. Enter it below to continue.");
       return { error: null };
     } catch (error) {
       const err = error as Error;
@@ -141,23 +147,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const verifyEmailOtp = async (email: string, token: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.verifyOtp({
         email,
-        password,
+        token: token.trim(),
+        type: "email",
       });
 
       if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          toast.error("Invalid email or password. Please try again.");
-        } else {
-          toast.error(error.message);
-        }
+        toast.error(error.message || "Invalid or expired code. Try again.");
         return { error };
       }
 
-      toast.success("Welcome back!");
+      toast.success("You're signed in.");
       return { error: null };
     } catch (error) {
       const err = error as Error;
@@ -172,7 +175,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, roleLoading, signUp, signIn, signOut, userRole, userProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        roleLoading,
+        requestEmailOtp,
+        verifyEmailOtp,
+        signOut,
+        userRole,
+        userProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
