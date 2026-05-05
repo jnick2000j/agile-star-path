@@ -806,23 +806,39 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                 filteredTasks.map((task) => {
                   const config = statusConfig[task.status];
                   const StatusIcon = config.icon;
+                  const depth = depthByTaskId.get(task.id) || 0;
+                  const isSubtask = depth > 0;
+                  const subtaskCount = (childrenByParent.get(task.id) || []).length;
                   return (
                     <React.Fragment key={task.id}>
-                    <TableRow>
+                    <TableRow className={isSubtask ? "bg-muted/20" : undefined}>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {task.reference_number || "—"}
                       </TableCell>
                       <TableCell>
                         <div
-                          className="cursor-pointer hover:text-primary"
+                          className="cursor-pointer hover:text-primary flex items-start gap-2"
+                          style={{ paddingLeft: depth * 20 }}
                           onClick={() => { setEditingTask(task); setEditDialogOpen(true); }}
                         >
-                          <p className="font-medium">{task.name}</p>
-                          {task.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-1">
-                              {task.description}
-                            </p>
+                          {isSubtask && (
+                            <CornerDownRight className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                           )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{task.name}</p>
+                              {!isSubtask && subtaskCount > 0 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {subtaskCount} subtask{subtaskCount === 1 ? "" : "s"}
+                                </Badge>
+                              )}
+                            </div>
+                            {task.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-1">
+                                {task.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
