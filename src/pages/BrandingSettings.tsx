@@ -405,7 +405,80 @@ export default function BrandingSettings() {
               </div>
             </div>
 
-            {/* App Name & Tagline */}
+            {/* Custom Logo Sizing — per placement */}
+            <div className="metric-card">
+              <h3 className="text-lg font-semibold mb-1">Custom Logo Sizing</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Set width and height (in pixels) per placement. Leave blank to inherit the
+                {selectedOrg === "global" ? " hard-coded" : " platform default"} size.
+                Width and height are independent — set only one to preserve aspect ratio.
+              </p>
+              <div className="space-y-5">
+                {([
+                  { key: "header", label: "Header (top bar)", defaults: "auto × 56" },
+                  { key: "login", label: "Login page", defaults: "auto × 96" },
+                  { key: "email", label: "Email header", defaults: "auto × 48" },
+                ] as const).map((p) => {
+                  const wKey = `logo_${p.key}_width` as const;
+                  const hKey = `logo_${p.key}_height` as const;
+                  const w = (branding as any)[wKey] as number | null;
+                  const h = (branding as any)[hKey] as number | null;
+                  return (
+                    <div key={p.key} className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-3 items-end pb-3 border-b border-border last:border-0">
+                      <div>
+                        <Label className="text-sm">{p.label}</Label>
+                        <p className="text-xs text-muted-foreground">Default: {p.defaults} px</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Width (px)</Label>
+                        <Input
+                          type="number"
+                          min={4}
+                          max={512}
+                          placeholder="auto"
+                          value={w ?? ""}
+                          onChange={(e) =>
+                            update(wKey as any, e.target.value === "" ? null : Math.max(4, Math.min(512, Number(e.target.value))))
+                          }
+                          className="w-24"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Height (px)</Label>
+                        <Input
+                          type="number"
+                          min={4}
+                          max={512}
+                          placeholder="auto"
+                          value={h ?? ""}
+                          onChange={(e) =>
+                            update(hKey as any, e.target.value === "" ? null : Math.max(4, Math.min(512, Number(e.target.value))))
+                          }
+                          className="w-24"
+                        />
+                      </div>
+                      <div className="flex items-center justify-center min-w-[80px] min-h-[60px] rounded border border-border bg-muted/30 p-2">
+                        {(signedLogoUrl || branding.logo_url) ? (
+                          <img
+                            src={signedLogoUrl || branding.logo_url}
+                            alt="preview"
+                            style={{
+                              width: w ? `${w}px` : "auto",
+                              height: h ? `${h}px` : "auto",
+                              maxWidth: "120px",
+                              maxHeight: "80px",
+                              objectFit: "contain",
+                            }}
+                          />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No logo</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <div className="metric-card">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Type className="h-5 w-5 text-primary" /> Application Identity
