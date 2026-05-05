@@ -111,15 +111,17 @@ export function AssignUserAccessDialog({ onSuccess, presetUserId, presetUserLabe
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser || !selectedEntity || !selectedRole) {
+    const effectiveUserId = presetUserId
+      ? presetUserId
+      : users.find((u) => u.id === selectedUser)?.user_id;
+    if (!effectiveUserId || !selectedEntity || !selectedRole) {
       toast.error("Select a user, an entity, and a role from the catalog");
       return;
     }
 
     setLoading(true);
     try {
-      const user = users.find((u) => u.id === selectedUser);
-      if (!user) throw new Error("User not found");
+      const user = { user_id: effectiveUserId };
 
       let error;
       if (scope === "organization") {
