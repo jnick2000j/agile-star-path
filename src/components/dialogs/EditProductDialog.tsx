@@ -31,6 +31,7 @@ interface Product {
   project_id?: string | null;
   product_owner_id?: string | null;
   timesheets_enabled?: boolean;
+  sponsor?: string | null;
 }
 
 interface EditProductDialogProps {
@@ -67,6 +68,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
     launch_date: product.launch_date || "",
     product_owner_id: product.product_owner_id || "",
     timesheets_enabled: product.timesheets_enabled ?? true,
+    sponsor: product.sponsor || "",
   });
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
         launch_date: product.launch_date || "",
         product_owner_id: product.product_owner_id || "",
         timesheets_enabled: product.timesheets_enabled ?? true,
+        sponsor: product.sponsor || "",
       });
       Promise.all([
         supabase.from("organizations").select("id, name").order("name"),
@@ -127,6 +130,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
           launch_date: formData.launch_date || null,
           product_owner_id: formData.product_owner_id || null,
           timesheets_enabled: formData.timesheets_enabled,
+          sponsor: formData.sponsor || null,
         })
         .eq("id", product.id);
       if (error) throw error;
@@ -289,6 +293,21 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
             <div>
               <Label>Revenue Target</Label>
               <Input value={formData.revenue_target} onChange={(e) => setFormData({ ...formData, revenue_target: e.target.value })} disabled={!canEdit} />
+            </div>
+            <div>
+              <Label>Sponsor</Label>
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })} disabled={!canEdit}>
+                <SelectTrigger><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                  {formData.sponsor && !teamMembers.some((m) => m.user_id === formData.sponsor) && (
+                    <SelectItem value={formData.sponsor}>{formData.sponsor} (legacy)</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div className="sm:col-span-2 flex items-center justify-between rounded-lg border p-3">
               <div className="space-y-0.5">
