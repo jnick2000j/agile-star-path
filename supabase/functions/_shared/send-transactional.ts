@@ -27,11 +27,22 @@ interface SendArgs {
   text?: string;
   /** Friendly label shown in email logs. Defaults to "transactional". */
   label?: string;
+  /**
+   * Logical trigger key used for admin on/off toggles
+   * (see public.email_trigger_settings). When provided alongside
+   * `organizationId`, the helper checks `is_email_trigger_enabled` first
+   * and short-circuits without sending if the trigger is disabled.
+   */
+  triggerKey?: string;
+  /** Org context for the trigger gate. Required when triggerKey is set. */
+  organizationId?: string | null;
 }
 
 interface SendResult {
   ok: boolean;
   error?: string;
+  /** True when the send was skipped because the trigger is admin-disabled. */
+  skipped?: boolean;
 }
 
 function htmlToText(html: string): string {
