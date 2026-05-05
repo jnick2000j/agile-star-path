@@ -301,16 +301,19 @@ export function EmailTemplatesPanel() {
   }
 
   // Live preview — branded shell mock
-  const renderPreview = (text: string) =>
-    text
-      .replaceAll("{{user_name}}", "Jane Doe")
-      .replaceAll("{{org_name}}", currentOrganization?.name || "Acme Corp")
-      .replaceAll("{{site_name}}", "The TaskMaster")
-      .replaceAll("{{action_url}}", "#")
-      .replaceAll("{{otp_code}}", "428193")
-      .replaceAll("{{task_title}}", "Review Q2 risk register")
-      .replaceAll("{{programme_name}}", "Digital Transformation")
-      .replaceAll("{{document_title}}", "Stage 3 Exception Report");
+  const renderPreview = (text: string) => {
+    const map: Record<string, string> = {
+      user_name: "Jane Doe",
+      org_name: currentOrganization?.name || "Acme Corp",
+      site_name: "The TaskMaster",
+      action_url: "#",
+      otp_code: "428193",
+      task_title: "Review Q2 risk register",
+      programme_name: "Digital Transformation",
+      document_title: "Stage 3 Exception Report",
+    };
+    return text.replace(/\{\{(\w+)\}\}/g, (_, k) => map[k] ?? `{{${k}}}`);
+  };
 
   if (loading) {
     return (
