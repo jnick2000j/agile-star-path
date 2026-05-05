@@ -396,7 +396,14 @@ export default function Auth() {
           <img
             src={branding!.logo_url!}
             alt={appName}
-            className={logoOnly ? "max-h-20 w-auto object-contain" : `${logoSizeClasses[branding?.logo_size || "small"]} object-contain`}
+            style={customLogoStyle ?? undefined}
+            className={
+              customLogoStyle
+                ? ""
+                : logoOnly
+                  ? "max-h-20 w-auto object-contain"
+                  : `${logoSizeClasses[branding?.logo_size || "small"]} object-contain`
+            }
           />
         ) : (
           <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
