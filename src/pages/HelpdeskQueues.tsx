@@ -275,6 +275,28 @@ function QueueDialog({ orgId, profiles, existing, onClose }: { orgId?: string; p
             </SelectContent>
           </Select>
         </div>
+        <div className="border-t pt-3 space-y-3">
+          <div>
+            <Label className="text-sm font-semibold">Email overrides (optional)</Label>
+            <p className="text-xs text-muted-foreground">
+              Override the From / Reply-To used when this queue notifies people. Leave blank to use the org default.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>From name</Label>
+              <Input value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="Tier 1 Support" />
+            </div>
+            <div>
+              <Label>From address</Label>
+              <Input type="email" value={fromAddress} onChange={(e) => setFromAddress(e.target.value)} placeholder="tier1@yourcompany.com" />
+            </div>
+          </div>
+          <div>
+            <Label>Reply-To address</Label>
+            <Input type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="tier1@yourcompany.com" />
+          </div>
+        </div>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>Cancel</Button>
