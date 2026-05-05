@@ -106,10 +106,17 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       return;
     }
 
+    if (formData.organization_id && !formData.custom_role_id && !formData.create_as_platform_admin) {
+      toast.error("Select a role from the catalog for this user.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const fullName = `${formData.first_name} ${formData.last_name}`.trim();
+      const selectedRole = roles.find((r) => r.id === formData.custom_role_id);
+      const derivedAccessLevel = deriveAccessLevel(selectedRole?.name);
 
       // Create user via the manage-user edge function (uses admin API)
       const { data, error } = await supabase.functions.invoke("manage-user", {
@@ -120,13 +127,28 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           full_name: fullName || formData.email.split('@')[0],
           redirect_to: `${window.location.origin}/auth`,
           organization_id: formData.organization_id || null,
-          access_level: formData.access_level,
+          access_level: derivedAccessLevel,
           create_as_platform_admin: formData.create_as_platform_admin,
         },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // Assign the catalog role at organization scope
+      if (data?.user_id && formData.organization_id && formData.custom_role_id && !formData.create_as_platform_admin) {
+        const { error: roleErr } = await supabase
+          .from("user_organization_custom_roles")
+          .upsert(
+            {
+              user_id: data.user_id,
+              organization_id: formData.organization_id,
+              custom_role_id: formData.custom_role_id,
+            },
+            { onConflict: "user_id,organization_id,custom_role_id" }
+          );
+        if (roleErr) console.error("Failed to assign role:", roleErr);
+      }
 
       // Update the profile with additional info after a short delay
       if (data?.user_id) {
