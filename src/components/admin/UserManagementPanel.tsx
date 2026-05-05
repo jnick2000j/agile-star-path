@@ -135,6 +135,7 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
         location: profile.location,
         department: profile.department,
         archived: profile.archived || false,
+        account_status: (profile.account_status as "pending" | "active") || "pending",
         job_title: profile.job_title || null,
         highest_access: highestAccessMap[profile.user_id] || null,
         custom_roles: customRolesMap[profile.user_id] || [],
