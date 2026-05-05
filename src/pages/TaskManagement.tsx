@@ -59,6 +59,8 @@ import {
   Trash2,
   Copy,
   Repeat,
+  CornerDownRight,
+  Plus as PlusIcon,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -163,6 +165,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     entity_type: "project",
     entity_id: "",
     work_package_id: "",
+    parent_task_id: "",
     planned_start: "",
     planned_end: "",
     estimated_hours: "",
@@ -288,6 +291,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
         programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
         work_package_id: data.work_package_id || null,
+        parent_task_id: data.parent_task_id || null,
       });
       if (error) throw error;
     },
@@ -303,6 +307,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
         entity_type: "project",
         entity_id: "",
         work_package_id: "",
+        parent_task_id: "",
         planned_start: "",
         planned_end: "",
         estimated_hours: "",
@@ -399,13 +404,47 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   });
 
   // Filter tasks
-  const filteredTasks = tasks.filter((task) => {
+  const matchesFilters = (task: Task) => {
     if (statusFilter !== "all" && task.status !== statusFilter) return false;
     if (entityFilter === "project" && !task.project_id) return false;
     if (entityFilter === "program" && !task.programme_id) return false;
     if (entityFilter === "product" && !task.product_id) return false;
     return true;
-  });
+  };
+
+  // Group: render parents (or orphan subtasks whose parent is filtered out) followed by their subtasks
+  const tasksById = new Map(tasks.map((t) => [t.id, t]));
+  const childrenByParent = new Map<string, Task[]>();
+  for (const t of tasks) {
+    if (t.parent_task_id) {
+      const arr = childrenByParent.get(t.parent_task_id) || [];
+      arr.push(t);
+      childrenByParent.set(t.parent_task_id, arr);
+    }
+  }
+  const filteredTasksFlat: Array<{ task: Task; depth: number }> = [];
+  const seen = new Set<string>();
+  // Top-level first: tasks without a parent (or whose parent is missing)
+  for (const t of tasks) {
+    const isTopLevel = !t.parent_task_id || !tasksById.has(t.parent_task_id);
+    if (!isTopLevel) continue;
+    const childMatches = (childrenByParent.get(t.id) || []).some(matchesFilters);
+    if (!matchesFilters(t) && !childMatches) continue;
+    filteredTasksFlat.push({ task: t, depth: 0 });
+    seen.add(t.id);
+    for (const child of childrenByParent.get(t.id) || []) {
+      if (!matchesFilters(child)) continue;
+      filteredTasksFlat.push({ task: child, depth: 1 });
+      seen.add(child.id);
+    }
+  }
+  // Any matching subtasks whose parent didn't render (e.g. parent filtered out and we still want the child shown)
+  for (const t of tasks) {
+    if (seen.has(t.id)) continue;
+    if (matchesFilters(t)) filteredTasksFlat.push({ task: t, depth: 0 });
+  }
+  const filteredTasks = filteredTasksFlat.map((x) => x.task);
+  const depthByTaskId = new Map(filteredTasksFlat.map((x) => [x.task.id, x.depth]));
 
   // Calculate stats
   const stats = {
@@ -441,6 +480,23 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   const getWorkPackageName = (workPackageId: string | null) => {
     if (!workPackageId) return null;
     return workPackages.find((wp) => wp.id === workPackageId)?.name || null;
+  };
+
+  const openCreateSubtaskFor = (parent: Task) => {
+    setFormData({
+      name: "",
+      description: "",
+      priority: parent.priority,
+      status: "not_started",
+      entity_type: parent.project_id ? "project" : parent.programme_id ? "program" : parent.product_id ? "product" : "project",
+      entity_id: parent.project_id || parent.programme_id || parent.product_id || "",
+      work_package_id: parent.work_package_id || "",
+      parent_task_id: parent.id,
+      planned_start: "",
+      planned_end: "",
+      estimated_hours: "",
+    });
+    setDialogOpen(true);
   };
 
   const content = (
@@ -544,14 +600,18 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setFormData((f) => ({ ...f, parent_task_id: "" }))}>
               <Plus className="h-4 w-4 mr-2" />
               New Task
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create New Task</DialogTitle>
+              <DialogTitle>
+                {formData.parent_task_id
+                  ? `Create Subtask of: ${tasks.find((t) => t.id === formData.parent_task_id)?.name || ""}`
+                  : "Create New Task"}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
@@ -630,6 +690,30 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                   </Select>
                 </div>
               )}
+              <div>
+                <label className="text-sm font-medium">Parent Task (Optional)</label>
+                <Select
+                  value={formData.parent_task_id || "none"}
+                  onValueChange={(v) => setFormData({ ...formData, parent_task_id: v === "none" ? "" : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="No parent — top-level task" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No parent (top-level task)</SelectItem>
+                    {tasks
+                      .filter((t) => !t.parent_task_id)
+                      .map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.reference_number ? `${t.reference_number} — ` : ""}{t.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Pick a parent to make this a subtask, or leave empty to create a master task.
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Priority</label>
@@ -726,23 +810,39 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                 filteredTasks.map((task) => {
                   const config = statusConfig[task.status];
                   const StatusIcon = config.icon;
+                  const depth = depthByTaskId.get(task.id) || 0;
+                  const isSubtask = depth > 0;
+                  const subtaskCount = (childrenByParent.get(task.id) || []).length;
                   return (
                     <React.Fragment key={task.id}>
-                    <TableRow>
+                    <TableRow className={isSubtask ? "bg-muted/20" : undefined}>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {task.reference_number || "—"}
                       </TableCell>
                       <TableCell>
                         <div
-                          className="cursor-pointer hover:text-primary"
+                          className="cursor-pointer hover:text-primary flex items-start gap-2"
+                          style={{ paddingLeft: depth * 20 }}
                           onClick={() => { setEditingTask(task); setEditDialogOpen(true); }}
                         >
-                          <p className="font-medium">{task.name}</p>
-                          {task.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-1">
-                              {task.description}
-                            </p>
+                          {isSubtask && (
+                            <CornerDownRight className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                           )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{task.name}</p>
+                              {!isSubtask && subtaskCount > 0 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {subtaskCount} subtask{subtaskCount === 1 ? "" : "s"}
+                                </Badge>
+                              )}
+                            </div>
+                            {task.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-1">
+                                {task.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -859,6 +959,17 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                               <SelectItem value="cancelled">Cancelled</SelectItem>
                             </SelectContent>
                           </Select>
+                          {!isSubtask && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openCreateSubtaskFor(task)}
+                              title="Add subtask"
+                            >
+                              <PlusIcon className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"

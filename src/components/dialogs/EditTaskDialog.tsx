@@ -44,6 +44,7 @@ interface TaskData {
   risk_id: string | null;
   issue_id: string | null;
   feature_id?: string | null;
+  parent_task_id?: string | null;
   completion_percentage?: number | null;
 }
 
@@ -76,7 +77,23 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
   const [riskId, setRiskId] = useState("");
   const [issueId, setIssueId] = useState("");
   const [featureId, setFeatureId] = useState("");
+  const [parentTaskId, setParentTaskId] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const { data: parentCandidates = [] } = useQuery({
+    queryKey: ["parent-task-candidates", currentOrganization?.id, task?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data } = await supabase
+        .from("tasks")
+        .select("id, name, reference_number, parent_task_id")
+        .eq("organization_id", currentOrganization.id)
+        .is("parent_task_id", null)
+        .order("name");
+      return (data || []).filter((t: any) => t.id !== task?.id);
+    },
+    enabled: open && !!currentOrganization?.id,
+  });
 
   const { data: sprints = [] } = useQuery({
     queryKey: ["sprints-for-task", currentOrganization?.id],
@@ -206,6 +223,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       setRiskId((task as any).risk_id || "");
       setIssueId((task as any).issue_id || "");
       setFeatureId((task as any).feature_id || "");
+      setParentTaskId((task as any).parent_task_id || "");
     }
   }, [task]);
 
@@ -230,6 +248,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       risk_id: riskId || null,
       issue_id: issueId || null,
       feature_id: featureId || null,
+      parent_task_id: parentTaskId || null,
     };
 
     if (status === "completed") {
@@ -441,6 +460,28 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Parent Task</Label>
+            <Select
+              value={parentTaskId || "none"}
+              onValueChange={(v) => setParentTaskId(v === "none" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="No parent — top-level task" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No parent (top-level task)</SelectItem>
+                {parentCandidates.map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.reference_number ? `${p.reference_number} — ` : ""}{p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Make this a subtask of another task, or leave empty to keep it as a master task.
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Sprint</Label>
