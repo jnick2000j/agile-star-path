@@ -12,6 +12,7 @@ import { ModuleGate } from "@/components/billing/ModuleGate";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AuthConfirm from "./pages/AuthConfirm";
 import Profile from "./pages/Profile";
 import Programmes from "./pages/Programmes";
 import ProgrammeDetails from "./pages/ProgrammeDetails";
@@ -154,6 +155,7 @@ const App = () => (
           <PaymentTestModeBanner />
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/confirm" element={<AuthConfirm />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/helpdesk-pricing" element={<HelpdeskPricing />} />
             <Route path="/itsm-pricing" element={<ITSMPricing />} />
