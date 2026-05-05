@@ -38,11 +38,22 @@ interface RoleOption {
   is_system: boolean;
 }
 
+interface ScopedEntity {
+  id: string;
+  name: string;
+  organization_id: string;
+}
+
+type AssignmentScope = "organization" | "programme" | "project" | "product";
+
 export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orgs, setOrgs] = useState<OrgOption[]>([]);
   const [roles, setRoles] = useState<RoleOption[]>([]);
+  const [programmes, setProgrammes] = useState<ScopedEntity[]>([]);
+  const [projects, setProjects] = useState<ScopedEntity[]>([]);
+  const [products, setProducts] = useState<ScopedEntity[]>([]);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -53,6 +64,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     department: "",
     location: "",
     organization_id: "",
+    assignment_scope: "organization" as AssignmentScope,
+    scoped_entity_id: "",
     custom_role_id: "",
     create_as_platform_admin: false,
   });
@@ -68,7 +81,30 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       .from("custom_roles")
       .select("id, name, is_system")
       .order("name")
-      .then(({ data }) => setRoles((data as RoleOption[]) || []));
+      .then(({ data }) => {
+        const list = (data as RoleOption[]) || [];
+        setRoles(list);
+        setFormData((prev) => {
+          if (prev.custom_role_id) return prev;
+          const def = list.find((r) => r.name === "Customer Portal User");
+          return def ? { ...prev, custom_role_id: def.id } : prev;
+        });
+      });
+    supabase
+      .from("programmes")
+      .select("id, name, organization_id")
+      .order("name")
+      .then(({ data }) => setProgrammes((data as ScopedEntity[]) || []));
+    supabase
+      .from("projects")
+      .select("id, name, organization_id")
+      .order("name")
+      .then(({ data }) => setProjects((data as ScopedEntity[]) || []));
+    supabase
+      .from("products")
+      .select("id, name, organization_id")
+      .order("name")
+      .then(({ data }) => setProducts((data as ScopedEntity[]) || []));
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const { data: role } = await supabase
@@ -80,6 +116,16 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       setIsPlatformAdmin(!!role);
     });
   }, [open]);
+
+  const scopedEntities = (): ScopedEntity[] => {
+    if (!formData.organization_id) return [];
+    switch (formData.assignment_scope) {
+      case "programme": return programmes.filter((p) => p.organization_id === formData.organization_id);
+      case "project":   return projects.filter((p) => p.organization_id === formData.organization_id);
+      case "product":   return products.filter((p) => p.organization_id === formData.organization_id);
+      default: return [];
+    }
+  };
 
   const deriveAccessLevel = (roleName?: string): string => {
     if (!roleName) return "viewer";
@@ -111,6 +157,16 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       return;
     }
 
+    if (
+      formData.organization_id &&
+      formData.assignment_scope !== "organization" &&
+      !formData.scoped_entity_id &&
+      !formData.create_as_platform_admin
+    ) {
+      toast.error(`Select a ${formData.assignment_scope} for this assignment.`);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -135,18 +191,38 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Assign the catalog role at organization scope
+      // Assign the catalog role at the chosen scope
       if (data?.user_id && formData.organization_id && formData.custom_role_id && !formData.create_as_platform_admin) {
-        const { error: roleErr } = await supabase
-          .from("user_organization_custom_roles")
-          .upsert(
-            {
-              user_id: data.user_id,
-              organization_id: formData.organization_id,
-              custom_role_id: formData.custom_role_id,
-            },
-            { onConflict: "user_id,organization_id,custom_role_id" }
-          );
+        let roleErr: any = null;
+        if (formData.assignment_scope === "organization") {
+          ({ error: roleErr } = await supabase
+            .from("user_organization_custom_roles")
+            .upsert(
+              { user_id: data.user_id, organization_id: formData.organization_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,organization_id,custom_role_id" }
+            ));
+        } else if (formData.assignment_scope === "programme") {
+          ({ error: roleErr } = await supabase
+            .from("user_programme_custom_roles")
+            .upsert(
+              { user_id: data.user_id, programme_id: formData.scoped_entity_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,programme_id,custom_role_id" }
+            ));
+        } else if (formData.assignment_scope === "project") {
+          ({ error: roleErr } = await supabase
+            .from("user_project_custom_roles")
+            .upsert(
+              { user_id: data.user_id, project_id: formData.scoped_entity_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,project_id,custom_role_id" }
+            ));
+        } else if (formData.assignment_scope === "product") {
+          ({ error: roleErr } = await supabase
+            .from("user_product_custom_roles")
+            .upsert(
+              { user_id: data.user_id, product_id: formData.scoped_entity_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,product_id,custom_role_id" }
+            ));
+        }
         if (roleErr) console.error("Failed to assign role:", roleErr);
       }
 
@@ -189,6 +265,8 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         department: "",
         location: "",
         organization_id: "",
+        assignment_scope: "organization",
+        scoped_entity_id: "",
         custom_role_id: "",
         create_as_platform_admin: false,
       });
@@ -338,6 +416,66 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
                   Manage the catalog under Roles &amp; Access → Role Catalog.
                 </p>
               </div>
+            </div>
+
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="assignment_scope">Assign role at</Label>
+                <Select
+                  value={formData.assignment_scope}
+                  onValueChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      assignment_scope: v as AssignmentScope,
+                      scoped_entity_id: "",
+                    })
+                  }
+                  disabled={formData.create_as_platform_admin}
+                >
+                  <SelectTrigger id="assignment_scope">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="organization">Organization (all)</SelectItem>
+                    <SelectItem value="programme">Specific Programme</SelectItem>
+                    <SelectItem value="project">Specific Project</SelectItem>
+                    <SelectItem value="product">Specific Product</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.assignment_scope !== "organization" && (
+                <div className="space-y-2">
+                  <Label htmlFor="scoped_entity_id" className="capitalize">
+                    {formData.assignment_scope}
+                  </Label>
+                  <Select
+                    value={formData.scoped_entity_id}
+                    onValueChange={(v) => setFormData({ ...formData, scoped_entity_id: v })}
+                    disabled={formData.create_as_platform_admin || !formData.organization_id}
+                  >
+                    <SelectTrigger id="scoped_entity_id">
+                      <SelectValue
+                        placeholder={
+                          formData.organization_id
+                            ? `Select ${formData.assignment_scope}`
+                            : "Select organization first"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {scopedEntities().map((e) => (
+                        <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                      ))}
+                      {scopedEntities().length === 0 && formData.organization_id && (
+                        <div className="px-3 py-2 text-xs text-muted-foreground">
+                          No {formData.assignment_scope}s in this organization.
+                        </div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             {isPlatformAdmin && (
               <label className="flex items-start gap-2 pt-1 text-sm">
