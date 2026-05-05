@@ -52,6 +52,7 @@ export interface UserWithRole {
   location: string | null;
   department: string | null;
   archived: boolean;
+  account_status: "pending" | "active";
   job_title: string | null;
   highest_access: AccessLevel | null;
   custom_roles: UserCustomRoleAssignment[];
