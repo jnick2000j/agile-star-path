@@ -179,9 +179,7 @@ export function Sidebar() {
     },
     { label: "Automations", icon: Workflow, href: "/admin/automations", module: "automations" },
   ];
-  const platformNavigation: (NavItem & { module?: string })[] = userRole === "admin"
-    ? [{ label: "Platform Admin", icon: Crown, href: "/platform-admin" }]
-    : [];
+  const platformNavigation: (NavItem & { module?: string })[] = [];
 
   // Filter navigation by vertical's enabled modules + org-admin module toggles.
   // Items without a `module` key always show. Module toggles default ON when not yet loaded
