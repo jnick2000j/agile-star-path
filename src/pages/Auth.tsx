@@ -109,27 +109,8 @@ export default function Auth() {
 
   const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
-  const orgProvisioningRef = useRef<Promise<string | null> | null>(null);
 
-  const provisionFirstOrganization = useCallback(async (name: string) => {
-    const trimmedName = name.trim();
-    if (!trimmedName) return null;
-    if (!orgProvisioningRef.current) {
-      orgProvisioningRef.current = Promise.resolve(
-        supabase.rpc("create_org_for_new_user", { _org_name: trimmedName })
-      )
-        .then(({ data, error }) => {
-          if (error) throw error;
-          if (data) localStorage.setItem("currentOrganizationId", data as string);
-          return (data as string | null) ?? null;
-        })
-        .catch((error) => {
-          orgProvisioningRef.current = null;
-          throw error;
-        });
-    }
-    return orgProvisioningRef.current;
-  }, []);
+
 
   useEffect(() => {
     if (!user) return;
