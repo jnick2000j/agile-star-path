@@ -199,6 +199,18 @@ export function EmailSettings() {
                 onChange={(e) => setFromAddress(e.target.value)}
               />
             </div>
+          <div className="space-y-2">
+            <Label htmlFor="reply-to">Reply-To address</Label>
+            <Input
+              id="reply-to"
+              type="email"
+              placeholder="support@yourcompany.com"
+              value={replyTo}
+              onChange={(e) => setReplyTo(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional. When set, recipient replies are routed here instead of the From address. Helpdesk queues can override this per queue.
+            </p>
           </div>
 
           {transport === "smtp" && (
