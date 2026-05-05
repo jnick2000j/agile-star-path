@@ -38,6 +38,9 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
 
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    global: {
+      headers: { Authorization: `Bearer ${serviceKey}` },
+    },
   });
 
   try {
@@ -53,6 +56,7 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
             html: args.html,
           },
         },
+        headers: { Authorization: `Bearer ${serviceKey}` },
       },
     );
     if (error) {
