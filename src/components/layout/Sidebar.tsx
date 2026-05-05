@@ -28,6 +28,7 @@ import {
   Star,
   StarOff,
   GraduationCap,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVertical } from "@/hooks/useVertical";
@@ -178,6 +179,9 @@ export function Sidebar() {
     },
     { label: "Automations", icon: Workflow, href: "/admin/automations", module: "automations" },
   ];
+  const platformNavigation: (NavItem & { module?: string })[] = userRole === "admin"
+    ? [{ label: "Platform Admin", icon: Crown, href: "/platform-admin" }]
+    : [];
 
   // Filter navigation by vertical's enabled modules + org-admin module toggles.
   // Items without a `module` key always show. Module toggles default ON when not yet loaded
@@ -200,7 +204,7 @@ export function Sidebar() {
     if (v === undefined || v === null) return true;
     return v === true || v === "true";
   };
-  const baseNavigation = allNavigation.filter((item) => isModuleEnabled(item.module));
+  const baseNavigation = [...allNavigation, ...platformNavigation].filter((item) => isModuleEnabled(item.module));
 
   // Apply per-org helpdesk module toggles to the Helpdesk subtree.
   const { isEnabled: isHelpdeskModuleEnabled } = useModuleToggles();
