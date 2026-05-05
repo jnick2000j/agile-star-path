@@ -134,7 +134,12 @@ export function EmailSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="settings" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="templates">Templates</TabsTrigger>
+      </TabsList>
+      <TabsContent value="settings" className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
