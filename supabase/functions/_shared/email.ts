@@ -39,6 +39,13 @@ export interface SendEmailOptions {
   organizationId?: string;
   /** Override transport selection. */
   transport?: EmailTransport;
+  /**
+   * Logical trigger key used by the admin email-trigger toggles
+   * (public.email_trigger_settings). When set together with
+   * `organizationId`, the send is short-circuited (skipped) if an admin
+   * has disabled this trigger for that org.
+   */
+  triggerKey?: string;
 }
 
 export interface SendEmailResult {
@@ -46,6 +53,8 @@ export interface SendEmailResult {
   transport: EmailTransport;
   messageId?: string;
   error?: string;
+  /** True when the send was skipped because the trigger is admin-disabled. */
+  skipped?: boolean;
 }
 
 function envTransport(): EmailTransport {
