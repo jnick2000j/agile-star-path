@@ -14746,6 +14746,48 @@ export type Database = {
           },
         ]
       }
+      user_product_custom_roles: {
+        Row: {
+          custom_role_id: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          custom_role_id: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          custom_role_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_product_custom_roles_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_product_custom_roles_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_programme_access: {
         Row: {
           access_level: string
@@ -14778,6 +14820,48 @@ export type Database = {
           },
         ]
       }
+      user_programme_custom_roles: {
+        Row: {
+          custom_role_id: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          programme_id: string
+          user_id: string
+        }
+        Insert: {
+          custom_role_id: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          programme_id: string
+          user_id: string
+        }
+        Update: {
+          custom_role_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          programme_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_programme_custom_roles_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_programme_custom_roles_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_project_access: {
         Row: {
           access_level: string
@@ -14803,6 +14887,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_project_access_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_project_custom_roles: {
+        Row: {
+          custom_role_id: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          custom_role_id: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          custom_role_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_project_custom_roles_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_project_custom_roles_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
