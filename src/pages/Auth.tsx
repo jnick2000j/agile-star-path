@@ -261,14 +261,11 @@ export default function Auth() {
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
     if (!error) {
-      try {
-        if (mode === "signup" && orgName.trim()) {
-          await provisionFirstOrganization(orgName.trim());
-        }
-        navigate("/");
-      } catch (err: any) {
-        toast.error(err.message || "Failed to create organization");
-      }
+      // Don't auto-provision the org here — the post-auth effect routes
+      // brand-new users to /onboarding where the full wizard (intent →
+      // vertical → org name → invite → plan) collects everything properly.
+      // The org_name captured during signup is preserved in user_metadata
+      // and the wizard pre-fills it.
     }
     setLoading(false);
   };
