@@ -52,6 +52,7 @@ export function EmailSettings() {
   const [transport, setTransport] = useState<Transport>("lovable");
   const [fromAddress, setFromAddress] = useState("");
   const [fromName, setFromName] = useState("");
+  const [replyTo, setReplyTo] = useState("");
   const [testRecipient, setTestRecipient] = useState("");
 
   useEffect(() => {
