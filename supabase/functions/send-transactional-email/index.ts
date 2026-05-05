@@ -301,11 +301,18 @@ Deno.serve(async (req) => {
     resolvedSubject = override.subject
     console.log('Transactional email using org override', { templateName, organizationId })
   } else {
-    html = await renderAsync(React.createElement(template.component, templateData))
-    plainText = await renderAsync(
-      React.createElement(template.component, templateData),
-      { plainText: true }
+    const brand = await resolveEmailBranding(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      organizationId,
     )
+    const wrapped = React.createElement(
+      BrandContext.Provider,
+      { value: brand },
+      React.createElement(template.component, templateData),
+    )
+    html = await renderAsync(wrapped)
+    plainText = await renderAsync(wrapped, { plainText: true })
     resolvedSubject =
       typeof template.subject === 'function'
         ? template.subject(templateData)
