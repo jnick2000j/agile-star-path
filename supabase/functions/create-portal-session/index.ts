@@ -47,10 +47,17 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!sub?.stripe_customer_id) {
-      return new Response(JSON.stringify({ error: "No subscription found for this organization" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Return 200 so the client receives the JSON body. supabase.functions.invoke
+      // discards the body on non-2xx responses, which would prevent the UI from
+      // showing a friendly "no subscription yet" message.
+      return new Response(
+        JSON.stringify({
+          error: "No subscription found for this organization",
+          fallback: true,
+          code: "no_subscription",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const stripe = createStripeClient(env);
