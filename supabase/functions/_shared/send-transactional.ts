@@ -7,6 +7,7 @@
 // (process-email-queue) processes both auth and transactional queues.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { tryRenderOrgOverride } from "./email-overrides.tsx";
 
 // Baked in at email scaffold time. Keep these in sync with
 // supabase/functions/send-transactional-email/index.ts.
@@ -40,6 +41,15 @@ interface SendArgs {
   from?: string;
   /** Optional Reply-To address. */
   replyTo?: string;
+  /**
+   * If set together with `organizationId`, looks up the per-org copy override
+   * for this template_key (matching the editor in EmailTemplatesPanel) and,
+   * when enabled, replaces `subject` + `html` + `text` with the override
+   * rendering. `templateData` is used for {{var}} substitution.
+   */
+  templateKey?: string;
+  /** Variables substituted into override copy ({{user_name}} etc). */
+  templateData?: Record<string, unknown>;
 }
 
 interface SendResult {
@@ -82,8 +92,31 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
   });
 
   const messageId = args.idempotencyKey;
-  const text = args.text ?? htmlToText(args.html);
+  let subject = args.subject;
+  let html = args.html;
+  let text = args.text ?? htmlToText(args.html);
   const label = args.label ?? "transactional";
+
+  // Per-org copy override (matches EmailTemplatesPanel editor).
+  if (args.templateKey && args.organizationId) {
+    try {
+      const rendered = await tryRenderOrgOverride(
+        args.organizationId,
+        args.templateKey,
+        args.templateData ?? {},
+      );
+      if (rendered) {
+        subject = rendered.subject;
+        html = rendered.html;
+        text = rendered.text;
+        console.log(
+          `applied org override '${args.templateKey}' for org ${args.organizationId}`,
+        );
+      }
+    } catch (e) {
+      console.warn("org override render failed; falling back to default:", e);
+    }
+  }
 
   // Admin trigger gate: if a triggerKey + organizationId is provided and the
   // trigger is disabled for that org, do not send and do not log.
@@ -152,8 +185,8 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
         from: args.from ?? `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
         reply_to: args.replyTo ?? undefined,
         sender_domain: SENDER_DOMAIN,
-        subject: args.subject,
-        html: args.html,
+        subject,
+        html,
         text,
         purpose: "transactional",
         label,

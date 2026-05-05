@@ -178,6 +178,13 @@ Deno.serve(async (req) => {
       label: "user-invite",
       triggerKey: "user_invite",
       organizationId: organization_id,
+      templateKey: "organization-invite",
+      templateData: {
+        user_name: email.split("@")[0],
+        org_name: org?.name || "their organization",
+        site_name: "The TaskMaster",
+        action_url: acceptUrl,
+      },
     });
     emailSent = result.ok;
     if (!result.ok) console.error("send-invite email failed:", result.error);
