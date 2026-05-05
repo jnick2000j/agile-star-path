@@ -282,17 +282,18 @@ export default function Auth() {
   const handleResendCode = async () => {
     if (resendCooldown > 0 || resending) return;
     setResending(true);
-    const { error } = await requestEmailOtp(email, {
-      firstName: mode === "signup" ? firstName : undefined,
-      lastName: mode === "signup" ? lastName : undefined,
-      fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
-      orgName: mode === "signup" ? orgName.trim() : undefined,
-      shouldCreateUser: mode === "signup",
-    });
+    if (mode === "signup") {
+      await requestSignupConfirmation(email, {
+        firstName,
+        lastName,
+        fullName: `${firstName} ${lastName}`.trim(),
+        orgName: orgName.trim(),
+      });
+    } else {
+      await requestEmailOtp(email, { shouldCreateUser: false });
+    }
     setResending(false);
-    // Always start cooldown — even on error — to prevent hammering Supabase's rate limiter.
     setResendCooldown(60);
-    void error;
   };
 
   const handleOAuth = async (provider: "google" | "apple") => {
