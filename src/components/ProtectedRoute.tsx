@@ -43,7 +43,7 @@ function isPortalAllowedPath(pathname: string): boolean {
 }
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-  const { user, loading, userRole } = useAuth();
+  const { user, loading, roleLoading, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
   const location = useLocation();
   const [orgCheck, setOrgCheck] = useState<"checking" | "has" | "none">("checking");
@@ -98,7 +98,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
       });
   }, [user, currentOrganization?.id]);
 
-  if (loading || (user && orgCheck === "checking")) {
+  if (loading || (user && (roleLoading || orgCheck === "checking"))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -111,12 +111,12 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
 
   // Send users without an org to onboarding (except when they're already there)
-  if (orgCheck === "none" && location.pathname !== "/onboarding" && location.pathname !== "/accept-invite") {
+  if (orgCheck === "none" && userRole !== "admin" && location.pathname !== "/onboarding" && location.pathname !== "/accept-invite") {
     return <Navigate to="/onboarding" replace />;
   }
 
-  if (requiredRoles && requiredRoles.length > 0 && userRole) {
-    if (!requiredRoles.includes(userRole)) {
+  if (requiredRoles && requiredRoles.length > 0) {
+    if (!userRole || !requiredRoles.includes(userRole)) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
