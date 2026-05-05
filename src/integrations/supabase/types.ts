@@ -10441,6 +10441,7 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string
+          job_title: string | null
           last_name: string | null
           location: string | null
           mailing_address: string | null
@@ -10466,6 +10467,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id?: string
+          job_title?: string | null
           last_name?: string | null
           location?: string | null
           mailing_address?: string | null
@@ -10491,6 +10493,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id?: string
+          job_title?: string | null
           last_name?: string | null
           location?: string | null
           mailing_address?: string | null
