@@ -64,6 +64,11 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       .select("id, name")
       .order("name")
       .then(({ data }) => setOrgs((data as OrgOption[]) || []));
+    supabase
+      .from("custom_roles")
+      .select("id, name, is_system")
+      .order("name")
+      .then(({ data }) => setRoles((data as RoleOption[]) || []));
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const { data: role } = await supabase
@@ -75,6 +80,13 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       setIsPlatformAdmin(!!role);
     });
   }, [open]);
+
+  const deriveAccessLevel = (roleName?: string): string => {
+    if (!roleName) return "viewer";
+    if (roleName === "Org Admin") return "admin";
+    if (roleName === "Org Editor") return "editor";
+    return "viewer";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
