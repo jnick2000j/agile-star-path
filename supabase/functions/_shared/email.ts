@@ -139,7 +139,10 @@ export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult
       if (!url || !key) {
         return { ok: false, transport: "lovable", error: "Lovable transport requires SUPABASE_URL and service role key" };
       }
-      const sb = createClient(url, key);
+      const sb = createClient(url, key, {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: `Bearer ${key}` } },
+      });
       // One invocation per recipient (transactional 1:1 model)
       const errors: string[] = [];
       for (const to of recipients) {
@@ -152,6 +155,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult
             templateData: { subject, html: html || `<p>${text}</p>`, text },
             subject,
           },
+          headers: { Authorization: `Bearer ${key}` },
         });
         if (error) {
           const msg = (error.message || "").toLowerCase();
