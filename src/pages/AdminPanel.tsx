@@ -469,7 +469,6 @@ export default function AdminPanel() {
                               </div>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="admin">Platform Administrator</SelectItem>
                               <SelectItem value="org_admin">Org Administrator</SelectItem>
                               <SelectItem value="programme_owner">Program Owner</SelectItem>
                               <SelectItem value="project_manager">Project Manager</SelectItem>
