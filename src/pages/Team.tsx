@@ -15,7 +15,9 @@ import {
   Loader2,
   ShieldOff,
   ShieldCheck,
+  KeyRound,
 } from "lucide-react";
+import { SystemRoleAssignmentsPanel } from "@/components/team/SystemRoleAssignmentsPanel";
 import { cn } from "@/lib/utils";
 import {
   Popover,
