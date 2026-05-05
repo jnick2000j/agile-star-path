@@ -85,6 +85,7 @@ export async function resolveEmailBranding(
 
     return {
       siteName,
+      tagline,
       logoUrl,
       logoWidth,
       logoHeight,
