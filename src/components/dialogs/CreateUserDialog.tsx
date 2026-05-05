@@ -317,22 +317,26 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="access_level">Access level</Label>
+                <Label htmlFor="custom_role_id">Role (from catalog)</Label>
                 <Select
-                  value={formData.access_level}
-                  onValueChange={(v) => setFormData({ ...formData, access_level: v })}
+                  value={formData.custom_role_id}
+                  onValueChange={(v) => setFormData({ ...formData, custom_role_id: v })}
                   disabled={formData.create_as_platform_admin}
                 >
-                  <SelectTrigger id="access_level">
-                    <SelectValue />
+                  <SelectTrigger id="custom_role_id">
+                    <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                    <SelectItem value="editor">Editor</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Org Admin</SelectItem>
+                    {roles.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}{r.is_system ? "" : " (custom)"}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Manage the catalog under Roles &amp; Access → Role Catalog.
+                </p>
               </div>
             </div>
             {isPlatformAdmin && (
