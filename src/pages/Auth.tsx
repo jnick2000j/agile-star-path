@@ -212,7 +212,10 @@ export default function Auth() {
         orgName: mode === "signup" ? orgName.trim() : undefined,
         shouldCreateUser: mode === "signup",
       });
-      if (!error) setStep("verify");
+      if (!error) {
+        setStep("verify");
+        setResendCooldown(60);
+      }
       setLoading(false);
       return;
     }
