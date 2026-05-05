@@ -168,6 +168,46 @@ Deno.serve(async (req) => {
 
   const idemKey = `helpdesk-${payload.notification_type}-${ticket.id}-${(payload.metadata?.idempotency_suffix ?? Date.now())}`;
 
+  // Resolve From / Reply-To: queue overrides win, then org email_settings.
+  let fromOverride: string | undefined;
+  let replyToOverride: string | undefined;
+  try {
+    let qFromAddr: string | null = null;
+    let qFromName: string | null = null;
+    let qReplyTo: string | null = null;
+    if ((ticket as any).queue_id) {
+      const { data: qrow } = await supabase
+        .from("helpdesk_queues")
+        .select("from_address, from_name, reply_to")
+        .eq("id", (ticket as any).queue_id)
+        .maybeSingle();
+      qFromAddr = qrow?.from_address ?? null;
+      qFromName = qrow?.from_name ?? null;
+      qReplyTo = qrow?.reply_to ?? null;
+    }
+    let oFromAddr: string | null = null;
+    let oFromName: string | null = null;
+    let oReplyTo: string | null = null;
+    if (!qFromAddr || !qReplyTo) {
+      const { data: orow } = await supabase
+        .from("email_settings")
+        .select("from_address, from_name, reply_to")
+        .eq("organization_id", ticket.organization_id)
+        .maybeSingle();
+      oFromAddr = orow?.from_address ?? null;
+      oFromName = orow?.from_name ?? null;
+      oReplyTo = orow?.reply_to ?? null;
+    }
+    const finalAddr = qFromAddr ?? oFromAddr;
+    const finalName = qFromName ?? oFromName;
+    if (finalAddr) {
+      fromOverride = finalName ? `${finalName} <${finalAddr}>` : finalAddr;
+    }
+    replyToOverride = qReplyTo ?? oReplyTo ?? undefined;
+  } catch (e) {
+    console.warn("from/reply-to resolution failed; using defaults", e);
+  }
+
   try {
     const triggerKeyMap: Record<string, string> = {
       reply: "helpdesk_ticket_reply",
@@ -186,6 +226,8 @@ Deno.serve(async (req) => {
       label: `helpdesk-${payload.notification_type}`,
       triggerKey: triggerKeyMap[payload.notification_type],
       organizationId: ticket.organization_id,
+      from: fromOverride,
+      replyTo: replyToOverride,
     });
     if (result.ok) {
       if (logRow?.id) {
