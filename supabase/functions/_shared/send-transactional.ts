@@ -36,6 +36,10 @@ interface SendArgs {
   triggerKey?: string;
   /** Org context for the trigger gate. Required when triggerKey is set. */
   organizationId?: string | null;
+  /** Optional override for the From header (e.g. "Acme Support <support@acme.com>"). */
+  from?: string;
+  /** Optional Reply-To address. */
+  replyTo?: string;
 }
 
 interface SendResult {
@@ -145,7 +149,8 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
         message_id: messageId,
         idempotency_key: messageId,
         to: args.to,
-        from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+        from: args.from ?? `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+        reply_to: args.replyTo ?? undefined,
         sender_domain: SENDER_DOMAIN,
         subject: args.subject,
         html: args.html,

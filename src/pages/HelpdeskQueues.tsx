@@ -214,6 +214,9 @@ function QueueDialog({ orgId, profiles, existing, onClose }: { orgId?: string; p
   const [color, setColor] = useState(existing?.color || "#3b82f6");
   const [priority, setPriority] = useState(existing?.default_priority || "medium");
   const [defaultAssignee, setDefaultAssignee] = useState(existing?.default_assignee_id || "");
+  const [fromAddress, setFromAddress] = useState(existing?.from_address || "");
+  const [fromName, setFromName] = useState(existing?.from_name || "");
+  const [replyTo, setReplyTo] = useState(existing?.reply_to || "");
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -226,6 +229,9 @@ function QueueDialog({ orgId, profiles, existing, onClose }: { orgId?: string; p
       color,
       default_priority: priority,
       default_assignee_id: defaultAssignee || null,
+      from_address: fromAddress.trim() || null,
+      from_name: fromName.trim() || null,
+      reply_to: replyTo.trim() || null,
     };
     const { error } = existing
       ? await (supabase as any).from("helpdesk_queues").update(payload).eq("id", existing.id)
@@ -268,6 +274,28 @@ function QueueDialog({ orgId, profiles, existing, onClose }: { orgId?: string; p
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="border-t pt-3 space-y-3">
+          <div>
+            <Label className="text-sm font-semibold">Email overrides (optional)</Label>
+            <p className="text-xs text-muted-foreground">
+              Override the From / Reply-To used when this queue notifies people. Leave blank to use the org default.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>From name</Label>
+              <Input value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="Tier 1 Support" />
+            </div>
+            <div>
+              <Label>From address</Label>
+              <Input type="email" value={fromAddress} onChange={(e) => setFromAddress(e.target.value)} placeholder="tier1@yourcompany.com" />
+            </div>
+          </div>
+          <div>
+            <Label>Reply-To address</Label>
+            <Input type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="tier1@yourcompany.com" />
+          </div>
         </div>
       </div>
       <DialogFooter>

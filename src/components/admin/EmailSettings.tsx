@@ -19,6 +19,7 @@ interface EmailSettingsRow {
   active_transport: Transport;
   from_address: string | null;
   from_name: string | null;
+  reply_to: string | null;
   last_test_status: string | null;
   last_test_at: string | null;
   last_test_error: string | null;
@@ -51,6 +52,7 @@ export function EmailSettings() {
   const [transport, setTransport] = useState<Transport>("lovable");
   const [fromAddress, setFromAddress] = useState("");
   const [fromName, setFromName] = useState("");
+  const [replyTo, setReplyTo] = useState("");
   const [testRecipient, setTestRecipient] = useState("");
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export function EmailSettings() {
       setTransport(data.active_transport);
       setFromAddress(data.from_address ?? "");
       setFromName(data.from_name ?? "");
+      setReplyTo((data as any).reply_to ?? "");
     }
     setLoading(false);
   }
@@ -86,6 +89,7 @@ export function EmailSettings() {
       active_transport: transport,
       from_address: fromAddress || null,
       from_name: fromName || null,
+      reply_to: replyTo || null,
     };
     const { error } = await (supabase as any)
       .from("email_settings")
@@ -195,6 +199,19 @@ export function EmailSettings() {
                 onChange={(e) => setFromAddress(e.target.value)}
               />
             </div>
+          <div className="space-y-2">
+            <Label htmlFor="reply-to">Reply-To address</Label>
+            <Input
+              id="reply-to"
+              type="email"
+              placeholder="support@yourcompany.com"
+              value={replyTo}
+              onChange={(e) => setReplyTo(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional. When set, recipient replies are routed here instead of the From address. Helpdesk queues can override this per queue.
+            </p>
+          </div>
           </div>
 
           {transport === "smtp" && (
