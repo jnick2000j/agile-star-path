@@ -47,6 +47,7 @@ import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrations
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { PlatformAdminsPanel } from "@/components/platform-admin/PlatformAdminsPanel";
 import { PlatformSettingsPanel } from "@/components/platform-admin/PlatformSettingsPanel";
+import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
@@ -108,7 +109,7 @@ export default function PlatformAdmin() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = [
-    "overview","tenants","platform-admins","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
+    "overview","tenants","users","platform-admins","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
   ];
   const requestedTab = searchParams.get("tab");
   const activeTab = requestedTab && validTabs.includes(requestedTab) ? requestedTab : "overview";
@@ -266,6 +267,7 @@ export default function PlatformAdmin() {
         <TabsList className="bg-secondary flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tenants">Tenant Management</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="platform-admins">Platform Admins</TabsTrigger>
           <TabsTrigger value="licenses">Licenses</TabsTrigger>
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
@@ -461,6 +463,13 @@ export default function PlatformAdmin() {
           </Card>
 
           <SuspensionHistory limit={50} />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <UserManagementPanel
+            heading="Global User Administration"
+            subtitle="Manage every user across all tenants. Edits here apply organization-wide based on the viewer's permissions."
+          />
         </TabsContent>
 
         <TabsContent value="platform-admins">
