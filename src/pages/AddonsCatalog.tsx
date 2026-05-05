@@ -161,7 +161,7 @@ export default function AddonsCatalog() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {addons.map((addon) => {
               const Icon = ICON_MAP[addon.name] || Layers;
               const price = cycle === "monthly" ? addon.price_monthly : addon.price_yearly;
