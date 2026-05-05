@@ -462,6 +462,28 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
             </Select>
           </div>
           <div className="space-y-2">
+            <Label>Parent Task</Label>
+            <Select
+              value={parentTaskId || "none"}
+              onValueChange={(v) => setParentTaskId(v === "none" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="No parent — top-level task" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No parent (top-level task)</SelectItem>
+                {parentCandidates.map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.reference_number ? `${p.reference_number} — ` : ""}{p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Make this a subtask of another task, or leave empty to keep it as a master task.
+            </p>
+          </div>
+          <div className="space-y-2">
             <Label>Sprint</Label>
             <Select value={sprintId || "none"} onValueChange={(v) => setSprintId(v === "none" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder="No sprint" /></SelectTrigger>
