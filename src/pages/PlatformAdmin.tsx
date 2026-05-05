@@ -109,7 +109,7 @@ export default function PlatformAdmin() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = [
-    "overview","tenants","platform-admins","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
+    "overview","tenants","users","platform-admins","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
   ];
   const requestedTab = searchParams.get("tab");
   const activeTab = requestedTab && validTabs.includes(requestedTab) ? requestedTab : "overview";
