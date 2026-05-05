@@ -93,7 +93,7 @@ const RELEASE_TYPES = ["major", "minor", "patch", "hotfix", "preview"];
 
 export default function ProductReleases() {
   const { user } = useAuth();
-  const { organization } = useOrganization();
+  const { currentOrganization: organization } = useOrganization();
   const [products, setProducts] = useState<Product[]>([]);
   const [releases, setReleases] = useState<Release[]>([]);
   const [environments, setEnvironments] = useState<Environment[]>([]);
@@ -157,7 +157,7 @@ export default function ProductReleases() {
   ).length, [filtered]);
 
   return (
-    <AppLayout>
+    <AppLayout title="Software Releases" subtitle="Plan, gate, promote and ship product releases">
       <div className="p-4 md:p-6 space-y-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
