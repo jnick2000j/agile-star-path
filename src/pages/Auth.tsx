@@ -61,7 +61,7 @@ const logoSizeClasses: Record<string, string> = {
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const nameSchema = z.string().min(1, "Name is required");
-const otpSchema = z.string().regex(/^\d{6}$/, "Enter the 6-digit code");
+const otpSchema = z.string().regex(/^\d{6,8}$/, "Enter the verification code");
 
 type AuthMode = "login" | "signup" | "sso";
 type AuthStep = "request" | "verify";
