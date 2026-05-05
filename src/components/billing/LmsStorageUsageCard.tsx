@@ -6,7 +6,7 @@ import { GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
-import { formatCurrency } from "@/lib/currency";
+import { formatPrice } from "@/lib/currency";
 
 interface UsageRow {
   bytes_used: number;
@@ -19,13 +19,13 @@ const BYTES_PER_GB = 1024 * 1024 * 1024;
 
 export function LmsStorageUsageCard() {
   const { currentOrganization } = useOrganization();
-  const { hasFeature, getFeatureValue } = usePlanFeatures();
+  const { hasFeature, getLimit } = usePlanFeatures();
   const [usage, setUsage] = useState<UsageRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   const lmsOn = hasFeature("feature_lms");
-  const includedGb = Number(getFeatureValue("lms_storage_included_gb") ?? 5);
-  const perGbCents = Number(getFeatureValue("lms_storage_overage_per_gb_cents") ?? 25);
+  const includedGb = getLimit("lms_storage_included_gb") || 5;
+  const perGbCents = getLimit("lms_storage_overage_per_gb_cents") || 25;
 
   useEffect(() => {
     if (!currentOrganization?.id || !lmsOn) {
@@ -102,7 +102,7 @@ export function LmsStorageUsageCard() {
                 {" "}
                 — projected overage this month:{" "}
                 <span className="text-foreground font-medium">
-                  {formatCurrency(monthlyOverageCents / 100)}
+                  {formatPrice("USD", monthlyOverageCents / 100)}
                 </span>
               </span>
             </div>
