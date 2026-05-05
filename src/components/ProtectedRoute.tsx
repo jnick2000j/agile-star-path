@@ -116,7 +116,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
 
   if (requiredRoles && requiredRoles.length > 0) {
-    if (!requiredRoles.includes(userRole)) {
+    if (!userRole || !requiredRoles.includes(userRole)) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
