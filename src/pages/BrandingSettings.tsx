@@ -82,6 +82,13 @@ interface BrandingState {
   form_text_color: string;
   app_name_color: string;
   tagline_color: string;
+  // Per-placement custom logo sizing (px). null = inherit platform default.
+  logo_header_width: number | null;
+  logo_header_height: number | null;
+  logo_login_width: number | null;
+  logo_login_height: number | null;
+  logo_email_width: number | null;
+  logo_email_height: number | null;
 }
 
 const defaultBranding: BrandingState = {
