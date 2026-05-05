@@ -274,48 +274,37 @@ export default function AdminPanel() {
 
         <TabsContent value="users">
           {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-5 mb-6">
-            <div className="metric-card">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Crown className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold">{roleCounts.admin}</p>
-                  <p className="text-sm text-muted-foreground">Admins</p>
-                </div>
-              </div>
-            </div>
-            <div className="metric-card">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                  <Briefcase className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold">{roleCounts.programme_owner}</p>
-                  <p className="text-sm text-muted-foreground">Program Owners</p>
-                </div>
-              </div>
-            </div>
-            <div className="metric-card">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-                  <UserCog className="h-5 w-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold">{roleCounts.project_manager}</p>
-                  <p className="text-sm text-muted-foreground">Project Managers</p>
-                </div>
-              </div>
-            </div>
+          <div className="grid gap-4 md:grid-cols-4 mb-6">
             <div className="metric-card">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                   <Users className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-2xl font-semibold">{roleCounts.org_stakeholder}</p>
-                  <p className="text-sm text-muted-foreground">Stakeholders</p>
+                  <p className="text-2xl font-semibold">{totalActive}</p>
+                  <p className="text-sm text-muted-foreground">Total Members</p>
+                </div>
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Crown className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold">{orgAdminCount}</p>
+                  <p className="text-sm text-muted-foreground">Org Admins</p>
+                </div>
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                  <Tag className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold">{withCustomRoleCount}</p>
+                  <p className="text-sm text-muted-foreground">With Custom Role</p>
                 </div>
               </div>
             </div>
