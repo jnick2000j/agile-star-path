@@ -203,9 +203,10 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin = userRole === "admin";
+  const isOrgAdmin = userRole === "org_admin";
 
   const canManage = (entity: string): boolean => {
-    if (isAdmin) return true;
+    if (isAdmin || isOrgAdmin) return true;
     if (!permissions) return false;
 
     const map: Record<string, keyof CustomRole> = {
