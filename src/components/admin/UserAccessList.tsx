@@ -205,11 +205,9 @@ export function UserAccessList() {
     }
   };
 
-  const getAccessLevels = (entityType: string) => {
-    if (entityType === "organization") {
-      return ["admin", "manager", "editor", "viewer"];
-    }
-    return ["owner", "manager", "editor", "viewer"];
+  const getAccessLevels = (_entityType: string) => {
+    // Unified 3-tier model — see Phase 1 of role consolidation.
+    return ["admin", "editor", "viewer"];
   };
 
   if (loading) {

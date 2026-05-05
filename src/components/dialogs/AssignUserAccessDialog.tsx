@@ -181,17 +181,9 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
   };
 
   const getAccessLevels = () => {
-    if (accessType === "organization") {
-      return [
-        { value: "admin", label: "Admin" },
-        { value: "manager", label: "Manager" },
-        { value: "editor", label: "Editor" },
-        { value: "viewer", label: "Viewer" },
-      ];
-    }
+    // Unified 3-tier model — see Phase 1 of role consolidation.
     return [
-      { value: "owner", label: "Owner" },
-      { value: "manager", label: "Manager" },
+      { value: "admin", label: "Admin" },
       { value: "editor", label: "Editor" },
       { value: "viewer", label: "Viewer" },
     ];

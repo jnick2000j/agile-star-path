@@ -297,10 +297,8 @@ export default function AdminPanel() {
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList className="bg-secondary">
           <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="role-types">Role Types</TabsTrigger>
-          <TabsTrigger value="role-builder">Permission Matrix</TabsTrigger>
+          <TabsTrigger value="roles-access">Roles &amp; Access</TabsTrigger>
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="access">Access Control</TabsTrigger>
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
           <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
@@ -504,12 +502,38 @@ export default function AdminPanel() {
           </div>
         </TabsContent>
 
-        <TabsContent value="role-types">
-          <RoleTypesManager />
-        </TabsContent>
-
-        <TabsContent value="role-builder">
-          <RoleBuilderMatrix />
+        <TabsContent value="roles-access">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold">Roles &amp; Access</h3>
+            <p className="text-sm text-muted-foreground">
+              One place to manage who's in the organization, what they can do, and the role catalog
+              that drives those permissions. Platform admin grants live under
+              {" "}<a href="/platform-admin?tab=platform-admins" className="text-primary underline">Platform Admin → Platform Admins</a>.
+            </p>
+          </div>
+          <Tabs defaultValue="members" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="members">Members &amp; Access</TabsTrigger>
+              <TabsTrigger value="catalog">Role Catalog</TabsTrigger>
+              <TabsTrigger value="matrix">Permission Matrix</TabsTrigger>
+            </TabsList>
+            <TabsContent value="members">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Assign per-entity access tiers (Viewer / Editor / Admin) for users on
+                  organizations, programmes, projects, and products.
+                </p>
+                <AssignUserAccessDialog onSuccess={() => window.location.reload()} />
+              </div>
+              <UserAccessList />
+            </TabsContent>
+            <TabsContent value="catalog">
+              <RoleTypesManager />
+            </TabsContent>
+            <TabsContent value="matrix">
+              <RoleBuilderMatrix />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="organizations">
@@ -577,20 +601,6 @@ export default function AdminPanel() {
               ))
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="access">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-lg font-semibold">Access Control</h3>
-              <p className="text-sm text-muted-foreground">
-                Configure granular access permissions for users to specific programmes and projects.
-              </p>
-            </div>
-            <AssignUserAccessDialog onSuccess={() => window.location.reload()} />
-          </div>
-          
-          <UserAccessList />
         </TabsContent>
 
         <TabsContent value="residency">
