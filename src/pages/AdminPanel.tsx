@@ -492,8 +492,8 @@ export default function AdminPanel() {
             <TabsContent value="members">
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-muted-foreground">
-                  Assign per-entity access tiers (Viewer / Editor / Admin) for users on
-                  organizations, programmes, projects, and products.
+                  Grant users access by assigning roles from the catalog. Roles can be assigned at
+                  organization, programme, project, or product scope.
                 </p>
                 <AssignUserAccessDialog onSuccess={() => window.location.reload()} />
               </div>
