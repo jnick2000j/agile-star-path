@@ -415,7 +415,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
                 <p className="text-xs text-muted-foreground">
                   Manage the catalog under Roles &amp; Access → Role Catalog.
                 </p>
+              </div>
             </div>
+
 
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">
