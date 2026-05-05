@@ -60,6 +60,7 @@ import { EmailSettings } from "@/components/admin/EmailSettings";
 import { EmailTriggerSettings } from "@/components/admin/EmailTriggerSettings";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
+import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 
 type AccessLevel = "admin" | "editor" | "viewer";
 
