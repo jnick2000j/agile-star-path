@@ -157,6 +157,16 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       return;
     }
 
+    if (
+      formData.organization_id &&
+      formData.assignment_scope !== "organization" &&
+      !formData.scoped_entity_id &&
+      !formData.create_as_platform_admin
+    ) {
+      toast.error(`Select a ${formData.assignment_scope} for this assignment.`);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -181,18 +191,38 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Assign the catalog role at organization scope
+      // Assign the catalog role at the chosen scope
       if (data?.user_id && formData.organization_id && formData.custom_role_id && !formData.create_as_platform_admin) {
-        const { error: roleErr } = await supabase
-          .from("user_organization_custom_roles")
-          .upsert(
-            {
-              user_id: data.user_id,
-              organization_id: formData.organization_id,
-              custom_role_id: formData.custom_role_id,
-            },
-            { onConflict: "user_id,organization_id,custom_role_id" }
-          );
+        let roleErr: any = null;
+        if (formData.assignment_scope === "organization") {
+          ({ error: roleErr } = await supabase
+            .from("user_organization_custom_roles")
+            .upsert(
+              { user_id: data.user_id, organization_id: formData.organization_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,organization_id,custom_role_id" }
+            ));
+        } else if (formData.assignment_scope === "programme") {
+          ({ error: roleErr } = await supabase
+            .from("user_programme_custom_roles")
+            .upsert(
+              { user_id: data.user_id, programme_id: formData.scoped_entity_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,programme_id,custom_role_id" }
+            ));
+        } else if (formData.assignment_scope === "project") {
+          ({ error: roleErr } = await supabase
+            .from("user_project_custom_roles")
+            .upsert(
+              { user_id: data.user_id, project_id: formData.scoped_entity_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,project_id,custom_role_id" }
+            ));
+        } else if (formData.assignment_scope === "product") {
+          ({ error: roleErr } = await supabase
+            .from("user_product_custom_roles")
+            .upsert(
+              { user_id: data.user_id, product_id: formData.scoped_entity_id, custom_role_id: formData.custom_role_id },
+              { onConflict: "user_id,product_id,custom_role_id" }
+            ));
+        }
         if (roleErr) console.error("Failed to assign role:", roleErr);
       }
 
