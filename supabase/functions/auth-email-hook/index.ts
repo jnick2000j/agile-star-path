@@ -28,14 +28,15 @@ async function lookupOrgByEmail(supabase: any, email: string): Promise<string | 
   try {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('user_id')
+      .select('default_organization_id, user_id')
       .eq('email', email.toLowerCase())
       .maybeSingle()
-    if (!profile?.user_id) return null
+    if (!profile) return null
+    if (profile.default_organization_id) return profile.default_organization_id
 
-    // Pick first organization membership.
+    // Fall back to first org membership.
     const { data: member } = await supabase
-      .from('organization_members')
+      .from('user_organization_access')
       .select('organization_id')
       .eq('user_id', profile.user_id)
       .limit(1)
