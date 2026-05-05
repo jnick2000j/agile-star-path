@@ -278,13 +278,13 @@ const App = () => (
             <Route path="/services/retainers" element={<ProtectedRoute><Retainers /></ProtectedRoute>} />
             <Route path="/verticals/docs" element={<ProtectedRoute><VerticalsDocs /></ProtectedRoute>} />
             <Route path="/verticals/:slug" element={<ProtectedRoute><VerticalEntityRegister /></ProtectedRoute>} />
-            <Route path="/learning" element={<ProtectedRoute><LmsCatalog /></ProtectedRoute>} />
-            <Route path="/learning/my" element={<ProtectedRoute><MyLearning /></ProtectedRoute>} />
-            <Route path="/learning/courses/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
-            <Route path="/learning/admin" element={<ProtectedRoute><LmsAdmin /></ProtectedRoute>} />
-            <Route path="/learning/admin/courses/:id" element={<ProtectedRoute><LmsCourseEditor /></ProtectedRoute>} />
-            <Route path="/learning/admin/lessons/:id/quiz" element={<ProtectedRoute><LmsQuizEditor /></ProtectedRoute>} />
-            <Route path="/learning/dashboard" element={<ProtectedRoute><LmsManagerDashboard /></ProtectedRoute>} />
+            <Route path="/learning" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="The Learning module is bundled with Helpdesk & Learning and ITSM & Learning plans. Upgrade your plan to unlock courses, learning paths, quizzes and certificates."><LmsCatalog /></ModuleGate></ProtectedRoute>} />
+            <Route path="/learning/my" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to access courses and learning paths."><MyLearning /></ModuleGate></ProtectedRoute>} />
+            <Route path="/learning/courses/:id" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to access this course."><CourseDetail /></ModuleGate></ProtectedRoute>} />
+            <Route path="/learning/admin" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to administer LMS content."><LmsAdmin /></ModuleGate></ProtectedRoute>} />
+            <Route path="/learning/admin/courses/:id" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to edit courses."><LmsCourseEditor /></ModuleGate></ProtectedRoute>} />
+            <Route path="/learning/admin/lessons/:id/quiz" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to edit quizzes."><LmsQuizEditor /></ModuleGate></ProtectedRoute>} />
+            <Route path="/learning/dashboard" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to access the learning manager dashboard."><LmsManagerDashboard /></ModuleGate></ProtectedRoute>} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
