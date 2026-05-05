@@ -61,10 +61,6 @@ export default function Onboarding() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
   const handleCreateOrg = async () => {
     if (!user || !orgName.trim()) return;
     setLoading(true);
