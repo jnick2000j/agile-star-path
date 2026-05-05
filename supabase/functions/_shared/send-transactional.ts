@@ -71,6 +71,34 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
   const label = args.label ?? "transactional";
 
   try {
+    // Get/create unsubscribe token (one per recipient email).
+    const normalizedEmail = args.to.toLowerCase();
+    let unsubscribeToken: string | null = null;
+    const { data: existing } = await admin
+      .from("email_unsubscribe_tokens")
+      .select("token, used_at")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+    if (existing && !existing.used_at) {
+      unsubscribeToken = existing.token;
+    } else if (!existing) {
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      unsubscribeToken = Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+      await admin.from("email_unsubscribe_tokens").upsert(
+        { token: unsubscribeToken, email: normalizedEmail },
+        { onConflict: "email", ignoreDuplicates: true },
+      );
+      const { data: stored } = await admin
+        .from("email_unsubscribe_tokens")
+        .select("token")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+      if (stored?.token) unsubscribeToken = stored.token;
+    } else {
+      unsubscribeToken = existing.token;
+    }
+
     // Log pending BEFORE enqueue so we have a record even if enqueue crashes.
     await admin.from("email_send_log").insert({
       message_id: messageId,
@@ -92,6 +120,7 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
         text,
         purpose: "transactional",
         label,
+        unsubscribe_token: unsubscribeToken,
         queued_at: new Date().toISOString(),
       },
     });
