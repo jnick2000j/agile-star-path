@@ -80,9 +80,14 @@ export function useVertical() {
     };
   }, [currentOrganization?.id]);
 
-  /** True if the module is part of this vertical's pack. Modules not in any vertical are allowed (e.g. settings). */
+  /**
+   * True if the module is part of this vertical's pack.
+   * While the vertical config is still loading, allow everything to avoid a flash of empty nav.
+   * Once loaded, an empty `enabled_modules` list means the vertical genuinely has no modules
+   * (so we hide module-gated items rather than showing every other vertical's nav).
+   */
   const hasModule = (moduleKey: string) => {
-    if (!vertical.enabled_modules.length) return true;
+    if (loading) return true;
     return vertical.enabled_modules.includes(moduleKey);
   };
 
