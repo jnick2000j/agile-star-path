@@ -418,7 +418,7 @@ export function StandalonePricingPage({
         </section>
       )}
 
-      <section className="max-w-3xl mx-auto px-6 pb-16 text-center">
+      <section className="max-w-3xl mx-auto px-6 pb-10 text-center">
         <h2 className="text-2xl font-bold mb-3">Need the full PPM platform?</h2>
         <p className="text-muted-foreground mb-6">
           Our flagship plans bundle PRINCE2, MSP programmes, agile products, AND {kind === "helpdesk" ? "Helpdesk" : "ITSM"} together.
@@ -426,6 +426,17 @@ export function StandalonePricingPage({
         <Button variant="outline" onClick={() => navigate("/pricing")}>
           View full PPM pricing
         </Button>
+      </section>
+
+      <section className="max-w-3xl mx-auto px-6 pb-16 text-center">
+        <Card className="p-6 bg-muted/30">
+          <Badge variant="secondary" className="mb-2">New</Badge>
+          <h3 className="text-xl font-bold mb-2">Train your team with the LMS Add-on</h3>
+          <p className="text-muted-foreground mb-4">
+            Author courses, run quizzes, issue certifications, and embed learning into projects and onboarding.
+          </p>
+          <Button onClick={() => navigate("/addons")}>Explore the LMS Add-on</Button>
+        </Card>
       </section>
 
       <Dialog open={!!checkoutPriceId} onOpenChange={(o) => !o && setCheckoutPriceId(null)}>
