@@ -81,7 +81,30 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       .from("custom_roles")
       .select("id, name, is_system")
       .order("name")
-      .then(({ data }) => setRoles((data as RoleOption[]) || []));
+      .then(({ data }) => {
+        const list = (data as RoleOption[]) || [];
+        setRoles(list);
+        setFormData((prev) => {
+          if (prev.custom_role_id) return prev;
+          const def = list.find((r) => r.name === "Customer Portal User");
+          return def ? { ...prev, custom_role_id: def.id } : prev;
+        });
+      });
+    supabase
+      .from("programmes")
+      .select("id, name, organization_id")
+      .order("name")
+      .then(({ data }) => setProgrammes((data as ScopedEntity[]) || []));
+    supabase
+      .from("projects")
+      .select("id, name, organization_id")
+      .order("name")
+      .then(({ data }) => setProjects((data as ScopedEntity[]) || []));
+    supabase
+      .from("products")
+      .select("id, name, organization_id")
+      .order("name")
+      .then(({ data }) => setProducts((data as ScopedEntity[]) || []));
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const { data: role } = await supabase
@@ -93,6 +116,16 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       setIsPlatformAdmin(!!role);
     });
   }, [open]);
+
+  const scopedEntities = (): ScopedEntity[] => {
+    if (!formData.organization_id) return [];
+    switch (formData.assignment_scope) {
+      case "programme": return programmes.filter((p) => p.organization_id === formData.organization_id);
+      case "project":   return projects.filter((p) => p.organization_id === formData.organization_id);
+      case "product":   return products.filter((p) => p.organization_id === formData.organization_id);
+      default: return [];
+    }
+  };
 
   const deriveAccessLevel = (roleName?: string): string => {
     if (!roleName) return "viewer";
