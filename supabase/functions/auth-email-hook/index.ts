@@ -79,6 +79,21 @@ const SAMPLE_DATA: Record<string, object> = {
   },
 }
 
+function buildUserConfirmedActionUrl(actionUrl: string, emailType: string): string {
+  if (emailType !== 'signup') return actionUrl
+
+  try {
+    const verifyUrl = new URL(actionUrl)
+    const redirectTo = verifyUrl.searchParams.get('redirect_to')
+    const appOrigin = redirectTo ? new URL(redirectTo).origin : SAMPLE_PROJECT_URL
+    const confirmUrl = new URL('/auth/confirm', appOrigin)
+    confirmUrl.searchParams.set('verify_url', actionUrl)
+    return confirmUrl.toString()
+  } catch (_error) {
+    return actionUrl
+  }
+}
+
 // Preview endpoint handler - returns rendered HTML without sending email
 async function handlePreview(req: Request): Promise<Response> {
   const previewCorsHeaders = {
@@ -222,7 +237,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     siteName: SITE_NAME,
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
-    confirmationUrl: payload.data.url,
+    confirmationUrl: buildUserConfirmedActionUrl(payload.data.url, emailType),
     token: payload.data.token,
     email: payload.data.email,
     newEmail: payload.data.new_email,
