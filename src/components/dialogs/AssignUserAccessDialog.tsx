@@ -23,6 +23,9 @@ import {
 
 interface AssignUserAccessDialogProps {
   onSuccess: () => void;
+  presetUserId?: string; // profiles.user_id to pre-select and lock
+  presetUserLabel?: string;
+  trigger?: React.ReactNode;
 }
 
 interface UserRow {
