@@ -600,14 +600,18 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setFormData((f) => ({ ...f, parent_task_id: "" }))}>
               <Plus className="h-4 w-4 mr-2" />
               New Task
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create New Task</DialogTitle>
+              <DialogTitle>
+                {formData.parent_task_id
+                  ? `Create Subtask of: ${tasks.find((t) => t.id === formData.parent_task_id)?.name || ""}`
+                  : "Create New Task"}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
