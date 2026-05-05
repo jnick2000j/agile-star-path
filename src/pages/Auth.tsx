@@ -103,6 +103,7 @@ export default function Auth() {
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [errors, setErrors] = useState<{ email?: string; otp?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<LoginBranding | null>(null);
 
