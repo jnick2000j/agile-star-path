@@ -59,6 +59,8 @@ import {
   Trash2,
   Copy,
   Repeat,
+  CornerDownRight,
+  Plus as PlusIcon,
 } from "lucide-react";
 import {
   AlertDialog,
