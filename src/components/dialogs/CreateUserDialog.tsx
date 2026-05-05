@@ -137,13 +137,15 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      toast.error("Email and password are required");
+    if (!formData.email) {
+      toast.error("Email is required");
       return;
     }
 
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    // Password is optional. The user signs in via the magic link / OTP in
+    // the invite email. If a password IS provided, enforce a minimum length.
+    if (formData.password && formData.password.length < 6) {
+      toast.error("If setting a password, it must be at least 6 characters");
       return;
     }
 
