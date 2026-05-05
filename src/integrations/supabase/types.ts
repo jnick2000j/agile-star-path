@@ -1935,6 +1935,7 @@ export type Database = {
           reason: string | null
           reference_number: string | null
           related_ticket_id: string | null
+          release_id: string | null
           requested_by: string | null
           risk_score: number | null
           rollback_plan: string | null
@@ -1973,6 +1974,7 @@ export type Database = {
           reason?: string | null
           reference_number?: string | null
           related_ticket_id?: string | null
+          release_id?: string | null
           requested_by?: string | null
           risk_score?: number | null
           rollback_plan?: string | null
@@ -2011,6 +2013,7 @@ export type Database = {
           reason?: string | null
           reference_number?: string | null
           related_ticket_id?: string | null
+          release_id?: string | null
           requested_by?: string | null
           risk_score?: number | null
           rollback_plan?: string | null
@@ -2054,6 +2057,13 @@ export type Database = {
             columns: ["related_ticket_id"]
             isOneToOne: false
             referencedRelation: "helpdesk_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_management_requests_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
             referencedColumns: ["id"]
           },
         ]
@@ -11662,6 +11672,393 @@ export type Database = {
           },
         ]
       }
+      release_environments: {
+        Row: {
+          auto_create_change_request: boolean
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_production: boolean
+          name: string
+          organization_id: string
+          product_id: string
+          requires_approval: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          auto_create_change_request?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_production?: boolean
+          name: string
+          organization_id: string
+          product_id: string
+          requires_approval?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          auto_create_change_request?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_production?: boolean
+          name?: string
+          organization_id?: string
+          product_id?: string
+          requires_approval?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_environments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_gates: {
+        Row: {
+          approval_chain_id: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          description: string | null
+          display_order: number
+          id: string
+          name: string
+          organization_id: string
+          release_id: string
+          required: boolean
+          status: Database["public"]["Enums"]["release_gate_status"]
+          updated_at: string
+        }
+        Insert: {
+          approval_chain_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          name: string
+          organization_id: string
+          release_id: string
+          required?: boolean
+          status?: Database["public"]["Enums"]["release_gate_status"]
+          updated_at?: string
+        }
+        Update: {
+          approval_chain_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          organization_id?: string
+          release_id?: string
+          required?: boolean
+          status?: Database["public"]["Enums"]["release_gate_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_gates_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_notes_items: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          display_order: number
+          id: string
+          organization_id: string
+          release_id: string
+          source_scope_item_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          organization_id: string
+          release_id: string
+          source_scope_item_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          organization_id?: string
+          release_id?: string
+          source_scope_item_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_notes_items_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "release_notes_items_source_scope_item_id_fkey"
+            columns: ["source_scope_item_id"]
+            isOneToOne: false
+            referencedRelation: "release_scope_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_promotions: {
+        Row: {
+          change_request_id: string | null
+          completed_at: string | null
+          created_at: string
+          environment_id: string
+          id: string
+          metadata: Json
+          notes: string | null
+          organization_id: string
+          promoted_by: string | null
+          release_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["release_promotion_status"]
+          updated_at: string
+        }
+        Insert: {
+          change_request_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          environment_id: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id: string
+          promoted_by?: string | null
+          release_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["release_promotion_status"]
+          updated_at?: string
+        }
+        Update: {
+          change_request_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          environment_id?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string
+          promoted_by?: string | null
+          release_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["release_promotion_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_promotions_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "release_environments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "release_promotions_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_scope_items: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          feature_id: string | null
+          id: string
+          item_type: Database["public"]["Enums"]["release_scope_item_type"]
+          notes: string | null
+          organization_id: string
+          release_id: string
+          task_id: string | null
+          work_package_id: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          feature_id?: string | null
+          id?: string
+          item_type: Database["public"]["Enums"]["release_scope_item_type"]
+          notes?: string | null
+          organization_id: string
+          release_id: string
+          task_id?: string | null
+          work_package_id?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          feature_id?: string | null
+          id?: string
+          item_type?: Database["public"]["Enums"]["release_scope_item_type"]
+          notes?: string | null
+          organization_id?: string
+          release_id?: string
+          task_id?: string | null
+          work_package_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_scope_items_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "product_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "release_scope_items_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "release_scope_items_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "release_scope_items_work_package_id_fkey"
+            columns: ["work_package_id"]
+            isOneToOne: false
+            referencedRelation: "work_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      releases: {
+        Row: {
+          approval_chain_id: string | null
+          code_freeze_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_hotfix: boolean
+          metadata: Json
+          name: string
+          organization_id: string
+          parent_release_id: string | null
+          product_id: string
+          reference_number: string | null
+          release_manager_id: string | null
+          release_notes: string | null
+          release_type: string
+          released_at: string | null
+          rollback_plan: string | null
+          status: Database["public"]["Enums"]["release_status"]
+          target_date: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          approval_chain_id?: string | null
+          code_freeze_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_hotfix?: boolean
+          metadata?: Json
+          name: string
+          organization_id: string
+          parent_release_id?: string | null
+          product_id: string
+          reference_number?: string | null
+          release_manager_id?: string | null
+          release_notes?: string | null
+          release_type?: string
+          released_at?: string | null
+          rollback_plan?: string | null
+          status?: Database["public"]["Enums"]["release_status"]
+          target_date?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          approval_chain_id?: string | null
+          code_freeze_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_hotfix?: boolean
+          metadata?: Json
+          name?: string
+          organization_id?: string
+          parent_release_id?: string | null
+          product_id?: string
+          reference_number?: string | null
+          release_manager_id?: string | null
+          release_notes?: string | null
+          release_type?: string
+          released_at?: string | null
+          rollback_plan?: string | null
+          status?: Database["public"]["Enums"]["release_status"]
+          target_date?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "releases_parent_release_id_fkey"
+            columns: ["parent_release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       residency_audit_log: {
         Row: {
           created_at: string
@@ -16383,6 +16780,10 @@ export type Database = {
         Args: { _groups: string[]; _org_id: string }
         Returns: string
       }
+      seed_default_release_environments: {
+        Args: { p_product_id: string }
+        Returns: undefined
+      }
       set_license_status: {
         Args: { _license_id: string; _reason?: string; _status: string }
         Returns: Json
@@ -16524,6 +16925,29 @@ export type Database = {
         | "passed"
         | "failed"
         | "conditional"
+      release_gate_status:
+        | "pending"
+        | "in_review"
+        | "approved"
+        | "rejected"
+        | "waived"
+      release_promotion_status:
+        | "pending"
+        | "in_progress"
+        | "succeeded"
+        | "failed"
+        | "rolled_back"
+        | "skipped"
+      release_scope_item_type: "feature" | "work_package" | "task"
+      release_status:
+        | "planning"
+        | "in_development"
+        | "code_freeze"
+        | "in_testing"
+        | "ready_for_release"
+        | "released"
+        | "rolled_back"
+        | "cancelled"
       task_status:
         | "not_started"
         | "in_progress"
@@ -16771,6 +17195,32 @@ export const Constants = {
         "passed",
         "failed",
         "conditional",
+      ],
+      release_gate_status: [
+        "pending",
+        "in_review",
+        "approved",
+        "rejected",
+        "waived",
+      ],
+      release_promotion_status: [
+        "pending",
+        "in_progress",
+        "succeeded",
+        "failed",
+        "rolled_back",
+        "skipped",
+      ],
+      release_scope_item_type: ["feature", "work_package", "task"],
+      release_status: [
+        "planning",
+        "in_development",
+        "code_freeze",
+        "in_testing",
+        "ready_for_release",
+        "released",
+        "rolled_back",
+        "cancelled",
       ],
       task_status: [
         "not_started",
