@@ -156,6 +156,8 @@ Deno.serve(async (req) => {
         to: [recipient.email],
         subject,
         html,
+        organizationId: organization_id ?? undefined,
+        triggerKey: "workflow_assignment",
       });
       emailSent = result.ok;
       if (!result.ok) console.error("notify-workflow-assignment email failed:", result.error);
