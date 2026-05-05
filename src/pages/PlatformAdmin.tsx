@@ -46,6 +46,7 @@ import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { PlatformAdminsPanel } from "@/components/platform-admin/PlatformAdminsPanel";
+import { PlatformSettingsPanel } from "@/components/platform-admin/PlatformSettingsPanel";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
