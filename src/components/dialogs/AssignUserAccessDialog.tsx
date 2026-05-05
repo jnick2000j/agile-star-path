@@ -59,7 +59,7 @@ const scopeLabel: Record<Scope, string> = {
   product: "Product",
 };
 
-export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProps) {
+export function AssignUserAccessDialog({ onSuccess, presetUserId, presetUserLabel, trigger }: AssignUserAccessDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
