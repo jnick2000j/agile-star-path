@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getSiteUrl } from "@/lib/site-url";
@@ -109,18 +109,26 @@ export default function Auth() {
 
   const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
-  const orgProvisioningRef = useRef(false);
+  const orgProvisioningRef = useRef<Promise<string | null> | null>(null);
 
-  const provisionFirstOrganization = async (name: string) => {
-    if (!name.trim() || orgProvisioningRef.current) return;
-    orgProvisioningRef.current = true;
-    const { data, error } = await supabase.rpc("create_org_for_new_user", { _org_name: name.trim() });
-    if (error) {
-      orgProvisioningRef.current = false;
-      throw error;
+  const provisionFirstOrganization = useCallback(async (name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return null;
+    if (!orgProvisioningRef.current) {
+      orgProvisioningRef.current = supabase
+        .rpc("create_org_for_new_user", { _org_name: trimmedName })
+        .then(({ data, error }) => {
+          if (error) throw error;
+          if (data) localStorage.setItem("currentOrganizationId", data as string);
+          return (data as string | null) ?? null;
+        })
+        .catch((error) => {
+          orgProvisioningRef.current = null;
+          throw error;
+        });
     }
-    if (data) localStorage.setItem("currentOrganizationId", data as string);
-  };
+    return orgProvisioningRef.current;
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -133,7 +141,7 @@ export default function Auth() {
         navigate("/");
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, provisionFirstOrganization]);
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
