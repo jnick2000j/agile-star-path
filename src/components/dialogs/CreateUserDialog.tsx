@@ -415,7 +415,65 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
                 <p className="text-xs text-muted-foreground">
                   Manage the catalog under Roles &amp; Access → Role Catalog.
                 </p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="assignment_scope">Assign role at</Label>
+                <Select
+                  value={formData.assignment_scope}
+                  onValueChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      assignment_scope: v as AssignmentScope,
+                      scoped_entity_id: "",
+                    })
+                  }
+                  disabled={formData.create_as_platform_admin}
+                >
+                  <SelectTrigger id="assignment_scope">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="organization">Organization (all)</SelectItem>
+                    <SelectItem value="programme">Specific Programme</SelectItem>
+                    <SelectItem value="project">Specific Project</SelectItem>
+                    <SelectItem value="product">Specific Product</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              {formData.assignment_scope !== "organization" && (
+                <div className="space-y-2">
+                  <Label htmlFor="scoped_entity_id" className="capitalize">
+                    {formData.assignment_scope}
+                  </Label>
+                  <Select
+                    value={formData.scoped_entity_id}
+                    onValueChange={(v) => setFormData({ ...formData, scoped_entity_id: v })}
+                    disabled={formData.create_as_platform_admin || !formData.organization_id}
+                  >
+                    <SelectTrigger id="scoped_entity_id">
+                      <SelectValue
+                        placeholder={
+                          formData.organization_id
+                            ? `Select ${formData.assignment_scope}`
+                            : "Select organization first"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {scopedEntities().map((e) => (
+                        <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                      ))}
+                      {scopedEntities().length === 0 && formData.organization_id && (
+                        <div className="px-3 py-2 text-xs text-muted-foreground">
+                          No {formData.assignment_scope}s in this organization.
+                        </div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             {isPlatformAdmin && (
               <label className="flex items-start gap-2 pt-1 text-sm">
