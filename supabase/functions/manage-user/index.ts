@@ -146,6 +146,9 @@ Deno.serve(async (req) => {
           tempPassword: password,
         }),
         idempotencyKey: `manage-user-invite-${newUser.user?.id ?? email}`,
+        label: "user-invite",
+        triggerKey: "user_invite",
+        organizationId: organization_id ?? null,
       });
       emailSent = result.ok;
       if (!result.ok) {
