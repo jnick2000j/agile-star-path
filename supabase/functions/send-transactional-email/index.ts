@@ -3,6 +3,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailTransport, sendViaSmtp } from '../_shared/smtp-transport.ts'
+import { tryRenderOrgOverride } from '../_shared/email-overrides.tsx'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -61,12 +62,14 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  let organizationId: string | null = null
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
     recipientEmail = body.recipientEmail || body.recipient_email
     messageId = crypto.randomUUID()
     idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
+    organizationId = body.organizationId || body.organization_id || null
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
     }
@@ -283,20 +286,29 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 4. Render React Email template to HTML and plain text
-  const html = await renderAsync(
-    React.createElement(template.component, templateData)
-  )
-  const plainText = await renderAsync(
-    React.createElement(template.component, templateData),
-    { plainText: true }
-  )
+  // 4. Render: try per-org copy override first, fall back to React template.
+  // The override editor uses the same template_key as the registry name.
+  const override = await tryRenderOrgOverride(organizationId, templateName, templateData)
 
-  // Resolve subject — supports static string or dynamic function
-  const resolvedSubject =
-    typeof template.subject === 'function'
-      ? template.subject(templateData)
-      : template.subject
+  let html: string
+  let plainText: string
+  let resolvedSubject: string
+  if (override) {
+    html = override.html
+    plainText = override.text
+    resolvedSubject = override.subject
+    console.log('Transactional email using org override', { templateName, organizationId })
+  } else {
+    html = await renderAsync(React.createElement(template.component, templateData))
+    plainText = await renderAsync(
+      React.createElement(template.component, templateData),
+      { plainText: true }
+    )
+    resolvedSubject =
+      typeof template.subject === 'function'
+        ? template.subject(templateData)
+        : template.subject
+  }
 
   // 5. Send the email.
   //   - On Lovable Cloud (default): enqueue for async dispatch + retries.

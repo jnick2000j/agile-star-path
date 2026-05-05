@@ -10,6 +10,43 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { tryRenderOrgOverride } from '../_shared/email-overrides.tsx'
+
+// Map Supabase auth action_type values to template_key values used by
+// the org override editor (kebab-case).
+const OVERRIDE_KEYS: Record<string, string> = {
+  signup: 'signup',
+  invite: 'invite',
+  magiclink: 'magic-link',
+  recovery: 'recovery',
+  email_change: 'email-change',
+  reauthentication: 'reauthentication',
+}
+
+/** Look up the org for a recipient by email — used for per-org overrides. */
+async function lookupOrgByEmail(supabase: any, email: string): Promise<string | null> {
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('default_organization_id, user_id')
+      .eq('email', email.toLowerCase())
+      .maybeSingle()
+    if (!profile) return null
+    if (profile.default_organization_id) return profile.default_organization_id
+
+    // Fall back to first org membership.
+    const { data: member } = await supabase
+      .from('user_organization_access')
+      .select('organization_id')
+      .eq('user_id', profile.user_id)
+      .limit(1)
+      .maybeSingle()
+    return member?.organization_id ?? null
+  } catch (e) {
+    console.warn('lookupOrgByEmail failed:', e)
+    return null
+  }
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -231,20 +268,43 @@ async function handleWebhook(req: Request): Promise<Response> {
     newEmail: payload.data.new_email,
   }
 
-  // Render React Email to HTML and plain text
-  const html = await renderAsync(React.createElement(EmailTemplate, templateProps))
-  const text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
-    plainText: true,
-  })
-
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
+  // Create Supabase admin client (needed for org lookup AND queue/log).
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
+  // Try per-org override first. Falls back to default React template.
+  const overrideKey = OVERRIDE_KEYS[emailType]
+  const orgId = overrideKey ? await lookupOrgByEmail(supabase, payload.data.email) : null
+  const overrideVars = {
+    user_name: payload.data.email?.split('@')[0],
+    org_name: '',
+    site_name: SITE_NAME,
+    action_url: payload.data.url,
+    otp_code: payload.data.token,
+  }
+  const rendered = overrideKey
+    ? await tryRenderOrgOverride(orgId, overrideKey, overrideVars)
+    : null
+
+  let html: string
+  let text: string
+  let subject: string
+  if (rendered) {
+    html = rendered.html
+    text = rendered.text
+    subject = rendered.subject
+    console.log('Auth email using org override', { emailType, orgId })
+  } else {
+    html = await renderAsync(React.createElement(EmailTemplate, templateProps))
+    text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
+      plainText: true,
+    })
+    subject = EMAIL_SUBJECTS[emailType] || 'Notification'
+  }
+
   const messageId = crypto.randomUUID()
-  const subject = EMAIL_SUBJECTS[emailType] || 'Notification'
 
   // Log pending BEFORE send/enqueue so we have a record even if it crashes
   await supabase.from('email_send_log').insert({
