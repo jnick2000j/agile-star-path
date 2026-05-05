@@ -248,6 +248,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       risk_id: riskId || null,
       issue_id: issueId || null,
       feature_id: featureId || null,
+      parent_task_id: parentTaskId || null,
     };
 
     if (status === "completed") {
