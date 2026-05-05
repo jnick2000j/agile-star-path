@@ -70,23 +70,45 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if caller is admin
-    const { data: roleData } = await supabaseAdmin
+    // Check if caller is platform admin
+    const { data: platformRoles } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", callerUser.id)
-      .single();
-
-    if (roleData?.role !== "admin") {
-      return new Response(
-        JSON.stringify({ error: "Only admins can perform this action" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      .eq("role", "admin");
+    const isPlatformAdmin = (platformRoles?.length ?? 0) > 0;
 
     const body = await req.json();
     const { action, user_id, email, password, full_name, redirect_to, organization_id } = body;
     const create_as_platform_admin = body?.create_as_platform_admin === true;
+
+    // Non-platform admins must be an org admin of the target organization
+    if (!isPlatformAdmin) {
+      if (create_as_platform_admin) {
+        return new Response(
+          JSON.stringify({ error: "Only platform administrators can create platform admins" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (!organization_id) {
+        return new Response(
+          JSON.stringify({ error: "organization_id is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const { data: orgAccess } = await supabaseAdmin
+        .from("user_organization_access")
+        .select("access_level")
+        .eq("user_id", callerUser.id)
+        .eq("organization_id", organization_id)
+        .maybeSingle();
+      if (orgAccess?.access_level !== "admin") {
+        return new Response(
+          JSON.stringify({ error: "Only org admins can perform this action" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
     const access_level: string = body?.access_level || "editor";
 
     if (action === "invite") {
