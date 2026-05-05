@@ -254,6 +254,8 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
       setChangingEmail(false);
     }
   };
+
+  const handleAddOrgAccess = async () => {
     if (!selectedOrgToAdd) return;
 
     try {
