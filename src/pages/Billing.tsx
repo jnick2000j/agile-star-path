@@ -40,6 +40,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { LicenseModeNotice } from "@/components/billing/LicenseModeNotice";
 import { BillingAccountPanel } from "@/components/billing/BillingAccountPanel";
+import { LmsStorageUsageCard } from "@/components/billing/LmsStorageUsageCard";
 
 interface Plan {
   id: string;
@@ -369,6 +370,8 @@ export default function Billing() {
         {isPlatformAdmin && <AICreditPackManager />}
 
         <BillingAccountPanel isAdmin={isAdmin} />
+
+        <LmsStorageUsageCard />
 
         {limits && (
           <Card className="p-6">
