@@ -6,6 +6,16 @@
 
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendTransactionalEmail } from "../_shared/send-transactional.ts";
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -148,61 +158,55 @@ Deno.serve(async (req) => {
 
   if (logErr) console.error("notification log insert failed", logErr);
 
-  // Try to send via Resend (optional)
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-  const resendKey = Deno.env.get("RESEND_API_KEY");
+  // Send via Lovable Emails (transactional queue).
+  const html =
+    `<div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">` +
+    `<h2 style="margin: 0 0 16px;">${escapeHtml(subject)}</h2>` +
+    `<pre style="white-space: pre-wrap; font-family: inherit; font-size: 14px; line-height: 1.5; margin: 0;">${escapeHtml(body)}</pre>` +
+    `<p style="font-size: 12px; color: #6b7280; margin-top: 24px;">You received this because of activity on ticket ${escapeHtml(ticket.reference_number ?? "")} in TaskMaster.</p>` +
+    `</div>`;
 
-  if (lovableKey && resendKey) {
-    try {
-      const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${lovableKey}`,
-          "X-Connection-Api-Key": resendKey,
-        },
-        body: JSON.stringify({
-          from: "Support <onboarding@resend.dev>",
-          to: [recipient],
-          subject,
-          text: body,
-          headers: { "X-Helpdesk-Ref": ticket.reference_number ?? "" },
-        }),
-      });
-      const respBody = await res.json().catch(() => ({}));
-      if (res.ok) {
-        if (logRow?.id) {
-          await supabase.from("helpdesk_notifications").update({
-            status: "sent", sent_at: new Date().toISOString(),
-            metadata: { ...(payload.metadata ?? {}), provider: "resend", provider_id: respBody.id },
-          }).eq("id", logRow.id);
-        }
-        return new Response(JSON.stringify({ ok: true, sent: true, provider: "resend" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      } else {
-        if (logRow?.id) {
-          await supabase.from("helpdesk_notifications").update({
-            status: "error",
-            error_message: `Resend ${res.status}: ${JSON.stringify(respBody)}`,
-          }).eq("id", logRow.id);
-        }
-      }
-    } catch (e: any) {
+  const idemKey = `helpdesk-${payload.notification_type}-${ticket.id}-${(payload.metadata?.idempotency_suffix ?? Date.now())}`;
+
+  try {
+    const result = await sendTransactionalEmail({
+      to: recipient,
+      subject,
+      html,
+      idempotencyKey: idemKey,
+    });
+    if (result.ok) {
       if (logRow?.id) {
         await supabase.from("helpdesk_notifications").update({
-          status: "error", error_message: e.message ?? String(e),
+          status: "sent",
+          sent_at: new Date().toISOString(),
+          metadata: { ...(payload.metadata ?? {}), provider: "lovable" },
         }).eq("id", logRow.id);
       }
+      return new Response(JSON.stringify({ ok: true, sent: true, provider: "lovable" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    if (logRow?.id) {
+      await supabase.from("helpdesk_notifications").update({
+        status: "error",
+        error_message: result.error ?? "send failed",
+      }).eq("id", logRow.id);
+    }
+    return new Response(JSON.stringify({ ok: false, sent: false, error: result.error }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e: any) {
+    if (logRow?.id) {
+      await supabase.from("helpdesk_notifications").update({
+        status: "error",
+        error_message: e.message ?? String(e),
+      }).eq("id", logRow.id);
+    }
+    return new Response(JSON.stringify({ ok: false, sent: false, error: e.message }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-
-  // No provider configured — leave as queued
-  return new Response(JSON.stringify({
-    ok: true, sent: false,
-    reason: "no_provider_configured",
-    notification_id: logRow?.id,
-  }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
 });
