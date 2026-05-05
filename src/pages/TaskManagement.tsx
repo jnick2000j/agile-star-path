@@ -686,6 +686,30 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
                   </Select>
                 </div>
               )}
+              <div>
+                <label className="text-sm font-medium">Parent Task (Optional)</label>
+                <Select
+                  value={formData.parent_task_id || "none"}
+                  onValueChange={(v) => setFormData({ ...formData, parent_task_id: v === "none" ? "" : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="No parent — top-level task" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No parent (top-level task)</SelectItem>
+                    {tasks
+                      .filter((t) => !t.parent_task_id)
+                      .map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.reference_number ? `${t.reference_number} — ` : ""}{t.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Pick a parent to make this a subtask, or leave empty to create a master task.
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Priority</label>
