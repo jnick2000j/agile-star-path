@@ -165,6 +165,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     entity_type: "project",
     entity_id: "",
     work_package_id: "",
+    parent_task_id: "",
     planned_start: "",
     planned_end: "",
     estimated_hours: "",
