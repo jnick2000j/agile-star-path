@@ -268,20 +268,43 @@ async function handleWebhook(req: Request): Promise<Response> {
     newEmail: payload.data.new_email,
   }
 
-  // Render React Email to HTML and plain text
-  const html = await renderAsync(React.createElement(EmailTemplate, templateProps))
-  const text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
-    plainText: true,
-  })
-
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
+  // Create Supabase admin client (needed for org lookup AND queue/log).
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
+  // Try per-org override first. Falls back to default React template.
+  const overrideKey = OVERRIDE_KEYS[emailType]
+  const orgId = overrideKey ? await lookupOrgByEmail(supabase, payload.data.email) : null
+  const overrideVars = {
+    user_name: payload.data.email?.split('@')[0],
+    org_name: '',
+    site_name: SITE_NAME,
+    action_url: payload.data.url,
+    otp_code: payload.data.token,
+  }
+  const rendered = overrideKey
+    ? await tryRenderOrgOverride(orgId, overrideKey, overrideVars)
+    : null
+
+  let html: string
+  let text: string
+  let subject: string
+  if (rendered) {
+    html = rendered.html
+    text = rendered.text
+    subject = rendered.subject
+    console.log('Auth email using org override', { emailType, orgId })
+  } else {
+    html = await renderAsync(React.createElement(EmailTemplate, templateProps))
+    text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
+      plainText: true,
+    })
+    subject = EMAIL_SUBJECTS[emailType] || 'Notification'
+  }
+
   const messageId = crypto.randomUUID()
-  const subject = EMAIL_SUBJECTS[emailType] || 'Notification'
 
   // Log pending BEFORE send/enqueue so we have a record even if it crashes
   await supabase.from('email_send_log').insert({
