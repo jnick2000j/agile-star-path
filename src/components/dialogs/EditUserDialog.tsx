@@ -391,6 +391,35 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
             />
           </div>
 
+          {/* Sign-in email — admins can change for non-SSO accounts */}
+          <div className="rounded-lg border border-border p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="user_email" className="text-base">Sign-in Email</Label>
+              <span className="text-xs text-muted-foreground">Current: {user.email}</span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                id="user_email"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="new.address@example.com"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleChangeEmail}
+                disabled={changingEmail || newEmail.trim().toLowerCase() === user.email.toLowerCase()}
+              >
+                {changingEmail ? "Updating..." : "Change email"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Updates the user's sign-in address immediately and marks it confirmed. Accounts managed
+              by SSO or auto-provisioning cannot be changed here — update them in your identity provider.
+            </p>
+          </div>
+
           {/* Access is managed via role assignments — see the "Edit access" button on the user row */}
           <div className="rounded-lg border border-dashed border-border p-4 bg-muted/30">
             <div className="flex items-center gap-2 mb-1">
