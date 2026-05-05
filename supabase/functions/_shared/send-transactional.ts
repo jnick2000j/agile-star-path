@@ -83,6 +83,7 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
       queue_name: "transactional_emails",
       payload: {
         message_id: messageId,
+        idempotency_key: messageId,
         to: args.to,
         from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
