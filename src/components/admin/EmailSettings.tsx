@@ -212,6 +212,7 @@ export function EmailSettings() {
               Optional. When set, recipient replies are routed here instead of the From address. Helpdesk queues can override this per queue.
             </p>
           </div>
+          </div>
 
           {transport === "smtp" && (
             <Alert>
