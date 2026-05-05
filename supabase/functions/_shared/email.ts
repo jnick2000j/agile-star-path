@@ -134,40 +134,19 @@ export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult
 
   if (transport === "lovable") {
     try {
-      const url = Deno.env.get("SUPABASE_URL");
-      const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      const anon = Deno.env.get("SUPABASE_ANON_KEY");
-      if (!url || !key) {
-        return { ok: false, transport: "lovable", error: "Lovable transport requires SUPABASE_URL and service role key" };
-      }
+      const { sendTransactionalEmail } = await import("./send-transactional.ts");
       const errors: string[] = [];
       for (const to of recipients) {
         const idemKey = `adhoc-${crypto.randomUUID()}`;
-        const res = await fetch(`${url}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${key}`,
-            apikey: anon ?? key,
-          },
-          body: JSON.stringify({
-            templateName: "generic-html",
-            recipientEmail: to,
-            idempotencyKey: idemKey,
-            templateData: { subject, html: html || `<p>${text}</p>`, text },
-            subject,
-          }),
+        const result = await sendTransactionalEmail({
+          to,
+          subject,
+          html: html || `<p>${text}</p>`,
+          text,
+          idempotencyKey: idemKey,
+          label: "system-notification",
         });
-        if (!res.ok) {
-          const body = await res.text();
-          if (res.status === 404 || /not found/i.test(body)) {
-            errors.push(`${to}: Lovable Emails is not set up for this project yet. Configure an email domain in Cloud → Emails, or switch to SMTP/Resend in Admin → Email settings.`);
-          } else {
-            errors.push(`${to}: send-transactional-email ${res.status}: ${body}`);
-          }
-        } else {
-          await res.text();
-        }
+        if (!result.ok) errors.push(`${to}: ${result.error}`);
       }
       if (errors.length) return { ok: false, transport: "lovable", error: errors.join("; ") };
       return { ok: true, transport: "lovable" };
