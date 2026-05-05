@@ -332,6 +332,16 @@ export default function Auth() {
   const showFooter = branding?.show_footer !== false;
   const hasLogo = branding?.show_logo !== false && !!branding?.logo_url;
   const logoOnly = hasLogo && !showAppName;
+  // Custom logo sizing — when set, overrides the legacy logoSizeClasses + logoOnly heuristics.
+  // width=0 ⇒ auto (preserve aspect). Same for height.
+  const customLogoStyle: React.CSSProperties | null =
+    branding?.logo_login_width || branding?.logo_login_height
+      ? {
+          width: branding?.logo_login_width ? `${branding.logo_login_width}px` : "auto",
+          height: branding?.logo_login_height ? `${branding.logo_login_height}px` : "auto",
+          objectFit: "contain",
+        }
+      : null;
   const heroTextColor = (branding as any)?.hero_text_color || undefined;
   const formTextColor = (branding as any)?.form_text_color || undefined;
   const appNameColor = (branding as any)?.app_name_color || undefined;
