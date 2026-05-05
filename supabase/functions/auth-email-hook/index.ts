@@ -11,6 +11,8 @@ import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
 import { tryRenderOrgOverride } from '../_shared/email-overrides.tsx'
+import { resolveEmailBranding } from '../_shared/email-branding.ts'
+import { BrandContext } from '../_shared/email-templates/_brand.tsx'
 
 // Map Supabase auth action_type values to template_key values used by
 // the org override editor (kebab-case).
