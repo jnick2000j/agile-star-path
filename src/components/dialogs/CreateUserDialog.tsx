@@ -32,10 +32,17 @@ interface OrgOption {
   name: string;
 }
 
+interface RoleOption {
+  id: string;
+  name: string;
+  is_system: boolean;
+}
+
 export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orgs, setOrgs] = useState<OrgOption[]>([]);
+  const [roles, setRoles] = useState<RoleOption[]>([]);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -46,7 +53,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     department: "",
     location: "",
     organization_id: "",
-    access_level: "editor",
+    custom_role_id: "",
     create_as_platform_admin: false,
   });
 
