@@ -15859,6 +15859,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      ensure_org_admin_role_for_user: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: undefined
+      }
       generate_reference_number: {
         Args: { _entity_type: string; _organization_id: string }
         Returns: string
