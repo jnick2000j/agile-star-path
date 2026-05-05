@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const { action, user_id, email, password, full_name, redirect_to, organization_id } = body;
+    const new_email: string | undefined = body?.new_email;
     const create_as_platform_admin = body?.create_as_platform_admin === true;
 
     // Non-platform admins must be an org admin of the target organization
