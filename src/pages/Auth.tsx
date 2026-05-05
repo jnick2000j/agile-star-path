@@ -262,19 +262,12 @@ export default function Auth() {
       return;
     }
 
-    // step === "verify"
+    // step === "verify" — login flow only
     if (!validateVerify()) return;
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
     if (!error) {
-      if (mode === "signup") {
-        navigate("/onboarding", { replace: true });
-      }
-      // Don't auto-provision the org here — the post-auth effect routes
-      // brand-new users to /onboarding where the full wizard (intent →
-      // vertical → org name → invite → plan) collects everything properly.
-      // The org_name captured during signup is preserved in user_metadata
-      // and the wizard pre-fills it.
+      // Returning user — let the post-auth effect route to dashboard or onboarding
     }
     setLoading(false);
   };
