@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, ArrowLeft, Loader2, Headphones, GitBranch, Layers } from "lucide-react";
+import { Check, ArrowLeft, Loader2, Headphones, GitBranch, Layers, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
