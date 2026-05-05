@@ -163,7 +163,7 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
         body: {
           action: "resend_invite",
           user_id: user.user_id,
-          redirect_to: `${window.location.origin}/auth`,
+          redirect_to: `${window.location.origin}/auth/confirm`,
         },
       });
       if (error) throw error;
