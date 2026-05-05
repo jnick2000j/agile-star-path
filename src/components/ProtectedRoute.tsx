@@ -25,6 +25,23 @@ const SUSPENSION_ALLOWED_PATHS = [
   "/accept-invite",
 ];
 
+// Routes available to external customer-portal users (profiles.user_type = 'portal').
+// Anything else returns an Access Denied screen so portal users cannot reach the
+// internal staff app even if they manage to type the URL directly.
+const PORTAL_ALLOWED_PREFIXES = [
+  "/help",
+  "/csat",
+  "/knowledgebase",
+  "/change-management/portal",
+  "/profile",
+  "/auth",
+  "/accept-invite",
+];
+
+function isPortalAllowedPath(pathname: string): boolean {
+  return PORTAL_ALLOWED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
   const { user, loading, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
@@ -33,7 +50,18 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   const [disabledInfo, setDisabledInfo] = useState<{ disabled: boolean; reason: string | null }>(
     { disabled: false, reason: null }
   );
+  const [userType, setUserType] = useState<"staff" | "portal" | "system" | null>(null);
   const mfa = useMFAGate();
+
+  useEffect(() => {
+    if (!user) { setUserType(null); return; }
+    supabase
+      .from("profiles")
+      .select("user_type")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setUserType((data?.user_type as any) ?? "staff"));
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
