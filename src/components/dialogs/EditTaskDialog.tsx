@@ -223,6 +223,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
       setRiskId((task as any).risk_id || "");
       setIssueId((task as any).issue_id || "");
       setFeatureId((task as any).feature_id || "");
+      setParentTaskId((task as any).parent_task_id || "");
     }
   }, [task]);
 
