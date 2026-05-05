@@ -449,12 +449,17 @@ export default function AdminPanel() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <EditUserDialog user={user} onSuccess={fetchUsers} />
-                          <Link to="/admin?tab=roles-access">
-                            <Button variant="outline" size="sm" className="gap-1.5">
-                              <Settings2 className="h-3.5 w-3.5" />
-                              Edit access
-                            </Button>
-                          </Link>
+                          <AssignUserAccessDialog
+                            onSuccess={fetchUsers}
+                            presetUserId={user.user_id}
+                            presetUserLabel={getUserDisplayName(user)}
+                            trigger={
+                              <Button variant="outline" size="sm" className="gap-1.5">
+                                <Settings2 className="h-3.5 w-3.5" />
+                                Edit access
+                              </Button>
+                            }
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
