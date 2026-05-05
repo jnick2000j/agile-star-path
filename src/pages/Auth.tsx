@@ -64,7 +64,7 @@ const nameSchema = z.string().min(1, "Name is required");
 const otpSchema = z.string().regex(/^\d{6,8}$/, "Enter the verification code");
 
 type AuthMode = "login" | "signup" | "sso";
-type AuthStep = "request" | "verify";
+type AuthStep = "request" | "verify" | "check_email";
 const SIGNUP_ONBOARDING_EMAIL_KEY = "taskmaster:signup-onboarding-email";
 
 const defaultFeatures = [
@@ -108,7 +108,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; otp?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<LoginBranding | null>(null);
 
-  const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
+  const { requestEmailOtp, verifyEmailOtp, requestSignupConfirmation, user } = useAuth();
   const navigate = useNavigate();
 
 
