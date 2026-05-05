@@ -2,10 +2,13 @@ import { useState, useEffect, createContext, useContext, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getSiteUrl, DEFAULT_SITE_URL } from "@/lib/site-url";
 
-// Always send users back to the published site after email verification.
-// Preview/sandbox URLs go stale and show a Lovable fallback page.
-export const APP_URL = "https://thetaskmaster.lovable.app";
+/**
+ * @deprecated Prefer `getSiteUrl()` from `@/lib/site-url`, which reads the
+ * configurable platform setting. This constant remains as a static fallback.
+ */
+export const APP_URL = DEFAULT_SITE_URL;
 
 interface UserProfile {
   first_name: string | null;
