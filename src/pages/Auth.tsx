@@ -378,9 +378,9 @@ export default function Auth() {
         {step === "verify" && (
           <div className="space-y-3">
             <Label htmlFor="otp" className="text-xs font-medium flex items-center gap-1.5">
-              <KeyRound className="h-3.5 w-3.5" /> 6-digit verification code
+              <KeyRound className="h-3.5 w-3.5" /> Verification code
             </Label>
-            <InputOTP maxLength={6} value={otp} onChange={setOtp} containerClassName="justify-start">
+            <InputOTP maxLength={8} value={otp} onChange={setOtp} containerClassName="justify-start">
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -388,6 +388,8 @@ export default function Auth() {
                 <InputOTPSlot index={3} />
                 <InputOTPSlot index={4} />
                 <InputOTPSlot index={5} />
+                <InputOTPSlot index={6} />
+                <InputOTPSlot index={7} />
               </InputOTPGroup>
             </InputOTP>
             {errors.otp && <p className="text-xs text-destructive">{errors.otp}</p>}
