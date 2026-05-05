@@ -3,6 +3,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { parseEmailWebhookPayload } from 'npm:@lovable.dev/email-js'
 import { WebhookError, verifyWebhookRequest } from 'npm:@lovable.dev/webhooks-js'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { getEmailTransport, sendViaSmtp } from '../_shared/smtp-transport.ts'
 import { SignupEmail } from '../_shared/email-templates/signup.tsx'
 import { InviteEmail } from '../_shared/email-templates/invite.tsx'
 import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
@@ -243,8 +244,9 @@ async function handleWebhook(req: Request): Promise<Response> {
   )
 
   const messageId = crypto.randomUUID()
+  const subject = EMAIL_SUBJECTS[emailType] || 'Notification'
 
-  // Log pending BEFORE enqueue so we have a record even if enqueue crashes
+  // Log pending BEFORE send/enqueue so we have a record even if it crashes
   await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: emailType,
@@ -252,6 +254,40 @@ async function handleWebhook(req: Request): Promise<Response> {
     status: 'pending',
   })
 
+  // ON-PREMISES PATH: send directly via SMTP, bypassing the Lovable queue.
+  if (getEmailTransport() === 'smtp') {
+    const smtpResult = await sendViaSmtp({
+      to: payload.data.email,
+      subject,
+      html,
+      text,
+      from: Deno.env.get('SMTP_FROM') || `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+    })
+
+    await supabase.from('email_send_log').insert({
+      message_id: messageId,
+      template_name: emailType,
+      recipient_email: payload.data.email,
+      status: smtpResult.ok ? 'sent' : 'failed',
+      error_message: smtpResult.ok ? null : smtpResult.error,
+    })
+
+    if (!smtpResult.ok) {
+      console.error('SMTP send failed for auth email', { error: smtpResult.error, run_id, emailType })
+      return new Response(JSON.stringify({ error: smtpResult.error }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    console.log('Auth email sent via SMTP', { emailType, email: payload.data.email, run_id })
+    return new Response(
+      JSON.stringify({ success: true, transport: 'smtp' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // CLOUD PATH (default): enqueue for async processing.
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'auth_emails',
     payload: {
