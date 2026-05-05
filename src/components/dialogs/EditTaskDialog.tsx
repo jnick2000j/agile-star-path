@@ -77,7 +77,23 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdate }: EditTaskD
   const [riskId, setRiskId] = useState("");
   const [issueId, setIssueId] = useState("");
   const [featureId, setFeatureId] = useState("");
+  const [parentTaskId, setParentTaskId] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const { data: parentCandidates = [] } = useQuery({
+    queryKey: ["parent-task-candidates", currentOrganization?.id, task?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const { data } = await supabase
+        .from("tasks")
+        .select("id, name, reference_number, parent_task_id")
+        .eq("organization_id", currentOrganization.id)
+        .is("parent_task_id", null)
+        .order("name");
+      return (data || []).filter((t: any) => t.id !== task?.id);
+    },
+    enabled: open && !!currentOrganization?.id,
+  });
 
   const { data: sprints = [] } = useQuery({
     queryKey: ["sprints-for-task", currentOrganization?.id],
