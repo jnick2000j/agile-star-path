@@ -15634,6 +15634,10 @@ export type Database = {
         Args: { _task_id: string; _user_id: string }
         Returns: boolean
       }
+      check_org_resource_limit: {
+        Args: { _org_id: string; _resource_type: string }
+        Returns: boolean
+      }
       check_plan_limit: {
         Args: { _org_id: string; _resource_type: string }
         Returns: boolean
@@ -15673,6 +15677,7 @@ export type Database = {
         }
         Returns: Json
       }
+      count_billable_users: { Args: { _org_id: string }; Returns: number }
       count_billing_account_orgs: {
         Args: { _account_id: string }
         Returns: number

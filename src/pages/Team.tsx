@@ -15,7 +15,9 @@ import {
   Loader2,
   ShieldOff,
   ShieldCheck,
+  KeyRound,
 } from "lucide-react";
+import { SystemRoleAssignmentsPanel } from "@/components/team/SystemRoleAssignmentsPanel";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -102,6 +104,9 @@ export default function Team() {
   const [statusAction, setStatusAction] = useState<"disable" | "enable">("disable");
   const [statusReason, setStatusReason] = useState("");
   const [statusBusy, setStatusBusy] = useState(false);
+
+  // System role manager dialog
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -403,6 +408,22 @@ export default function Team() {
               </div>
             </PopoverContent>
           </Popover>
+          <Button variant="outline" className="gap-2" onClick={() => setRolesDialogOpen(true)}>
+            <KeyRound className="h-4 w-4" />
+            System Roles
+          </Button>
+          <Dialog open={rolesDialogOpen} onOpenChange={setRolesDialogOpen}>
+            <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>System role assignments</DialogTitle>
+                <DialogDescription>
+                  Manage Helpdesk, Change Management, Governance and Customer
+                  Portal roles for members of this organization.
+                </DialogDescription>
+              </DialogHeader>
+              <SystemRoleAssignmentsPanel />
+            </DialogContent>
+          </Dialog>
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (open) fetchAvailableUsers(); }}>
             <DialogTrigger asChild>
               <Button className="gap-2">

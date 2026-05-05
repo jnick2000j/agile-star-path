@@ -25,6 +25,23 @@ const SUSPENSION_ALLOWED_PATHS = [
   "/accept-invite",
 ];
 
+// Routes available to external customer-portal users (profiles.user_type = 'portal').
+// Anything else returns an Access Denied screen so portal users cannot reach the
+// internal staff app even if they manage to type the URL directly.
+const PORTAL_ALLOWED_PREFIXES = [
+  "/help",
+  "/csat",
+  "/knowledgebase",
+  "/change-management/portal",
+  "/profile",
+  "/auth",
+  "/accept-invite",
+];
+
+function isPortalAllowedPath(pathname: string): boolean {
+  return PORTAL_ALLOWED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
   const { user, loading, userRole } = useAuth();
   const { currentOrganization } = useOrganization();
@@ -33,7 +50,18 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   const [disabledInfo, setDisabledInfo] = useState<{ disabled: boolean; reason: string | null }>(
     { disabled: false, reason: null }
   );
+  const [userType, setUserType] = useState<"staff" | "portal" | "system" | null>(null);
   const mfa = useMFAGate();
+
+  useEffect(() => {
+    if (!user) { setUserType(null); return; }
+    supabase
+      .from("profiles")
+      .select("user_type")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setUserType((data?.user_type as any) ?? "staff"));
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
@@ -148,6 +176,22 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
         />
       );
     }
+  }
+
+  // Portal-user gate — external customer-portal users can only reach the
+  // customer-facing surfaces (help, knowledgebase, CSAT, change-portal, profile).
+  if (userType === "portal" && !isPortalAllowedPath(location.pathname)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Customer portal access</h1>
+          <p className="text-muted-foreground mb-4">
+            Your account is configured as a customer-portal user and doesn't have access to internal staff pages.
+          </p>
+          <a href="/help" className="text-primary underline">Go to the help portal</a>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
