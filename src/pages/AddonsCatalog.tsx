@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, ArrowLeft, Loader2, Headphones, GitBranch, Layers, GraduationCap } from "lucide-react";
+import { Check, ArrowLeft, Loader2, Headphones, GitBranch, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -33,7 +33,6 @@ const ICON_MAP: Record<string, any> = {
   "Helpdesk Add-on": Headphones,
   "Change Management Add-on": GitBranch,
   "ITSM Suite Add-on": Layers,
-  "Learning Management Add-on": GraduationCap,
 };
 
 const FEATURE_HIGHLIGHTS: Record<string, string[]> = {
@@ -54,12 +53,6 @@ const FEATURE_HIGHLIGHTS: Record<string, string[]> = {
     "Save ~20% vs buying separately",
     "Unified ticket → change workflow",
     "Best for IT-heavy operations",
-  ],
-  "Learning Management Add-on": [
-    "Author courses, lessons & quizzes",
-    "Certifications and learner progress tracking",
-    "Embed training in onboarding & projects",
-    "Role-based learning paths",
   ],
 };
 
@@ -104,8 +97,6 @@ export default function AddonsCatalog() {
       ? "helpdesk"
       : purchasingAddon.name.toLowerCase().includes("change")
       ? "change_management"
-      : purchasingAddon.name.toLowerCase().includes("learning")
-      ? "lms"
       : "addon";
     return `${base}&addon=${key}&addon_name=${encodeURIComponent(purchasingAddon.name)}`;
   };
@@ -116,7 +107,6 @@ export default function AddonsCatalog() {
     }
     if (addon.name.includes("Helpdesk")) return hasFeature("feature_helpdesk");
     if (addon.name.includes("Change Management")) return hasFeature("feature_change_management");
-    if (addon.name.includes("Learning")) return hasFeature("feature_lms");
     return false;
   };
 
@@ -130,10 +120,10 @@ export default function AddonsCatalog() {
         <div className="text-center mb-10">
           <Badge variant="secondary" className="mb-3">14-day free trial • Cancel anytime</Badge>
           <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
-            Power up with Helpdesk, Change Management &amp; Learning
+            Power up with Helpdesk &amp; Change Management
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Add ITSM and LMS modules to your existing plan. They unlock automatically the moment your subscription is active.
+            Add ITSM modules to your existing plan. They unlock automatically the moment your subscription is active.
           </p>
 
           <div className="inline-flex gap-1 p-1 bg-muted rounded-lg mt-6">
@@ -161,7 +151,7 @@ export default function AddonsCatalog() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-3">
             {addons.map((addon) => {
               const Icon = ICON_MAP[addon.name] || Layers;
               const price = cycle === "monthly" ? addon.price_monthly : addon.price_yearly;
