@@ -93,6 +93,19 @@ Deno.serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+      // Every new user must be associated with at least one organization,
+      // unless the caller explicitly creates a platform administrator.
+      const isCreatingPlatformAdmin =
+        (await req.clone().json().catch(() => ({})))?.create_as_platform_admin === true;
+      if (!organization_id && !isCreatingPlatformAdmin) {
+        return new Response(
+          JSON.stringify({
+            error:
+              "organization_id is required. Every new user must be assigned to an organization (platform administrators excepted).",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
       const redirectTo =
         redirect_to ||
