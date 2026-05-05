@@ -197,7 +197,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/branding" element={<ProtectedRoute><BrandingSettings /></ProtectedRoute>} />
             <Route path="/security" element={<ProtectedRoute><SecurityCenter /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><AdminPanel /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin", "org_admin"]}><AdminPanel /></ProtectedRoute>} />
             <Route path="/admin/migrations" element={<Navigate to="/platform-admin?tab=migrations" replace />} />
             <Route path="/platform-admin" element={<ProtectedRoute requiredRoles={["admin"]}><PlatformAdmin /></ProtectedRoute>} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
