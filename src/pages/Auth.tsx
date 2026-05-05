@@ -24,6 +24,8 @@ interface LoginBranding {
   logo_size: string | null;
   show_logo: boolean | null;
   header_font_size: string | null;
+  logo_login_width: number | null;
+  logo_login_height: number | null;
   hero_title: string | null;
   hero_description: string | null;
   feature_1_label: string | null;
@@ -330,6 +332,16 @@ export default function Auth() {
   const showFooter = branding?.show_footer !== false;
   const hasLogo = branding?.show_logo !== false && !!branding?.logo_url;
   const logoOnly = hasLogo && !showAppName;
+  // Custom logo sizing — when set, overrides the legacy logoSizeClasses + logoOnly heuristics.
+  // width=0 ⇒ auto (preserve aspect). Same for height.
+  const customLogoStyle: React.CSSProperties | null =
+    branding?.logo_login_width || branding?.logo_login_height
+      ? {
+          width: branding?.logo_login_width ? `${branding.logo_login_width}px` : "auto",
+          height: branding?.logo_login_height ? `${branding.logo_login_height}px` : "auto",
+          objectFit: "contain",
+        }
+      : null;
   const heroTextColor = (branding as any)?.hero_text_color || undefined;
   const formTextColor = (branding as any)?.form_text_color || undefined;
   const appNameColor = (branding as any)?.app_name_color || undefined;
@@ -384,7 +396,14 @@ export default function Auth() {
           <img
             src={branding!.logo_url!}
             alt={appName}
-            className={logoOnly ? "max-h-20 w-auto object-contain" : `${logoSizeClasses[branding?.logo_size || "small"]} object-contain`}
+            style={customLogoStyle ?? undefined}
+            className={
+              customLogoStyle
+                ? ""
+                : logoOnly
+                  ? "max-h-20 w-auto object-contain"
+                  : `${logoSizeClasses[branding?.logo_size || "small"]} object-contain`
+            }
           />
         ) : (
           <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -541,7 +560,14 @@ export default function Auth() {
             <img
               src={branding!.logo_url!}
               alt={appName}
-              className={logoOnly ? "max-h-40 w-auto object-contain" : "max-h-24 w-auto object-contain"}
+              style={customLogoStyle ?? undefined}
+              className={
+                customLogoStyle
+                  ? ""
+                  : logoOnly
+                    ? "max-h-40 w-auto object-contain"
+                    : "max-h-24 w-auto object-contain"
+              }
             />
           ) : (
             <div className="flex items-center gap-3">
@@ -610,7 +636,14 @@ export default function Auth() {
                   <img
                     src={branding!.logo_url!}
                     alt={appName}
-                    className={logoOnly ? "max-h-20 w-auto object-contain" : "h-8 w-auto object-contain"}
+                    style={customLogoStyle ?? undefined}
+                    className={
+                      customLogoStyle
+                        ? ""
+                        : logoOnly
+                          ? "max-h-20 w-auto object-contain"
+                          : "h-8 w-auto object-contain"
+                    }
                   />
                 ) : (
                   <div className="h-8 w-8 rounded-lg bg-primary-foreground/20 flex items-center justify-center"><Layers className="h-4 w-4" /></div>
@@ -649,7 +682,14 @@ export default function Auth() {
                 <img
                   src={branding!.logo_url!}
                   alt={appName}
-                  className={logoOnly ? "max-h-28 w-auto object-contain" : `${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`}
+                  style={customLogoStyle ?? undefined}
+                  className={
+                    customLogoStyle
+                      ? ""
+                      : logoOnly
+                        ? "max-h-28 w-auto object-contain"
+                        : `${logoSizeClasses[branding?.logo_size || "medium"]} object-contain`
+                  }
                 />
               ) : (
                 <div className="h-10 w-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center"><Layers className="h-5 w-5" /></div>

@@ -17,6 +17,7 @@ import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "sonner";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
+import { useLogoSize, logoSizeStyle } from "@/hooks/useLogoSize";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,16 +117,18 @@ export function Header({ title, subtitle }: HeaderProps) {
   // Determine which logo to show (resolve to signed URL since 'logos' bucket is private)
   const storedLogo = currentOrganization?.logo_url || globalLogoUrl;
   const logoUrl = useSignedLogo(storedLogo);
+  const headerLogoSize = useLogoSize("header");
 
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
       <div className="flex items-center gap-5">
         {/* Organization Logo in Header - left of title */}
         {logoUrl && (
-          <img 
-            src={logoUrl} 
+          <img
+            src={logoUrl}
             alt="Organization logo"
-            className="h-14 w-auto object-contain drop-shadow-sm"
+            style={logoSizeStyle(headerLogoSize)}
+            className="drop-shadow-sm"
           />
         )}
         <div>
