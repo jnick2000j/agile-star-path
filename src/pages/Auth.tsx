@@ -560,7 +560,14 @@ export default function Auth() {
             <img
               src={branding!.logo_url!}
               alt={appName}
-              className={logoOnly ? "max-h-40 w-auto object-contain" : "max-h-24 w-auto object-contain"}
+              style={customLogoStyle ?? undefined}
+              className={
+                customLogoStyle
+                  ? ""
+                  : logoOnly
+                    ? "max-h-40 w-auto object-contain"
+                    : "max-h-24 w-auto object-contain"
+              }
             />
           ) : (
             <div className="flex items-center gap-3">
