@@ -465,6 +465,13 @@ export default function PlatformAdmin() {
           <SuspensionHistory limit={50} />
         </TabsContent>
 
+        <TabsContent value="users">
+          <UserManagementPanel
+            heading="Global User Administration"
+            subtitle="Manage every user across all tenants. Edits here apply organization-wide based on the viewer's permissions."
+          />
+        </TabsContent>
+
         <TabsContent value="platform-admins">
           <PlatformAdminsPanel />
         </TabsContent>
