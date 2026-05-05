@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserPlus } from "lucide-react";
@@ -19,9 +27,16 @@ interface CreateUserDialogProps {
   onSuccess: () => void;
 }
 
+interface OrgOption {
+  id: string;
+  name: string;
+}
+
 export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [orgs, setOrgs] = useState<OrgOption[]>([]);
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -30,11 +45,33 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
     phone_number: "",
     department: "",
     location: "",
+    organization_id: "",
+    access_level: "editor",
+    create_as_platform_admin: false,
   });
+
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from("organizations")
+      .select("id, name")
+      .order("name")
+      .then(({ data }) => setOrgs((data as OrgOption[]) || []));
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: role } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsPlatformAdmin(!!role);
+    });
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       toast.error("Email and password are required");
       return;
@@ -45,11 +82,16 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
       return;
     }
 
+    if (!formData.organization_id && !formData.create_as_platform_admin) {
+      toast.error("Select an organization, or mark this user as a platform administrator.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const fullName = `${formData.first_name} ${formData.last_name}`.trim();
-      
+
       // Create user via the manage-user edge function (uses admin API)
       const { data, error } = await supabase.functions.invoke("manage-user", {
         body: {
@@ -58,6 +100,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           password: formData.password,
           full_name: fullName || formData.email.split('@')[0],
           redirect_to: `${window.location.origin}/auth`,
+          organization_id: formData.organization_id || null,
+          access_level: formData.access_level,
+          create_as_platform_admin: formData.create_as_platform_admin,
         },
       });
 
@@ -102,6 +147,9 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         phone_number: "",
         department: "",
         location: "",
+        organization_id: "",
+        access_level: "editor",
+        create_as_platform_admin: false,
       });
       onSuccess();
     } catch (error: any) {
@@ -200,6 +248,69 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-3 rounded-md border p-3">
+            <Label className="text-sm font-semibold">Organization assignment *</Label>
+            <p className="text-xs text-muted-foreground">
+              Every user must belong to at least one organization. Platform administrators are the only exception.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="organization_id">Organization</Label>
+                <Select
+                  value={formData.organization_id}
+                  onValueChange={(v) => setFormData({ ...formData, organization_id: v })}
+                  disabled={formData.create_as_platform_admin}
+                >
+                  <SelectTrigger id="organization_id">
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {orgs.map((o) => (
+                      <SelectItem key={o.id} value={o.id}>
+                        {o.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="access_level">Access level</Label>
+                <Select
+                  value={formData.access_level}
+                  onValueChange={(v) => setFormData({ ...formData, access_level: v })}
+                  disabled={formData.create_as_platform_admin}
+                >
+                  <SelectTrigger id="access_level">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                    <SelectItem value="editor">Editor</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="admin">Org Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {isPlatformAdmin && (
+              <label className="flex items-start gap-2 pt-1 text-sm">
+                <Checkbox
+                  checked={formData.create_as_platform_admin}
+                  onCheckedChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      create_as_platform_admin: v === true,
+                      organization_id: v === true ? "" : formData.organization_id,
+                    })
+                  }
+                />
+                <span>
+                  Create as <strong>Platform Administrator</strong> (no organization required; full system access).
+                </span>
+              </label>
+            )}
           </div>
 
           <DialogFooter>

@@ -45,6 +45,7 @@ import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles"
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
+import { OrphanUsersPanel } from "@/components/platform-admin/OrphanUsersPanel";
 import { Layers as LayersIcon, Briefcase } from "lucide-react";
 import {
   AlertDialog,
@@ -264,6 +265,7 @@ export default function PlatformAdmin() {
         <TabsList className="bg-secondary flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tenants">Tenant Management</TabsTrigger>
+          <TabsTrigger value="orphans">Orphan Users</TabsTrigger>
           <TabsTrigger value="licenses">Licenses</TabsTrigger>
           <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
           <TabsTrigger value="ai">AI &amp; Credits</TabsTrigger>
@@ -458,6 +460,10 @@ export default function PlatformAdmin() {
           </Card>
 
           <SuspensionHistory limit={50} />
+        </TabsContent>
+
+        <TabsContent value="orphans">
+          <OrphanUsersPanel />
         </TabsContent>
 
         <TabsContent value="licenses">

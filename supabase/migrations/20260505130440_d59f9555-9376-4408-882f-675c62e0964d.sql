@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.list_orphan_users() FROM PUBLIC, anon;
