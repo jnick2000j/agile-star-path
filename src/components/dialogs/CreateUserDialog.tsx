@@ -189,7 +189,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         department: "",
         location: "",
         organization_id: "",
-        access_level: "editor",
+        custom_role_id: "",
         create_as_platform_admin: false,
       });
       onSuccess();
