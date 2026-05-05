@@ -174,6 +174,8 @@ Deno.serve(async (req) => {
                 <p>Your <strong>${setting.frequency}</strong> update for this ${setting.entity_type} is <strong>${statusText}</strong>.</p>
                 <p>Please log in and submit your update at your earliest convenience.</p>
                 <p>Thank you.</p>`,
+              organizationId: setting.organization_id,
+              triggerKey: "update_reminder",
             });
             if (!result.ok) {
               console.error("Email send failed:", result.error);

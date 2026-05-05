@@ -195,6 +195,8 @@ async function generateForProject(supabase: any, project: ProjectRow, periodStar
         to: r.email,
         subject: `[${project.name}] Weekly construction progress · ${periodStartIso.slice(0, 10)}`,
         html,
+        organizationId: project.organization_id,
+        triggerKey: "construction_weekly_report",
       });
       if (res.ok) {
         delivered++;

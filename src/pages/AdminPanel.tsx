@@ -63,6 +63,7 @@ import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EmailSettings } from "@/components/admin/EmailSettings";
+import { EmailTriggerSettings } from "@/components/admin/EmailTriggerSettings";
 
 
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
@@ -600,8 +601,9 @@ export default function AdminPanel() {
           <AIProviderSettings />
         </TabsContent>
 
-        <TabsContent value="email">
+        <TabsContent value="email" className="space-y-6">
           <EmailSettings />
+          <EmailTriggerSettings />
         </TabsContent>
 
         <TabsContent value="migration">

@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { action, user_id, email, password, full_name, redirect_to } = await req.json();
+    const { action, user_id, email, password, full_name, redirect_to, organization_id } = await req.json();
 
     if (action === "invite") {
       if (!email) {
@@ -146,6 +146,9 @@ Deno.serve(async (req) => {
           tempPassword: password,
         }),
         idempotencyKey: `manage-user-invite-${newUser.user?.id ?? email}`,
+        label: "user-invite",
+        triggerKey: "user_invite",
+        organizationId: organization_id ?? null,
       });
       emailSent = result.ok;
       if (!result.ok) {
@@ -211,6 +214,9 @@ Deno.serve(async (req) => {
         subject: `${inviterName} re-sent your invite to ${appName}`,
         html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
         idempotencyKey: `manage-user-resend-${user_id}-${Date.now()}`,
+        label: "user-invite-resend",
+        triggerKey: "user_invite_resend",
+        organizationId: organization_id ?? null,
       });
       emailSent = result.ok;
       if (!result.ok) emailError = result.error;

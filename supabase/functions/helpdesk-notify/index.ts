@@ -169,11 +169,23 @@ Deno.serve(async (req) => {
   const idemKey = `helpdesk-${payload.notification_type}-${ticket.id}-${(payload.metadata?.idempotency_suffix ?? Date.now())}`;
 
   try {
+    const triggerKeyMap: Record<string, string> = {
+      reply: "helpdesk_ticket_reply",
+      assigned: "helpdesk_ticket_assigned",
+      status_changed: "helpdesk_ticket_status",
+      sla_warning: "helpdesk_sla_warning",
+      created: "helpdesk_ticket_created",
+      resolved: "helpdesk_ticket_status",
+      internal_note: "helpdesk_ticket_reply",
+    };
     const result = await sendTransactionalEmail({
       to: recipient,
       subject,
       html,
       idempotencyKey: idemKey,
+      label: `helpdesk-${payload.notification_type}`,
+      triggerKey: triggerKeyMap[payload.notification_type],
+      organizationId: ticket.organization_id,
     });
     if (result.ok) {
       if (logRow?.id) {

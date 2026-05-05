@@ -175,6 +175,9 @@ Deno.serve(async (req) => {
             </div>
           `,
       idempotencyKey: `org-invite-${invite.id}`,
+      label: "user-invite",
+      triggerKey: "user_invite",
+      organizationId: organization_id,
     });
     emailSent = result.ok;
     if (!result.ok) console.error("send-invite email failed:", result.error);

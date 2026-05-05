@@ -39,6 +39,13 @@ export interface SendEmailOptions {
   organizationId?: string;
   /** Override transport selection. */
   transport?: EmailTransport;
+  /**
+   * Logical trigger key used by the admin email-trigger toggles
+   * (public.email_trigger_settings). When set together with
+   * `organizationId`, the send is short-circuited (skipped) if an admin
+   * has disabled this trigger for that org.
+   */
+  triggerKey?: string;
 }
 
 export interface SendEmailResult {
@@ -46,6 +53,8 @@ export interface SendEmailResult {
   transport: EmailTransport;
   messageId?: string;
   error?: string;
+  /** True when the send was skipped because the trigger is admin-disabled. */
+  skipped?: boolean;
 }
 
 function envTransport(): EmailTransport {
@@ -117,7 +126,39 @@ export async function resolveTransport(
   return envTransport();
 }
 
+async function isTriggerEnabled(orgId: string, triggerKey: string): Promise<boolean> {
+  try {
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !key) return true;
+    const sb = createClient(url, key);
+    const { data, error } = await sb.rpc("is_email_trigger_enabled", {
+      _organization_id: orgId,
+      _trigger_key: triggerKey,
+    });
+    if (error) {
+      console.warn("trigger gate check failed; defaulting to enabled:", error.message);
+      return true;
+    }
+    return data !== false;
+  } catch (e) {
+    console.warn("trigger gate check threw; defaulting to enabled:", e);
+    return true;
+  }
+}
+
 export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult> {
+  // Admin trigger gate (applies to all transports).
+  if (opts.triggerKey && opts.organizationId) {
+    const enabled = await isTriggerEnabled(opts.organizationId, opts.triggerKey);
+    if (!enabled) {
+      console.log(
+        `email trigger '${opts.triggerKey}' disabled for org ${opts.organizationId} — skipping send to ${Array.isArray(opts.to) ? opts.to.join(",") : opts.to}`,
+      );
+      return { ok: true, transport: "lovable", skipped: true };
+    }
+  }
+
   const transport = await resolveTransport(opts.organizationId, opts.transport);
   const recipients = Array.isArray(opts.to) ? opts.to : [opts.to];
   const subject = opts.subject;

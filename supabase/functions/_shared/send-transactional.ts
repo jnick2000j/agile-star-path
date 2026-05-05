@@ -27,11 +27,22 @@ interface SendArgs {
   text?: string;
   /** Friendly label shown in email logs. Defaults to "transactional". */
   label?: string;
+  /**
+   * Logical trigger key used for admin on/off toggles
+   * (see public.email_trigger_settings). When provided alongside
+   * `organizationId`, the helper checks `is_email_trigger_enabled` first
+   * and short-circuits without sending if the trigger is disabled.
+   */
+  triggerKey?: string;
+  /** Org context for the trigger gate. Required when triggerKey is set. */
+  organizationId?: string | null;
 }
 
 interface SendResult {
   ok: boolean;
   error?: string;
+  /** True when the send was skipped because the trigger is admin-disabled. */
+  skipped?: boolean;
 }
 
 function htmlToText(html: string): string {
@@ -69,6 +80,27 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
   const messageId = args.idempotencyKey;
   const text = args.text ?? htmlToText(args.html);
   const label = args.label ?? "transactional";
+
+  // Admin trigger gate: if a triggerKey + organizationId is provided and the
+  // trigger is disabled for that org, do not send and do not log.
+  if (args.triggerKey && args.organizationId) {
+    try {
+      const { data: enabled, error: gateErr } = await admin.rpc(
+        "is_email_trigger_enabled",
+        { _organization_id: args.organizationId, _trigger_key: args.triggerKey },
+      );
+      if (gateErr) {
+        console.warn("trigger gate check failed; defaulting to enabled:", gateErr.message);
+      } else if (enabled === false) {
+        console.log(
+          `email trigger '${args.triggerKey}' disabled for org ${args.organizationId} — skipping ${args.label ?? "transactional"} to ${args.to}`,
+        );
+        return { ok: true, skipped: true };
+      }
+    } catch (e) {
+      console.warn("trigger gate check threw; defaulting to enabled:", e);
+    }
+  }
 
   try {
     // Get/create unsubscribe token (one per recipient email).

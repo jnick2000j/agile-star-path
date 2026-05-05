@@ -324,6 +324,8 @@ Deno.serve(async (req) => {
           to: [built.recipient.email],
           subject: built.emailSubject,
           html,
+          organizationId: payload.organization_id ?? undefined,
+          triggerKey: "system_notification",
         });
         if (result.ok) emailed++;
         else console.error("notification email failed", result.error);
