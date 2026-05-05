@@ -116,12 +116,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const requestEmailOtp = async (email: string, options: OtpRequestOptions = {}) => {
     try {
       const { firstName, lastName, fullName, orgName, shouldCreateUser = true } = options;
+      const siteUrl = await getSiteUrl();
 
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser,
-          emailRedirectTo: APP_URL,
+          emailRedirectTo: siteUrl,
           // user_metadata is only applied on first creation
           data: {
             full_name: fullName || `${firstName ?? ""} ${lastName ?? ""}`.trim() || undefined,
