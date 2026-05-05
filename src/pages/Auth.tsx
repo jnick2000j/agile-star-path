@@ -94,16 +94,18 @@ function PatternOverlay({ pattern }: { pattern: string }) {
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
+  const [step, setStep] = useState<AuthStep>("request");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; firstName?: string; lastName?: string; orgName?: string }>({});
+  const [resending, setResending] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; otp?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<LoginBranding | null>(null);
 
-  const { signIn, signUp, user } = useAuth();
+  const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -119,8 +121,6 @@ export default function Auth() {
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
-      // Use the public edge function so anonymous visitors get fresh signed URLs
-      // for the logo and login background (the 'logos' bucket is private).
       const { data: payload, error } = await supabase.functions.invoke("get-public-branding");
       const data = !error ? (payload as any)?.branding : null;
 
@@ -137,12 +137,16 @@ export default function Auth() {
     fetchGlobalBranding();
   }, []);
 
-  const validateForm = () => {
+  const switchMode = (next: AuthMode) => {
+    setMode(next);
+    setStep("request");
+    setOtp("");
+    setErrors({});
+  };
+
+  const validateRequest = () => {
     const newErrors: typeof errors = {};
     try { emailSchema.parse(email); } catch (e) { if (e instanceof z.ZodError) newErrors.email = e.errors[0].message; }
-    if (mode !== "forgot-password") {
-      try { passwordSchema.parse(password); } catch (e) { if (e instanceof z.ZodError) newErrors.password = e.errors[0].message; }
-    }
     if (mode === "signup") {
       try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
       try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
@@ -152,52 +156,81 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateVerify = () => {
+    const newErrors: typeof errors = {};
+    try { otpSchema.parse(otp); } catch (e) { if (e instanceof z.ZodError) newErrors.otp = e.errors[0].message; }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
-    setLoading(true);
-    if (mode === "login") {
-      const { error } = await signIn(email, password);
-      if (!error) navigate("/");
-    } else if (mode === "signup") {
-      const fullName = `${firstName} ${lastName}`.trim();
-      const { error } = await signUp(email, password, fullName, firstName, lastName, orgName.trim());
-      if (!error) { setMode("login"); setPassword(""); }
-    } else if (mode === "forgot-password") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
-      if (error) toast.error(error.message);
-      else { toast.success("Password reset email sent. Check your inbox."); setMode("login"); }
-    } else if (mode === "sso") {
+    if (mode === "sso") {
+      if (!validateRequest()) return;
+      setLoading(true);
       try {
         const { data, error } = await supabase.rpc("get_org_sso_config_by_domain", { _email: email });
         if (error) throw error;
         const cfg = Array.isArray(data) ? data[0] : data;
         if (!cfg?.saml_provider_id && !cfg?.oidc_issuer_url) {
-          toast.error("No SSO configured for this email domain. Use email + password or contact your admin.");
+          toast.error("No SSO configured for this email domain. Use email sign-in or contact your admin.");
           setLoading(false);
           return;
         }
-        // SAML path via signInWithSSO (provider id was returned by Supabase admin API)
         if (cfg.saml_provider_id) {
           const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
             providerId: cfg.saml_provider_id,
-            options: { redirectTo: `${window.location.origin}/` },
+            options: { redirectTo: APP_URL },
           });
           if (ssoError) throw ssoError;
         } else {
-          // OIDC fallback — also via signInWithSSO domain-based
           const domain = email.split("@")[1];
           const { error: ssoError } = await (supabase.auth as any).signInWithSSO({
             domain,
-            options: { redirectTo: `${window.location.origin}/` },
+            options: { redirectTo: APP_URL },
           });
           if (ssoError) throw ssoError;
         }
-      } catch (e: any) {
-        toast.error(e.message || "SSO sign-in failed");
+      } catch (err: any) {
+        toast.error(err.message || "SSO sign-in failed");
       }
+      setLoading(false);
+      return;
     }
+
+    if (step === "request") {
+      if (!validateRequest()) return;
+      setLoading(true);
+      const { error } = await requestEmailOtp(email, {
+        firstName: mode === "signup" ? firstName : undefined,
+        lastName: mode === "signup" ? lastName : undefined,
+        fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
+        orgName: mode === "signup" ? orgName.trim() : undefined,
+        shouldCreateUser: mode === "signup",
+      });
+      if (!error) setStep("verify");
+      setLoading(false);
+      return;
+    }
+
+    // step === "verify"
+    if (!validateVerify()) return;
+    setLoading(true);
+    const { error } = await verifyEmailOtp(email, otp);
+    if (!error) navigate("/");
     setLoading(false);
+  };
+
+  const handleResendCode = async () => {
+    setResending(true);
+    await requestEmailOtp(email, {
+      firstName: mode === "signup" ? firstName : undefined,
+      lastName: mode === "signup" ? lastName : undefined,
+      fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
+      orgName: mode === "signup" ? orgName.trim() : undefined,
+      shouldCreateUser: mode === "signup",
+    });
+    setResending(false);
   };
 
   const handleOAuth = async (provider: "google" | "apple") => {
