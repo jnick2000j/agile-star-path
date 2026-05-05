@@ -299,10 +299,18 @@ async function handleWebhook(req: Request): Promise<Response> {
     subject = rendered.subject
     console.log('Auth email using org override', { emailType, orgId })
   } else {
-    html = await renderAsync(React.createElement(EmailTemplate, templateProps))
-    text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
-      plainText: true,
-    })
+    const brand = await resolveEmailBranding(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      orgId,
+    )
+    const wrapped = React.createElement(
+      BrandContext.Provider,
+      { value: brand },
+      React.createElement(EmailTemplate, templateProps),
+    )
+    html = await renderAsync(wrapped)
+    text = await renderAsync(wrapped, { plainText: true })
     subject = EMAIL_SUBJECTS[emailType] || 'Notification'
   }
 
