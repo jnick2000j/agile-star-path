@@ -115,6 +115,28 @@ export default function AdminPanel() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
+  const [resendingFor, setResendingFor] = useState<string | null>(null);
+
+  const handleResendInvite = async (user: UserWithRole) => {
+    setResendingFor(user.user_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "resend_invite",
+          user_id: user.user_id,
+          redirect_to: `${window.location.origin}/auth`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Invite email resent to ${user.email}`);
+    } catch (err: any) {
+      console.error("Resend invite failed:", err);
+      toast.error(err.message || "Failed to resend invite");
+    } finally {
+      setResendingFor(null);
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
