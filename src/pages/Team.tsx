@@ -105,6 +105,9 @@ export default function Team() {
   const [statusReason, setStatusReason] = useState("");
   const [statusBusy, setStatusBusy] = useState(false);
 
+  // System role manager dialog
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
+
   useEffect(() => {
     fetchTeamMembers();
   }, [currentOrganization]);
