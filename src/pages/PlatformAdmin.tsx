@@ -464,6 +464,10 @@ export default function PlatformAdmin() {
           <SuspensionHistory limit={50} />
         </TabsContent>
 
+        <TabsContent value="platform-admins">
+          <PlatformAdminsPanel />
+        </TabsContent>
+
         <TabsContent value="orphans">
           <OrphanUsersPanel />
         </TabsContent>
