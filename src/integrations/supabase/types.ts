@@ -8362,6 +8362,91 @@ export type Database = {
           },
         ]
       }
+      lms_storage_overage: {
+        Row: {
+          amount_cents: number
+          bytes_used: number
+          created_at: string
+          id: string
+          organization_id: string
+          overage_gb: number
+          period_end: string
+          period_start: string
+          reported_at: string | null
+          stripe_invoice_item_id: string | null
+          unit_price_cents: number
+        }
+        Insert: {
+          amount_cents?: number
+          bytes_used?: number
+          created_at?: string
+          id?: string
+          organization_id: string
+          overage_gb?: number
+          period_end: string
+          period_start: string
+          reported_at?: string | null
+          stripe_invoice_item_id?: string | null
+          unit_price_cents?: number
+        }
+        Update: {
+          amount_cents?: number
+          bytes_used?: number
+          created_at?: string
+          id?: string
+          organization_id?: string
+          overage_gb?: number
+          period_end?: string
+          period_start?: string
+          reported_at?: string | null
+          stripe_invoice_item_id?: string | null
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_storage_overage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_storage_usage: {
+        Row: {
+          bytes_used: number
+          files_count: number
+          included_gb: number
+          last_recomputed_at: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          bytes_used?: number
+          files_count?: number
+          included_gb?: number
+          last_recomputed_at?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          bytes_used?: number
+          files_count?: number
+          included_gb?: number
+          last_recomputed_at?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_storage_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       major_incident_tickets: {
         Row: {
           created_at: string
@@ -16135,6 +16220,7 @@ export type Database = {
           status: string
         }[]
       }
+      lms_storage_overage_gb: { Args: { _org_id: string }; Returns: number }
       lms_submit_quiz: {
         Args: { _answers: Json; _lesson_id: string }
         Returns: {
@@ -16210,6 +16296,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recompute_lms_storage: { Args: { _org_id: string }; Returns: undefined }
       resolve_scim_groups_to_access_level: {
         Args: { _groups: string[]; _org_id: string }
         Returns: string
