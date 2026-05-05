@@ -132,17 +132,30 @@ export default function Auth() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      const orgNameMeta = user.user_metadata?.org_name;
-      if (orgNameMeta) {
-        provisionFirstOrganization(orgNameMeta)
-          .then(() => navigate("/"))
-          .catch((error) => toast.error(error.message || "Failed to create organization"));
+    if (!user) return;
+    // Decide where to send the user once they're authenticated.
+    // - Brand new sign-ups (no org membership yet) go to the onboarding wizard
+    //   so they pick intent / vertical / org / plan instead of being dropped on
+    //   an empty Dashboard.
+    // - Returning users go straight to the app.
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("user_organization_access")
+        .select("organization_id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_disabled", false);
+      if (cancelled) return;
+      if ((count ?? 0) === 0) {
+        navigate("/onboarding");
       } else {
         navigate("/");
       }
-    }
-  }, [user, navigate, provisionFirstOrganization]);
+    })().catch(() => {
+      if (!cancelled) navigate("/");
+    });
+    return () => { cancelled = true; };
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
