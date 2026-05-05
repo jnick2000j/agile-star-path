@@ -13,6 +13,8 @@ import {
   Settings2,
   Mail,
   Loader2,
+  RotateCcw,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
