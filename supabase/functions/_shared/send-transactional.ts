@@ -7,6 +7,7 @@
 // (process-email-queue) processes both auth and transactional queues.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { tryRenderOrgOverride } from "./email-overrides.tsx";
 
 // Baked in at email scaffold time. Keep these in sync with
 // supabase/functions/send-transactional-email/index.ts.
