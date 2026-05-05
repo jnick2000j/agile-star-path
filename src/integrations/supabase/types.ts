@@ -3795,6 +3795,7 @@ export type Database = {
           last_test_error: string | null
           last_test_status: string | null
           organization_id: string
+          reply_to: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -3808,6 +3809,7 @@ export type Database = {
           last_test_error?: string | null
           last_test_status?: string | null
           organization_id: string
+          reply_to?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -3821,6 +3823,7 @@ export type Database = {
           last_test_error?: string | null
           last_test_status?: string | null
           organization_id?: string
+          reply_to?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -5304,10 +5307,13 @@ export type Database = {
           default_assignee_id: string | null
           default_priority: Database["public"]["Enums"]["helpdesk_ticket_priority"]
           description: string | null
+          from_address: string | null
+          from_name: string | null
           id: string
           is_active: boolean
           name: string
           organization_id: string
+          reply_to: string | null
           updated_at: string
         }
         Insert: {
@@ -5317,10 +5323,13 @@ export type Database = {
           default_assignee_id?: string | null
           default_priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
           description?: string | null
+          from_address?: string | null
+          from_name?: string | null
           id?: string
           is_active?: boolean
           name: string
           organization_id: string
+          reply_to?: string | null
           updated_at?: string
         }
         Update: {
@@ -5330,10 +5339,13 @@ export type Database = {
           default_assignee_id?: string | null
           default_priority?: Database["public"]["Enums"]["helpdesk_ticket_priority"]
           description?: string | null
+          from_address?: string | null
+          from_name?: string | null
           id?: string
           is_active?: boolean
           name?: string
           organization_id?: string
+          reply_to?: string | null
           updated_at?: string
         }
         Relationships: [
