@@ -70,23 +70,48 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if caller is admin
+    // Check if caller is platform admin
     const { data: roleData } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", callerUser.id)
-      .single();
-
-    if (roleData?.role !== "admin") {
-      return new Response(
-        JSON.stringify({ error: "Only admins can perform this action" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      .eq("role", "admin")
+      .maybeSingle();
+    const isPlatformAdmin = roleData?.role === "admin";
 
     const body = await req.json();
     const { action, user_id, email, password, full_name, redirect_to, organization_id } = body;
     const create_as_platform_admin = body?.create_as_platform_admin === true;
+
+    // If not a platform admin, allow org admins to manage users within their org.
+    if (!isPlatformAdmin) {
+      // Platform-admin-only actions
+      if (create_as_platform_admin) {
+        return new Response(
+          JSON.stringify({ error: "Only platform admins can grant platform admin" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (!organization_id) {
+        return new Response(
+          JSON.stringify({ error: "organization_id is required for non-platform-admin callers" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const { data: orgAccess } = await supabaseAdmin
+        .from("user_organization_access")
+        .select("access_level")
+        .eq("user_id", callerUser.id)
+        .eq("organization_id", organization_id)
+        .eq("access_level", "admin")
+        .maybeSingle();
+      if (!orgAccess) {
+        return new Response(
+          JSON.stringify({ error: "Only organization admins can perform this action" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
     const access_level: string = body?.access_level || "editor";
 
     if (action === "invite") {
