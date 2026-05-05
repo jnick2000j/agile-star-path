@@ -3,6 +3,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Container,
   Hr,
+  Img,
   Link,
   Section,
   Text,
@@ -25,41 +26,90 @@ export const BRAND = {
 export const SITE_NAME = 'The TaskMaster'
 export const SITE_URL = 'https://thetaskmaster.lovable.app'
 
-export const Header = () => (
-  <Section style={headerSection}>
-    <Text style={brandMark}>
-      <span style={brandDot}>●</span>{' '}
-      <span style={brandText}>The TaskMaster</span>
-    </Text>
-    <Text style={tagline}>
-      Programme &amp; Project Information Management
-    </Text>
-  </Section>
-)
+// Branding overrides resolved per-send (org → platform → defaults).
+export interface EmailBrand {
+  siteName?: string | null
+  siteUrl?: string | null
+  logoUrl?: string | null
+  logoWidth?: number | null  // px
+  logoHeight?: number | null // px
+  tagline?: string | null
+}
 
-export const Footer = () => (
-  <Section style={footerSection}>
-    <Hr style={hr} />
-    <Text style={footerText}>
-      Sent by <strong>The TaskMaster</strong> &middot;{' '}
-      <Link href={SITE_URL} style={footerLink}>
-        thetaskmaster.lovable.app
-      </Link>
-    </Text>
-    <Text style={footerSmall}>
-      You're receiving this email because of activity on your TaskMaster
-      account. Need help? Contact your organization administrator.
-    </Text>
-  </Section>
-)
+export const BrandContext = React.createContext<EmailBrand>({})
 
-export const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Container style={shell}>
-    <Header />
-    <Section style={body}>{children}</Section>
-    <Footer />
-  </Container>
-)
+export const Header = () => {
+  const brand = React.useContext(BrandContext)
+  const name = brand.siteName || SITE_NAME
+  const tag =
+    brand.tagline ?? 'Programme & Project Information Management'
+  const w = brand.logoWidth && brand.logoWidth > 0 ? brand.logoWidth : undefined
+  const h = brand.logoHeight && brand.logoHeight > 0 ? brand.logoHeight : 32
+
+  return (
+    <Section style={headerSection}>
+      {brand.logoUrl ? (
+        <Img
+          src={brand.logoUrl}
+          alt={name}
+          width={w as any}
+          height={h as any}
+          style={{
+            display: 'block',
+            objectFit: 'contain',
+            ...(w ? { width: `${w}px` } : { width: 'auto' }),
+            height: `${h}px`,
+            margin: '0 0 4px',
+          }}
+        />
+      ) : (
+        <Text style={brandMark}>
+          <span style={brandDot}>●</span> <span style={brandText}>{name}</span>
+        </Text>
+      )}
+      {tag ? <Text style={tagline}>{tag}</Text> : null}
+    </Section>
+  )
+}
+
+export const Footer = () => {
+  const brand = React.useContext(BrandContext)
+  const name = brand.siteName || SITE_NAME
+  const url = brand.siteUrl || SITE_URL
+  const display = url.replace(/^https?:\/\//, '')
+  return (
+    <Section style={footerSection}>
+      <Hr style={hr} />
+      <Text style={footerText}>
+        Sent by <strong>{name}</strong> &middot;{' '}
+        <Link href={url} style={footerLink}>
+          {display}
+        </Link>
+      </Text>
+      <Text style={footerSmall}>
+        You're receiving this email because of activity on your {name}{' '}
+        account. Need help? Contact your organization administrator.
+      </Text>
+    </Section>
+  )
+}
+
+export const Shell: React.FC<{
+  children: React.ReactNode
+  brand?: EmailBrand
+}> = ({ children, brand }) => {
+  const inner = (
+    <Container style={shell}>
+      <Header />
+      <Section style={body}>{children}</Section>
+      <Footer />
+    </Container>
+  )
+  if (brand) {
+    return <BrandContext.Provider value={brand}>{inner}</BrandContext.Provider>
+  }
+  return inner
+}
 
 const shell = {
   maxWidth: '600px',
