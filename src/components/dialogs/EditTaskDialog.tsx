@@ -44,6 +44,7 @@ interface TaskData {
   risk_id: string | null;
   issue_id: string | null;
   feature_id?: string | null;
+  parent_task_id?: string | null;
   completion_percentage?: number | null;
 }
 
