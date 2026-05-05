@@ -297,10 +297,8 @@ export default function AdminPanel() {
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList className="bg-secondary">
           <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="role-types">Role Types</TabsTrigger>
-          <TabsTrigger value="role-builder">Permission Matrix</TabsTrigger>
+          <TabsTrigger value="roles-access">Roles &amp; Access</TabsTrigger>
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="access">Access Control</TabsTrigger>
           <TabsTrigger value="residency">Region & Compliance</TabsTrigger>
           <TabsTrigger value="ai-provider">AI Provider</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
