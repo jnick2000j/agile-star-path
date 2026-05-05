@@ -46,7 +46,7 @@ export const SignupEmail = ({
           <Text style={codeText}>{token ?? '------'}</Text>
         </Section>
         <Text style={text}>
-          Enter this 6-digit code on the {siteName} sign-up screen. The code expires
+          Enter this code on the {siteName} sign-up screen. The code expires
           in a few minutes.
         </Text>
         <Text style={footer}>
