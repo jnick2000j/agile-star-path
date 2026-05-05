@@ -177,6 +177,30 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
     }
   };
 
+  const [resettingFor, setResettingFor] = useState<string | null>(null);
+  const handleResetToPending = async (user: UserWithRole) => {
+    if (!confirm(`Reset ${user.email} to Pending? They will be signed out and required to re-confirm their email.`)) return;
+    setResettingFor(user.user_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "reset_to_pending",
+          user_id: user.user_id,
+          redirect_to: `${window.location.origin}/auth/confirm`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`${user.email} reset to Pending. Confirmation email sent.`);
+      await fetchUsers();
+    } catch (err: any) {
+      console.error("Reset to pending failed:", err);
+      toast.error(err.message || "Failed to reset user");
+    } finally {
+      setResettingFor(null);
+    }
+  };
+
   const filteredUsers = users.filter((u) => {
     const displayName = u.first_name && u.last_name
       ? `${u.first_name} ${u.last_name}`
