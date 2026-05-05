@@ -15759,6 +15759,18 @@ export type Database = {
       }
       is_org_suspended: { Args: { _org_id: string }; Returns: boolean }
       kb_increment_view: { Args: { p_article_id: string }; Returns: undefined }
+      list_orphan_users: {
+        Args: never
+        Returns: {
+          archived: boolean
+          created_at: string
+          email: string
+          first_name: string
+          full_name: string
+          last_name: string
+          user_id: string
+        }[]
+      }
       lms_course_org: { Args: { _course_id: string }; Returns: string }
       lms_get_quiz_for_attempt: {
         Args: { _lesson_id: string }
