@@ -13510,6 +13510,8 @@ export type Database = {
           price_monthly: number | null
           price_yearly: number | null
           sort_order: number | null
+          stripe_extra_org_lookup_key_monthly: string | null
+          stripe_extra_org_lookup_key_yearly: string | null
           stripe_lookup_key_monthly: string | null
           stripe_lookup_key_yearly: string | null
           stripe_price_id_monthly: string | null
@@ -13547,6 +13549,8 @@ export type Database = {
           price_monthly?: number | null
           price_yearly?: number | null
           sort_order?: number | null
+          stripe_extra_org_lookup_key_monthly?: string | null
+          stripe_extra_org_lookup_key_yearly?: string | null
           stripe_lookup_key_monthly?: string | null
           stripe_lookup_key_yearly?: string | null
           stripe_price_id_monthly?: string | null
@@ -13584,6 +13588,8 @@ export type Database = {
           price_monthly?: number | null
           price_yearly?: number | null
           sort_order?: number | null
+          stripe_extra_org_lookup_key_monthly?: string | null
+          stripe_extra_org_lookup_key_yearly?: string | null
           stripe_lookup_key_monthly?: string | null
           stripe_lookup_key_yearly?: string | null
           stripe_price_id_monthly?: string | null
@@ -15662,6 +15668,20 @@ export type Database = {
           plan_id: string
           plan_name: string
           status: string
+        }[]
+      }
+      get_billing_account_sync_info: {
+        Args: { _account_id: string }
+        Returns: {
+          account_id: string
+          active_org_count: number
+          billing_interval: string
+          environment: string
+          extra_org_lookup_key: string
+          extra_org_price_monthly: number
+          included_orgs: number
+          owner_organization_id: string
+          stripe_subscription_id: string
         }[]
       }
       get_csat_by_token: {
