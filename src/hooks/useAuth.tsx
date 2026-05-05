@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  roleLoading: boolean;
   signUp: (email: string, password: string, fullName: string, firstName?: string, lastName?: string, orgName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
@@ -40,22 +42,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (session?.user) {
           // Defer Supabase calls with setTimeout
+          setRoleLoading(true);
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
         } else {
           setUserRole(null);
           setUserProfile(null);
+          setRoleLoading(false);
         }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        setRoleLoading(true);
+        await fetchUserRole(session.user.id);
       }
       setLoading(false);
     });
@@ -65,18 +70,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const [{ data: platformRoles, error: platformRoleError }, { data, error }] = await Promise.all([
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin"),
+        supabase
         .from("profiles")
         .select("role, first_name, last_name, full_name")
         .eq("user_id", userId)
-        .single();
+          .single(),
+      ]);
+
+      if (platformRoleError) {
+        console.error("Error fetching platform role:", platformRoleError);
+      }
 
       if (error) {
         console.error("Error fetching user role:", error);
-        return;
       }
 
-      setUserRole(data?.role || "org_stakeholder");
+      setUserRole((platformRoles?.length ?? 0) > 0 ? "admin" : data?.role || "org_stakeholder");
       setUserProfile({
         first_name: data?.first_name || null,
         last_name: data?.last_name || null,
@@ -84,6 +99,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error("Error fetching user role:", error);
+      setUserRole("org_stakeholder");
+    } finally {
+      setRoleLoading(false);
     }
   };
 
@@ -154,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, userRole, userProfile }}>
+    <AuthContext.Provider value={{ user, session, loading, roleLoading, signUp, signIn, signOut, userRole, userProfile }}>
       {children}
     </AuthContext.Provider>
   );
