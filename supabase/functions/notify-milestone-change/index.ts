@@ -148,6 +148,8 @@ serve(async (req) => {
           to: emailRecipients,
           subject: title,
           html,
+          organizationId: milestone.organization_id ?? undefined,
+          triggerKey: "milestone_change",
         });
         if (result.ok) emailsSent = emailRecipients.length;
       }
