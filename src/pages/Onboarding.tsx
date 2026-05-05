@@ -44,22 +44,27 @@ export default function Onboarding() {
   const [plans, setPlans] = useState<any[]>([]);
   const [showOrgWizard, setShowOrgWizard] = useState(false);
 
-  // Load only enabled verticals so the user can't pick a disabled industry.
+  // Load enabled verticals. Self-serve sign-ups currently only support the
+  // Technology vertical; platform admins still see the full catalogue so they
+  // can pick on behalf of customers.
   useEffect(() => {
-    supabase
+    let query = supabase
       .from("industry_verticals")
       .select("id, name, description, is_active, sort_order")
       .eq("is_active", true)
-      .order("sort_order")
-      .then(({ data }) => {
-        const list = (data ?? []).map((v: any) => ({ id: v.id, name: v.name, description: v.description }));
-        setVerticals(list);
-        if (list.length && !list.find((v) => v.id === vertical)) {
-          setVertical(list[0].id);
-        }
-      });
+      .order("sort_order");
+    if (!isPlatformAdmin) {
+      query = query.eq("id", "technology");
+    }
+    query.then(({ data }) => {
+      const list = (data ?? []).map((v: any) => ({ id: v.id, name: v.name, description: v.description }));
+      setVerticals(list);
+      if (list.length && !list.find((v) => v.id === vertical)) {
+        setVertical(list[0].id);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isPlatformAdmin]);
 
   const handleCreateOrg = async () => {
     if (!user || !orgName.trim()) return;
