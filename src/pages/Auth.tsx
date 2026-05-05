@@ -65,6 +65,7 @@ const otpSchema = z.string().regex(/^\d{6,8}$/, "Enter the verification code");
 
 type AuthMode = "login" | "signup" | "sso";
 type AuthStep = "request" | "verify";
+const SIGNUP_ONBOARDING_EMAIL_KEY = "taskmaster:signup-onboarding-email";
 
 const defaultFeatures = [
   { icon: Layers, title: "Programme Management", description: "Track programmes, projects, and products with full lifecycle governance." },
@@ -114,6 +115,15 @@ export default function Auth() {
 
   useEffect(() => {
     if (!user) return;
+    const pendingSignupEmail = sessionStorage.getItem(SIGNUP_ONBOARDING_EMAIL_KEY)?.toLowerCase();
+    const shouldForceOnboarding = !!pendingSignupEmail && pendingSignupEmail === user.email?.toLowerCase();
+
+    if (shouldForceOnboarding) {
+      sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
+      navigate("/onboarding", { replace: true });
+      return;
+    }
+
     // Decide where to send the user once they're authenticated.
     // - Brand new sign-ups (no org membership yet) go to the onboarding wizard
     //   so they pick intent / vertical / org / plan instead of being dropped on
@@ -128,12 +138,12 @@ export default function Auth() {
         .eq("is_disabled", false);
       if (cancelled) return;
       if ((count ?? 0) === 0) {
-        navigate("/onboarding");
+        navigate("/onboarding", { replace: true });
       } else {
-        navigate("/");
+        navigate("/", { replace: true });
       }
     })().catch(() => {
-      if (!cancelled) navigate("/");
+      if (!cancelled) navigate("/", { replace: true });
     });
     return () => { cancelled = true; };
   }, [user, navigate]);
@@ -230,6 +240,11 @@ export default function Auth() {
         shouldCreateUser: mode === "signup",
       });
       if (!error) {
+        if (mode === "signup") {
+          sessionStorage.setItem(SIGNUP_ONBOARDING_EMAIL_KEY, email.toLowerCase());
+        } else {
+          sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
+        }
         setStep("verify");
         setResendCooldown(60);
       }
@@ -242,6 +257,9 @@ export default function Auth() {
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
     if (!error) {
+      if (mode === "signup") {
+        navigate("/onboarding", { replace: true });
+      }
       // Don't auto-provision the org here — the post-auth effect routes
       // brand-new users to /onboarding where the full wizard (intent →
       // vertical → org name → invite → plan) collects everything properly.
