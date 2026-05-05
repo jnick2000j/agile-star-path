@@ -10,6 +10,42 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { tryRenderOrgOverride } from '../_shared/email-overrides.tsx'
+
+// Map Supabase auth action_type values to template_key values used by
+// the org override editor (kebab-case).
+const OVERRIDE_KEYS: Record<string, string> = {
+  signup: 'signup',
+  invite: 'invite',
+  magiclink: 'magic-link',
+  recovery: 'recovery',
+  email_change: 'email-change',
+  reauthentication: 'reauthentication',
+}
+
+/** Look up the org for a recipient by email — used for per-org overrides. */
+async function lookupOrgByEmail(supabase: any, email: string): Promise<string | null> {
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('email', email.toLowerCase())
+      .maybeSingle()
+    if (!profile?.user_id) return null
+
+    // Pick first organization membership.
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', profile.user_id)
+      .limit(1)
+      .maybeSingle()
+    return member?.organization_id ?? null
+  } catch (e) {
+    console.warn('lookupOrgByEmail failed:', e)
+    return null
+  }
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
