@@ -40,17 +40,15 @@ export function useVertical() {
     const load = async () => {
       setLoading(true);
       try {
-        if (!currentOrganization?.id) {
-          if (!cancelled) setVertical(FALLBACK);
-          return;
+        let vid: VerticalId = "technology";
+        if (currentOrganization?.id) {
+          const { data: org } = await supabase
+            .from("organizations")
+            .select("industry_vertical")
+            .eq("id", currentOrganization.id)
+            .maybeSingle();
+          vid = (org?.industry_vertical as VerticalId) || "technology";
         }
-        const { data: org } = await supabase
-          .from("organizations")
-          .select("industry_vertical")
-          .eq("id", currentOrganization.id)
-          .maybeSingle();
-
-        const vid = (org?.industry_vertical as VerticalId) || "technology";
 
         const { data: vConfig } = await supabase
           .from("industry_verticals")
