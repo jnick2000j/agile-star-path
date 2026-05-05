@@ -178,5 +178,21 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     }
   }
 
+  // Portal-user gate — external customer-portal users can only reach the
+  // customer-facing surfaces (help, knowledgebase, CSAT, change-portal, profile).
+  if (userType === "portal" && !isPortalAllowedPath(location.pathname)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Customer portal access</h1>
+          <p className="text-muted-foreground mb-4">
+            Your account is configured as a customer-portal user and doesn't have access to internal staff pages.
+          </p>
+          <a href="/help" className="text-primary underline">Go to the help portal</a>
+        </div>
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
