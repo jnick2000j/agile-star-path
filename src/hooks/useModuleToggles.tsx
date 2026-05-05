@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
+import { usePlanFeatures } from "./usePlanFeatures";
 import { toast } from "sonner";
 
 export interface HelpdeskModuleDef {
@@ -34,6 +35,7 @@ export const ADDON_MODULE_KEYS = new Set<string>(["lms"]);
 
 export function useModuleToggles(orgId?: string | null) {
   const { currentOrganization } = useOrganization();
+  const { hasFeature } = usePlanFeatures();
   const effectiveOrgId = orgId ?? currentOrganization?.id ?? null;
   const [toggles, setToggles] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -64,11 +66,14 @@ export function useModuleToggles(orgId?: string | null) {
 
   const isEnabled = useCallback(
     (key: string) => {
+      // Explicit toggle wins.
+      if (toggles[key] !== undefined) return toggles[key];
+      // LMS auto-enables when the org's plan grants feature_lms (Helpdesk + Learning / ITSM + Learning).
+      if (key === "lms" && hasFeature("feature_lms")) return true;
       // Add-on modules default OFF; everything else defaults ON when no row exists.
-      if (toggles[key] === undefined) return !ADDON_MODULE_KEYS.has(key);
-      return toggles[key];
+      return !ADDON_MODULE_KEYS.has(key);
     },
-    [toggles],
+    [toggles, hasFeature],
   );
 
   const setEnabled = useCallback(
