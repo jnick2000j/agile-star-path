@@ -84,7 +84,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { action, user_id, email, password, full_name, redirect_to, organization_id } = await req.json();
+    const body = await req.json();
+    const { action, user_id, email, password, full_name, redirect_to, organization_id } = body;
+    const create_as_platform_admin = body?.create_as_platform_admin === true;
+    const access_level: string = body?.access_level || "editor";
 
     if (action === "invite") {
       if (!email) {
