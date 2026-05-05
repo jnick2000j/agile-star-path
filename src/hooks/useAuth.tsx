@@ -29,10 +29,16 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   roleLoading: boolean;
-  /** Send a 6-digit one-time code to the user's email. */
+  /** Send a 6-digit one-time code to the user's email (login flow). */
   requestEmailOtp: (email: string, options?: OtpRequestOptions) => Promise<{ error: Error | null }>;
   /** Verify the 6-digit code the user received by email. */
   verifyEmailOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
+  /**
+   * Send a confirmation link for new sign-ups. The link routes to
+   * /auth/confirm where the session is immediately discarded so the user
+   * must log in fresh. This separates email confirmation from logging in.
+   */
+  requestSignupConfirmation: (email: string, options?: OtpRequestOptions) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   userRole: string | null;
   userProfile: UserProfile | null;
@@ -113,7 +119,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const requestEmailOtp = async (email: string, options: OtpRequestOptions = {}) => {
+  const requestSignupConfirmation = async (email: string, options: OtpRequestOptions = {}) => {
+    try {
+      const { firstName, lastName, fullName, orgName } = options;
+      const siteUrl = await getSiteUrl();
+      const confirmUrl = `${siteUrl.replace(/\/$/, "")}/auth/confirm`;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          // The link in the email lands here. /auth/confirm will sign the
+          // user out and prompt them to log in.
+          emailRedirectTo: confirmUrl,
+          data: {
+            full_name: fullName || `${firstName ?? ""} ${lastName ?? ""}`.trim() || undefined,
+            first_name: firstName || undefined,
+            last_name: lastName || undefined,
+            org_name: orgName || undefined,
+          },
+        },
+      });
+
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("rate limit") || msg.includes("for security purposes")) {
+          toast.error("Too many requests. Please wait a minute before trying again.");
+        } else if (msg.includes("already registered") || msg.includes("already exists")) {
+          toast.error("That email is already registered. Try signing in instead.");
+        } else {
+          toast.error(error.message);
+        }
+        return { error };
+      }
+
+      toast.success("Check your email for a confirmation link.");
+      return { error: null };
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message);
+      return { error: err };
+    }
+  };
     try {
       const { firstName, lastName, fullName, orgName, shouldCreateUser = true } = options;
       const siteUrl = await getSiteUrl();
