@@ -206,7 +206,54 @@ export function EditUserDialog({ user, onSuccess, trigger }: EditUserDialogProps
     }
   };
 
-  const handleAddOrgAccess = async () => {
+  const handleChangeEmail = async () => {
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (trimmed === user.email.toLowerCase()) {
+      toast.info("That's already the user's current email.");
+      return;
+    }
+    if (!confirm(`Change the sign-in email for ${user.email} to ${trimmed}? They will use the new address to sign in immediately.`)) {
+      return;
+    }
+    setChangingEmail(true);
+    try {
+      // Pass the first organization the target belongs to so org-admin callers pass the membership check.
+      const orgIdForCheck = userOrgAccess[0]?.organization_id;
+      const response = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "change_email",
+          user_id: user.user_id,
+          new_email: trimmed,
+          organization_id: orgIdForCheck,
+        },
+      });
+      if (response.error) {
+        const fnErr: any = response.error;
+        const ctx = fnErr?.context;
+        let msg = fnErr?.message || "Failed to change email";
+        try {
+          const body = ctx ? await ctx.json() : null;
+          if (body?.error) msg = body.error;
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      const data: any = response.data;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Email updated to ${data?.email ?? trimmed}`);
+      onSuccess();
+      setOpen(false);
+    } catch (error: unknown) {
+      console.error("Change email failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to change email";
+      toast.error(errorMessage);
+    } finally {
+      setChangingEmail(false);
+    }
+  };
     if (!selectedOrgToAdd) return;
 
     try {
