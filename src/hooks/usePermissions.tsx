@@ -235,12 +235,12 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   };
 
   const canDelete = (entity: string): boolean => {
-    if (isAdmin) return true;
+    if (isAdmin || isOrgAdmin) return true;
     return can(entity, "delete");
   };
 
   const can = (module: string, action: PermissionAction = "view"): boolean => {
-    if (isAdmin) return true;
+    if (isAdmin || isOrgAdmin) return true;
     const moduleKey = legacyEntityToModule[module] ?? module;
     const row = modulePermissions.find((p) => p.module_key === moduleKey);
     if (row) {
