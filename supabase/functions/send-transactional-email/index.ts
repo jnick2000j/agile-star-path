@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+import { getEmailTransport, sendViaSmtp } from '../_shared/smtp-transport.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -297,10 +298,11 @@ Deno.serve(async (req) => {
       ? template.subject(templateData)
       : template.subject
 
-  // 5. Enqueue the pre-rendered email for async processing by the dispatcher.
-  // The dispatcher (process-email-queue) handles sending, retries, and rate-limit backoff.
+  // 5. Send the email.
+  //   - On Lovable Cloud (default): enqueue for async dispatch + retries.
+  //   - On-premises (EMAIL_TRANSPORT=smtp): send directly via customer SMTP.
 
-  // Log pending BEFORE enqueue so we have a record even if enqueue crashes
+  // Log pending BEFORE send/enqueue so we have a record even if it crashes
   await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: templateName,
@@ -308,6 +310,44 @@ Deno.serve(async (req) => {
     status: 'pending',
   })
 
+  // ON-PREMISES PATH
+  if (getEmailTransport() === 'smtp') {
+    const smtpResult = await sendViaSmtp({
+      to: effectiveRecipient,
+      subject: resolvedSubject,
+      html,
+      text: plainText,
+      from: Deno.env.get('SMTP_FROM') || `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+    })
+
+    await supabase.from('email_send_log').insert({
+      message_id: messageId,
+      template_name: templateName,
+      recipient_email: effectiveRecipient,
+      status: smtpResult.ok ? 'sent' : 'failed',
+      error_message: smtpResult.ok ? null : smtpResult.error,
+    })
+
+    if (!smtpResult.ok) {
+      console.error('SMTP send failed for transactional email', {
+        error: smtpResult.error,
+        templateName,
+        effectiveRecipient,
+      })
+      return new Response(JSON.stringify({ error: smtpResult.error }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    console.log('Transactional email sent via SMTP', { templateName, effectiveRecipient })
+    return new Response(
+      JSON.stringify({ success: true, transport: 'smtp' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // CLOUD PATH (default)
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'transactional_emails',
     payload: {
