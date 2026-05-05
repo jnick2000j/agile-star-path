@@ -6,11 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
-  Shield, 
-  UserCog, 
   Users,
   Crown,
-  Briefcase,
   Building2,
   Palette,
   ArrowRight,
@@ -19,6 +16,8 @@ import {
   FolderKanban,
   Package,
   Layers,
+  Tag,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
