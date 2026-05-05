@@ -134,15 +134,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        if (error.message.toLowerCase().includes("signups not allowed")) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("signups not allowed")) {
           toast.error("This email isn't registered yet. Please sign up first.");
+        } else if (msg.includes("rate limit") || msg.includes("for security purposes")) {
+          toast.error("Too many requests. Please wait a minute before trying again.");
         } else {
           toast.error(error.message);
         }
         return { error };
       }
 
-      toast.success("We emailed you a 6-digit code. Enter it below to continue.");
+      toast.success("We emailed you a verification code. Enter it below to continue.");
       return { error: null };
     } catch (error) {
       const err = error as Error;

@@ -103,6 +103,7 @@ export default function Auth() {
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [errors, setErrors] = useState<{ email?: string; otp?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<LoginBranding | null>(null);
 
@@ -211,7 +212,10 @@ export default function Auth() {
         orgName: mode === "signup" ? orgName.trim() : undefined,
         shouldCreateUser: mode === "signup",
       });
-      if (!error) setStep("verify");
+      if (!error) {
+        setStep("verify");
+        setResendCooldown(60);
+      }
       setLoading(false);
       return;
     }
@@ -224,9 +228,17 @@ export default function Auth() {
     setLoading(false);
   };
 
+  // Tick down the resend cooldown each second.
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
   const handleResendCode = async () => {
+    if (resendCooldown > 0 || resending) return;
     setResending(true);
-    await requestEmailOtp(email, {
+    const { error } = await requestEmailOtp(email, {
       firstName: mode === "signup" ? firstName : undefined,
       lastName: mode === "signup" ? lastName : undefined,
       fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
@@ -234,6 +246,9 @@ export default function Auth() {
       shouldCreateUser: mode === "signup",
     });
     setResending(false);
+    // Always start cooldown — even on error — to prevent hammering Supabase's rate limiter.
+    setResendCooldown(60);
+    void error;
   };
 
   const handleOAuth = async (provider: "google" | "apple") => {
@@ -397,8 +412,8 @@ export default function Auth() {
               <button type="button" onClick={() => { setStep("request"); setOtp(""); setErrors({}); }} className="text-muted-foreground hover:text-foreground flex items-center gap-1">
                 <ArrowLeft className="h-3 w-3" /> Use a different email
               </button>
-              <button type="button" onClick={handleResendCode} disabled={resending} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
-                {resending ? "Sending…" : "Resend code"}
+              <button type="button" onClick={handleResendCode} disabled={resending || resendCooldown > 0} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
+                {resending ? "Sending…" : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
               </button>
             </div>
           </div>
