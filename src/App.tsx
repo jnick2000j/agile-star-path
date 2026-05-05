@@ -31,6 +31,7 @@ import ProductRoadmap from "./pages/ProductRoadmap";
 import FeatureBacklog from "./pages/FeatureBacklog";
 import SprintPlanning from "./pages/SprintPlanning";
 import FeatureDependencies from "./pages/FeatureDependencies";
+import ProductReleases from "./pages/ProductReleases";
 import UnifiedBacklog from "./pages/UnifiedBacklog";
 import RiskRegister from "./pages/RiskRegister";
 import IssueRegister from "./pages/IssueRegister";
@@ -182,6 +183,7 @@ const App = () => (
             <Route path="/products/roadmap" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><ProductRoadmap /></ModuleGate></ProtectedRoute>} />
             <Route path="/products/features" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><FeatureBacklog /></ModuleGate></ProtectedRoute>} />
             <Route path="/products/dependencies" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><FeatureDependencies /></ModuleGate></ProtectedRoute>} />
+            <Route path="/products/releases" element={<ProtectedRoute><ModuleGate feature="feature_module_products" title="Products" description="The Products module is disabled for this organization."><ProductReleases /></ModuleGate></ProtectedRoute>} />
             <Route path="/planning/backlog" element={<ProtectedRoute><UnifiedBacklog /></ProtectedRoute>} />
             <Route path="/planning/sprints" element={<ProtectedRoute><SprintPlanning /></ProtectedRoute>} />
             <Route path="/registers" element={<ProtectedRoute><Registers /></ProtectedRoute>} />
