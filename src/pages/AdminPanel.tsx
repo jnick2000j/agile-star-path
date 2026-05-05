@@ -117,49 +117,65 @@ export default function AdminPanel() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [
+        { data: profiles, error: profileError },
+        { data: orgAccess, error: orgAccessError },
+        { data: customRoleAssignments, error: customRoleError },
+      ] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_organization_access").select("user_id, organization_id, access_level"),
+        supabase
+          .from("user_organization_custom_roles")
+          .select("user_id, organization_id, custom_roles(name, is_system)"),
+      ]);
 
       if (profileError) throw profileError;
+      if (orgAccessError) throw orgAccessError;
+      if (customRoleError) throw customRoleError;
 
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
-
-      if (rolesError) throw rolesError;
-
-      // Get org access counts
-      const { data: orgAccess } = await supabase
-        .from("user_organization_access")
-        .select("user_id");
-
+      // Aggregate per user
       const orgCountMap: Record<string, number> = {};
-      orgAccess?.forEach((a) => {
+      const highestAccessMap: Record<string, AccessLevel> = {};
+      orgAccess?.forEach((a: any) => {
         orgCountMap[a.user_id] = (orgCountMap[a.user_id] || 0) + 1;
+        const lvl = a.access_level as AccessLevel;
+        const current = highestAccessMap[a.user_id];
+        if (!current || accessRank[lvl] > accessRank[current]) {
+          highestAccessMap[a.user_id] = lvl;
+        }
       });
 
-      const usersWithRoles: UserWithRole[] = (profiles || []).map((profile) => {
-        const userRole = roles?.find((r) => r.user_id === profile.user_id);
-        return {
-          id: profile.id,
-          user_id: profile.user_id,
-          email: profile.email,
-          full_name: profile.full_name,
-          first_name: (profile as any).first_name,
-          last_name: (profile as any).last_name,
-          phone_number: profile.phone_number,
-          address: profile.address,
-          mailing_address: profile.mailing_address,
-          location: profile.location,
-          department: profile.department,
-          archived: profile.archived || false,
-          role: userRole?.role || "org_stakeholder",
-          created_at: profile.created_at,
-          org_count: orgCountMap[profile.user_id] || 0,
-        };
+      const customRolesMap: Record<string, UserCustomRoleAssignment[]> = {};
+      customRoleAssignments?.forEach((row: any) => {
+        const cr = row.custom_roles;
+        if (!cr) return;
+        const list = customRolesMap[row.user_id] || (customRolesMap[row.user_id] = []);
+        list.push({
+          organization_id: row.organization_id,
+          role_name: cr.name,
+          is_system: !!cr.is_system,
+        });
       });
+
+      const usersWithRoles: UserWithRole[] = (profiles || []).map((profile: any) => ({
+        id: profile.id,
+        user_id: profile.user_id,
+        email: profile.email,
+        full_name: profile.full_name,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        phone_number: profile.phone_number,
+        address: profile.address,
+        mailing_address: profile.mailing_address,
+        location: profile.location,
+        department: profile.department,
+        archived: profile.archived || false,
+        job_title: profile.job_title || null,
+        highest_access: highestAccessMap[profile.user_id] || null,
+        custom_roles: customRolesMap[profile.user_id] || [],
+        created_at: profile.created_at,
+        org_count: orgCountMap[profile.user_id] || 0,
+      }));
 
       setUsers(usersWithRoles);
     } catch (error) {
@@ -179,7 +195,6 @@ export default function AdminPanel() {
 
       if (error) throw error;
 
-      // Fetch counts for each organization
       const orgsWithCounts = await Promise.all(
         (orgs || []).map(async (org) => {
           const [programmes, projects, products] = await Promise.all([
@@ -213,45 +228,9 @@ export default function AdminPanel() {
     fetchOrganizations();
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: AppRole) => {
-    try {
-      const { data: existing } = await supabase
-        .from("user_roles")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (existing) {
-        const { error } = await supabase
-          .from("user_roles")
-          .update({ role: newRole })
-          .eq("user_id", userId);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: newRole });
-
-        if (error) throw error;
-      }
-
-      await supabase
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("user_id", userId);
-
-      toast.success("Role updated successfully");
-      fetchUsers();
-    } catch (error) {
-      console.error("Error updating role:", error);
-      toast.error("Failed to update role. You may not have admin permissions.");
-    }
-  };
-
   const filteredUsers = users.filter((u) => {
-    const displayName = u.first_name && u.last_name 
-      ? `${u.first_name} ${u.last_name}` 
+    const displayName = u.first_name && u.last_name
+      ? `${u.first_name} ${u.last_name}`
       : u.full_name || "";
     const matchesSearch =
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -260,14 +239,11 @@ export default function AdminPanel() {
     return matchesSearch && matchesArchived;
   });
 
-  const roleCounts = {
-    admin: users.filter((u) => u.role === "admin" && !u.archived).length,
-    programme_owner: users.filter((u) => u.role === "programme_owner" && !u.archived).length,
-    project_manager: users.filter((u) => u.role === "project_manager" && !u.archived).length,
-    org_stakeholder: users.filter((u) => u.role === "org_stakeholder" && !u.archived).length,
-  };
-
+  const totalActive = users.filter((u) => !u.archived).length;
+  const orgAdminCount = users.filter((u) => !u.archived && u.highest_access === "admin").length;
+  const withCustomRoleCount = users.filter((u) => !u.archived && u.custom_roles.length > 0).length;
   const archivedCount = users.filter((u) => u.archived).length;
+
 
   const getUserDisplayName = (user: UserWithRole) => {
     if (user.first_name && user.last_name) {
