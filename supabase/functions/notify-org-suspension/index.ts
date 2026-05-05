@@ -101,6 +101,8 @@ Deno.serve(async (req) => {
       to: emails,
       subject,
       html,
+      organizationId: body.organization_id,
+      triggerKey: "org_suspension",
     });
 
     if (!result.ok) {
