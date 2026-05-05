@@ -33,6 +33,7 @@ const ICON_MAP: Record<string, any> = {
   "Helpdesk Add-on": Headphones,
   "Change Management Add-on": GitBranch,
   "ITSM Suite Add-on": Layers,
+  "Learning Management Add-on": GraduationCap,
 };
 
 const FEATURE_HIGHLIGHTS: Record<string, string[]> = {
@@ -53,6 +54,12 @@ const FEATURE_HIGHLIGHTS: Record<string, string[]> = {
     "Save ~20% vs buying separately",
     "Unified ticket → change workflow",
     "Best for IT-heavy operations",
+  ],
+  "Learning Management Add-on": [
+    "Author courses, lessons & quizzes",
+    "Certifications and learner progress tracking",
+    "Embed training in onboarding & projects",
+    "Role-based learning paths",
   ],
 };
 
