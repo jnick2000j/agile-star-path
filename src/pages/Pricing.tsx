@@ -205,6 +205,27 @@ export default function Pricing() {
         )}
       </section>
 
+      <section className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="p-5">
+            <h3 className="font-bold mb-1">Helpdesk Add-on</h3>
+            <p className="text-sm text-muted-foreground mb-3">Tickets, SLAs, customer portal — linked to your projects.</p>
+            <Button variant="outline" size="sm" onClick={() => navigate("/addons")}>Explore add-on</Button>
+          </Card>
+          <Card className="p-5">
+            <h3 className="font-bold mb-1">Change Management Add-on</h3>
+            <p className="text-sm text-muted-foreground mb-3">Full CAB workflow, risk scoring, and audit trail.</p>
+            <Button variant="outline" size="sm" onClick={() => navigate("/addons")}>Explore add-on</Button>
+          </Card>
+          <Card className="p-5 border-primary/40">
+            <Badge variant="secondary" className="mb-2">New</Badge>
+            <h3 className="font-bold mb-1">Learning Management Add-on</h3>
+            <p className="text-sm text-muted-foreground mb-3">Courses, quizzes, certifications, and role-based learning paths.</p>
+            <Button size="sm" onClick={() => navigate("/addons")}>Explore LMS</Button>
+          </Card>
+        </div>
+      </section>
+
       <section className="max-w-3xl mx-auto px-6 pb-16 text-center">
         <h2 className="text-2xl font-bold mb-3">Need something custom?</h2>
         <p className="text-muted-foreground mb-6">
