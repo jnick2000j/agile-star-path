@@ -36,6 +36,10 @@ interface SendArgs {
   triggerKey?: string;
   /** Org context for the trigger gate. Required when triggerKey is set. */
   organizationId?: string | null;
+  /** Optional override for the From header (e.g. "Acme Support <support@acme.com>"). */
+  from?: string;
+  /** Optional Reply-To address. */
+  replyTo?: string;
 }
 
 interface SendResult {
