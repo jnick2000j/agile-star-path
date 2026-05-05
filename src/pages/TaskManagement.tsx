@@ -482,6 +482,23 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     return workPackages.find((wp) => wp.id === workPackageId)?.name || null;
   };
 
+  const openCreateSubtaskFor = (parent: Task) => {
+    setFormData({
+      name: "",
+      description: "",
+      priority: parent.priority,
+      status: "not_started",
+      entity_type: parent.project_id ? "project" : parent.programme_id ? "program" : parent.product_id ? "product" : "project",
+      entity_id: parent.project_id || parent.programme_id || parent.product_id || "",
+      work_package_id: parent.work_package_id || "",
+      parent_task_id: parent.id,
+      planned_start: "",
+      planned_end: "",
+      estimated_hours: "",
+    });
+    setDialogOpen(true);
+  };
+
   const content = (
     <>
       {/* Stats Cards */}
