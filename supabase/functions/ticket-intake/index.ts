@@ -69,6 +69,28 @@ Deno.serve(async (req) => {
     return json(403, { error: "origin_not_allowed" });
   }
 
+  // Auth requirement: restrict to organization members
+  if (channel.require_authenticated) {
+    const authHeader = req.headers.get("authorization") || "";
+    const jwt = authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice(7).trim()
+      : "";
+    if (!jwt) {
+      return json(401, { error: "auth_required", message: "This channel only accepts tickets from organization members. Please sign in." });
+    }
+    const { data: userData, error: userErr } = await supabase.auth.getUser(jwt);
+    if (userErr || !userData?.user) {
+      return json(401, { error: "invalid_session" });
+    }
+    const { data: hasAccess } = await supabase.rpc("has_org_access", {
+      _user_id: userData.user.id,
+      _organization_id: channel.organization_id,
+    });
+    if (!hasAccess) {
+      return json(403, { error: "not_org_member", message: "Your account is not a member of this organization." });
+    }
+  }
+
   // Email requirement
   if (channel.require_email && !body.email) {
     return json(400, { error: "email_required" });
