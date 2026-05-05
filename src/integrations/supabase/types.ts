@@ -1563,6 +1563,12 @@ export type Database = {
           login_cta_text: string | null
           login_footer_text: string | null
           login_layout: string | null
+          logo_email_height: number | null
+          logo_email_width: number | null
+          logo_header_height: number | null
+          logo_header_width: number | null
+          logo_login_height: number | null
+          logo_login_width: number | null
           logo_size: string | null
           logo_url: string | null
           organization_id: string | null
@@ -1609,6 +1615,12 @@ export type Database = {
           login_cta_text?: string | null
           login_footer_text?: string | null
           login_layout?: string | null
+          logo_email_height?: number | null
+          logo_email_width?: number | null
+          logo_header_height?: number | null
+          logo_header_width?: number | null
+          logo_login_height?: number | null
+          logo_login_width?: number | null
           logo_size?: string | null
           logo_url?: string | null
           organization_id?: string | null
@@ -1655,6 +1667,12 @@ export type Database = {
           login_cta_text?: string | null
           login_footer_text?: string | null
           login_layout?: string | null
+          logo_email_height?: number | null
+          logo_email_width?: number | null
+          logo_header_height?: number | null
+          logo_header_width?: number | null
+          logo_login_height?: number | null
+          logo_login_width?: number | null
           logo_size?: string | null
           logo_url?: string | null
           organization_id?: string | null
