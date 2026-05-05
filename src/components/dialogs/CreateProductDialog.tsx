@@ -339,6 +339,18 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
                 placeholder="e.g., $1M ARR"
               />
             </div>
+            <div>
+              <Label htmlFor="sponsor">Sponsor</Label>
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })}>
+                <SelectTrigger id="sponsor"><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
