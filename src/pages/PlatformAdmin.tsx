@@ -274,6 +274,7 @@ export default function PlatformAdmin() {
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="modules">Module Toggles</TabsTrigger>
           <TabsTrigger value="migrations">Migrations</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
 
