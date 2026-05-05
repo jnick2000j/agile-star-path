@@ -1103,12 +1103,33 @@ export default function Timesheets() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Input
-                              value={e.description ?? ""}
-                              onChange={(ev) => updateEntry(e.id, { description: ev.target.value })}
-                              disabled={!canEdit}
-                              placeholder="Optional notes"
-                            />
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full justify-start font-normal text-left h-9"
+                                  disabled={!canEdit && !e.description}
+                                >
+                                  <StickyNote className="h-3.5 w-3.5 mr-2 shrink-0 text-muted-foreground" />
+                                  <span className="truncate text-xs">
+                                    {e.description?.trim()
+                                      ? e.description
+                                      : <span className="text-muted-foreground">Optional notes</span>}
+                                  </span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-96 p-3" align="start">
+                                <Label className="text-xs mb-2 block">Notes</Label>
+                                <Textarea
+                                  value={e.description ?? ""}
+                                  onChange={(ev) => updateEntry(e.id, { description: ev.target.value })}
+                                  disabled={!canEdit}
+                                  placeholder="Optional notes — describe what you worked on…"
+                                  className="min-h-[140px] max-h-[400px] resize-y overflow-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
                           </TableCell>
                           {DAY_KEYS.map((key) => (
                             <TableCell key={key} className="p-1">
