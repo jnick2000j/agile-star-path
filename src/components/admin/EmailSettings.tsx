@@ -76,6 +76,7 @@ export function EmailSettings() {
       setTransport(data.active_transport);
       setFromAddress(data.from_address ?? "");
       setFromName(data.from_name ?? "");
+      setReplyTo((data as any).reply_to ?? "");
     }
     setLoading(false);
   }
