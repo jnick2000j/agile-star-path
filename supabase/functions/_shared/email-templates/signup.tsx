@@ -45,11 +45,15 @@ export const SignupEmail = ({
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
-          ) by clicking the button below:
+          ) by opening the secure confirmation page below:
         </Text>
         <Button style={button} href={confirmationUrl}>
           Verify Email
         </Button>
+        <Text style={text}>
+          If your email app scans links, this confirmation page will wait for you to click before
+          activating your account.
+        </Text>
         <Text style={footer}>
           If you didn't create an account, you can safely ignore this email.
         </Text>
