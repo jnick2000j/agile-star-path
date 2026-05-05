@@ -90,10 +90,13 @@ export default function TicketIntake({ embedded = false }: { embedded?: boolean 
                      ch.channel_type === "email" ? <Mail className="h-5 w-5 text-primary" /> :
                      <Code className="h-5 w-5 text-primary" />}
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold truncate">{ch.name}</h3>
                         <Badge variant={ch.is_active ? "default" : "secondary"}>{ch.is_active ? "Active" : "Disabled"}</Badge>
                         <Badge variant="outline" className="capitalize">{ch.channel_type}</Badge>
+                        {ch.require_authenticated
+                          ? <Badge variant="outline">Org members only</Badge>
+                          : <Badge variant="outline">Public</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
                         Token: <code>{ch.public_token.slice(0, 12)}…</code> · Limit: {ch.rate_limit_per_hour}/hr · Default priority: {ch.default_priority}
