@@ -126,6 +126,32 @@ Deno.serve(async (req) => {
       );
       if (createError) throw createError;
 
+      // 1b. Grant org access immediately so the user is never an "orphan",
+      //     OR mark them a platform administrator if explicitly requested.
+      const newUserId = newUser.user?.id;
+      if (newUserId) {
+        if (organization_id) {
+          const { error: accessError } = await supabaseAdmin
+            .from("user_organization_access")
+            .upsert(
+              { user_id: newUserId, organization_id, access_level },
+              { onConflict: "user_id,organization_id" }
+            );
+          if (accessError) console.error("manage-user grant org access failed:", accessError);
+
+          await supabaseAdmin
+            .from("profiles")
+            .update({ default_organization_id: organization_id })
+            .eq("user_id", newUserId)
+            .is("default_organization_id", null);
+        } else if (create_as_platform_admin) {
+          const { error: roleError } = await supabaseAdmin
+            .from("user_roles")
+            .upsert({ user_id: newUserId, role: "admin" }, { onConflict: "user_id,role" });
+          if (roleError) console.error("manage-user grant platform admin failed:", roleError);
+        }
+      }
+
       // 2. Generate a signup confirmation link (does NOT send email itself).
       const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
         type: "signup",
