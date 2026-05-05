@@ -137,13 +137,15 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      toast.error("Email and password are required");
+    if (!formData.email) {
+      toast.error("Email is required");
       return;
     }
 
-    if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    // Password is optional. The user signs in via the magic link / OTP in
+    // the invite email. If a password IS provided, enforce a minimum length.
+    if (formData.password && formData.password.length < 6) {
+      toast.error("If setting a password, it must be at least 6 characters");
       return;
     }
 
@@ -179,7 +181,7 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
         body: {
           action: "invite",
           email: formData.email,
-          password: formData.password,
+          password: formData.password || undefined,
           full_name: fullName || formData.email.split('@')[0],
           redirect_to: `${window.location.origin}/auth`,
           organization_id: formData.organization_id || null,
@@ -308,17 +310,19 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Temporary Password *</Label>
+            <Label htmlFor="password">Temporary Password (optional)</Label>
             <Input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
               minLength={6}
+              placeholder="Leave blank to use email OTP only"
             />
             <p className="text-xs text-muted-foreground">
-              The user must confirm their email before signing in. They can reset this password after.
+              Leave blank to invite the user by email — they'll sign in with a one‑time code (OTP)
+              and set their own password later. Only fill this in if you need to share a temporary
+              password out‑of‑band.
             </p>
           </div>
 
