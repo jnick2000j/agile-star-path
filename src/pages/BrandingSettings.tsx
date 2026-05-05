@@ -203,6 +203,12 @@ export default function BrandingSettings() {
         form_text_color: (data as any).form_text_color || "",
         app_name_color: (data as any).app_name_color || "",
         tagline_color: (data as any).tagline_color || "",
+        logo_header_width: (data as any).logo_header_width ?? null,
+        logo_header_height: (data as any).logo_header_height ?? null,
+        logo_login_width: (data as any).logo_login_width ?? null,
+        logo_login_height: (data as any).logo_login_height ?? null,
+        logo_email_width: (data as any).logo_email_width ?? null,
+        logo_email_height: (data as any).logo_email_height ?? null,
       });
     } else {
       setBranding(defaultBranding);
