@@ -214,6 +214,8 @@ Deno.serve(async (req) => {
           to: [profile.email],
           subject,
           html,
+          organizationId: change.organization_id,
+          triggerKey: "cm_activity",
         });
         if (result.ok) emailsSent++;
         else console.error("notify-cm-activity email failed:", result.error);
