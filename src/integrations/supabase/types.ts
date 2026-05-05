@@ -5071,6 +5071,7 @@ export type Database = {
           organization_id: string
           public_token: string
           rate_limit_per_hour: number
+          require_authenticated: boolean
           require_email: boolean
           updated_at: string
         }
@@ -5089,6 +5090,7 @@ export type Database = {
           organization_id: string
           public_token?: string
           rate_limit_per_hour?: number
+          require_authenticated?: boolean
           require_email?: boolean
           updated_at?: string
         }
@@ -5107,6 +5109,7 @@ export type Database = {
           organization_id?: string
           public_token?: string
           rate_limit_per_hour?: number
+          require_authenticated?: boolean
           require_email?: boolean
           updated_at?: string
         }

@@ -273,7 +273,6 @@ export default function PlatformAdmin() {
           <TabsTrigger value="sso">SSO Queue</TabsTrigger>
           <TabsTrigger value="verticals">Industry Verticals</TabsTrigger>
           <TabsTrigger value="modules">Module Toggles</TabsTrigger>
-          <TabsTrigger value="migration-requests">Migration Requests</TabsTrigger>
           <TabsTrigger value="migrations">Migrations</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
         </TabsList>
@@ -508,12 +507,19 @@ export default function PlatformAdmin() {
           <PlatformModuleToggles />
         </TabsContent>
 
-        <TabsContent value="migration-requests" className="space-y-4">
-          <PlatformMigrationRequestsQueue />
-        </TabsContent>
-
         <TabsContent value="migrations" className="space-y-4">
-          <PlatformMigrationsManager />
+          <Tabs defaultValue="requests" className="space-y-4">
+            <TabsList className="bg-secondary">
+              <TabsTrigger value="requests">Migration Requests Queue</TabsTrigger>
+              <TabsTrigger value="wizard">Migration Wizard</TabsTrigger>
+            </TabsList>
+            <TabsContent value="requests" className="space-y-4">
+              <PlatformMigrationRequestsQueue />
+            </TabsContent>
+            <TabsContent value="wizard" className="space-y-4">
+              <PlatformMigrationsManager />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">
