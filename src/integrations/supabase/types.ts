@@ -10544,6 +10544,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"]
           address: string | null
           archived: boolean
           archived_at: string | null
@@ -10570,6 +10571,7 @@ export type Database = {
           zip: string | null
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           address?: string | null
           archived?: boolean
           archived_at?: string | null
@@ -10596,6 +10598,7 @@ export type Database = {
           zip?: string | null
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           address?: string | null
           archived?: boolean
           archived_at?: string | null
@@ -15858,6 +15861,10 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { _token: string }; Returns: Json }
+      admin_clear_email_confirmation: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       apply_addon_feature_overrides: {
         Args: { _addon_sub_id: string }
         Returns: undefined
@@ -15909,6 +15916,10 @@ export type Database = {
       compute_compliance_score: {
         Args: { _scope_id: string; _scope_type: string }
         Returns: Json
+      }
+      compute_initial_account_status: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["account_status"]
       }
       consume_ai_credits: {
         Args: {
@@ -16297,6 +16308,10 @@ export type Database = {
         }[]
       }
       recompute_lms_storage: { Args: { _org_id: string }; Returns: undefined }
+      reconcile_my_account_status: {
+        Args: never
+        Returns: Database["public"]["Enums"]["account_status"]
+      }
       resolve_scim_groups_to_access_level: {
         Args: { _groups: string[]; _org_id: string }
         Returns: string
@@ -16323,6 +16338,13 @@ export type Database = {
         }
         Returns: Json
       }
+      set_profile_account_status: {
+        Args: {
+          _status: Database["public"]["Enums"]["account_status"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       submit_csat_response_by_token: {
         Args: {
           _comment?: string
@@ -16334,6 +16356,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_status: "pending" | "active"
       app_role:
         | "admin"
         | "programme_owner"
@@ -16569,6 +16592,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: ["pending", "active"],
       app_role: [
         "admin",
         "programme_owner",

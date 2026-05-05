@@ -13,6 +13,8 @@ import {
   Settings2,
   Mail,
   Loader2,
+  RotateCcw,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -50,6 +52,7 @@ export interface UserWithRole {
   location: string | null;
   department: string | null;
   archived: boolean;
+  account_status: "pending" | "active";
   job_title: string | null;
   highest_access: AccessLevel | null;
   custom_roles: UserCustomRoleAssignment[];
@@ -132,6 +135,7 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
         location: profile.location,
         department: profile.department,
         archived: profile.archived || false,
+        account_status: (profile.account_status as "pending" | "active") || "pending",
         job_title: profile.job_title || null,
         highest_access: highestAccessMap[profile.user_id] || null,
         custom_roles: customRolesMap[profile.user_id] || [],
@@ -159,7 +163,7 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
         body: {
           action: "resend_invite",
           user_id: user.user_id,
-          redirect_to: `${window.location.origin}/auth`,
+          redirect_to: `${window.location.origin}/auth/confirm`,
         },
       });
       if (error) throw error;
@@ -170,6 +174,30 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
       toast.error(err.message || "Failed to resend invite");
     } finally {
       setResendingFor(null);
+    }
+  };
+
+  const [resettingFor, setResettingFor] = useState<string | null>(null);
+  const handleResetToPending = async (user: UserWithRole) => {
+    if (!confirm(`Reset ${user.email} to Pending? They will be signed out and required to re-confirm their email.`)) return;
+    setResettingFor(user.user_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "reset_to_pending",
+          user_id: user.user_id,
+          redirect_to: `${window.location.origin}/auth/confirm`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`${user.email} reset to Pending. Confirmation email sent.`);
+      await fetchUsers();
+    } catch (err: any) {
+      console.error("Reset to pending failed:", err);
+      toast.error(err.message || "Failed to reset user");
+    } finally {
+      setResettingFor(null);
     }
   };
 
@@ -377,6 +405,11 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
                   <TableCell>
                     {user.archived ? (
                       <Badge variant="destructive">Archived</Badge>
+                    ) : user.account_status === "pending" ? (
+                      <Badge variant="outline" className="border-warning text-warning gap-1">
+                        <Clock className="h-3 w-3" />
+                        Pending
+                      </Badge>
                     ) : (
                       <Badge variant="default" className="bg-success">Active</Badge>
                     )}
@@ -408,6 +441,21 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
                             ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             : <Mail className="h-3.5 w-3.5" />}
                           Resend invite
+                        </Button>
+                      )}
+                      {!user.archived && user.account_status === "active" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          disabled={resettingFor === user.user_id}
+                          onClick={() => handleResetToPending(user)}
+                          title="Force user to re-confirm their email address"
+                        >
+                          {resettingFor === user.user_id
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            : <RotateCcw className="h-3.5 w-3.5" />}
+                          Reset to pending
                         </Button>
                       )}
                     </div>

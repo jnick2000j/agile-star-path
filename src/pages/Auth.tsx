@@ -64,7 +64,7 @@ const nameSchema = z.string().min(1, "Name is required");
 const otpSchema = z.string().regex(/^\d{6,8}$/, "Enter the verification code");
 
 type AuthMode = "login" | "signup" | "sso";
-type AuthStep = "request" | "verify";
+type AuthStep = "request" | "verify" | "check_email";
 const SIGNUP_ONBOARDING_EMAIL_KEY = "taskmaster:signup-onboarding-email";
 
 const defaultFeatures = [
@@ -108,7 +108,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; otp?: string; firstName?: string; lastName?: string; orgName?: string }>({});
   const [branding, setBranding] = useState<LoginBranding | null>(null);
 
-  const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
+  const { requestEmailOtp, verifyEmailOtp, requestSignupConfirmation, user } = useAuth();
   const navigate = useNavigate();
 
 
@@ -232,19 +232,29 @@ export default function Auth() {
     if (step === "request") {
       if (!validateRequest()) return;
       setLoading(true);
-      const { error } = await requestEmailOtp(email, {
-        firstName: mode === "signup" ? firstName : undefined,
-        lastName: mode === "signup" ? lastName : undefined,
-        fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
-        orgName: mode === "signup" ? orgName.trim() : undefined,
-        shouldCreateUser: mode === "signup",
-      });
-      if (!error) {
-        if (mode === "signup") {
+
+      if (mode === "signup") {
+        // Signup uses a confirmation link (NOT auto sign-in). The user
+        // confirms their email first, then must log in separately.
+        const { error } = await requestSignupConfirmation(email, {
+          firstName,
+          lastName,
+          fullName: `${firstName} ${lastName}`.trim(),
+          orgName: orgName.trim(),
+        });
+        if (!error) {
           sessionStorage.setItem(SIGNUP_ONBOARDING_EMAIL_KEY, email.toLowerCase());
-        } else {
-          sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
+          setStep("check_email");
+          setResendCooldown(60);
         }
+        setLoading(false);
+        return;
+      }
+
+      // Login flow: keep OTP code entry for returning users
+      const { error } = await requestEmailOtp(email, { shouldCreateUser: false });
+      if (!error) {
+        sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
         setStep("verify");
         setResendCooldown(60);
       }
@@ -252,19 +262,12 @@ export default function Auth() {
       return;
     }
 
-    // step === "verify"
+    // step === "verify" — login flow only
     if (!validateVerify()) return;
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
     if (!error) {
-      if (mode === "signup") {
-        navigate("/onboarding", { replace: true });
-      }
-      // Don't auto-provision the org here — the post-auth effect routes
-      // brand-new users to /onboarding where the full wizard (intent →
-      // vertical → org name → invite → plan) collects everything properly.
-      // The org_name captured during signup is preserved in user_metadata
-      // and the wizard pre-fills it.
+      // Returning user — let the post-auth effect route to dashboard or onboarding
     }
     setLoading(false);
   };
@@ -279,17 +282,18 @@ export default function Auth() {
   const handleResendCode = async () => {
     if (resendCooldown > 0 || resending) return;
     setResending(true);
-    const { error } = await requestEmailOtp(email, {
-      firstName: mode === "signup" ? firstName : undefined,
-      lastName: mode === "signup" ? lastName : undefined,
-      fullName: mode === "signup" ? `${firstName} ${lastName}`.trim() : undefined,
-      orgName: mode === "signup" ? orgName.trim() : undefined,
-      shouldCreateUser: mode === "signup",
-    });
+    if (mode === "signup") {
+      await requestSignupConfirmation(email, {
+        firstName,
+        lastName,
+        fullName: `${firstName} ${lastName}`.trim(),
+        orgName: orgName.trim(),
+      });
+    } else {
+      await requestEmailOtp(email, { shouldCreateUser: false });
+    }
     setResending(false);
-    // Always start cooldown — even on error — to prevent hammering Supabase's rate limiter.
     setResendCooldown(60);
-    void error;
   };
 
   const handleOAuth = async (provider: "google" | "apple") => {
@@ -343,6 +347,7 @@ export default function Auth() {
   });
 
   const getTitle = () => {
+    if (step === "check_email") return "Check your email";
     if (step === "verify") return "Enter your code";
     switch (mode) {
       case "login": return showWelcomeMessage ? (branding?.welcome_message || "Welcome back") : "Sign in";
@@ -352,19 +357,22 @@ export default function Auth() {
   };
 
   const getSubtitle = () => {
+    if (step === "check_email")
+      return `We sent a confirmation link to ${email}. Click the link in your inbox to confirm your email — then come back and sign in.`;
     if (step === "verify") return `We sent a verification code to ${email}. It expires in a few minutes.`;
     switch (mode) {
       case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your email and we'll send you a one-time code.") : "Enter your email and we'll send you a one-time code.";
-      case "signup": return "Tell us about you. We'll email a one-time code to confirm your address.";
+      case "signup": return "Tell us about you. We'll email a confirmation link to verify your address.";
       case "sso": return "Enter your work email and we'll route you to your identity provider.";
     }
   };
 
   const getButtonText = () => {
+    if (step === "check_email") return "Back to sign in";
     if (step === "verify") return "Verify & sign in";
     switch (mode) {
       case "login": return branding?.login_button_text || "Email me a code";
-      case "signup": return "Send verification code";
+      case "signup": return "Send confirmation link";
       case "sso": return "Continue with SSO";
     }
   };
@@ -460,9 +468,41 @@ export default function Auth() {
           </div>
         )}
 
-        <Button type="submit" className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm" disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{getButtonText()} <ArrowRight className="h-3.5 w-3.5" /></>}
-        </Button>
+        {step === "check_email" && (
+          <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm space-y-3">
+            <div className="flex items-start gap-3">
+              <Mail className="h-5 w-5 text-primary mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Confirmation email sent</p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  Once you click the link in your email, your account will be marked active and you can sign in.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <button type="button" onClick={() => { setStep("request"); setOtp(""); setErrors({}); }} className="text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" /> Use a different email
+              </button>
+              <button type="button" onClick={handleResendCode} disabled={resending || resendCooldown > 0} className="text-primary hover:text-primary/80 font-medium disabled:opacity-50">
+                {resending ? "Sending…" : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend link"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "check_email" ? (
+          <Button
+            type="button"
+            className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm"
+            onClick={() => { switchMode("login"); }}
+          >
+            Back to sign in <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        ) : (
+          <Button type="submit" className="w-full h-10 gap-2 text-sm font-medium mt-1 shadow-sm" disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{getButtonText()} <ArrowRight className="h-3.5 w-3.5" /></>}
+          </Button>
+        )}
       </form>
 
       <div className="mt-6 pt-5 border-t border-border/60 text-center">

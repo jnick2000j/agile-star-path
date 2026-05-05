@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
 
       const redirectTo =
         redirect_to ||
-        `${supabaseUrl.replace(".supabase.co", ".lovable.app")}/auth`;
+        `${supabaseUrl.replace(".supabase.co", ".lovable.app")}/auth/confirm`;
 
       // 1. Create the user. If a temp password was supplied use it, otherwise
       //    create with email_confirm=false and rely on the invite link.
@@ -259,7 +259,7 @@ Deno.serve(async (req) => {
         );
       }
 
-      const redirectTo = redirect_to || `${req.headers.get("origin") || ""}/auth`;
+      const redirectTo = redirect_to || `${req.headers.get("origin") || ""}/auth/confirm`;
 
       const { data: linkData, error: resendError } = await supabaseAdmin.auth.admin.generateLink({
         type: "signup",
@@ -457,8 +457,119 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (action === "reset_to_pending") {
+      // Re-require email confirmation: clear auth.users.email_confirmed_at,
+      // mark profile pending, then re-send the confirmation email.
+      const { data: targetWrap, error: targetErr } = await supabaseAdmin.auth.admin.getUserById(user_id);
+      if (targetErr || !targetWrap?.user) {
+        return new Response(
+          JSON.stringify({ error: "Target user not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const targetUser = targetWrap.user as any;
+
+      // Block reset for SSO accounts (identity provider owns confirmation)
+      const ssoProviders = new Set(["saml", "oidc", "sso"]);
+      const identities: Array<{ provider?: string }> = targetUser.identities ?? [];
+      const isSso =
+        identities.some((i) => ssoProviders.has((i?.provider ?? "").toLowerCase())) ||
+        ssoProviders.has((targetUser.app_metadata?.provider ?? "").toLowerCase()) ||
+        !!targetUser.app_metadata?.provider_id;
+      if (isSso) {
+        return new Response(
+          JSON.stringify({
+            error: "Account is managed by SSO/auto-provisioning and cannot be reset to pending here.",
+            reason: "sso_managed",
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Org admins must share an organization with the target
+      if (!isPlatformAdmin) {
+        const { data: targetMembership } = await supabaseAdmin
+          .from("user_organization_access")
+          .select("organization_id")
+          .eq("user_id", user_id)
+          .eq("organization_id", organization_id);
+        if (!targetMembership || targetMembership.length === 0) {
+          return new Response(
+            JSON.stringify({ error: "Target user is not a member of this organization" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // 1. Clear email confirmation directly in auth.users (admin SDK has no flag for this).
+      //    Also invalidate any active sessions so the user is forced through the new flow.
+      const { error: clearErr } = await supabaseAdmin.rpc("admin_clear_email_confirmation", {
+        _user_id: user_id,
+      });
+      if (clearErr) {
+        console.error("reset_to_pending clear confirm failed:", clearErr);
+        return new Response(
+          JSON.stringify({ error: clearErr.message || "Failed to clear email confirmation" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // 2. Mark profile pending
+      await supabaseAdmin.rpc("set_profile_account_status", {
+        _user_id: user_id,
+        _status: "pending",
+      });
+
+      // 3. Sign out all sessions for this user
+      try {
+        await supabaseAdmin.auth.admin.signOut(user_id, "global");
+      } catch (e) {
+        console.warn("reset_to_pending: signOut warning", e);
+      }
+
+      // 4. Send a fresh signup confirmation email
+      const redirectTo =
+        redirect_to || `${req.headers.get("origin") || ""}/auth/confirm`;
+
+      const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
+        type: "signup",
+        email: targetUser.email!,
+        options: { redirectTo },
+      } as any);
+      const acceptUrl =
+        (linkData as any)?.properties?.action_link ||
+        (linkData as any)?.action_link ||
+        redirectTo;
+
+      const inviterName =
+        (callerUser.user_metadata as any)?.full_name || callerUser.email || "An administrator";
+      const appName = Deno.env.get("APP_NAME") || "TaskMaster";
+      const result = await sendTransactionalEmail({
+        to: targetUser.email!,
+        subject: `Please re-confirm your ${appName} account`,
+        html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
+        idempotencyKey: `manage-user-reset-${user_id}-${Date.now()}`,
+        label: "user-reset-pending",
+        triggerKey: "user_reset_pending",
+        organizationId: organization_id ?? null,
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          emailSent: result.ok,
+          emailError: result.ok ? undefined : result.error,
+          accept_url: acceptUrl,
+          message: result.ok
+            ? "Account reset to pending. Confirmation email sent."
+            : "Account reset to pending. Email queue error — share accept_url manually.",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: "Invalid action. Use 'invite', 'resend_invite', 'archive', 'unarchive', 'delete', or 'change_email'" }),
+      JSON.stringify({ error: "Invalid action. Use 'invite', 'resend_invite', 'archive', 'unarchive', 'delete', 'change_email', or 'reset_to_pending'" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
