@@ -19,6 +19,7 @@ interface EmailSettingsRow {
   active_transport: Transport;
   from_address: string | null;
   from_name: string | null;
+  reply_to: string | null;
   last_test_status: string | null;
   last_test_at: string | null;
   last_test_error: string | null;
