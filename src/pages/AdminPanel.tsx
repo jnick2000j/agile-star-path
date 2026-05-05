@@ -18,6 +18,8 @@ import {
   Layers,
   Tag,
   Settings2,
+  Mail,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSignedLogo } from "@/hooks/useSignedLogo";
@@ -113,6 +115,28 @@ export default function AdminPanel() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
+  const [resendingFor, setResendingFor] = useState<string | null>(null);
+
+  const handleResendInvite = async (user: UserWithRole) => {
+    setResendingFor(user.user_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "resend_invite",
+          user_id: user.user_id,
+          redirect_to: `${window.location.origin}/auth`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Invite email resent to ${user.email}`);
+    } catch (err: any) {
+      console.error("Resend invite failed:", err);
+      toast.error(err.message || "Failed to resend invite");
+    } finally {
+      setResendingFor(null);
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -447,7 +471,7 @@ export default function AdminPanel() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <EditUserDialog user={user} onSuccess={fetchUsers} />
                           <AssignUserAccessDialog
                             onSuccess={fetchUsers}
@@ -460,6 +484,21 @@ export default function AdminPanel() {
                               </Button>
                             }
                           />
+                          {!user.archived && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              disabled={resendingFor === user.user_id}
+                              onClick={() => handleResendInvite(user)}
+                              title="Resend the invitation email with a fresh sign-in link"
+                            >
+                              {resendingFor === user.user_id
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Mail className="h-3.5 w-3.5" />}
+                              Resend invite
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
