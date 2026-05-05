@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { action, user_id, email, password, full_name, redirect_to } = await req.json();
+    const { action, user_id, email, password, full_name, redirect_to, organization_id } = await req.json();
 
     if (action === "invite") {
       if (!email) {
