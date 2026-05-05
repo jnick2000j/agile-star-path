@@ -81,6 +81,27 @@ export async function sendTransactionalEmail(args: SendArgs): Promise<SendResult
   const text = args.text ?? htmlToText(args.html);
   const label = args.label ?? "transactional";
 
+  // Admin trigger gate: if a triggerKey + organizationId is provided and the
+  // trigger is disabled for that org, do not send and do not log.
+  if (args.triggerKey && args.organizationId) {
+    try {
+      const { data: enabled, error: gateErr } = await admin.rpc(
+        "is_email_trigger_enabled",
+        { _organization_id: args.organizationId, _trigger_key: args.triggerKey },
+      );
+      if (gateErr) {
+        console.warn("trigger gate check failed; defaulting to enabled:", gateErr.message);
+      } else if (enabled === false) {
+        console.log(
+          `email trigger '${args.triggerKey}' disabled for org ${args.organizationId} — skipping ${args.label ?? "transactional"} to ${args.to}`,
+        );
+        return { ok: true, skipped: true };
+      }
+    } catch (e) {
+      console.warn("trigger gate check threw; defaulting to enabled:", e);
+    }
+  }
+
   try {
     // Get/create unsubscribe token (one per recipient email).
     const normalizedEmail = args.to.toLowerCase();
