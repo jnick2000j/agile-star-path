@@ -15861,6 +15861,10 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { _token: string }; Returns: Json }
+      admin_clear_email_confirmation: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       apply_addon_feature_overrides: {
         Args: { _addon_sub_id: string }
         Returns: undefined
