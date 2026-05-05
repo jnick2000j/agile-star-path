@@ -136,40 +136,37 @@ export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult
     try {
       const url = Deno.env.get("SUPABASE_URL");
       const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      const anon = Deno.env.get("SUPABASE_ANON_KEY");
       if (!url || !key) {
         return { ok: false, transport: "lovable", error: "Lovable transport requires SUPABASE_URL and service role key" };
       }
-      const sb = createClient(url, key, {
-        auth: { autoRefreshToken: false, persistSession: false },
-        global: { headers: { Authorization: `Bearer ${key}` } },
-      });
-      // One invocation per recipient (transactional 1:1 model)
       const errors: string[] = [];
       for (const to of recipients) {
         const idemKey = `adhoc-${crypto.randomUUID()}`;
-        const { error } = await sb.functions.invoke("send-transactional-email", {
-          body: {
+        const res = await fetch(`${url}/functions/v1/send-transactional-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${key}`,
+            apikey: anon ?? key,
+          },
+          body: JSON.stringify({
             templateName: "generic-html",
             recipientEmail: to,
             idempotencyKey: idemKey,
             templateData: { subject, html: html || `<p>${text}</p>`, text },
             subject,
-          },
-          headers: { Authorization: `Bearer ${key}` },
+          }),
         });
-        if (error) {
-          const msg = (error.message || "").toLowerCase();
-          if (
-            msg.includes("not found") ||
-            msg.includes("non-2xx") ||
-            msg.includes("404")
-          ) {
-            errors.push(
-              `${to}: Lovable Emails is not set up for this project yet. Configure an email domain in Cloud → Emails, or switch to SMTP/Resend in Admin → Email settings.`,
-            );
+        if (!res.ok) {
+          const body = await res.text();
+          if (res.status === 404 || /not found/i.test(body)) {
+            errors.push(`${to}: Lovable Emails is not set up for this project yet. Configure an email domain in Cloud → Emails, or switch to SMTP/Resend in Admin → Email settings.`);
           } else {
-            errors.push(`${to}: ${error.message}`);
+            errors.push(`${to}: send-transactional-email ${res.status}: ${body}`);
           }
+        } else {
+          await res.text();
         }
       }
       if (errors.length) return { ok: false, transport: "lovable", error: errors.join("; ") };
