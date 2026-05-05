@@ -368,6 +368,8 @@ export default function Billing() {
 
         {isPlatformAdmin && <AICreditPackManager />}
 
+        <BillingAccountPanel isAdmin={isAdmin} />
+
         {limits && (
           <Card className="p-6">
             <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
