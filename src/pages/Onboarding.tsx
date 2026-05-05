@@ -61,30 +61,30 @@ export default function Onboarding() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
   const handleCreateOrg = async () => {
     if (!user || !orgName.trim()) return;
     setLoading(true);
     try {
-      const { data: org, error: orgError } = await supabase
-        .from("organizations")
-        .insert({ name: orgName.trim(), slug: generateSlug(orgName), created_by: user.id, industry_vertical: vertical })
-        .select()
-        .single();
+      const { data: createdOrgId, error: orgError } = await supabase.rpc("create_org_for_new_user", {
+        _org_name: orgName.trim(),
+      });
 
       if (orgError) throw orgError;
+      if (!createdOrgId) throw new Error("Failed to create organization");
 
-      await supabase
-        .from("user_organization_access")
-        .insert({ user_id: user.id, organization_id: org.id, access_level: "admin" });
+      const organizationId = createdOrgId as string;
 
-      await supabase.from("branding_settings").insert({ organization_id: org.id });
+      const { error: verticalError } = await supabase
+        .from("organizations")
+        .update({ industry_vertical: vertical })
+        .eq("id", organizationId);
 
-      setOrgId(org.id);
-      localStorage.setItem("currentOrganizationId", org.id);
+      if (verticalError) throw verticalError;
+
+      await supabase.from("branding_settings").insert({ organization_id: organizationId });
+
+      setOrgId(organizationId);
+      localStorage.setItem("currentOrganizationId", organizationId);
 
       // Fetch plans for next step — filter to the intent the user picked
       const planKinds = intent === "ppm" ? ["core"] : intent === "helpdesk" ? ["helpdesk"] : ["itsm"];
@@ -100,13 +100,12 @@ export default function Onboarding() {
 
       // Auto-assign free plan if available (PPM Free, Helpdesk Free)
       const freePlan = plansData?.find(p => p.price_monthly === 0 && p.price_yearly === 0);
-      if (freePlan && org.id) {
-        await supabase.from("organization_subscriptions").insert({
-          organization_id: org.id,
+      if (freePlan) {
+        await supabase.from("organization_subscriptions").update({
           plan_id: freePlan.id,
           status: "trialing",
           trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        });
+        }).eq("organization_id", organizationId);
         setSelectedPlan(freePlan.id);
       }
 
