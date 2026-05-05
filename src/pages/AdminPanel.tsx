@@ -471,7 +471,7 @@ export default function AdminPanel() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <EditUserDialog user={user} onSuccess={fetchUsers} />
                           <AssignUserAccessDialog
                             onSuccess={fetchUsers}
@@ -484,6 +484,21 @@ export default function AdminPanel() {
                               </Button>
                             }
                           />
+                          {!user.archived && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              disabled={resendingFor === user.user_id}
+                              onClick={() => handleResendInvite(user)}
+                              title="Resend the invitation email with a fresh sign-in link"
+                            >
+                              {resendingFor === user.user_id
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Mail className="h-3.5 w-3.5" />}
+                              Resend invite
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
