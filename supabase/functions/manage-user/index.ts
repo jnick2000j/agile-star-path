@@ -98,9 +98,7 @@ Deno.serve(async (req) => {
       }
       // Every new user must be associated with at least one organization,
       // unless the caller explicitly creates a platform administrator.
-      const isCreatingPlatformAdmin =
-        (await req.clone().json().catch(() => ({})))?.create_as_platform_admin === true;
-      if (!organization_id && !isCreatingPlatformAdmin) {
+      if (!organization_id && !create_as_platform_admin) {
         return new Response(
           JSON.stringify({
             error:
