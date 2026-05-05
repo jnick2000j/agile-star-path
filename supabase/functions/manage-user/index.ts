@@ -219,6 +219,13 @@ Deno.serve(async (req) => {
         label: "user-invite",
         triggerKey: "user_invite",
         organizationId: organization_id ?? null,
+        templateKey: "invite",
+        templateData: {
+          user_name: email.split("@")[0],
+          org_name: appName,
+          site_name: appName,
+          action_url: acceptUrl,
+        },
       });
       emailSent = result.ok;
       if (!result.ok) {
@@ -287,6 +294,13 @@ Deno.serve(async (req) => {
         label: "user-invite-resend",
         triggerKey: "user_invite_resend",
         organizationId: organization_id ?? null,
+        templateKey: "invite",
+        templateData: {
+          user_name: targetUser.email!.split("@")[0],
+          org_name: appName,
+          site_name: appName,
+          action_url: acceptUrl,
+        },
       });
       emailSent = result.ok;
       if (!result.ok) emailError = result.error;
@@ -552,6 +566,12 @@ Deno.serve(async (req) => {
         label: "user-reset-pending",
         triggerKey: "user_reset_pending",
         organizationId: organization_id ?? null,
+        templateKey: "signup",
+        templateData: {
+          user_name: targetUser.email!.split("@")[0],
+          site_name: appName,
+          action_url: acceptUrl,
+        },
       });
 
       return new Response(
