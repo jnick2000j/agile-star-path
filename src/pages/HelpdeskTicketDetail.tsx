@@ -810,9 +810,9 @@ export default function HelpdeskTicketDetail() {
             </div>
           </div>
 
-          {/* Row 3: Mark as Resolved (own line, wraps cleanly) */}
-          {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
-            <div className="flex flex-wrap items-stretch gap-2 pt-2 border-t">
+          {/* Action buttons: wrap to multi-row, allow in-button text wrap */}
+          <div className="flex flex-wrap items-stretch gap-2 pt-2 border-t">
+            {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
               <Button
                 size="sm"
                 onClick={() => setResolveOpen(true)}
@@ -820,11 +820,7 @@ export default function HelpdeskTicketDetail() {
               >
                 <Save className="h-4 w-4 mr-2 shrink-0" /> Mark as Resolved
               </Button>
-            </div>
-          )}
-
-          {/* Action buttons: wrap to multi-row, allow in-button text wrap */}
-          <div className="flex flex-wrap items-stretch gap-2 pt-2 border-t">
+            )}
             <Button size="sm" variant="outline" onClick={() => setSlaCsatOpen(true)} className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight">
               <Gauge className="h-4 w-4 mr-2 shrink-0" /> SLA / CSAT
             </Button>
