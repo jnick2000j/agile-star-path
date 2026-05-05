@@ -214,6 +214,9 @@ Deno.serve(async (req) => {
         subject: `${inviterName} re-sent your invite to ${appName}`,
         html: inviteEmailHtml({ inviterName, appName, acceptUrl }),
         idempotencyKey: `manage-user-resend-${user_id}-${Date.now()}`,
+        label: "user-invite-resend",
+        triggerKey: "user_invite_resend",
+        organizationId: organization_id ?? null,
       });
       emailSent = result.ok;
       if (!result.ok) emailError = result.error;
