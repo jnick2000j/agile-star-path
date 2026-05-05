@@ -38,6 +38,8 @@ const PORTAL_ALLOWED_PREFIXES = [
   "/accept-invite",
 ];
 
+const SIGNUP_ONBOARDING_EMAIL_KEY = "taskmaster:signup-onboarding-email";
+
 function isPortalAllowedPath(pathname: string): boolean {
   return PORTAL_ALLOWED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -108,6 +110,14 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  const pendingSignupEmail = sessionStorage.getItem(SIGNUP_ONBOARDING_EMAIL_KEY)?.toLowerCase();
+  const shouldForceOnboarding = !!pendingSignupEmail && pendingSignupEmail === user.email?.toLowerCase();
+
+  if (shouldForceOnboarding && location.pathname !== "/onboarding" && location.pathname !== "/accept-invite") {
+    sessionStorage.removeItem(SIGNUP_ONBOARDING_EMAIL_KEY);
+    return <Navigate to="/onboarding" replace />;
   }
 
   // Send users without an org to onboarding (except when they're already there)
