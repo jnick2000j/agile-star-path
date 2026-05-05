@@ -109,40 +109,34 @@ export default function Auth() {
 
   const { requestEmailOtp, verifyEmailOtp, user } = useAuth();
   const navigate = useNavigate();
-  const orgProvisioningRef = useRef<Promise<string | null> | null>(null);
 
-  const provisionFirstOrganization = useCallback(async (name: string) => {
-    const trimmedName = name.trim();
-    if (!trimmedName) return null;
-    if (!orgProvisioningRef.current) {
-      orgProvisioningRef.current = Promise.resolve(
-        supabase.rpc("create_org_for_new_user", { _org_name: trimmedName })
-      )
-        .then(({ data, error }) => {
-          if (error) throw error;
-          if (data) localStorage.setItem("currentOrganizationId", data as string);
-          return (data as string | null) ?? null;
-        })
-        .catch((error) => {
-          orgProvisioningRef.current = null;
-          throw error;
-        });
-    }
-    return orgProvisioningRef.current;
-  }, []);
+
 
   useEffect(() => {
-    if (user) {
-      const orgNameMeta = user.user_metadata?.org_name;
-      if (orgNameMeta) {
-        provisionFirstOrganization(orgNameMeta)
-          .then(() => navigate("/"))
-          .catch((error) => toast.error(error.message || "Failed to create organization"));
+    if (!user) return;
+    // Decide where to send the user once they're authenticated.
+    // - Brand new sign-ups (no org membership yet) go to the onboarding wizard
+    //   so they pick intent / vertical / org / plan instead of being dropped on
+    //   an empty Dashboard.
+    // - Returning users go straight to the app.
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("user_organization_access")
+        .select("organization_id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_disabled", false);
+      if (cancelled) return;
+      if ((count ?? 0) === 0) {
+        navigate("/onboarding");
       } else {
         navigate("/");
       }
-    }
-  }, [user, navigate, provisionFirstOrganization]);
+    })().catch(() => {
+      if (!cancelled) navigate("/");
+    });
+    return () => { cancelled = true; };
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchGlobalBranding = async () => {
@@ -248,14 +242,11 @@ export default function Auth() {
     setLoading(true);
     const { error } = await verifyEmailOtp(email, otp);
     if (!error) {
-      try {
-        if (mode === "signup" && orgName.trim()) {
-          await provisionFirstOrganization(orgName.trim());
-        }
-        navigate("/");
-      } catch (err: any) {
-        toast.error(err.message || "Failed to create organization");
-      }
+      // Don't auto-provision the org here — the post-auth effect routes
+      // brand-new users to /onboarding where the full wizard (intent →
+      // vertical → org name → invite → plan) collects everything properly.
+      // The org_name captured during signup is preserved in user_metadata
+      // and the wizard pre-fills it.
     }
     setLoading(false);
   };

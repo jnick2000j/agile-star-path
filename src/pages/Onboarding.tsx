@@ -37,7 +37,7 @@ export default function Onboarding() {
   const [verticals, setVerticals] = useState<VerticalOpt[]>([]);
   const [vertical, setVertical] = useState<string>("technology");
   const [loading, setLoading] = useState(false);
-  const [orgName, setOrgName] = useState("");
+  const [orgName, setOrgName] = useState((user?.user_metadata as any)?.org_name ?? "");
   const [orgId, setOrgId] = useState<string | null>(null);
   const [inviteEmails, setInviteEmails] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
