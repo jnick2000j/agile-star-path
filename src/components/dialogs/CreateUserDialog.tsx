@@ -310,17 +310,19 @@ export function CreateUserDialog({ onSuccess }: CreateUserDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Temporary Password *</Label>
+            <Label htmlFor="password">Temporary Password (optional)</Label>
             <Input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
               minLength={6}
+              placeholder="Leave blank to use email OTP only"
             />
             <p className="text-xs text-muted-foreground">
-              The user must confirm their email before signing in. They can reset this password after.
+              Leave blank to invite the user by email — they'll sign in with a one‑time code (OTP)
+              and set their own password later. Only fill this in if you need to share a temporary
+              password out‑of‑band.
             </p>
           </div>
 
