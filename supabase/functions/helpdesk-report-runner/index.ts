@@ -142,6 +142,7 @@ Deno.serve(async (req) => {
             html: `<p>Your scheduled helpdesk report <strong>${report.name}</strong> is attached.</p><p><strong>${rows.length}</strong> rows, generated ${new Date().toUTCString()}.</p>`,
             attachments: [{ filename, content: b64, contentType: "text/csv" }],
             organizationId: report.organization_id,
+            triggerKey: "helpdesk_report",
           });
           if (res.ok) emailed = report.recipients.length;
         }
