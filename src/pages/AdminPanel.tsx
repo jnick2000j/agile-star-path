@@ -56,12 +56,13 @@ import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplian
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EmailSettings } from "@/components/admin/EmailSettings";
 import { EmailTriggerSettings } from "@/components/admin/EmailTriggerSettings";
+type AccessLevel = "admin" | "editor" | "viewer";
 
-
-import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
-import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
-
-type AppRole = Database["public"]["Enums"]["app_role"];
+interface UserCustomRoleAssignment {
+  organization_id: string;
+  role_name: string;
+  is_system: boolean;
+}
 
 interface UserWithRole {
   id: string;
@@ -76,7 +77,9 @@ interface UserWithRole {
   location: string | null;
   department: string | null;
   archived: boolean;
-  role: AppRole;
+  job_title: string | null;
+  highest_access: AccessLevel | null;
+  custom_roles: UserCustomRoleAssignment[];
   created_at: string;
   org_count: number;
 }
@@ -93,20 +96,13 @@ interface Organization {
   product_count: number;
 }
 
-const roleConfig: Record<AppRole, { label: string; icon: React.ElementType; className: string }> = {
-  admin: { label: "Platform Administrator", icon: Crown, className: "bg-primary/10 text-primary" },
-  org_admin: { label: "Org Administrator", icon: Building2, className: "bg-primary/10 text-primary" },
-  programme_owner: { label: "Program Owner", icon: Briefcase, className: "bg-success/10 text-success" },
-  project_manager: { label: "Project Manager", icon: UserCog, className: "bg-warning/10 text-warning" },
-  product_manager: { label: "Product Manager", icon: Briefcase, className: "bg-accent/10 text-accent-foreground" },
-  product_team_member: { label: "Product Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
-  project_team_member: { label: "Project Team Member", icon: Users, className: "bg-secondary text-secondary-foreground" },
-  org_stakeholder: { label: "Org Stakeholder", icon: Building2, className: "bg-muted text-muted-foreground" },
-  programme_stakeholder: { label: "Program Stakeholder", icon: Briefcase, className: "bg-muted text-muted-foreground" },
-  project_stakeholder: { label: "Project Stakeholder", icon: FolderKanban, className: "bg-muted text-muted-foreground" },
-  product_stakeholder: { label: "Product Stakeholder", icon: Package, className: "bg-muted text-muted-foreground" },
-  stakeholder: { label: "Stakeholder", icon: Users, className: "bg-muted text-muted-foreground" },
+const accessLevelConfig: Record<AccessLevel, { label: string; className: string }> = {
+  admin:  { label: "Org Admin",  className: "bg-primary/10 text-primary border-primary/20" },
+  editor: { label: "Editor",     className: "bg-success/10 text-success border-success/20" },
+  viewer: { label: "Viewer",     className: "bg-muted text-muted-foreground" },
 };
+
+const accessRank: Record<AccessLevel, number> = { viewer: 1, editor: 2, admin: 3 };
 
 export default function AdminPanel() {
   const [searchQuery, setSearchQuery] = useState("");
