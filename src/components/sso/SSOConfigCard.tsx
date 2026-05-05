@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { SSOSetupWizard } from "./SSOSetupWizard";
 import { useOrganization } from "@/hooks/useOrganization";
-import { ShieldCheck, Lock, Clock, CheckCircle2, XCircle, Settings } from "lucide-react";
+import { ShieldCheck, Lock, Clock, CheckCircle2, XCircle, Settings, Info } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 
@@ -139,6 +139,24 @@ export function SSOConfigCard() {
           </div>
           {config && statusBadge(config.status)}
         </div>
+
+        <Alert className="mb-4 bg-muted/40">
+          <Info className="h-4 w-4" />
+          <AlertDescription className="text-xs leading-relaxed">
+            <strong>How SSO works across multiple Organizations:</strong> SSO is matched by
+            email domain. Once active, any user signing in with an allowed domain is
+            authenticated through your identity provider and can then access <em>every</em>{" "}
+            Organization they have been granted membership in — a single SSO connection is
+            automatically reused across all of your Orgs.
+            <br />
+            <br />
+            <strong>Security &amp; Access remain per Organization:</strong> SSO only
+            establishes <em>who</em> the user is. Roles, permissions, data visibility, and
+            admin scope are still controlled separately within each Organization via{" "}
+            <em>User &amp; Access Management</em>. Granting SSO access does not grant access
+            to any Org's data — membership and access levels must still be assigned per Org.
+          </AlertDescription>
+        </Alert>
 
         {!config && (
           <>
