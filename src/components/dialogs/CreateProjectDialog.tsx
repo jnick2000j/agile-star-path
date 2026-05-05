@@ -35,6 +35,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
   const isConstruction = hasModule("rfis");
   const [programmes, setProgrammes] = useState<{ id: string; name: string }[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ user_id: string; full_name: string | null; email: string }[]>([]);
 
   const handleOpen = (newOpen: boolean) => {
     if (newOpen && !canCreate("projects")) {
@@ -58,18 +59,21 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
     contract_value: "",
     contract_currency: "USD",
     contract_form: "",
+    sponsor: "",
     start_date: "",
     end_date: "",
   });
 
   useEffect(() => {
     const fetchData = async () => {
-      const [progsRes, orgsRes] = await Promise.all([
+      const [progsRes, orgsRes, membersRes] = await Promise.all([
         supabase.from("programmes").select("id, name, organization_id"),
         supabase.from("organizations").select("id, name").order("name"),
+        supabase.from("profiles").select("user_id, full_name, email").eq("archived", false),
       ]);
       if (progsRes.data) setProgrammes(progsRes.data);
       if (orgsRes.data) setOrganizations(orgsRes.data);
+      if (membersRes.data) setTeamMembers(membersRes.data);
     };
     if (open) fetchData();
   }, [open]);
@@ -105,6 +109,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
         contract_form: formData.contract_form || null,
         programme_id: formData.programme_id || null,
         organization_id: formData.organization_id,
+        sponsor: formData.sponsor || null,
         start_date: formData.start_date || null,
         end_date: formData.end_date || null,
         created_by: user.id,
@@ -141,6 +146,7 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
         contract_value: "",
         contract_currency: "USD",
         contract_form: "",
+        sponsor: "",
         start_date: "",
         end_date: "",
       });
@@ -343,6 +349,18 @@ export function CreateProjectDialog({ onSuccess }: CreateProjectDialogProps) {
                 </div>
               </>
             )}
+            <div>
+              <Label htmlFor="sponsor">Sponsor</Label>
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })}>
+                <SelectTrigger id="sponsor"><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label htmlFor="start_date">Start Date</Label>
               <Input

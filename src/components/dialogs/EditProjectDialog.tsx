@@ -27,6 +27,7 @@ interface Project {
   programme_id: string | null;
   manager_id: string | null;
   timesheets_enabled?: boolean;
+  sponsor?: string | null;
 }
 
 interface EditProjectDialogProps {
@@ -58,6 +59,7 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
     end_date: project.end_date || "",
     manager_id: project.manager_id || "",
     timesheets_enabled: project.timesheets_enabled ?? true,
+    sponsor: project.sponsor || "",
   });
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
         end_date: project.end_date || "",
         manager_id: project.manager_id || "",
         timesheets_enabled: project.timesheets_enabled ?? true,
+        sponsor: project.sponsor || "",
       });
       fetchData();
     }
@@ -112,6 +115,7 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
           end_date: formData.end_date || null,
           manager_id: formData.manager_id || null,
           timesheets_enabled: formData.timesheets_enabled,
+          sponsor: formData.sponsor || null,
         })
         .eq("id", project.id);
 
@@ -309,6 +313,21 @@ export function EditProjectDialog({ project, open, onOpenChange, onSuccess }: Ed
                   <SelectItem value="Agile">Agile</SelectItem>
                   <SelectItem value="Hybrid">Hybrid</SelectItem>
                   <SelectItem value="Waterfall">Waterfall</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Sponsor</Label>
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })} disabled={!canEdit}>
+                <SelectTrigger><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                  {formData.sponsor && !teamMembers.some((m) => m.user_id === formData.sponsor) && (
+                    <SelectItem value={formData.sponsor}>{formData.sponsor} (legacy)</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

@@ -10512,6 +10512,7 @@ export type Database = {
           reference_number: string | null
           revenue_target: string | null
           secondary_metrics: string[] | null
+          sponsor: string | null
           stage: string
           status: string
           target_market: string | null
@@ -10542,6 +10543,7 @@ export type Database = {
           reference_number?: string | null
           revenue_target?: string | null
           secondary_metrics?: string[] | null
+          sponsor?: string | null
           stage?: string
           status?: string
           target_market?: string | null
@@ -10572,6 +10574,7 @@ export type Database = {
           reference_number?: string | null
           revenue_target?: string | null
           secondary_metrics?: string[] | null
+          sponsor?: string | null
           stage?: string
           status?: string
           target_market?: string | null
@@ -11184,6 +11187,7 @@ export type Database = {
           source_bid_id: string | null
           source_opportunity_id: string | null
           source_rfp_id: string | null
+          sponsor: string | null
           stage: string
           start_date: string | null
           timesheets_enabled: boolean
@@ -11212,6 +11216,7 @@ export type Database = {
           source_bid_id?: string | null
           source_opportunity_id?: string | null
           source_rfp_id?: string | null
+          sponsor?: string | null
           stage?: string
           start_date?: string | null
           timesheets_enabled?: boolean
@@ -11240,6 +11245,7 @@ export type Database = {
           source_bid_id?: string | null
           source_opportunity_id?: string | null
           source_rfp_id?: string | null
+          sponsor?: string | null
           stage?: string
           start_date?: string | null
           timesheets_enabled?: boolean

@@ -41,6 +41,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [programmes, setProgrammes] = useState<Program[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ user_id: string; full_name: string | null; email: string }[]>([]);
   const { user } = useAuth();
   const { currentOrganization } = useOrganization();
   const { canCreate, limits } = usePlanLimits();
@@ -68,18 +69,21 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
     primary_metric: "",
     revenue_target: "",
     launch_date: "",
+    sponsor: "",
   });
 
   useEffect(() => {
     const fetchData = async () => {
-      const [orgsRes, progsRes, projsRes] = await Promise.all([
+      const [orgsRes, progsRes, projsRes, membersRes] = await Promise.all([
         supabase.from("organizations").select("id, name").order("name"),
         supabase.from("programmes").select("id, name").order("name"),
         supabase.from("projects").select("id, name, programme_id").order("name"),
+        supabase.from("profiles").select("user_id, full_name, email").eq("archived", false),
       ]);
       if (orgsRes.data) setOrganizations(orgsRes.data);
       if (progsRes.data) setProgrammes(progsRes.data);
       if (projsRes.data) setProjects(projsRes.data);
+      if (membersRes.data) setTeamMembers(membersRes.data);
     };
     if (open) fetchData();
   }, [open]);
@@ -106,6 +110,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
         organization_id: formData.organization_id,
         programme_id: formData.programme_id || null,
         project_id: formData.project_id && formData.project_id !== "none" ? formData.project_id : null,
+        sponsor: formData.sponsor || null,
         launch_date: formData.launch_date || null,
         created_by: user.id,
         product_owner_id: user.id,
@@ -142,6 +147,7 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
         primary_metric: "",
         revenue_target: "",
         launch_date: "",
+        sponsor: "",
       });
       onSuccess?.();
     } catch (error) {
@@ -332,6 +338,18 @@ export function CreateProductDialog({ onSuccess }: CreateProductDialogProps) {
                 onChange={(e) => setFormData({ ...formData, revenue_target: e.target.value })}
                 placeholder="e.g., $1M ARR"
               />
+            </div>
+            <div>
+              <Label htmlFor="sponsor">Sponsor</Label>
+              <Select value={formData.sponsor || "none"} onValueChange={(v) => setFormData({ ...formData, sponsor: v === "none" ? "" : v })}>
+                <SelectTrigger id="sponsor"><SelectValue placeholder="Select sponsor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.full_name || m.email}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
