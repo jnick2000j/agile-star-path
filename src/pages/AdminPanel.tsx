@@ -600,8 +600,9 @@ export default function AdminPanel() {
           <AIProviderSettings />
         </TabsContent>
 
-        <TabsContent value="email">
+        <TabsContent value="email" className="space-y-6">
           <EmailSettings />
+          <EmailTriggerSettings />
         </TabsContent>
 
         <TabsContent value="migration">
