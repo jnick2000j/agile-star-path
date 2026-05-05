@@ -523,6 +523,10 @@ export default function PlatformAdmin() {
           </Tabs>
         </TabsContent>
 
+        <TabsContent value="settings" className="space-y-4">
+          <PlatformSettingsPanel />
+        </TabsContent>
+
         <TabsContent value="audit" className="space-y-4">
           <AuditRetentionPolicy scope="platform" />
           <AuditLogViewer scope="platform" />
