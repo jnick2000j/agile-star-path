@@ -56,6 +56,9 @@ import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplian
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
 import { EmailSettings } from "@/components/admin/EmailSettings";
 import { EmailTriggerSettings } from "@/components/admin/EmailTriggerSettings";
+import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
+import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
+
 type AccessLevel = "admin" | "editor" | "viewer";
 
 interface UserCustomRoleAssignment {
