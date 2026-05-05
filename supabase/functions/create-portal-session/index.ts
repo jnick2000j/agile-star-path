@@ -39,14 +39,48 @@ serve(async (req) => {
 
     const env = (environment || "sandbox") as StripeEnv;
 
-    const { data: sub } = await supabase
+    // Resolve Stripe customer: prefer this org's own subscription; otherwise look up via
+    // the org's billing account (where the owner-org of the account holds the subscription).
+    let stripeCustomerId: string | null = null;
+
+    const { data: ownSub } = await supabase
       .from("organization_subscriptions")
       .select("stripe_customer_id")
       .eq("organization_id", organizationId)
       .eq("environment", env)
       .maybeSingle();
 
-    if (!sub?.stripe_customer_id) {
+    if (ownSub?.stripe_customer_id) {
+      stripeCustomerId = ownSub.stripe_customer_id;
+    } else {
+      const { data: orgRow } = await supabase
+        .from("organizations")
+        .select("billing_account_id")
+        .eq("id", organizationId)
+        .maybeSingle();
+
+      if (orgRow?.billing_account_id) {
+        const { data: acct } = await supabase
+          .from("billing_accounts")
+          .select("owner_organization_id, stripe_customer_id")
+          .eq("id", orgRow.billing_account_id)
+          .maybeSingle();
+
+        if (acct?.stripe_customer_id) {
+          stripeCustomerId = acct.stripe_customer_id;
+        } else if (acct?.owner_organization_id) {
+          const { data: ownerSub } = await supabase
+            .from("organization_subscriptions")
+            .select("stripe_customer_id")
+            .eq("organization_id", acct.owner_organization_id)
+            .eq("environment", env)
+            .maybeSingle();
+          stripeCustomerId = ownerSub?.stripe_customer_id ?? null;
+        }
+      }
+    }
+
+    if (!stripeCustomerId) {
       // Return 200 so the client receives the JSON body. supabase.functions.invoke
       // discards the body on non-2xx responses, which would prevent the UI from
       // showing a friendly "no subscription yet" message.
@@ -62,7 +96,7 @@ serve(async (req) => {
 
     const stripe = createStripeClient(env);
     const portal = await stripe.billingPortal.sessions.create({
-      customer: sub.stripe_customer_id,
+      customer: stripeCustomerId,
       ...(returnUrl && { return_url: returnUrl }),
     });
 

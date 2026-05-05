@@ -1494,6 +1494,47 @@ export type Database = {
           },
         ]
       }
+      billing_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          owner_organization_id: string
+          owner_user_id: string | null
+          stripe_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          owner_organization_id: string
+          owner_user_id?: string | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          owner_organization_id?: string
+          owner_user_id?: string | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_accounts_owner_organization_id_fkey"
+            columns: ["owner_organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branding_settings: {
         Row: {
           accent_color: string | null
@@ -9718,6 +9759,7 @@ export type Database = {
           allow_cross_region_ai: boolean
           archived_at: string | null
           archived_by: string | null
+          billing_account_id: string | null
           created_at: string
           created_by: string | null
           data_region: string
@@ -9744,6 +9786,7 @@ export type Database = {
           allow_cross_region_ai?: boolean
           archived_at?: string | null
           archived_by?: string | null
+          billing_account_id?: string | null
           created_at?: string
           created_by?: string | null
           data_region?: string
@@ -9770,6 +9813,7 @@ export type Database = {
           allow_cross_region_ai?: boolean
           archived_at?: string | null
           archived_by?: string | null
+          billing_account_id?: string | null
           created_at?: string
           created_by?: string | null
           data_region?: string
@@ -9793,6 +9837,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "organizations_billing_account_id_fkey"
+            columns: ["billing_account_id"]
+            isOneToOne: false
+            referencedRelation: "billing_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organizations_industry_vertical_fkey"
             columns: ["industry_vertical"]
@@ -13439,9 +13490,11 @@ export type Database = {
           cta_label: string | null
           currency: string
           description: string | null
+          extra_org_price_monthly: number
           features: Json | null
           highlight: boolean
           id: string
+          included_orgs: number
           is_active: boolean | null
           is_addon: boolean
           is_archived: boolean
@@ -13474,9 +13527,11 @@ export type Database = {
           cta_label?: string | null
           currency?: string
           description?: string | null
+          extra_org_price_monthly?: number
           features?: Json | null
           highlight?: boolean
           id?: string
+          included_orgs?: number
           is_active?: boolean | null
           is_addon?: boolean
           is_archived?: boolean
@@ -13509,9 +13564,11 @@ export type Database = {
           cta_label?: string | null
           currency?: string
           description?: string | null
+          extra_org_price_monthly?: number
           features?: Json | null
           highlight?: boolean
           id?: string
+          included_orgs?: number
           is_active?: boolean | null
           is_addon?: boolean
           is_archived?: boolean
@@ -15514,6 +15571,14 @@ export type Database = {
         Args: { _archive?: boolean; _org_id: string }
         Returns: undefined
       }
+      attach_org_to_billing_account: {
+        Args: { _account_id: string; _org_id: string }
+        Returns: undefined
+      }
+      can_downgrade_to_plan: {
+        Args: { _account_id: string; _target_plan_id: string }
+        Returns: boolean
+      }
       can_user_log_time_on_task: {
         Args: { _task_id: string; _user_id: string }
         Returns: boolean
@@ -15557,6 +15622,10 @@ export type Database = {
         }
         Returns: Json
       }
+      count_billing_account_orgs: {
+        Args: { _account_id: string }
+        Returns: number
+      }
       create_org_for_new_user: { Args: { _org_name: string }; Returns: string }
       cron_flush_siem_exporters: { Args: never; Returns: Json }
       delete_email: {
@@ -15564,6 +15633,10 @@ export type Database = {
         Returns: boolean
       }
       delete_organization_cascade: {
+        Args: { _org_id: string }
+        Returns: undefined
+      }
+      detach_org_from_billing_account: {
         Args: { _org_id: string }
         Returns: undefined
       }
@@ -15576,6 +15649,21 @@ export type Database = {
         Returns: string
       }
       get_ai_credit_status: { Args: { _org_id: string }; Returns: Json }
+      get_billing_account_for_org: {
+        Args: { _org_id: string }
+        Returns: string
+      }
+      get_billing_account_plan: {
+        Args: { _account_id: string }
+        Returns: {
+          current_period_end: string
+          extra_org_price_monthly: number
+          included_orgs: number
+          plan_id: string
+          plan_name: string
+          status: string
+        }[]
+      }
       get_csat_by_token: {
         Args: { _token: string }
         Returns: {
@@ -15759,6 +15847,16 @@ export type Database = {
       }
       is_org_suspended: { Args: { _org_id: string }; Returns: boolean }
       kb_increment_view: { Args: { p_article_id: string }; Returns: undefined }
+      list_billing_account_orgs: {
+        Args: { _account_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          is_archived: boolean
+          is_owner: boolean
+          name: string
+        }[]
+      }
       list_orphan_users: {
         Args: never
         Returns: {

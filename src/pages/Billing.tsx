@@ -39,6 +39,7 @@ import { AICreditPackManager } from "@/components/billing/AICreditPackManager";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useDeploymentMode } from "@/hooks/useDeploymentMode";
 import { LicenseModeNotice } from "@/components/billing/LicenseModeNotice";
+import { BillingAccountPanel } from "@/components/billing/BillingAccountPanel";
 
 interface Plan {
   id: string;
@@ -150,6 +151,38 @@ export default function Billing() {
     if (!currentOrganization?.id || !isAdmin) return;
     const plan = plans.find((p) => p.id === planId);
     if (!plan) return;
+
+    // Downgrade guard: if the org belongs to a billing account, ensure the new plan's
+    // included_orgs quota covers the current active-org count. Block otherwise.
+    try {
+      const { data: orgRow } = await supabase
+        .from("organizations")
+        .select("billing_account_id")
+        .eq("id", currentOrganization.id)
+        .maybeSingle();
+      const accountId = orgRow?.billing_account_id;
+      if (accountId) {
+        const { data: canDowngrade } = await supabase.rpc("can_downgrade_to_plan", {
+          _account_id: accountId,
+          _target_plan_id: planId,
+        });
+        if (canDowngrade === false) {
+          const { data: orgsList } = await supabase.rpc("list_billing_account_orgs", {
+            _account_id: accountId,
+          });
+          const activeCount = ((orgsList as any[]) || []).filter((o) => !o.is_archived).length;
+          const quota = (plan as any).included_orgs ?? 1;
+          toast.error(
+            `Cannot switch to ${plan.name}: your billing account has ${activeCount} active organizations but ${plan.name} only includes ${quota}. Archive ${activeCount - quota} organization(s) first.`,
+            { duration: 8000 },
+          );
+          return;
+        }
+      }
+    } catch (e) {
+      // Soft-fail the guard so a database hiccup doesn't trap the admin
+      console.warn("Downgrade guard check failed:", e);
+    }
 
     // Free plan = direct switch
     if (plan.price_monthly === 0 && plan.price_yearly === 0) {
@@ -334,6 +367,8 @@ export default function Billing() {
         <AICreditHistory />
 
         {isPlatformAdmin && <AICreditPackManager />}
+
+        <BillingAccountPanel isAdmin={isAdmin} />
 
         {limits && (
           <Card className="p-6">
