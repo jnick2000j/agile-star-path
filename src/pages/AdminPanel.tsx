@@ -415,20 +415,7 @@ export default function AdminPanel() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1.5 max-w-[280px]">
-                          {user.highest_access ? (
-                            <Badge
-                              variant="outline"
-                              className={cn("w-fit gap-1", accessLevelConfig[user.highest_access].className)}
-                            >
-                              {user.highest_access === "admin" && <Crown className="h-3 w-3" />}
-                              {accessLevelConfig[user.highest_access].label}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="w-fit text-muted-foreground">
-                              No access
-                            </Badge>
-                          )}
-                          {user.custom_roles.length > 0 && (() => {
+                          {user.custom_roles.length > 0 ? (() => {
                             const unique = Array.from(new Set(user.custom_roles.map((r) => r.role_name)));
                             return (
                               <div className="flex flex-wrap gap-1">
@@ -445,7 +432,11 @@ export default function AdminPanel() {
                                 )}
                               </div>
                             );
-                          })()}
+                          })() : (
+                            <Badge variant="outline" className="w-fit text-muted-foreground">
+                              No roles assigned
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -458,12 +449,17 @@ export default function AdminPanel() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <EditUserDialog user={user} onSuccess={fetchUsers} />
-                          <Link to="/admin?tab=roles-access">
-                            <Button variant="outline" size="sm" className="gap-1.5">
-                              <Settings2 className="h-3.5 w-3.5" />
-                              Edit access
-                            </Button>
-                          </Link>
+                          <AssignUserAccessDialog
+                            onSuccess={fetchUsers}
+                            presetUserId={user.user_id}
+                            presetUserLabel={getUserDisplayName(user)}
+                            trigger={
+                              <Button variant="outline" size="sm" className="gap-1.5">
+                                <Settings2 className="h-3.5 w-3.5" />
+                                Edit access
+                              </Button>
+                            }
+                          />
                         </div>
                       </TableCell>
                     </TableRow>

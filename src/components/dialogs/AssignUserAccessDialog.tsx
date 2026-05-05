@@ -23,6 +23,9 @@ import {
 
 interface AssignUserAccessDialogProps {
   onSuccess: () => void;
+  presetUserId?: string; // profiles.user_id to pre-select and lock
+  presetUserLabel?: string;
+  trigger?: React.ReactNode;
 }
 
 interface UserRow {
@@ -56,7 +59,7 @@ const scopeLabel: Record<Scope, string> = {
   product: "Product",
 };
 
-export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProps) {
+export function AssignUserAccessDialog({ onSuccess, presetUserId, presetUserLabel, trigger }: AssignUserAccessDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -108,15 +111,17 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser || !selectedEntity || !selectedRole) {
+    const effectiveUserId = presetUserId
+      ? presetUserId
+      : users.find((u) => u.id === selectedUser)?.user_id;
+    if (!effectiveUserId || !selectedEntity || !selectedRole) {
       toast.error("Select a user, an entity, and a role from the catalog");
       return;
     }
 
     setLoading(true);
     try {
-      const user = users.find((u) => u.id === selectedUser);
-      if (!user) throw new Error("User not found");
+      const user = { user_id: effectiveUserId };
 
       let error;
       if (scope === "organization") {
@@ -161,34 +166,40 @@ export function AssignUserAccessDialog({ onSuccess }: AssignUserAccessDialogProp
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Assign Role
-        </Button>
+        {trigger ?? (
+          <Button className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Assign Role
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-primary" />
-            Assign Role from Catalog
+            {presetUserId ? "Edit Access" : "Assign Role from Catalog"}
           </DialogTitle>
           <DialogDescription>
-            Grant a user access by assigning a role from the catalog at the chosen scope.
+            {presetUserId
+              ? `Assign a catalog role to ${presetUserLabel ?? "this user"} at the chosen scope.`
+              : "Grant a user access by assigning a role from the catalog at the chosen scope."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label>User</Label>
-              <Select value={selectedUser} onValueChange={setSelectedUser}>
-                <SelectTrigger><SelectValue placeholder="Select a user" /></SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  {users.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{userDisplay(u)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!presetUserId && (
+              <div className="space-y-2">
+                <Label>User</Label>
+                <Select value={selectedUser} onValueChange={setSelectedUser}>
+                  <SelectTrigger><SelectValue placeholder="Select a user" /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{userDisplay(u)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Scope</Label>
