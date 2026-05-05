@@ -24,6 +24,8 @@ interface LoginBranding {
   logo_size: string | null;
   show_logo: boolean | null;
   header_font_size: string | null;
+  logo_login_width: number | null;
+  logo_login_height: number | null;
   hero_title: string | null;
   hero_description: string | null;
   feature_1_label: string | null;
