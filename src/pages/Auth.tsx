@@ -296,7 +296,7 @@ export default function Auth() {
   };
 
   const getSubtitle = () => {
-    if (step === "verify") return `We sent a 6-digit code to ${email}. It expires in a few minutes.`;
+    if (step === "verify") return `We sent a verification code to ${email}. It expires in a few minutes.`;
     switch (mode) {
       case "login": return showLoginCta ? (branding?.login_cta_text || "Enter your email and we'll send you a one-time code.") : "Enter your email and we'll send you a one-time code.";
       case "signup": return "Tell us about you. We'll email a one-time code to confirm your address.";
