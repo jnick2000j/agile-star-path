@@ -359,6 +359,19 @@ export default function HelpdeskTicketDetail() {
       return data ?? [];
     },
   });
+  const { data: queueOptions = [] } = useQuery({
+    queryKey: ["ticket-queues", currentOrganization?.id],
+    enabled: !!currentOrganization?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("helpdesk_queues")
+        .select("id, name, is_active")
+        .eq("organization_id", currentOrganization!.id)
+        .eq("is_active", true)
+        .order("name");
+      return data ?? [];
+    },
+  });
 
   const { data: childTickets = [] } = useQuery({
     queryKey: ["helpdesk-child-tickets", id],
@@ -726,7 +739,7 @@ export default function HelpdeskTicketDetail() {
             )}
           </div>
 
-          {/* Row 2: Programme / Project / Product + SLA indicator */}
+          {/* Row 2: Programme / Project / Product / Queue */}
           <div className="flex flex-wrap items-end gap-4 pt-2 border-t">
             <div className="space-y-1 min-w-[140px] flex-1">
               <Label className="text-xs text-muted-foreground">Programme</Label>
@@ -780,17 +793,35 @@ export default function HelpdeskTicketDetail() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1 min-w-[140px]">
-              <Label className="text-xs text-muted-foreground">&nbsp;</Label>
-              <div className="h-8 flex items-center gap-2">
-                {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
-                  <Button size="sm" onClick={() => setResolveOpen(true)} className="shrink-0 rounded-none">
-                    <Save className="h-4 w-4 mr-2" /> Mark as Resolved
-                  </Button>
-                )}
-              </div>
+            <div className="space-y-1 min-w-[140px] flex-1">
+              <Label className="text-xs text-muted-foreground">Queue</Label>
+              <Select
+                value={(ticket as any).queue_id || "none"}
+                onValueChange={(v) => updateFields({ queue_id: v === "none" ? null : v })}
+              >
+                <SelectTrigger className="h-8"><SelectValue placeholder="None" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {queueOptions.map((q: any) => (
+                    <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+
+          {/* Row 3: Mark as Resolved (own line, wraps cleanly) */}
+          {ticket.status !== "resolved" && ticket.status !== "closed" && ticket.status !== "cancelled" && (
+            <div className="flex flex-wrap items-stretch gap-2 pt-2 border-t">
+              <Button
+                size="sm"
+                onClick={() => setResolveOpen(true)}
+                className="shrink-0 rounded-none h-auto min-h-9 py-1.5 whitespace-normal text-left leading-tight"
+              >
+                <Save className="h-4 w-4 mr-2 shrink-0" /> Mark as Resolved
+              </Button>
+            </div>
+          )}
 
           {/* Action buttons: wrap to multi-row, allow in-button text wrap */}
           <div className="flex flex-wrap items-stretch gap-2 pt-2 border-t">
