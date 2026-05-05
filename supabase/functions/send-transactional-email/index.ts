@@ -4,6 +4,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailTransport, sendViaSmtp } from '../_shared/smtp-transport.ts'
 import { tryRenderOrgOverride } from '../_shared/email-overrides.tsx'
+import { resolveEmailBranding } from '../_shared/email-branding.ts'
+import { BrandContext } from '../_shared/email-templates/_brand.tsx'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -299,11 +301,18 @@ Deno.serve(async (req) => {
     resolvedSubject = override.subject
     console.log('Transactional email using org override', { templateName, organizationId })
   } else {
-    html = await renderAsync(React.createElement(template.component, templateData))
-    plainText = await renderAsync(
-      React.createElement(template.component, templateData),
-      { plainText: true }
+    const brand = await resolveEmailBranding(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      organizationId,
     )
+    const wrapped = React.createElement(
+      BrandContext.Provider,
+      { value: brand },
+      React.createElement(template.component, templateData),
+    )
+    html = await renderAsync(wrapped)
+    plainText = await renderAsync(wrapped, { plainText: true })
     resolvedSubject =
       typeof template.subject === 'function'
         ? template.subject(templateData)
