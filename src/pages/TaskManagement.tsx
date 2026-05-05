@@ -291,6 +291,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
         programme_id: data.entity_type === "program" && data.entity_id ? data.entity_id : null,
         product_id: data.entity_type === "product" && data.entity_id ? data.entity_id : null,
         work_package_id: data.work_package_id || null,
+        parent_task_id: data.parent_task_id || null,
       });
       if (error) throw error;
     },
@@ -306,6 +307,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
         entity_type: "project",
         entity_id: "",
         work_package_id: "",
+        parent_task_id: "",
         planned_start: "",
         planned_end: "",
         estimated_hours: "",
