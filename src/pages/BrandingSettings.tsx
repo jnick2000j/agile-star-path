@@ -132,6 +132,12 @@ const defaultBranding: BrandingState = {
   form_text_color: "",
   app_name_color: "",
   tagline_color: "",
+  logo_header_width: null,
+  logo_header_height: null,
+  logo_login_width: null,
+  logo_login_height: null,
+  logo_email_width: null,
+  logo_email_height: null,
 };
 
 export default function BrandingSettings() {
