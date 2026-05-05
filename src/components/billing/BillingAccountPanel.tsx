@@ -137,6 +137,10 @@ export function BillingAccountPanel({ isAdmin }: { isAdmin: boolean }) {
       toast.success("Organization added to this billing account");
       setAttachOpen(false);
       setOrgToAttach("");
+      // Best-effort sync of Stripe subscription quantity for extras.
+      supabase.functions
+        .invoke("sync-billing-quantity", { body: { billingAccountId: account.id } })
+        .catch((err) => console.warn("sync-billing-quantity failed:", err));
       await load();
     } catch (e: any) {
       toast.error(e.message || "Failed to attach organization");
@@ -153,6 +157,11 @@ export function BillingAccountPanel({ isAdmin }: { isAdmin: boolean }) {
       });
       if (error) throw error;
       toast.success("Organization removed from this billing account");
+      if (account) {
+        supabase.functions
+          .invoke("sync-billing-quantity", { body: { billingAccountId: account.id } })
+          .catch((err) => console.warn("sync-billing-quantity failed:", err));
+      }
       await load();
     } catch (e: any) {
       toast.error(e.message || "Failed to detach organization");
