@@ -252,12 +252,12 @@ const App = () => (
               <Route path="catalog" element={<PortalCatalog />} />
               <Route path="training" element={<PortalTraining />} />
             </Route>
-            <Route path="/change-management/workflows" element={<ProtectedRoute><CMWorkflows /></ProtectedRoute>} />
-            <Route path="/change-management" element={<ProtectedRoute><ChangeManagement /></ProtectedRoute>} />
-            <Route path="/change-management/portal" element={<ProtectedRoute><ChangeControlPortal /></ProtectedRoute>} />
-            <Route path="/change-management/my-changes" element={<ProtectedRoute><MyChanges /></ProtectedRoute>} />
-            <Route path="/change-management/settings" element={<ProtectedRoute><ChangeManagementSettings /></ProtectedRoute>} />
-            <Route path="/change-management/:id" element={<ProtectedRoute><ChangeManagementDetail /></ProtectedRoute>} />
+            <Route path="/change-management/workflows" element={<ProtectedRoute><ModuleGate feature="feature_module_change_management" title="Change Management" description="The Change Management module is not included in your current plan. Upgrade to enable RFCs, CAB workflows and change scheduling."><CMWorkflows /></ModuleGate></ProtectedRoute>} />
+            <Route path="/change-management" element={<ProtectedRoute><ModuleGate feature="feature_module_change_management" title="Change Management" description="The Change Management module is not included in your current plan. Upgrade to enable RFCs, CAB workflows and change scheduling."><ChangeManagement /></ModuleGate></ProtectedRoute>} />
+            <Route path="/change-management/portal" element={<ProtectedRoute><ModuleGate feature="feature_module_change_management" title="Change Management" description="The Change Management module is not included in your current plan."><ChangeControlPortal /></ModuleGate></ProtectedRoute>} />
+            <Route path="/change-management/my-changes" element={<ProtectedRoute><ModuleGate feature="feature_module_change_management" title="Change Management" description="The Change Management module is not included in your current plan."><MyChanges /></ModuleGate></ProtectedRoute>} />
+            <Route path="/change-management/settings" element={<ProtectedRoute><ModuleGate feature="feature_module_change_management" title="Change Management" description="The Change Management module is not included in your current plan."><ChangeManagementSettings /></ModuleGate></ProtectedRoute>} />
+            <Route path="/change-management/:id" element={<ProtectedRoute><ModuleGate feature="feature_module_change_management" title="Change Management" description="The Change Management module is not included in your current plan."><ChangeManagementDetail /></ModuleGate></ProtectedRoute>} />
             <Route path="/governance" element={<ProtectedRoute><Governance /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
