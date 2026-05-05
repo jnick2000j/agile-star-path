@@ -4,39 +4,44 @@ import * as React from 'npm:react@18.3.1'
 
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
   Html,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
 interface MagicLinkEmailProps {
   siteName: string
-  confirmationUrl: string
+  confirmationUrl?: string
+  token?: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
-  confirmationUrl,
+  token,
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your login link for {siteName}</Preview>
+    <Preview>Your {siteName} sign-in code: {token ?? '------'}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
+        <Heading style={h1}>Your sign-in code</Heading>
         <Text style={text}>
-          Click the button below to log in to {siteName}. This link will expire
-          shortly.
+          Use the code below to sign in to <strong>{siteName}</strong>. This code
+          expires in a few minutes.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Log In
-        </Button>
+        <Section style={codeBox}>
+          <Text style={codeText}>{token ?? '------'}</Text>
+        </Section>
+        <Text style={text}>
+          Enter this code in the verification screen on the {siteName} sign-in page.
+        </Text>
         <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
+          If you didn't request this code, you can safely ignore this email — no one
+          can sign in without it.
         </Text>
       </Container>
     </Body>
@@ -61,15 +66,22 @@ const text = {
   fontSize: '14px',
   color: 'hsl(213, 20%, 42%)',
   lineHeight: '1.5',
-  margin: '0 0 25px',
+  margin: '0 0 20px',
 }
-const button = {
-  backgroundColor: 'hsl(178, 58%, 40%)',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '0.5rem',
-  padding: '12px 20px',
-  textDecoration: 'none',
-  fontWeight: 600,
+const codeBox = {
+  backgroundColor: 'hsl(213, 30%, 96%)',
+  border: '1px solid hsl(213, 25%, 88%)',
+  borderRadius: '8px',
+  padding: '20px',
+  textAlign: 'center' as const,
+  margin: '0 0 24px',
 }
-const footer = { fontSize: '12px', color: 'hsl(213, 15%, 55%)', margin: '30px 0 0' }
+const codeText = {
+  fontSize: '32px',
+  fontWeight: 700,
+  letterSpacing: '8px',
+  color: 'hsl(213, 60%, 15%)',
+  margin: 0,
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+}
+const footer = { fontSize: '12px', color: 'hsl(213, 15%, 55%)', margin: '24px 0 0' }
