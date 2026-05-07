@@ -450,16 +450,20 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
   const { currentOrganization } = useOrganization();
   const effectiveOrg = orgId ?? currentOrganization?.id;
 
-  const { data: tasks = [] } = useQuery({
+  const { data: tasks = [], refetch: refetchTasks } = useQuery({
     queryKey: ["svc-item-tasks", itemId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("service_catalog_item_tasks")
         .select("*")
         .eq("item_id", itemId)
-        .order("step_order", { ascending: true });
+        .order("step_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) { toast.error(error.message); return []; }
       return data ?? [];
     },
+    enabled: !!itemId && open,
+    staleTime: 0,
   });
 
   const { data: members = [] } = useQuery({
