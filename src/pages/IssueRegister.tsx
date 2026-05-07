@@ -71,14 +71,14 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 export default function IssueRegister({ embedded = false }: { embedded?: boolean }) {
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
   const { canManage } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [typeFilters, setTypeFilters] = useState<string[]>([]);
-  const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
-  const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
+
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
@@ -110,30 +110,13 @@ export default function IssueRegister({ embedded = false }: { embedded?: boolean
     }
   };
 
-  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setFilters(prev => 
-      prev.includes(value) 
-        ? prev.filter(s => s !== value)
-        : [...prev, value]
+  const filteredIssues = (() => {
+    const bySearch = issues.filter((i) =>
+      !searchQuery || i.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
-
-  const clearFilters = () => {
-    setTypeFilters([]);
-    setPriorityFilters([]);
-    setStatusFilters([]);
-  };
-
-  const filteredIssues = issues.filter((i) => {
-    const matchesSearch = i.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = typeFilters.length === 0 || typeFilters.includes(i.type);
-    const matchesPriority = priorityFilters.length === 0 || priorityFilters.includes(i.priority);
-    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(i.status);
-    return matchesSearch && matchesType && matchesPriority && matchesStatus;
-  });
-
-  const activeFilterCount = typeFilters.length + priorityFilters.length + statusFilters.length;
-
+    const byFilters = applyFilters(bySearch, filters, { userId: user?.id });
+    return applySort(byFilters, sort);
+  })();
   const handleEditClick = (issue: Issue) => {
     setSelectedIssue(issue);
     setEditDialogOpen(true);
