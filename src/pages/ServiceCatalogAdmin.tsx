@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown, Link2, Link2Off } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryIcon, CategoryIconPicker } from "@/components/catalog/CategoryIconPicker";
 
@@ -481,13 +481,17 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     enabled: !!effectiveOrg,
   });
 
-  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "" });
+  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
 
   const refetch = () => qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
 
+  const maxStep = tasks.reduce((m: number, t: any) => Math.max(m, t.step_order ?? 0), 0);
+
   const addTask = async () => {
     if (!form.title.trim() || !effectiveOrg) { toast.error("Task title required"); return; }
-    const nextOrder = (tasks[tasks.length - 1]?.step_order ?? 0) + 1;
+    // run_mode "concurrent" => share the current max step (run alongside last stage)
+    // run_mode "sequential" => new step after current max
+    const nextOrder = form.run_mode === "concurrent" && maxStep > 0 ? maxStep : maxStep + 1;
     const { error } = await supabase.from("service_catalog_item_tasks").insert({
       organization_id: effectiveOrg,
       item_id: itemId,
@@ -499,12 +503,32 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
     });
     if (error) { toast.error(error.message); return; }
-    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "" });
+    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
     refetch();
   };
 
   const removeTask = async (id: string) => {
     await supabase.from("service_catalog_item_tasks").delete().eq("id", id);
+    refetch();
+  };
+
+  const toggleParallel = async (id: string) => {
+    const idx = tasks.findIndex((x: any) => x.id === id);
+    const t: any = tasks[idx];
+    const prev: any = tasks[idx - 1];
+    if (!t || !prev) { toast.error("Need a previous task to merge with"); return; }
+    if (t.step_order === prev.step_order) {
+      // Currently parallel — promote to its own sequential step
+      await supabase.from("service_catalog_item_tasks").update({ step_order: prev.step_order + 1 }).eq("id", id);
+      // Push everything after up by 1 to avoid colliding with subsequent steps
+      const after = tasks.slice(idx + 1).filter((x: any) => x.step_order > prev.step_order);
+      for (const a of after) {
+        await supabase.from("service_catalog_item_tasks").update({ step_order: a.step_order + 1 }).eq("id", a.id);
+      }
+    } else {
+      // Currently sequential — merge into previous step (run in parallel)
+      await supabase.from("service_catalog_item_tasks").update({ step_order: prev.step_order }).eq("id", id);
+    }
     refetch();
   };
 
@@ -523,34 +547,66 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     return [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
   };
 
+  // Group tasks into stages by step_order (preserving order)
+  const stages: { step: number; items: any[] }[] = [];
+  for (const t of tasks as any[]) {
+    const last = stages[stages.length - 1];
+    if (last && last.step === t.step_order) last.items.push(t);
+    else stages.push({ step: t.step_order, items: [t] });
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Fulfillment tasks</DialogTitle>
           <DialogDescription>
-            Each task becomes a child Help Desk ticket. They open one at a time — the next task ticket is created when the previous one is resolved.
+            Tasks in the same stage run concurrently as separate child tickets. The next stage opens automatically when every ticket in the current stage is resolved.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="space-y-1">
-            {tasks.length === 0 && (
+          <div className="space-y-3">
+            {stages.length === 0 && (
               <p className="text-sm text-muted-foreground">No tasks defined yet — approved requests will only create the parent ticket.</p>
             )}
-            {tasks.map((t: any, idx: number) => (
-              <div key={t.id} className="flex items-center gap-2 border rounded-md p-2 text-sm">
-                <Badge variant="outline" className="text-xs">Step {idx + 1}</Badge>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{t.title}</div>
-                  <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
-                    <span className="capitalize">{t.default_priority}</span>
-                    {t.default_assignee_id && <span>· {memberLabel(t.default_assignee_id)}</span>}
-                    {t.estimated_hours != null && <span>· {t.estimated_hours}h</span>}
-                  </div>
+            {stages.map((stage, sIdx) => (
+              <div key={stage.step} className="rounded-md border bg-muted/30 p-2 space-y-1.5">
+                <div className="flex items-center gap-2 px-1">
+                  <Badge variant="secondary" className="text-xs">Stage {sIdx + 1}</Badge>
+                  {stage.items.length > 1 && (
+                    <Badge variant="outline" className="text-xs gap-1">
+                      <Link2 className="h-3 w-3" /> {stage.items.length} concurrent
+                    </Badge>
+                  )}
                 </div>
-                <Button size="icon" variant="ghost" disabled={idx === 0} onClick={() => move(t.id, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="ghost" disabled={idx === tasks.length - 1} onClick={() => move(t.id, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => removeTask(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                {stage.items.map((t: any) => {
+                  const overallIdx = (tasks as any[]).findIndex((x) => x.id === t.id);
+                  const isParallel = stage.items.length > 1;
+                  return (
+                    <div key={t.id} className="flex items-center gap-2 border rounded-md p-2 text-sm bg-background">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{t.title}</div>
+                        <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
+                          <span className="capitalize">{t.default_priority}</span>
+                          {t.default_assignee_id && <span>· {memberLabel(t.default_assignee_id)}</span>}
+                          {t.estimated_hours != null && <span>· {t.estimated_hours}h</span>}
+                        </div>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title={isParallel ? "Make sequential (own stage)" : "Run alongside previous stage"}
+                        disabled={overallIdx === 0}
+                        onClick={() => toggleParallel(t.id)}
+                      >
+                        {isParallel ? <Link2Off className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button size="icon" variant="ghost" disabled={overallIdx === 0} onClick={() => move(t.id, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                      <Button size="icon" variant="ghost" disabled={overallIdx === tasks.length - 1} onClick={() => move(t.id, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => removeTask(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -585,6 +641,18 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                 <Label className="text-xs">Est. hours</Label>
                 <Input type="number" value={form.estimated_hours} onChange={(e) => setForm({ ...form, estimated_hours: e.target.value })} />
               </div>
+            </div>
+            <div>
+              <Label className="text-xs">Run mode</Label>
+              <Select value={form.run_mode} onValueChange={(v) => setForm({ ...form, run_mode: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sequential">New stage (sequential — runs after previous)</SelectItem>
+                  <SelectItem value="concurrent" disabled={maxStep === 0}>
+                    Concurrent (run alongside the last stage)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button size="sm" onClick={addTask}><Plus className="h-4 w-4 mr-1" /> Add task</Button>
           </div>
