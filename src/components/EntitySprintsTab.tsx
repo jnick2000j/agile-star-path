@@ -83,6 +83,7 @@ export function EntitySprintsTab({ entityType, entityId, organizationId }: Entit
   const [expandedSprintId, setExpandedSprintId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [sprintToDelete, setSprintToDelete] = useState<{ id: string; name: string } | null>(null);
   const [newSprint, setNewSprint] = useState({
     name: "",
     description: "",
