@@ -731,12 +731,6 @@ export default function HelpdeskTicketDetail() {
                   : <span className="text-muted-foreground">Unassigned</span>}
               </p>
             </div>
-            {ticket.category && (
-              <div className="space-y-1 min-w-[140px]">
-                <Label className="text-xs text-muted-foreground">Category</Label>
-                <p className="text-sm h-8 flex items-center truncate">{ticket.category}</p>
-              </div>
-            )}
           </div>
 
           {/* Row 2: Programme / Project / Product / Queue */}
