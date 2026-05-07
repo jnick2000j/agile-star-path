@@ -11,6 +11,7 @@ import {
   Download
 } from "lucide-react";
 import { CreateIssueDialog } from "@/components/dialogs/CreateIssueDialog";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { cn } from "@/lib/utils";
@@ -190,6 +191,22 @@ export default function IssueRegister({ embedded = false }: { embedded?: boolean
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Saved views */}
+      <div className="mb-3">
+        <SavedViewsBar
+          scope="issues.list"
+          state={{
+            filters: { status: statusFilters, type: typeFilters, priority: priorityFilters },
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            setStatusFilters(Array.isArray(f.status) ? f.status : []);
+            setTypeFilters(Array.isArray(f.type) ? f.type : []);
+            setPriorityFilters(Array.isArray(f.priority) ? f.priority : []);
+          }}
+        />
       </div>
 
       {/* Actions Bar */}

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateRiskDialog } from "@/components/dialogs/CreateRiskDialog";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { RiskInsightsPanel } from "@/components/risks/RiskInsightsPanel";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import { DocumentUpload } from "@/components/DocumentUpload";
@@ -201,6 +202,23 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
 
       {/* AI Risk Insights */}
       <RiskInsightsPanel risks={risks} />
+
+      {/* Saved views */}
+      <div className="mb-3">
+        <SavedViewsBar
+          scope="risks.list"
+          state={{
+            filters: { status: statusFilters, category: categoryFilters, probability: probabilityFilters },
+            sort: null,
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            setStatusFilters(Array.isArray(f.status) ? f.status : []);
+            setCategoryFilters(Array.isArray(f.category) ? f.category : []);
+            setProbabilityFilters(Array.isArray(f.probability) ? f.probability : []);
+          }}
+        />
+      </div>
 
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">

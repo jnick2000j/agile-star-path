@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateChangeDialog } from "@/components/changeMgmt/CreateChangeDialog";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,16 @@ export default function ChangeManagement() {
             <StatCard label="In progress" value={stats.in_progress} accent="primary" />
             <StatCard label="Total" value={stats.total} icon={<GitBranch className="h-4 w-4" />} />
           </div>
+
+          <SavedViewsBar
+            scope="change-management.list"
+            state={{ filters: { status: statusFilter, type: typeFilter } }}
+            onApply={(cfg) => {
+              const f = cfg.filters ?? {};
+              if (typeof f.status === "string") setStatusFilter(f.status);
+              if (typeof f.type === "string") setTypeFilter(f.type);
+            }}
+          />
 
           <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
             <div className="flex items-center gap-2 flex-1 max-w-xl">

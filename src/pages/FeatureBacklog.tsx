@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -207,6 +208,14 @@ export default function FeatureBacklog() {
   return (
     <AppLayout title="Feature Backlog" subtitle="Kanban board for tracking feature status">
       <div className="space-y-6">
+        <SavedViewsBar
+          scope="features.backlog"
+          state={{ filters: { product: productFilter }, layout: "kanban" }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            if (typeof f.product === "string") setProductFilter(f.product);
+          }}
+        />
         {/* Header Controls */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-4 flex-1">
