@@ -83,7 +83,8 @@ export default function FeatureBacklog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [productFilter, setProductFilter] = useState<string>("all");
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [draggedFeature, setDraggedFeature] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
@@ -186,12 +187,15 @@ export default function FeatureBacklog() {
     }
   };
 
-  const filteredFeatures = features.filter(f => {
-    const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      f.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesProduct = productFilter === "all" || f.product_id === productFilter;
-    return matchesSearch && matchesProduct;
-  });
+  const filteredFeatures = (() => {
+    const bySearch = features.filter((f) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return f.name.toLowerCase().includes(q) || !!f.description?.toLowerCase().includes(q);
+    });
+    const byFilters = applyFilters(bySearch, filters, { userId: user?.id });
+    return applySort(byFilters, sort);
+  })();
 
   const getFeaturesForStatus = (status: string) => {
     return filteredFeatures.filter(f => f.status === status);
@@ -212,141 +216,129 @@ export default function FeatureBacklog() {
       <div className="space-y-6">
         <SavedViewsBar
           scope="features.backlog"
-          state={{ filters: { product: productFilter }, layout: "kanban" }}
+          schema={featuresSchema}
+          state={{ filters: filters as any, sort, layout: "kanban" }}
           onApply={(cfg) => {
-            const f = cfg.filters ?? {};
-            if (typeof f.product === "string") setProductFilter(f.product);
+            const f = cfg.filters as any;
+            setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+            setSort(cfg.sort ?? null);
           }}
-        />
-        {/* Header Controls */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex gap-4 flex-1">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          leading={
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search features..."
+                placeholder="Search features…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="pl-8 h-8 text-sm bg-background"
               />
             </div>
-            <Select value={productFilter} onValueChange={setProductFilter}>
-              <SelectTrigger className="w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by product" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Products</SelectItem>
-                {products.map(product => (
-                  <SelectItem key={product.id} value={product.id}>{product.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Feature
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Feature</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Feature Name *</Label>
-                  <Input
-                    value={newFeature.name}
-                    onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
-                    placeholder="Enter feature name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    value={newFeature.description}
-                    onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
-                    placeholder="Describe the feature"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Product *</Label>
-                  <Select
-                    value={newFeature.product_id}
-                    onValueChange={(v) => setNewFeature({ ...newFeature, product_id: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.map(product => (
-                        <SelectItem key={product.id} value={product.id}>{product.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Priority</Label>
-                    <Select
-                      value={newFeature.priority}
-                      onValueChange={(v) => setNewFeature({ ...newFeature, priority: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="low">Low</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>MoSCoW</Label>
-                    <Select
-                      value={newFeature.moscow}
-                      onValueChange={(v) => setNewFeature({ ...newFeature, moscow: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="must">Must Have</SelectItem>
-                        <SelectItem value="should">Should Have</SelectItem>
-                        <SelectItem value="could">Could Have</SelectItem>
-                        <SelectItem value="wont">Won't Have</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Target Release</Label>
-                  <Select
-                    value={newFeature.target_release}
-                    onValueChange={(v) => setNewFeature({ ...newFeature, target_release: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select quarter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Q1">Q1</SelectItem>
-                      <SelectItem value="Q2">Q2</SelectItem>
-                      <SelectItem value="Q3">Q3</SelectItem>
-                      <SelectItem value="Q4">Q4</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={handleCreateFeature} className="w-full">
-                  Create Feature
+          }
+          trailing={
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="h-8">
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Add Feature
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Feature</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Feature Name *</Label>
+                    <Input
+                      value={newFeature.name}
+                      onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
+                      placeholder="Enter feature name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      value={newFeature.description}
+                      onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
+                      placeholder="Describe the feature"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Product *</Label>
+                    <Select
+                      value={newFeature.product_id}
+                      onValueChange={(v) => setNewFeature({ ...newFeature, product_id: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select product" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {products.map(product => (
+                          <SelectItem key={product.id} value={product.id}>{product.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Priority</Label>
+                      <Select
+                        value={newFeature.priority}
+                        onValueChange={(v) => setNewFeature({ ...newFeature, priority: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="low">Low</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>MoSCoW</Label>
+                      <Select
+                        value={newFeature.moscow}
+                        onValueChange={(v) => setNewFeature({ ...newFeature, moscow: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="must">Must Have</SelectItem>
+                          <SelectItem value="should">Should Have</SelectItem>
+                          <SelectItem value="could">Could Have</SelectItem>
+                          <SelectItem value="wont">Won't Have</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Target Release</Label>
+                    <Select
+                      value={newFeature.target_release}
+                      onValueChange={(v) => setNewFeature({ ...newFeature, target_release: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select quarter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Q1">Q1</SelectItem>
+                        <SelectItem value="Q2">Q2</SelectItem>
+                        <SelectItem value="Q3">Q3</SelectItem>
+                        <SelectItem value="Q4">Q4</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleCreateFeature} className="w-full">
+                    Create Feature
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          }
+        />
 
         {/* Kanban Board */}
         <div className="flex gap-4 overflow-x-auto pb-4">
