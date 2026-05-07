@@ -652,7 +652,12 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                   return (
                     <div key={t.id} className="flex items-center gap-2 border rounded-md p-2 text-sm bg-background">
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{t.title}</div>
+                        <div className="font-medium truncate flex items-center gap-2">
+                          {t.title}
+                          <Badge variant={t.audience === "internal" ? "secondary" : "outline"} className="text-[10px] capitalize">
+                            {t.audience === "internal" ? "Internal" : "External"}
+                          </Badge>
+                        </div>
                         <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
                           <span className="capitalize">{t.default_priority}</span>
                           {t.default_queue_id && <span>· Queue: {queueLabel(t.default_queue_id)}</span>}
