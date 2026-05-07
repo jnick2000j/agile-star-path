@@ -139,9 +139,13 @@ export function SavedViewsBar({
         className
       )}
     >
-      {/* Top row: leading (search) + view + controls + layout + trailing (action) */}
+      {/* Single toolbar row: search · view · sort · group · columns · +filter · chips · layout · trailing */}
       <div className="flex items-center gap-1.5 flex-wrap px-2 py-1.5">
-        {leading && <div className="flex items-center gap-1.5 min-w-[200px] flex-1 max-w-md">{leading}</div>}
+        {leading && (
+          <div className="flex items-center gap-1.5 min-w-[200px] max-w-sm flex-1 sm:flex-none sm:w-72">
+            {leading}
+          </div>
+        )}
 
         <SavedViewMenu
           scope={scope}
@@ -162,6 +166,7 @@ export function SavedViewsBar({
               value={views.activeConfig.columns}
               onChange={setColumns}
             />
+            <FilterBuilder schema={schema!} value={filters} onChange={setFilters} />
           </>
         )}
 
@@ -192,18 +197,6 @@ export function SavedViewsBar({
           {trailing}
         </div>
       </div>
-
-      {/* Filter row — always shows the "Add filter" trigger */}
-      {showStructured && (
-        <div
-          className={cn(
-            "flex items-center gap-1.5 flex-wrap px-2 py-1.5",
-            hasActiveFilters && "border-t"
-          )}
-        >
-          <FilterBuilder schema={schema!} value={filters} onChange={setFilters} />
-        </div>
-      )}
     </div>
   );
 }
