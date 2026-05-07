@@ -456,6 +456,23 @@ export default function Helpdesk() {
             <StatCard label="Total" value={stats.total} />
           </div>
 
+          {/* Saved views + assignment chips */}
+          <SavedViewsBar
+            scope="helpdesk.tickets"
+            state={{
+              filters: { search, status: statusFilter, type: typeFilter, sla: slaFilter },
+              assignment: assignmentChip,
+            }}
+            onApply={(cfg) => {
+              const f = cfg.filters ?? {};
+              if (typeof f.search === "string") setSearch(f.search);
+              if (typeof f.status === "string") setStatusFilter(f.status);
+              if (typeof f.type === "string") setTypeFilter(f.type);
+              if (typeof f.sla === "string") setSlaFilter(f.sla);
+              setAssignmentChip(cfg.assignment ?? null);
+            }}
+          />
+
           {/* Toolbar — single row on md+ */}
           <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full">
             <div className="relative flex-1 min-w-[200px]">
