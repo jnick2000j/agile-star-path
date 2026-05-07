@@ -8,7 +8,7 @@ export type SavedViewLayout = "table" | "kanban" | "calendar" | "list" | "board"
 
 export interface SavedViewConfig {
   /** Either structured filter list (new) or legacy keyed object */
-  filters?: any[] | Record<string, any>;
+  filters?: any;
   sort?: { field: string; dir: "asc" | "desc" } | null;
   columns?: string[];
   grouping?: string | null;
