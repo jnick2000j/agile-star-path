@@ -79,6 +79,9 @@ import { EditTaskDialog } from "@/components/dialogs/EditTaskDialog";
 import { RecurringTaskDialog } from "@/components/dialogs/RecurringTaskDialog";
 import { format } from "date-fns";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
+import { tasksSchema } from "@/lib/viewSchemas/registers";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 
 type TaskStatus = "not_started" | "in_progress" | "on_hold" | "completed" | "cancelled";
 
@@ -150,8 +153,8 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     myAssignedTaskIds.has(task.id);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [entityFilter, setEntityFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<any>(null);
@@ -407,10 +410,6 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
 
   // Filter tasks
   const matchesFilters = (task: Task) => {
-    if (statusFilter !== "all" && task.status !== statusFilter) return false;
-    if (entityFilter === "project" && !task.project_id) return false;
-    if (entityFilter === "program" && !task.programme_id) return false;
-    if (entityFilter === "product" && !task.product_id) return false;
     if (assignmentChip === "me" && (task as any).assignee_id !== user?.id) return false;
     if (assignmentChip === "my_team" && (task as any).assignee_id !== user?.id) return false;
     if (assignmentChip === "unassigned" && (task as any).assignee_id) return false;
@@ -418,6 +417,9 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     if (assignmentChip === "mentioned_me") {
       const m = (task as any).mentioned_user_ids;
       if (!Array.isArray(m) || !m.includes(user?.id)) return false;
+    }
+    for (const f of filters) {
+      if (!applyFilters([task as any], [f], { userId: user?.id }).length) return false;
     }
     return true;
   };
@@ -569,61 +571,41 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
       </div>
 
       {/* Saved views */}
-      <div className="mb-3">
+      <div className="mb-4">
         <SavedViewsBar
           scope="tasks.list"
+          schema={tasksSchema}
+          showAssignmentChips
           state={{
-            filters: { entity: entityFilter, status: statusFilter },
+            filters: filters as any,
+            sort,
             assignment: assignmentChip,
           }}
           onApply={(cfg) => {
-            const f = cfg.filters ?? {};
-            if (typeof f.entity === "string") setEntityFilter(f.entity);
-            if (typeof f.status === "string") setStatusFilter(f.status);
+            const f = cfg.filters as any;
+            setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+            setSort(cfg.sort ?? null);
             setAssignmentChip(cfg.assignment ?? null);
           }}
+          trailing={
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              onClick={() => {
+                setRecurringSeed(null);
+                setRecurringOpen(true);
+              }}
+            >
+              <Repeat className="h-3.5 w-3.5 mr-1.5" />
+              Recurring
+            </Button>
+          }
         />
       </div>
 
-      {/* Filters and Actions */}
-      <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
-        <div className="flex gap-4">
-          <Select value={entityFilter} onValueChange={setEntityFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by entity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Entities</SelectItem>
-              <SelectItem value="project">Projects</SelectItem>
-              <SelectItem value="program">Programs</SelectItem>
-              <SelectItem value="product">Products</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="not_started">Not Started</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="on_hold">On Hold</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={() => {
-            setRecurringSeed(null);
-            setRecurringOpen(true);
-          }}
-        >
-          <Repeat className="h-4 w-4 mr-2" />
-          Recurring Tasks
-        </Button>
+      {/* Actions */}
+      <div className="flex justify-end mb-4">
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
