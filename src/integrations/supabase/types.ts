@@ -12920,6 +12920,7 @@ export type Database = {
       }
       service_catalog_item_tasks: {
         Row: {
+          audience: string
           created_at: string
           default_assignee_id: string | null
           default_priority: string
@@ -12934,6 +12935,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          audience?: string
           created_at?: string
           default_assignee_id?: string | null
           default_priority?: string
@@ -12948,6 +12950,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          audience?: string
           created_at?: string
           default_assignee_id?: string | null
           default_priority?: string
@@ -12990,6 +12993,7 @@ export type Database = {
           approval_policy: string
           approver_role: string | null
           approver_user_ids: string[]
+          audience: string
           category_id: string | null
           cost_currency: string
           cost_estimate: number | null
@@ -13014,6 +13018,7 @@ export type Database = {
           approval_policy?: string
           approver_role?: string | null
           approver_user_ids?: string[]
+          audience?: string
           category_id?: string | null
           cost_currency?: string
           cost_estimate?: number | null
@@ -13038,6 +13043,7 @@ export type Database = {
           approval_policy?: string
           approver_role?: string | null
           approver_user_ids?: string[]
+          audience?: string
           category_id?: string | null
           cost_currency?: string
           cost_estimate?: number | null
