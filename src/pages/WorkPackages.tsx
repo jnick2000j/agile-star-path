@@ -497,60 +497,33 @@ export default function WorkPackages() {
 
         <SavedViewsBar
           scope="work-packages.list"
-          state={{ filters: { project: projectFilter, status: statusFilter } }}
+          schema={workPackagesSchema}
+          state={{ filters: filters as any, sort }}
           onApply={(cfg) => {
-            const f = cfg.filters ?? {};
-            if (typeof f.project === "string") setProjectFilter(f.project);
-            if (typeof f.status === "string") setStatusFilter(f.status);
+            const f = cfg.filters as any;
+            setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+            setSort(cfg.sort ?? null);
           }}
+          trailing={
+            <Dialog open={isCreateOpen} onOpenChange={(open) => {
+              setIsCreateOpen(open);
+              if (!open) setFormData(defaultFormState);
+            }}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="h-8">
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  New Work Package
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create PRINCE2 Work Package</DialogTitle>
+                </DialogHeader>
+                <WorkPackageForm />
+              </DialogContent>
+            </Dialog>
+          }
         />
-
-        {/* Filters and Actions */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex gap-4">
-            <Select value={projectFilter} onValueChange={setProjectFilter}>
-              <SelectTrigger className="w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by project" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Projects</SelectItem>
-                {projects.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {Object.entries(statusConfig).map(([key, conf]) => (
-                  <SelectItem key={key} value={key}>{conf.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Dialog open={isCreateOpen} onOpenChange={(open) => {
-            setIsCreateOpen(open);
-            if (!open) setFormData(defaultFormState);
-          }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Work Package
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create PRINCE2 Work Package</DialogTitle>
-              </DialogHeader>
-              <WorkPackageForm />
-            </DialogContent>
-          </Dialog>
-        </div>
 
         {/* Edit Dialog */}
         <Dialog open={isEditOpen} onOpenChange={(open) => {
