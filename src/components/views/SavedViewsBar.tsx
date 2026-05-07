@@ -20,6 +20,10 @@ interface SavedViewsBarProps {
   /** Override layouts (otherwise uses schema.layouts) */
   layouts?: ("table" | "kanban" | "calendar" | "list" | "board" | "gantt")[];
   className?: string;
+  /** Rendered at the start of the toolbar row (e.g. search input) */
+  leading?: React.ReactNode;
+  /** Rendered at the end of the toolbar row (e.g. New / Create button) */
+  trailing?: React.ReactNode;
 }
 
 const LAYOUT_ICONS: Record<string, React.ComponentType<any>> = {
@@ -48,6 +52,8 @@ export function SavedViewsBar({
   schema,
   layouts,
   className,
+  leading,
+  trailing,
 }: SavedViewsBarProps) {
   const views = useSavedViews(scope, state);
   const lastAppliedRef = useRef<string>("");
@@ -133,8 +139,10 @@ export function SavedViewsBar({
         className
       )}
     >
-      {/* Top row: view + controls */}
-      <div className="flex items-center gap-1 flex-wrap px-2 py-1.5">
+      {/* Top row: leading (search) + view + controls + layout + trailing (action) */}
+      <div className="flex items-center gap-1.5 flex-wrap px-2 py-1.5">
+        {leading && <div className="flex items-center gap-1.5 min-w-[200px] flex-1 max-w-md">{leading}</div>}
+
         <SavedViewMenu
           scope={scope}
           views={views}
@@ -146,7 +154,7 @@ export function SavedViewsBar({
 
         {showStructured && (
           <>
-            <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-0.5" />
             <SortMenu schema={schema!} value={views.activeConfig.sort ?? null} onChange={setSort} />
             <GroupMenu schema={schema!} value={views.activeConfig.grouping ?? null} onChange={setGrouping} />
             <ColumnPicker
@@ -157,8 +165,8 @@ export function SavedViewsBar({
           </>
         )}
 
-        {availableLayouts.length > 1 && (
-          <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1.5">
+          {availableLayouts.length > 1 && (
             <ToggleGroup
               type="single"
               size="sm"
@@ -180,16 +188,17 @@ export function SavedViewsBar({
                 );
               })}
             </ToggleGroup>
-          </div>
-        )}
+          )}
+          {trailing}
+        </div>
       </div>
 
-      {/* Filter row */}
+      {/* Filter row — always shows the "Add filter" trigger */}
       {showStructured && (
         <div
           className={cn(
-            "flex items-center gap-1.5 flex-wrap border-t px-2 py-1.5",
-            !hasActiveFilters && "border-t-0 pt-0 pb-1.5"
+            "flex items-center gap-1.5 flex-wrap px-2 py-1.5",
+            hasActiveFilters && "border-t"
           )}
         >
           <FilterBuilder schema={schema!} value={filters} onChange={setFilters} />
