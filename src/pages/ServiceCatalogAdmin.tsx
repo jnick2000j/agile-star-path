@@ -634,7 +634,7 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
             <h4 className="text-sm font-semibold">Add task</h4>
             <Input placeholder="Task title (e.g. Provision laptop)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             <Textarea rows={2} placeholder="Description / instructions for the assignee" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               <div className="col-span-2 grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-xs">Assign to</Label>
