@@ -79,6 +79,9 @@ import { EditTaskDialog } from "@/components/dialogs/EditTaskDialog";
 import { RecurringTaskDialog } from "@/components/dialogs/RecurringTaskDialog";
 import { format } from "date-fns";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
+import { tasksSchema } from "@/lib/viewSchemas/registers";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 
 type TaskStatus = "not_started" | "in_progress" | "on_hold" | "completed" | "cancelled";
 
