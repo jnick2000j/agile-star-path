@@ -512,7 +512,7 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     enabled: !!effectiveOrg,
   });
 
-  const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+  const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential", audience: "external" });
 
   const refetch = async () => {
     await qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
