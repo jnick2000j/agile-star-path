@@ -606,7 +606,9 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                         <div className="font-medium truncate">{t.title}</div>
                         <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
                           <span className="capitalize">{t.default_priority}</span>
+                          {t.default_queue_id && <span>· Queue: {queueLabel(t.default_queue_id)}</span>}
                           {t.default_assignee_id && <span>· {memberLabel(t.default_assignee_id)}</span>}
+                          {!t.default_queue_id && !t.default_assignee_id && <span>· Unassigned</span>}
                           {t.estimated_hours != null && <span>· {t.estimated_hours}h</span>}
                         </div>
                       </div>
