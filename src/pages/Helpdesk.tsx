@@ -466,7 +466,7 @@ export default function Helpdesk() {
             <StatCard label="Total" value={stats.total} />
           </div>
 
-          {/* Saved views toolbar */}
+          {/* Saved views toolbar — search + filters + new ticket on one row */}
           <SavedViewsBar
             scope="helpdesk.tickets"
             schema={helpdeskTicketSchema}
@@ -480,11 +480,7 @@ export default function Helpdesk() {
               if (Array.isArray(f)) {
                 setAdvancedFilters(f as ViewFilter[]);
               } else if (f && typeof f === "object") {
-                // Legacy view config — migrate known keys back to local state
                 if (typeof f.search === "string") setSearch(f.search);
-                if (typeof f.status === "string") setStatusFilter(f.status);
-                if (typeof f.type === "string") setTypeFilter(f.type);
-                if (typeof f.sla === "string") setSlaFilter(f.sla);
                 setAdvancedFilters([]);
               } else {
                 setAdvancedFilters([]);
@@ -492,72 +488,37 @@ export default function Helpdesk() {
               setAssignmentChip(cfg.assignment ?? null);
               setSort(cfg.sort ?? null);
             }}
+            leading={
+              <div className="relative w-full">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search tickets, reference, reporter…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-8 h-8 text-sm bg-background"
+                />
+              </div>
+            }
+            trailing={
+              <>
+                <Button onClick={() => setCreateOpen(true)} size="sm" className="h-8 shrink-0">
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  {isServiceRequestsTab ? "New Request" : "New Ticket"}
+                </Button>
+                {isServiceRequestsTab && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/catalog")}
+                    className="h-8 shrink-0 gap-1.5"
+                  >
+                    <Package className="h-4 w-4" />
+                    Browse Catalog
+                  </Button>
+                )}
+              </>
+            }
           />
-
-          {/* Toolbar — single row on md+ */}
-          <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search tickets, reference, reporter..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px] shrink-0">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="open_active">Active (open)</SelectItem>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="open">Open</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="on_hold">On hold</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[150px] shrink-0">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="support">Support</SelectItem>
-                <SelectItem value="incident">Incident</SelectItem>
-                <SelectItem value="service_request">Service Request</SelectItem>
-                <SelectItem value="question">Question</SelectItem>
-                <SelectItem value="problem">Problem</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={slaFilter} onValueChange={setSlaFilter}>
-              <SelectTrigger className="w-[140px] shrink-0">
-                <SelectValue placeholder="SLA" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All SLA states</SelectItem>
-                <SelectItem value="breached">Breached</SelectItem>
-                <SelectItem value="at_risk">At risk</SelectItem>
-                <SelectItem value="paused">Paused</SelectItem>
-                <SelectItem value="on_track">On track</SelectItem>
-                <SelectItem value="none">No SLA</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setCreateOpen(true)} className="shrink-0 ml-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              {isServiceRequestsTab ? "New Request" : "New Ticket"}
-            </Button>
-            {isServiceRequestsTab && (
-              <Button variant="outline" onClick={() => navigate("/catalog")} className="shrink-0 gap-2">
-                <Package className="h-4 w-4" />
-                Browse Catalog
-              </Button>
-            )}
-          </div>
 
           {/* Table */}
           {dragId && (
