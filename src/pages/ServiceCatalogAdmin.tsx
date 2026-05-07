@@ -370,6 +370,16 @@ function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
               <Label>Est. fulfillment (hours)</Label>
               <Input type="number" value={form.estimated_fulfillment_hours ?? ""} onChange={(e) => setForm({ ...form, estimated_fulfillment_hours: e.target.value })} />
             </div>
+            <div>
+              <Label>Audience</Label>
+              <Select value={form.audience ?? "external"} onValueChange={(v) => setForm({ ...form, audience: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="external">External (end users)</SelectItem>
+                  <SelectItem value="internal">Internal (IT / staff only)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-end gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
               <Label className="!mt-0">Active</Label>
