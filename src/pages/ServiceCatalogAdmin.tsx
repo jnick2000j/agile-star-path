@@ -503,21 +503,21 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
 
   const addTask = async () => {
     if (!form.title.trim() || !effectiveOrg) { toast.error("Task title required"); return; }
-    // run_mode "concurrent" => share the current max step (run alongside last stage)
-    // run_mode "sequential" => new step after current max
     const nextOrder = form.run_mode === "concurrent" && maxStep > 0 ? maxStep : maxStep + 1;
+    const isQueue = form.assignee_kind === "queue";
     const { error } = await supabase.from("service_catalog_item_tasks").insert({
       organization_id: effectiveOrg,
       item_id: itemId,
       step_order: nextOrder,
       title: form.title.trim(),
       description: form.description.trim() || null,
-      default_assignee_id: form.default_assignee_id || null,
+      default_assignee_id: !isQueue && form.default_assignee_id ? form.default_assignee_id : null,
+      default_queue_id: isQueue && form.default_queue_id ? form.default_queue_id : null,
       default_priority: form.default_priority,
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
     });
     if (error) { toast.error(error.message); return; }
-    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+    setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
     refetch();
   };
 
