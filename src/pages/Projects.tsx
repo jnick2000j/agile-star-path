@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
-  Filter,
   LayoutGrid,
   List,
   Pencil
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { projectsSchema } from "@/lib/viewSchemas/registers";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import {
   Table,
   TableBody,
@@ -30,13 +32,6 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/hooks/useAuth";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 interface Project {
   id: string;
@@ -83,9 +78,8 @@ export default function Projects() {
   const { canManage } = usePermissions();
   const { user, userRole } = useAuth();
   const { hasFullOrgAccess } = useOrgAccessLevel();
-  const [stageFilters, setStageFilters] = useState<string[]>([]);
-  const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
-  const [healthFilters, setHealthFilters] = useState<string[]>([]);
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
   
   // Edit dialog state
@@ -182,38 +176,22 @@ export default function Projects() {
     }
   };
 
-  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setFilters(prev => 
-      prev.includes(value) 
-        ? prev.filter(s => s !== value)
-        : [...prev, value]
+  const filteredProjects = (() => {
+    const bySearch = projects.filter((p) =>
+      !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
-
-  const clearFilters = () => {
-    setStageFilters([]);
-    setPriorityFilters([]);
-    setHealthFilters([]);
-  };
-
-  const filteredProjects = projects.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStage = stageFilters.length === 0 || stageFilters.includes(p.stage);
-    const matchesPriority = priorityFilters.length === 0 || priorityFilters.includes(p.priority);
-    const matchesHealth = healthFilters.length === 0 || healthFilters.includes(p.health);
-    let matchesAssignment = true;
-    if (assignmentChip) {
+    const byAssignment = bySearch.filter((p) => {
+      if (!assignmentChip) return true;
       const uid = (user as any)?.id;
       const owner = (p as any).project_manager_id ?? (p as any).owner_id ?? (p as any).manager_id;
-      if (assignmentChip === "me" || assignmentChip === "my_team") matchesAssignment = owner === uid;
-      else if (assignmentChip === "unassigned") matchesAssignment = !owner;
-      else if (assignmentChip === "created_by_me") matchesAssignment = (p as any).created_by === uid;
-      else if (assignmentChip === "mentioned_me") matchesAssignment = false;
-    }
-    return matchesSearch && matchesStage && matchesPriority && matchesHealth && matchesAssignment;
-  });
-
-  const activeFilterCount = stageFilters.length + priorityFilters.length + healthFilters.length;
+      if (assignmentChip === "me" || assignmentChip === "my_team") return owner === uid;
+      if (assignmentChip === "unassigned") return !owner;
+      if (assignmentChip === "created_by_me") return (p as any).created_by === uid;
+      return false;
+    });
+    const byFilters = applyFilters(byAssignment, filters, { userId: user?.id });
+    return applySort(byFilters, sort);
+  })();
 
   const handleEditClick = (project: Project) => {
     setSelectedProject(project);
@@ -225,128 +203,57 @@ export default function Projects() {
       <div className="mb-4">
         <SavedViewsBar
           scope="projects.list"
+          schema={projectsSchema}
+          showAssignmentChips
           state={{
-            filters: {
-              search: searchQuery,
-              stage: stageFilters,
-              priority: priorityFilters,
-              health: healthFilters,
-              viewMode,
-            },
-            layout: viewMode === "grid" ? "board" : "list",
+            filters: filters as any,
+            sort,
+            layout: viewMode === "grid" ? "board" : "table",
             assignment: assignmentChip,
           }}
           onApply={(cfg) => {
-            const f = cfg.filters ?? {};
-            if (typeof f.search === "string") setSearchQuery(f.search);
-            if (Array.isArray(f.stage)) setStageFilters(f.stage);
-            if (Array.isArray(f.priority)) setPriorityFilters(f.priority);
-            if (Array.isArray(f.health)) setHealthFilters(f.health);
-            if (f.viewMode === "grid" || f.viewMode === "list") setViewMode(f.viewMode);
+            const f = cfg.filters as any;
+            setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+            setSort(cfg.sort ?? null);
+            if (cfg.layout === "board") setViewMode("grid");
+            else if (cfg.layout === "table" || cfg.layout === "list") setViewMode("list");
             setAssignmentChip(cfg.assignment ?? null);
           }}
-        />
-      </div>
-      {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search projects..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <div className="flex gap-2">
-          <div className="flex border border-border rounded-lg p-1">
-            <Button
-              variant={viewMode === "list" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "grid" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-                {activeFilterCount > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                    {activeFilterCount}
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-sm">Filters</h4>
-                  {activeFilterCount > 0 && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
-                      Clear all
-                    </Button>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Stage</Label>
-                  {Object.entries(stageConfig).map(([key, config]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`stage-${key}`} 
-                        checked={stageFilters.includes(key)}
-                        onCheckedChange={() => toggleFilter(key, stageFilters, setStageFilters)}
-                      />
-                      <label htmlFor={`stage-${key}`} className="text-sm cursor-pointer flex-1">
-                        {config.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Priority</Label>
-                  {Object.entries(priorityConfig).map(([key, config]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`priority-${key}`} 
-                        checked={priorityFilters.includes(key)}
-                        onCheckedChange={() => toggleFilter(key, priorityFilters, setPriorityFilters)}
-                      />
-                      <label htmlFor={`priority-${key}`} className="text-sm cursor-pointer flex-1">
-                        {config.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Health</Label>
-                  {Object.entries(healthConfig).map(([key]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`health-${key}`} 
-                        checked={healthFilters.includes(key)}
-                        onCheckedChange={() => toggleFilter(key, healthFilters, setHealthFilters)}
-                      />
-                      <label htmlFor={`health-${key}`} className="text-sm cursor-pointer flex-1 capitalize">
-                        {key}
-                      </label>
-                    </div>
-                  ))}
-                </div>
+          leading={
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search projects…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 text-sm bg-background"
+              />
+            </div>
+          }
+          trailing={
+            <>
+              <div className="flex border border-border rounded-md p-0.5 bg-background">
+                <Button
+                  variant={viewMode === "list" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant={viewMode === "grid" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </Button>
               </div>
-            </PopoverContent>
-          </Popover>
-          {canManage("projects") && <CreateProjectDialog onSuccess={fetchProjects} />}
-        </div>
+              {canManage("projects") && <CreateProjectDialog onSuccess={fetchProjects} />}
+            </>
+          }
+        />
       </div>
 
       {/* Projects Table */}
