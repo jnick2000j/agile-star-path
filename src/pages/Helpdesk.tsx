@@ -39,6 +39,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
+import { helpdeskTicketSchema } from "@/lib/viewSchemas/helpdesk";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
