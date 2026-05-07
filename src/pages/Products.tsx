@@ -17,7 +17,6 @@ import {
   Lightbulb,
   Rocket,
   ArrowUpRight,
-  Filter,
   Pencil,
 } from "lucide-react";
 import {
@@ -28,13 +27,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { productsSchema } from "@/lib/viewSchemas/registers";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateProductDialog } from "@/components/dialogs/CreateProductDialog";
 import { EditProductDialog } from "@/components/dialogs/EditProductDialog";
@@ -90,7 +85,8 @@ export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState<string>("all");
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { currentOrganization } = useOrganization();
   const { user, userRole } = useAuth();
@@ -186,12 +182,15 @@ export default function Products() {
     return Math.round((reach_score * impact_score * confidence_score) / effort_score);
   };
 
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStage = stageFilter === "all" || p.stage === stageFilter;
-    return matchesSearch && matchesStage;
-  });
+  const filteredProducts = (() => {
+    const bySearch = products.filter((p) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return p.name.toLowerCase().includes(q) || !!p.description?.toLowerCase().includes(q);
+    });
+    const byFilters = applyFilters(bySearch, filters, { userId: user?.id });
+    return applySort(byFilters, sort);
+  })();
 
   const stageCounts = {
     discovery: products.filter(p => p.stage === "discovery").length,
@@ -238,37 +237,26 @@ export default function Products() {
         <TabsContent value="portfolio" className="space-y-4">
           <SavedViewsBar
             scope="products.portfolio"
-            state={{ filters: { stage: stageFilter } }}
+            schema={productsSchema}
+            state={{ filters: filters as any, sort }}
             onApply={(cfg) => {
-              const f = cfg.filters ?? {};
-              if (typeof f.stage === "string") setStageFilter(f.stage);
+              const f = cfg.filters as any;
+              setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+              setSort(cfg.sort ?? null);
             }}
+            leading={
+              <div className="relative w-full">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search products…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-8 text-sm bg-background"
+                />
+              </div>
+            }
+            trailing={<CreateProductDialog onSuccess={fetchProducts} />}
           />
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={stageFilter} onValueChange={setStageFilter}>
-              <SelectTrigger className="w-[180px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by stage" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stages</SelectItem>
-                {Object.entries(stageConfig).map(([key, config]) => (
-                  <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <CreateProductDialog onSuccess={fetchProducts} />
-          </div>
 
           {/* Products Table */}
           <div className="metric-card overflow-hidden">
