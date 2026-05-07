@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/hooks/useAuth";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
 import {
   Popover,
@@ -85,6 +86,7 @@ export default function Projects() {
   const [stageFilters, setStageFilters] = useState<string[]>([]);
   const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
   const [healthFilters, setHealthFilters] = useState<string[]>([]);
+  const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
   
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -199,7 +201,16 @@ export default function Projects() {
     const matchesStage = stageFilters.length === 0 || stageFilters.includes(p.stage);
     const matchesPriority = priorityFilters.length === 0 || priorityFilters.includes(p.priority);
     const matchesHealth = healthFilters.length === 0 || healthFilters.includes(p.health);
-    return matchesSearch && matchesStage && matchesPriority && matchesHealth;
+    let matchesAssignment = true;
+    if (assignmentChip) {
+      const uid = (user as any)?.id;
+      const owner = (p as any).project_manager_id ?? (p as any).owner_id ?? (p as any).manager_id;
+      if (assignmentChip === "me" || assignmentChip === "my_team") matchesAssignment = owner === uid;
+      else if (assignmentChip === "unassigned") matchesAssignment = !owner;
+      else if (assignmentChip === "created_by_me") matchesAssignment = (p as any).created_by === uid;
+      else if (assignmentChip === "mentioned_me") matchesAssignment = false;
+    }
+    return matchesSearch && matchesStage && matchesPriority && matchesHealth && matchesAssignment;
   });
 
   const activeFilterCount = stageFilters.length + priorityFilters.length + healthFilters.length;
@@ -211,6 +222,31 @@ export default function Projects() {
 
   return (
     <AppLayout title="Projects" subtitle="Manage all projects across programmes">
+      <div className="mb-4">
+        <SavedViewsBar
+          scope="projects.list"
+          state={{
+            filters: {
+              search: searchQuery,
+              stage: stageFilters,
+              priority: priorityFilters,
+              health: healthFilters,
+              viewMode,
+            },
+            layout: viewMode === "grid" ? "board" : "list",
+            assignment: assignmentChip,
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            if (typeof f.search === "string") setSearchQuery(f.search);
+            if (Array.isArray(f.stage)) setStageFilters(f.stage);
+            if (Array.isArray(f.priority)) setPriorityFilters(f.priority);
+            if (Array.isArray(f.health)) setHealthFilters(f.health);
+            if (f.viewMode === "grid" || f.viewMode === "list") setViewMode(f.viewMode);
+            setAssignmentChip(cfg.assignment ?? null);
+          }}
+        />
+      </div>
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">

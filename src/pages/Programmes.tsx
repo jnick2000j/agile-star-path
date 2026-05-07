@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrgAccessLevel } from "@/hooks/useOrgAccessLevel";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import {
   Popover,
   PopoverContent,
@@ -61,6 +62,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function Programmes() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
   const [programmes, setProgrammes] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentOrganization } = useOrganization();
@@ -166,13 +168,37 @@ export default function Programmes() {
   const filteredPrograms = programmes.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilters.length === 0 || statusFilters.includes(p.status);
-    return matchesSearch && matchesStatus;
+    let matchesAssignment = true;
+    if (assignmentChip) {
+      const uid = (user as any)?.id;
+      const owner = (p as any).programme_manager_id ?? (p as any).owner_id;
+      if (assignmentChip === "me" || assignmentChip === "my_team") matchesAssignment = owner === uid;
+      else if (assignmentChip === "unassigned") matchesAssignment = !owner;
+      else if (assignmentChip === "created_by_me") matchesAssignment = (p as any).created_by === uid;
+      else if (assignmentChip === "mentioned_me") matchesAssignment = false;
+    }
+    return matchesSearch && matchesStatus && matchesAssignment;
   });
 
   const activeFilterCount = statusFilters.length;
 
   return (
     <AppLayout title="Programs" subtitle="Manage programme portfolio">
+      <div className="mb-4">
+        <SavedViewsBar
+          scope="programmes.list"
+          state={{
+            filters: { search: searchQuery, status: statusFilters },
+            assignment: assignmentChip,
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            if (typeof f.search === "string") setSearchQuery(f.search);
+            if (Array.isArray(f.status)) setStatusFilters(f.status);
+            setAssignmentChip(cfg.assignment ?? null);
+          }}
+        />
+      </div>
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
