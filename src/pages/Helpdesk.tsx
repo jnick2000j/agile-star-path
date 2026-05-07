@@ -107,6 +107,8 @@ export default function Helpdesk() {
   const [typeFilter, setTypeFilter] = useState<string>(isServiceRequestsTab ? "service_request" : "all");
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
+  const [advancedFilters, setAdvancedFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
 
