@@ -115,6 +115,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
       default_priority: form.default_priority,
       approval_policy: form.approval_policy,
       approver_user_ids: form.approver_user_ids ?? [],
+      audience: form.audience ?? "external",
       cost_estimate: form.cost_estimate ? Number(form.cost_estimate) : null,
       estimated_fulfillment_hours: form.estimated_fulfillment_hours ? Number(form.estimated_fulfillment_hours) : null,
       is_active: form.is_active,
