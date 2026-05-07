@@ -571,61 +571,41 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
       </div>
 
       {/* Saved views */}
-      <div className="mb-3">
+      <div className="mb-4">
         <SavedViewsBar
           scope="tasks.list"
+          schema={tasksSchema}
+          showAssignmentChips
           state={{
-            filters: { entity: entityFilter, status: statusFilter },
+            filters: filters as any,
+            sort,
             assignment: assignmentChip,
           }}
           onApply={(cfg) => {
-            const f = cfg.filters ?? {};
-            if (typeof f.entity === "string") setEntityFilter(f.entity);
-            if (typeof f.status === "string") setStatusFilter(f.status);
+            const f = cfg.filters as any;
+            setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+            setSort(cfg.sort ?? null);
             setAssignmentChip(cfg.assignment ?? null);
           }}
+          trailing={
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              onClick={() => {
+                setRecurringSeed(null);
+                setRecurringOpen(true);
+              }}
+            >
+              <Repeat className="h-3.5 w-3.5 mr-1.5" />
+              Recurring
+            </Button>
+          }
         />
       </div>
 
-      {/* Filters and Actions */}
-      <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
-        <div className="flex gap-4">
-          <Select value={entityFilter} onValueChange={setEntityFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by entity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Entities</SelectItem>
-              <SelectItem value="project">Projects</SelectItem>
-              <SelectItem value="program">Programs</SelectItem>
-              <SelectItem value="product">Products</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="not_started">Not Started</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="on_hold">On Hold</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={() => {
-            setRecurringSeed(null);
-            setRecurringOpen(true);
-          }}
-        >
-          <Repeat className="h-4 w-4 mr-2" />
-          Recurring Tasks
-        </Button>
+      {/* Actions */}
+      <div className="flex justify-end mb-4">
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
