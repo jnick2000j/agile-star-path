@@ -107,6 +107,16 @@ export default function ChangeManagement() {
             <StatCard label="Total" value={stats.total} icon={<GitBranch className="h-4 w-4" />} />
           </div>
 
+          <SavedViewsBar
+            scope="change-management.list"
+            state={{ filters: { status: statusFilter, type: typeFilter } }}
+            onApply={(cfg) => {
+              const f = cfg.filters ?? {};
+              if (typeof f.status === "string") setStatusFilter(f.status);
+              if (typeof f.type === "string") setTypeFilter(f.type);
+            }}
+          />
+
           <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
             <div className="flex items-center gap-2 flex-1 max-w-xl">
               <div className="relative flex-1">
