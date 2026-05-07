@@ -501,7 +501,10 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
 
   const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
 
-  const refetch = () => qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
+  const refetch = async () => {
+    await qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
+    await refetchTasks();
+  };
 
   const maxStep = tasks.reduce((m: number, t: any) => Math.max(m, t.step_order ?? 0), 0);
 
@@ -521,13 +524,15 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
     });
     if (error) { toast.error(error.message); return; }
+    toast.success("Task added");
     setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
-    refetch();
+    await refetch();
   };
 
   const removeTask = async (id: string) => {
-    await supabase.from("service_catalog_item_tasks").delete().eq("id", id);
-    refetch();
+    const { error } = await supabase.from("service_catalog_item_tasks").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    await refetch();
   };
 
   const toggleParallel = async (id: string) => {
@@ -547,7 +552,7 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
       // Currently sequential — merge into previous step (run in parallel)
       await supabase.from("service_catalog_item_tasks").update({ step_order: prev.step_order }).eq("id", id);
     }
-    refetch();
+    await refetch();
   };
 
   const move = async (id: string, dir: -1 | 1) => {
@@ -556,7 +561,25 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     if (!swap) return;
     await supabase.from("service_catalog_item_tasks").update({ step_order: swap.step_order }).eq("id", id);
     await supabase.from("service_catalog_item_tasks").update({ step_order: tasks[idx].step_order }).eq("id", swap.id);
-    refetch();
+    await refetch();
+  };
+
+  const moveStage = async (sIdx: number, dir: -1 | 1) => {
+    const a = stages[sIdx];
+    const b = stages[sIdx + dir];
+    if (!a || !b) return;
+    // Two-phase swap to avoid unique-step collisions
+    const tempStep = (maxStep + 1000) + sIdx;
+    for (const t of a.items) {
+      await supabase.from("service_catalog_item_tasks").update({ step_order: tempStep }).eq("id", t.id);
+    }
+    for (const t of b.items) {
+      await supabase.from("service_catalog_item_tasks").update({ step_order: a.step }).eq("id", t.id);
+    }
+    for (const t of a.items) {
+      await supabase.from("service_catalog_item_tasks").update({ step_order: b.step }).eq("id", t.id);
+    }
+    await refetch();
   };
 
   const memberLabel = (uid: string) => {
