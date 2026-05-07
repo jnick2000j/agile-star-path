@@ -535,10 +535,11 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
       default_queue_id: isQueue && form.default_queue_id ? form.default_queue_id : null,
       default_priority: form.default_priority,
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
+      audience: form.audience ?? "external",
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Task added");
-    setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+    setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential", audience: "external" });
     await refetch();
   };
 
