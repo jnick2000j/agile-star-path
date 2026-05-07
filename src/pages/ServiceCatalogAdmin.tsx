@@ -560,6 +560,10 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     if (!m) return "Unknown";
     return [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
   };
+  const queueLabel = (qid: string) => {
+    const q: any = queues.find((x: any) => x.id === qid);
+    return q?.name ?? "Queue";
+  };
 
   // Group tasks into stages by step_order (preserving order)
   const stages: { step: number; items: any[] }[] = [];
