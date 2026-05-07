@@ -314,6 +314,7 @@ function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
     name: "", short_description: "", description: "", category_id: "",
     default_priority: "medium", approval_policy: "none", approver_user_ids: [],
     cost_estimate: "", estimated_fulfillment_hours: "", is_active: true,
+    audience: "external",
   };
   const [form, setForm] = useState<any>(item ?? empty);
   useEffect(() => {
