@@ -11,6 +11,7 @@ import {
   Download
 } from "lucide-react";
 import { CreateIssueDialog } from "@/components/dialogs/CreateIssueDialog";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { cn } from "@/lib/utils";
