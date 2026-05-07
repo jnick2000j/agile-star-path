@@ -623,6 +623,14 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                       <Link2 className="h-3 w-3" /> {stage.items.length} concurrent
                     </Badge>
                   )}
+                  <div className="ml-auto flex items-center gap-1">
+                    <Button size="icon" variant="ghost" className="h-6 w-6" title="Move stage up" disabled={sIdx === 0} onClick={() => moveStage(sIdx, -1)}>
+                      <ChevronsUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-6 w-6" title="Move stage down" disabled={sIdx === stages.length - 1} onClick={() => moveStage(sIdx, 1)}>
+                      <ChevronsDown className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
                 {stage.items.map((t: any) => {
                   const overallIdx = (tasks as any[]).findIndex((x) => x.id === t.id);
