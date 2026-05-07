@@ -481,7 +481,21 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     enabled: !!effectiveOrg,
   });
 
-  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+  const { data: queues = [] } = useQuery({
+    queryKey: ["helpdesk-queues-picker", effectiveOrg],
+    queryFn: async () => {
+      if (!effectiveOrg) return [];
+      const { data } = await supabase
+        .from("helpdesk_queues")
+        .select("id, name")
+        .eq("organization_id", effectiveOrg)
+        .order("name");
+      return data ?? [];
+    },
+    enabled: !!effectiveOrg,
+  });
+
+  const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
 
   const refetch = () => qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
 
