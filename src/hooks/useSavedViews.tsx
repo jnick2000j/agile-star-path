@@ -94,7 +94,6 @@ export function useSavedViews(scope: string, initialConfig: SavedViewConfig = {}
     setOrgDefaultId(((oRes.data as any)?.view_id) ?? null);
     setMyDefaultId(((uRes.data as any)?.view_id) ?? null);
     setLoading(false);
-    return list;
   }, [orgId, scope, user]);
 
   useEffect(() => {
