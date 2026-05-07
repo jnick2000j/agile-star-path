@@ -20,6 +20,10 @@ interface SavedViewsBarProps {
   /** Override layouts (otherwise uses schema.layouts) */
   layouts?: ("table" | "kanban" | "calendar" | "list" | "board" | "gantt")[];
   className?: string;
+  /** Rendered at the start of the toolbar row (e.g. search input) */
+  leading?: React.ReactNode;
+  /** Rendered at the end of the toolbar row (e.g. New / Create button) */
+  trailing?: React.ReactNode;
 }
 
 const LAYOUT_ICONS: Record<string, React.ComponentType<any>> = {
