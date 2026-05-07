@@ -481,13 +481,17 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     enabled: !!effectiveOrg,
   });
 
-  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "" });
+  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
 
   const refetch = () => qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
 
+  const maxStep = tasks.reduce((m: number, t: any) => Math.max(m, t.step_order ?? 0), 0);
+
   const addTask = async () => {
     if (!form.title.trim() || !effectiveOrg) { toast.error("Task title required"); return; }
-    const nextOrder = (tasks[tasks.length - 1]?.step_order ?? 0) + 1;
+    // run_mode "concurrent" => share the current max step (run alongside last stage)
+    // run_mode "sequential" => new step after current max
+    const nextOrder = form.run_mode === "concurrent" && maxStep > 0 ? maxStep : maxStep + 1;
     const { error } = await supabase.from("service_catalog_item_tasks").insert({
       organization_id: effectiveOrg,
       item_id: itemId,
@@ -499,12 +503,32 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
     });
     if (error) { toast.error(error.message); return; }
-    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "" });
+    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
     refetch();
   };
 
   const removeTask = async (id: string) => {
     await supabase.from("service_catalog_item_tasks").delete().eq("id", id);
+    refetch();
+  };
+
+  const toggleParallel = async (id: string) => {
+    const idx = tasks.findIndex((x: any) => x.id === id);
+    const t: any = tasks[idx];
+    const prev: any = tasks[idx - 1];
+    if (!t || !prev) { toast.error("Need a previous task to merge with"); return; }
+    if (t.step_order === prev.step_order) {
+      // Currently parallel — promote to its own sequential step
+      await supabase.from("service_catalog_item_tasks").update({ step_order: prev.step_order + 1 }).eq("id", id);
+      // Push everything after up by 1 to avoid colliding with subsequent steps
+      const after = tasks.slice(idx + 1).filter((x: any) => x.step_order > prev.step_order);
+      for (const a of after) {
+        await supabase.from("service_catalog_item_tasks").update({ step_order: a.step_order + 1 }).eq("id", a.id);
+      }
+    } else {
+      // Currently sequential — merge into previous step (run in parallel)
+      await supabase.from("service_catalog_item_tasks").update({ step_order: prev.step_order }).eq("id", id);
+    }
     refetch();
   };
 
