@@ -39,6 +39,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
+import { helpdeskTicketSchema } from "@/lib/viewSchemas/helpdesk";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -104,6 +107,8 @@ export default function Helpdesk() {
   const [typeFilter, setTypeFilter] = useState<string>(isServiceRequestsTab ? "service_request" : "all");
   const [slaFilter, setSlaFilter] = useState<string>("all");
   const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
+  const [advancedFilters, setAdvancedFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
 
@@ -170,7 +175,7 @@ export default function Helpdesk() {
     return "on_track";
   };
 
-  const filtered = tickets.filter((t: any) => {
+  const baseFiltered = tickets.filter((t: any) => {
     if (search) {
       const s = search.toLowerCase();
       if (
@@ -184,10 +189,15 @@ export default function Helpdesk() {
     if (assignmentChip === "unassigned" && t.assignee_id) return false;
     if (assignmentChip === "created_by_me" && t.created_by !== user?.id && t.reporter_user_id !== user?.id) return false;
     if (assignmentChip === "mentioned_me" && !(Array.isArray(t.mentioned_user_ids) && t.mentioned_user_ids.includes(user?.id))) return false;
-    // my_team currently treated like 'me' until team mapping is wired
     if (assignmentChip === "my_team" && t.assignee_id !== user?.id) return false;
     return true;
   });
+
+  const withAdvanced = applyFilters(baseFiltered, advancedFilters, {
+    userId: user?.id,
+    accessors: { sla_state: slaStateOf },
+  });
+  const filtered = applySort(withAdvanced, sort);
 
   const stats = {
     open: tickets.filter((t: any) => ["new", "open", "pending"].includes(t.status)).length,
@@ -456,20 +466,31 @@ export default function Helpdesk() {
             <StatCard label="Total" value={stats.total} />
           </div>
 
-          {/* Saved views + assignment chips */}
+          {/* Saved views toolbar */}
           <SavedViewsBar
             scope="helpdesk.tickets"
+            schema={helpdeskTicketSchema}
             state={{
-              filters: { search, status: statusFilter, type: typeFilter, sla: slaFilter },
+              filters: advancedFilters as any,
               assignment: assignmentChip,
+              sort,
             }}
             onApply={(cfg) => {
-              const f = cfg.filters ?? {};
-              if (typeof f.search === "string") setSearch(f.search);
-              if (typeof f.status === "string") setStatusFilter(f.status);
-              if (typeof f.type === "string") setTypeFilter(f.type);
-              if (typeof f.sla === "string") setSlaFilter(f.sla);
+              const f = cfg.filters as any;
+              if (Array.isArray(f)) {
+                setAdvancedFilters(f as ViewFilter[]);
+              } else if (f && typeof f === "object") {
+                // Legacy view config — migrate known keys back to local state
+                if (typeof f.search === "string") setSearch(f.search);
+                if (typeof f.status === "string") setStatusFilter(f.status);
+                if (typeof f.type === "string") setTypeFilter(f.type);
+                if (typeof f.sla === "string") setSlaFilter(f.sla);
+                setAdvancedFilters([]);
+              } else {
+                setAdvancedFilters([]);
+              }
               setAssignmentChip(cfg.assignment ?? null);
+              setSort(cfg.sort ?? null);
             }}
           />
 

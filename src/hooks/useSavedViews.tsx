@@ -7,7 +7,8 @@ import { toast } from "@/hooks/use-toast";
 export type SavedViewLayout = "table" | "kanban" | "calendar" | "list" | "board" | "gantt";
 
 export interface SavedViewConfig {
-  filters?: Record<string, any>;
+  /** Either structured filter list (new) or legacy keyed object */
+  filters?: any;
   sort?: { field: string; dir: "asc" | "desc" } | null;
   columns?: string[];
   grouping?: string | null;
