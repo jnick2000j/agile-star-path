@@ -427,6 +427,31 @@ export function EntitySprintsTab({ entityType, entityId, organizationId }: Entit
           queryClient.invalidateQueries({ queryKey: ["entity-sprints"] });
         }}
       />
+
+      <AlertDialog
+        open={!!sprintToDelete}
+        onOpenChange={(open) => !open && setSprintToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete sprint?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{sprintToDelete?.name}</strong>. Tasks and
+              features assigned to this sprint will be unassigned (not deleted). This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => sprintToDelete && deleteSprint.mutate(sprintToDelete.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
