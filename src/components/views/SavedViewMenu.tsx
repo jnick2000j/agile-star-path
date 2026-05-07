@@ -1,6 +1,24 @@
-import { useState } from "react";
-import { Bookmark, ChevronDown, Plus, Star, Trash2, Users, Lock, Pencil } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  Bookmark,
+  ChevronDown,
+  Plus,
+  Star,
+  Trash2,
+  Users,
+  Lock,
+  Pencil,
+  RotateCcw,
+  Save,
+  MoreHorizontal,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,26 +35,31 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSavedViews, type SavedView } from "@/hooks/useSavedViews";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 interface SavedViewMenuProps {
   scope: string;
   views: ReturnType<typeof useSavedViews>;
-  /** Show assignment chip group */
   showAssignmentChips?: boolean;
+  /** Indicates user has unsaved changes vs the active view */
+  dirty?: boolean;
+  /** Save current state into the active view */
+  onSaveActive?: () => void;
+  /** Reset back to the saved view's config */
+  onReset?: () => void;
 }
 
-const ASSIGNMENT_OPTIONS = [
+const ASSIGNMENT_OPTIONS: { value: string; label: string }[] = [
   { value: "me", label: "Me" },
   { value: "my_team", label: "My team" },
   { value: "created_by_me", label: "Created by me" },
@@ -44,7 +67,14 @@ const ASSIGNMENT_OPTIONS = [
   { value: "unassigned", label: "Unassigned" },
 ];
 
-export function SavedViewMenu({ scope, views, showAssignmentChips = true }: SavedViewMenuProps) {
+export function SavedViewMenu({
+  scope,
+  views,
+  showAssignmentChips = true,
+  dirty,
+  onSaveActive,
+  onReset,
+}: SavedViewMenuProps) {
   const {
     views: list,
     activeView,
@@ -112,27 +142,45 @@ export function SavedViewMenu({ scope, views, showAssignmentChips = true }: Save
     setSaveOpen(false);
   };
 
+  const assignmentLabel =
+    ASSIGNMENT_OPTIONS.find((o) => o.value === activeConfig.assignment)?.label;
+
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {/* View switcher */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Bookmark className="h-4 w-4" />
-            <span className="max-w-[180px] truncate">
-              {activeView ? activeView.name : "Default view"}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 font-medium hover:bg-muted/60 px-2"
+          >
+            <Bookmark className="h-3.5 w-3.5 text-primary" />
+            <span className="max-w-[200px] truncate">
+              {activeView ? activeView.name : "All items"}
             </span>
-            <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+            {dirty && (
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-warning"
+                title="Unsaved changes"
+              />
+            )}
+            <ChevronDown className="h-3.5 w-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72">
-          <DropdownMenuLabel>Saved views</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => selectView(null)}>
-            <span className="flex-1">Default (no view)</span>
-            {!activeView && <Badge variant="secondary" className="ml-2">active</Badge>}
+          <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+            Saved views
+          </DropdownMenuLabel>
+          <DropdownMenuItem onSelect={() => selectView(null)} className="gap-2">
+            <Check className={cn("h-3.5 w-3.5", !activeView ? "opacity-100" : "opacity-0")} />
+            <span className="flex-1">All items (no view)</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {list.length === 0 && (
-            <div className="px-2 py-3 text-sm text-muted-foreground">No saved views yet.</div>
+            <div className="px-3 py-3 text-sm text-muted-foreground">
+              No saved views yet. Configure filters & columns, then save.
+            </div>
           )}
           {list.map((v) => (
             <DropdownMenuItem
@@ -143,6 +191,12 @@ export function SavedViewMenu({ scope, views, showAssignmentChips = true }: Save
               }}
               className="flex items-start gap-2"
             >
+              <Check
+                className={cn(
+                  "h-3.5 w-3.5 mt-0.5",
+                  activeView?.id === v.id ? "opacity-100" : "opacity-0"
+                )}
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate">{v.name}</span>
@@ -152,10 +206,14 @@ export function SavedViewMenu({ scope, views, showAssignmentChips = true }: Save
                     <Lock className="h-3 w-3 text-muted-foreground" />
                   )}
                   {orgDefaultId === v.id && (
-                    <Badge variant="outline" className="h-4 px-1 text-[10px]">org default</Badge>
+                    <Badge variant="outline" className="h-4 px-1 text-[10px]">
+                      org default
+                    </Badge>
                   )}
                   {myDefaultId === v.id && (
-                    <Badge variant="outline" className="h-4 px-1 text-[10px]">my default</Badge>
+                    <Badge variant="outline" className="h-4 px-1 text-[10px]">
+                      my default
+                    </Badge>
                   )}
                 </div>
                 {v.description && (
@@ -173,9 +231,7 @@ export function SavedViewMenu({ scope, views, showAssignmentChips = true }: Save
                   }}
                   title={myDefaultId === v.id ? "Clear my default" : "Set as my default"}
                 >
-                  <Star
-                    className={`h-3.5 w-3.5 ${myDefaultId === v.id ? "fill-current" : ""}`}
-                  />
+                  <Star className={cn("h-3.5 w-3.5", myDefaultId === v.id && "fill-current")} />
                 </Button>
                 {(v.owner_user_id === user?.id || (v.is_shared && isAdmin)) && (
                   <>
@@ -224,22 +280,81 @@ export function SavedViewMenu({ scope, views, showAssignmentChips = true }: Save
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Dirty state actions */}
+      {dirty && activeView && onSaveActive && (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 text-xs text-warning hover:text-warning"
+            onClick={onSaveActive}
+          >
+            <Save className="h-3.5 w-3.5" />
+            Save
+          </Button>
+          {onReset && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 text-xs text-muted-foreground"
+              onClick={onReset}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset
+            </Button>
+          )}
+        </>
+      )}
+
+      {/* Assignment dropdown */}
       {showAssignmentChips && (
-        <ToggleGroup
-          type="single"
-          size="sm"
-          value={activeConfig.assignment ?? ""}
-          onValueChange={(val) =>
-            setActiveConfig({ ...activeConfig, assignment: val || null })
-          }
-          className="flex-wrap"
-        >
-          {ASSIGNMENT_OPTIONS.map((opt) => (
-            <ToggleGroupItem key={opt.value} value={opt.value} className="h-8 text-xs">
-              {opt.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-7 gap-1 text-muted-foreground hover:text-foreground">
+              <span className="text-xs">Assignment</span>
+              {assignmentLabel && (
+                <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+                  {assignmentLabel}
+                </Badge>
+              )}
+              <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-52 p-1">
+            <button
+              type="button"
+              onClick={() => setActiveConfig({ ...activeConfig, assignment: null })}
+              className={cn(
+                "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-muted/60",
+                !activeConfig.assignment && "bg-muted/40"
+              )}
+            >
+              <Check
+                className={cn("h-3.5 w-3.5", !activeConfig.assignment ? "opacity-100" : "opacity-0")}
+              />
+              Anyone
+            </button>
+            {ASSIGNMENT_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => setActiveConfig({ ...activeConfig, assignment: o.value })}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-muted/60",
+                  activeConfig.assignment === o.value && "bg-muted/40"
+                )}
+              >
+                <Check
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    activeConfig.assignment === o.value ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {o.label}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
       )}
 
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
@@ -277,7 +392,9 @@ export function SavedViewMenu({ scope, views, showAssignmentChips = true }: Save
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={submit}>{editTarget ? "Update" : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
