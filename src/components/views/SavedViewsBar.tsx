@@ -52,6 +52,8 @@ export function SavedViewsBar({
   schema,
   layouts,
   className,
+  leading,
+  trailing,
 }: SavedViewsBarProps) {
   const views = useSavedViews(scope, state);
   const lastAppliedRef = useRef<string>("");
