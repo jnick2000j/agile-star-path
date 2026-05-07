@@ -203,6 +203,23 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
       {/* AI Risk Insights */}
       <RiskInsightsPanel risks={risks} />
 
+      {/* Saved views */}
+      <div className="mb-3">
+        <SavedViewsBar
+          scope="risks.list"
+          state={{
+            filters: { status: statusFilters, category: categoryFilters, probability: probabilityFilters },
+            sort: null,
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            setStatusFilters(Array.isArray(f.status) ? f.status : []);
+            setCategoryFilters(Array.isArray(f.category) ? f.category : []);
+            setProbabilityFilters(Array.isArray(f.probability) ? f.probability : []);
+          }}
+        />
+      </div>
+
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
