@@ -151,6 +151,7 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -409,6 +410,14 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     if (entityFilter === "project" && !task.project_id) return false;
     if (entityFilter === "program" && !task.programme_id) return false;
     if (entityFilter === "product" && !task.product_id) return false;
+    if (assignmentChip === "me" && (task as any).assignee_id !== user?.id) return false;
+    if (assignmentChip === "my_team" && (task as any).assignee_id !== user?.id) return false;
+    if (assignmentChip === "unassigned" && (task as any).assignee_id) return false;
+    if (assignmentChip === "created_by_me" && (task as any).created_by !== user?.id) return false;
+    if (assignmentChip === "mentioned_me") {
+      const m = (task as any).mentioned_user_ids;
+      if (!Array.isArray(m) || !m.includes(user?.id)) return false;
+    }
     return true;
   };
 
@@ -556,6 +565,23 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Saved views */}
+      <div className="mb-3">
+        <SavedViewsBar
+          scope="tasks.list"
+          state={{
+            filters: { entity: entityFilter, status: statusFilter },
+            assignment: assignmentChip,
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            if (typeof f.entity === "string") setEntityFilter(f.entity);
+            if (typeof f.status === "string") setStatusFilter(f.status);
+            setAssignmentChip(cfg.assignment ?? null);
+          }}
+        />
       </div>
 
       {/* Filters and Actions */}
