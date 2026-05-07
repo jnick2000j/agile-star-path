@@ -193,9 +193,14 @@ export function SavedViewsBar({
         </div>
       </div>
 
-      {/* Filter row */}
-      {showStructured && hasActiveFilters && (
-        <div className="flex items-center gap-1.5 flex-wrap border-t px-2 py-1.5">
+      {/* Filter row — always shows the "Add filter" trigger */}
+      {showStructured && (
+        <div
+          className={cn(
+            "flex items-center gap-1.5 flex-wrap px-2 py-1.5",
+            hasActiveFilters && "border-t"
+          )}
+        >
           <FilterBuilder schema={schema!} value={filters} onChange={setFilters} />
         </div>
       )}
