@@ -139,8 +139,10 @@ export function SavedViewsBar({
         className
       )}
     >
-      {/* Top row: view + controls */}
-      <div className="flex items-center gap-1 flex-wrap px-2 py-1.5">
+      {/* Top row: leading (search) + view + controls + layout + trailing (action) */}
+      <div className="flex items-center gap-1.5 flex-wrap px-2 py-1.5">
+        {leading && <div className="flex items-center gap-1.5 min-w-[200px] flex-1 max-w-md">{leading}</div>}
+
         <SavedViewMenu
           scope={scope}
           views={views}
@@ -152,7 +154,7 @@ export function SavedViewsBar({
 
         {showStructured && (
           <>
-            <div className="h-5 w-px bg-border mx-1" />
+            <div className="h-5 w-px bg-border mx-0.5" />
             <SortMenu schema={schema!} value={views.activeConfig.sort ?? null} onChange={setSort} />
             <GroupMenu schema={schema!} value={views.activeConfig.grouping ?? null} onChange={setGrouping} />
             <ColumnPicker
@@ -163,8 +165,8 @@ export function SavedViewsBar({
           </>
         )}
 
-        {availableLayouts.length > 1 && (
-          <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1.5">
+          {availableLayouts.length > 1 && (
             <ToggleGroup
               type="single"
               size="sm"
@@ -186,18 +188,14 @@ export function SavedViewsBar({
                 );
               })}
             </ToggleGroup>
-          </div>
-        )}
+          )}
+          {trailing}
+        </div>
       </div>
 
       {/* Filter row */}
-      {showStructured && (
-        <div
-          className={cn(
-            "flex items-center gap-1.5 flex-wrap border-t px-2 py-1.5",
-            !hasActiveFilters && "border-t-0 pt-0 pb-1.5"
-          )}
-        >
+      {showStructured && hasActiveFilters && (
+        <div className="flex items-center gap-1.5 flex-wrap border-t px-2 py-1.5">
           <FilterBuilder schema={schema!} value={filters} onChange={setFilters} />
         </div>
       )}
