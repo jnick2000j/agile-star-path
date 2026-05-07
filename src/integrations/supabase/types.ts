@@ -16325,6 +16325,12 @@ export type Database = {
       }
     }
     Functions: {
+      _attach_platform_audit: {
+        Args: { _category?: string; _table: string }
+        Returns: undefined
+      }
+      _audit_diff: { Args: { _new: Json; _old: Json }; Returns: Json }
+      _audit_redact: { Args: { _data: Json }; Returns: Json }
       accept_invitation: { Args: { _token: string }; Returns: Json }
       admin_clear_email_confirmation: {
         Args: { _user_id: string }
