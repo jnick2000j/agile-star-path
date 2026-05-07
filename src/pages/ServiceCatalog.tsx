@@ -38,18 +38,16 @@ export default function ServiceCatalog() {
   });
 
   const { data: items = [] } = useQuery({
-    queryKey: ["svc-items-public", currentOrganization?.id],
+    queryKey: ["svc-items-public", currentOrganization?.id, isManager],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const { data } = await supabase
+      let q = supabase
         .from("service_catalog_items")
         .select("id, name, short_description, category_id, approval_policy, cost_estimate, estimated_fulfillment_hours, audience, service_catalog_categories(name, color)")
         .eq("organization_id", currentOrganization.id)
-        .eq("is_active", true)
-        .eq("audience", "external")
-        .eq("organization_id", currentOrganization.id)
-        .eq("is_active", true)
-        .order("sort_order");
+        .eq("is_active", true);
+      if (!isManager) q = q.eq("audience", "external");
+      const { data } = await q.order("sort_order");
       return data ?? [];
     },
     enabled: !!currentOrganization?.id,
