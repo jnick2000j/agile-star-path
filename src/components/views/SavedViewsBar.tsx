@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ViewSwitcher } from "./ViewSwitcher";
+import { SavedViewMenu } from "./SavedViewMenu";
 import { useSavedViews, type SavedViewConfig } from "@/hooks/useSavedViews";
 
 interface SavedViewsBarProps {
@@ -41,5 +41,5 @@ export function SavedViewsBar({ scope, state, onApply, showAssignmentChips }: Sa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(state)]);
 
-  return <ViewSwitcher scope={scope} views={views} showAssignmentChips={showAssignmentChips} />;
+  return <SavedViewMenu scope={scope} views={views} showAssignmentChips={showAssignmentChips} />;
 }

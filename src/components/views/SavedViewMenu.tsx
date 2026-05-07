@@ -29,7 +29,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 
-interface ViewSwitcherProps {
+interface SavedViewMenuProps {
   scope: string;
   views: ReturnType<typeof useSavedViews>;
   /** Show assignment chip group */
@@ -44,7 +44,7 @@ const ASSIGNMENT_OPTIONS = [
   { value: "unassigned", label: "Unassigned" },
 ];
 
-export function ViewSwitcher({ scope, views, showAssignmentChips = true }: ViewSwitcherProps) {
+export function SavedViewMenu({ scope, views, showAssignmentChips = true }: SavedViewMenuProps) {
   const {
     views: list,
     activeView,
