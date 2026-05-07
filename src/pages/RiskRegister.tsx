@@ -77,14 +77,14 @@ const getScoreColor = (score: number) => {
 
 export default function RiskRegister({ embedded = false }: { embedded?: boolean }) {
   const { currentOrganization } = useOrganization();
+  const { user } = useAuth();
   const { canManage } = usePermissions();
-  const [searchQuery, setSearchQuery] = useState("");
   const [risks, setRisks] = useState<Risk[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
-  const [probabilityFilters, setProbabilityFilters] = useState<string[]>([]);
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
+
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
@@ -116,29 +116,14 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
     }
   };
 
-  const toggleFilter = (value: string, filters: string[], setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setFilters(prev => 
-      prev.includes(value) 
-        ? prev.filter(s => s !== value)
-        : [...prev, value]
+  const filteredRisks = (() => {
+    const bySearch = risks.filter((r) =>
+      !searchQuery || r.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
+    const byFilters = applyFilters(bySearch, filters, { userId: user?.id });
+    return applySort(byFilters, sort);
+  })();
 
-  const clearFilters = () => {
-    setStatusFilters([]);
-    setCategoryFilters([]);
-    setProbabilityFilters([]);
-  };
-
-  const filteredRisks = risks.filter((r) => {
-    const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilters.length === 0 || statusFilters.includes(r.status);
-    const matchesCategory = categoryFilters.length === 0 || (r.category && categoryFilters.includes(r.category));
-    const matchesProbability = probabilityFilters.length === 0 || probabilityFilters.includes(r.probability);
-    return matchesSearch && matchesStatus && matchesCategory && matchesProbability;
-  });
-
-  const activeFilterCount = statusFilters.length + categoryFilters.length + probabilityFilters.length;
   const openRisks = risks.filter(r => r.status === "open" || r.status === "mitigating").length;
   const highRisks = risks.filter(r => r.score >= 15).length;
 
