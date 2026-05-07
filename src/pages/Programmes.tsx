@@ -63,7 +63,8 @@ export default function Programmes() {
   const { currentOrganization } = useOrganization();
   const { user, userRole } = useAuth();
   const { hasFullOrgAccess } = useOrgAccessLevel();
-  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [editingProgramme, setEditingProgramme] = useState<Program | null>(null);
   const [userMap, setUserMap] = useState<Record<string, string>>({});
 
