@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown, Link2, Link2Off } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Settings2, ListChecks, ArrowUp, ArrowDown, Link2, Link2Off, ChevronsUp, ChevronsDown } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryIcon, CategoryIconPicker } from "@/components/catalog/CategoryIconPicker";
 
