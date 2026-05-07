@@ -494,6 +494,16 @@ export default function WorkPackages() {
           </p>
         </div>
 
+        <SavedViewsBar
+          scope="work-packages.list"
+          state={{ filters: { project: projectFilter, status: statusFilter } }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            if (typeof f.project === "string") setProjectFilter(f.project);
+            if (typeof f.status === "string") setStatusFilter(f.status);
+          }}
+        />
+
         {/* Filters and Actions */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-4">
