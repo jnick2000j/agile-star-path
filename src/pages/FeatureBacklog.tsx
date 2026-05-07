@@ -8,8 +8,10 @@ import {
   Search, 
   Plus,
   GripVertical,
-  Filter,
 } from "lucide-react";
+import { featuresSchema } from "@/lib/viewSchemas/registers";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import {
   Dialog,
   DialogContent,
