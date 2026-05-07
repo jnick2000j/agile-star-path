@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CreateRiskDialog } from "@/components/dialogs/CreateRiskDialog";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 import { RiskInsightsPanel } from "@/components/risks/RiskInsightsPanel";
 import { EditRegisterItemDialog } from "@/components/dialogs/EditRegisterItemDialog";
 import { DocumentUpload } from "@/components/DocumentUpload";
