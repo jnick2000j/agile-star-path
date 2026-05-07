@@ -115,6 +115,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
       default_priority: form.default_priority,
       approval_policy: form.approval_policy,
       approver_user_ids: form.approver_user_ids ?? [],
+      audience: form.audience ?? "external",
       cost_estimate: form.cost_estimate ? Number(form.cost_estimate) : null,
       estimated_fulfillment_hours: form.estimated_fulfillment_hours ? Number(form.estimated_fulfillment_hours) : null,
       is_active: form.is_active,
@@ -215,6 +216,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
                         </Badge>
                       )}
                       <Badge variant="outline" className="capitalize">{item.approval_policy.replace("_"," ")}</Badge>
+                      <Badge variant={item.audience === "internal" ? "secondary" : "outline"} className="capitalize">{item.audience === "internal" ? "Internal" : "External"}</Badge>
                     </div>
                     {item.short_description && <p className="text-xs text-muted-foreground truncate">{item.short_description}</p>}
                   </div>
@@ -313,6 +315,7 @@ function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
     name: "", short_description: "", description: "", category_id: "",
     default_priority: "medium", approval_policy: "none", approver_user_ids: [],
     cost_estimate: "", estimated_fulfillment_hours: "", is_active: true,
+    audience: "external",
   };
   const [form, setForm] = useState<any>(item ?? empty);
   useEffect(() => {
@@ -367,6 +370,16 @@ function ItemDialog({ open, onOpenChange, categories, item, onSave }: any) {
             <div>
               <Label>Est. fulfillment (hours)</Label>
               <Input type="number" value={form.estimated_fulfillment_hours ?? ""} onChange={(e) => setForm({ ...form, estimated_fulfillment_hours: e.target.value })} />
+            </div>
+            <div>
+              <Label>Audience</Label>
+              <Select value={form.audience ?? "external"} onValueChange={(v) => setForm({ ...form, audience: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="external">External (end users)</SelectItem>
+                  <SelectItem value="internal">Internal (IT / staff only)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-end gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
@@ -499,7 +512,7 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     enabled: !!effectiveOrg,
   });
 
-  const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+  const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential", audience: "external" });
 
   const refetch = async () => {
     await qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
@@ -522,10 +535,11 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
       default_queue_id: isQueue && form.default_queue_id ? form.default_queue_id : null,
       default_priority: form.default_priority,
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
+      audience: form.audience ?? "external",
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Task added");
-    setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+    setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential", audience: "external" });
     await refetch();
   };
 
@@ -638,7 +652,12 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                   return (
                     <div key={t.id} className="flex items-center gap-2 border rounded-md p-2 text-sm bg-background">
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{t.title}</div>
+                        <div className="font-medium truncate flex items-center gap-2">
+                          {t.title}
+                          <Badge variant={t.audience === "internal" ? "secondary" : "outline"} className="text-[10px] capitalize">
+                            {t.audience === "internal" ? "Internal" : "External"}
+                          </Badge>
+                        </div>
                         <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
                           <span className="capitalize">{t.default_priority}</span>
                           {t.default_queue_id && <span>· Queue: {queueLabel(t.default_queue_id)}</span>}
@@ -721,17 +740,29 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                 <Input type="number" value={form.estimated_hours} onChange={(e) => setForm({ ...form, estimated_hours: e.target.value })} />
               </div>
             </div>
-            <div>
-              <Label className="text-xs">Run mode</Label>
-              <Select value={form.run_mode} onValueChange={(v) => setForm({ ...form, run_mode: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sequential">New stage (sequential — runs after previous)</SelectItem>
-                  <SelectItem value="concurrent" disabled={maxStep === 0}>
-                    Concurrent (run alongside the last stage)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Run mode</Label>
+                <Select value={form.run_mode} onValueChange={(v) => setForm({ ...form, run_mode: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sequential">New stage (sequential — runs after previous)</SelectItem>
+                    <SelectItem value="concurrent" disabled={maxStep === 0}>
+                      Concurrent (run alongside the last stage)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Audience</Label>
+                <Select value={form.audience} onValueChange={(v) => setForm({ ...form, audience: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="external">External (visible to requester)</SelectItem>
+                    <SelectItem value="internal">Internal (IT only)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <Button size="sm" onClick={addTask}><Plus className="h-4 w-4 mr-1" /> Add task</Button>
           </div>

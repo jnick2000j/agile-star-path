@@ -40,6 +40,7 @@ export default function PortalCatalog() {
         )
         .eq("organization_id", currentOrganization!.id)
         .eq("is_active", true)
+        .eq("audience", "external")
         .order("sort_order");
       return data ?? [];
     },
