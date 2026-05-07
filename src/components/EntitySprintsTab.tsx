@@ -159,6 +159,21 @@ export function EntitySprintsTab({ entityType, entityId, organizationId }: Entit
     },
   });
 
+  const deleteSprint = useMutation({
+    mutationFn: async (sprintId: string) => {
+      const { error } = await supabase.from("sprints").delete().eq("id", sprintId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity-sprints", entityType, entityId] });
+      toast.success("Sprint deleted");
+      setSprintToDelete(null);
+    },
+    onError: (error: any) => {
+      toast.error("Failed to delete sprint: " + error.message);
+    },
+  });
+
   const getSprintPoints = (sprintId: string) => {
     if (!sprintItems || !("tasks" in sprintItems) || expandedSprintId !== sprintId) return 0;
     const taskPts = (sprintItems as any).tasks?.reduce((s: number, t: any) => s + (t.story_points || 0), 0) || 0;
