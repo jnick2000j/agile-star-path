@@ -740,17 +740,29 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                 <Input type="number" value={form.estimated_hours} onChange={(e) => setForm({ ...form, estimated_hours: e.target.value })} />
               </div>
             </div>
-            <div>
-              <Label className="text-xs">Run mode</Label>
-              <Select value={form.run_mode} onValueChange={(v) => setForm({ ...form, run_mode: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sequential">New stage (sequential — runs after previous)</SelectItem>
-                  <SelectItem value="concurrent" disabled={maxStep === 0}>
-                    Concurrent (run alongside the last stage)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Run mode</Label>
+                <Select value={form.run_mode} onValueChange={(v) => setForm({ ...form, run_mode: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sequential">New stage (sequential — runs after previous)</SelectItem>
+                    <SelectItem value="concurrent" disabled={maxStep === 0}>
+                      Concurrent (run alongside the last stage)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Audience</Label>
+                <Select value={form.audience} onValueChange={(v) => setForm({ ...form, audience: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="external">External (visible to requester)</SelectItem>
+                    <SelectItem value="internal">Internal (IT only)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <Button size="sm" onClick={addTask}><Plus className="h-4 w-4 mr-1" /> Add task</Button>
           </div>
