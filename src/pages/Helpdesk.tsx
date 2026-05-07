@@ -466,20 +466,31 @@ export default function Helpdesk() {
             <StatCard label="Total" value={stats.total} />
           </div>
 
-          {/* Saved views + assignment chips */}
+          {/* Saved views toolbar */}
           <SavedViewsBar
             scope="helpdesk.tickets"
+            schema={helpdeskTicketSchema}
             state={{
-              filters: { search, status: statusFilter, type: typeFilter, sla: slaFilter },
+              filters: advancedFilters as any,
               assignment: assignmentChip,
+              sort,
             }}
             onApply={(cfg) => {
-              const f = cfg.filters ?? {};
-              if (typeof f.search === "string") setSearch(f.search);
-              if (typeof f.status === "string") setStatusFilter(f.status);
-              if (typeof f.type === "string") setTypeFilter(f.type);
-              if (typeof f.sla === "string") setSlaFilter(f.sla);
+              const f = cfg.filters as any;
+              if (Array.isArray(f)) {
+                setAdvancedFilters(f as ViewFilter[]);
+              } else if (f && typeof f === "object") {
+                // Legacy view config — migrate known keys back to local state
+                if (typeof f.search === "string") setSearch(f.search);
+                if (typeof f.status === "string") setStatusFilter(f.status);
+                if (typeof f.type === "string") setTypeFilter(f.type);
+                if (typeof f.sla === "string") setSlaFilter(f.sla);
+                setAdvancedFilters([]);
+              } else {
+                setAdvancedFilters([]);
+              }
               setAssignmentChip(cfg.assignment ?? null);
+              setSort(cfg.sort ?? null);
             }}
           />
 
