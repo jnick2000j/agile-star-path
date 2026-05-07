@@ -175,7 +175,7 @@ export default function Helpdesk() {
     return "on_track";
   };
 
-  const filtered = tickets.filter((t: any) => {
+  const baseFiltered = tickets.filter((t: any) => {
     if (search) {
       const s = search.toLowerCase();
       if (
@@ -189,10 +189,15 @@ export default function Helpdesk() {
     if (assignmentChip === "unassigned" && t.assignee_id) return false;
     if (assignmentChip === "created_by_me" && t.created_by !== user?.id && t.reporter_user_id !== user?.id) return false;
     if (assignmentChip === "mentioned_me" && !(Array.isArray(t.mentioned_user_ids) && t.mentioned_user_ids.includes(user?.id))) return false;
-    // my_team currently treated like 'me' until team mapping is wired
     if (assignmentChip === "my_team" && t.assignee_id !== user?.id) return false;
     return true;
   });
+
+  const withAdvanced = applyFilters(baseFiltered, advancedFilters, {
+    userId: user?.id,
+    accessors: { sla_state: slaStateOf },
+  });
+  const filtered = applySort(withAdvanced, sort);
 
   const stats = {
     open: tickets.filter((t: any) => ["new", "open", "pending"].includes(t.status)).length,
