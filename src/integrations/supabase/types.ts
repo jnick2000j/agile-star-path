@@ -12923,6 +12923,7 @@ export type Database = {
           created_at: string
           default_assignee_id: string | null
           default_priority: string
+          default_queue_id: string | null
           description: string | null
           estimated_hours: number | null
           id: string
@@ -12936,6 +12937,7 @@ export type Database = {
           created_at?: string
           default_assignee_id?: string | null
           default_priority?: string
+          default_queue_id?: string | null
           description?: string | null
           estimated_hours?: number | null
           id?: string
@@ -12949,6 +12951,7 @@ export type Database = {
           created_at?: string
           default_assignee_id?: string | null
           default_priority?: string
+          default_queue_id?: string | null
           description?: string | null
           estimated_hours?: number | null
           id?: string
@@ -12959,6 +12962,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "service_catalog_item_tasks_default_queue_id_fkey"
+            columns: ["default_queue_id"]
+            isOneToOne: false
+            referencedRelation: "helpdesk_queues"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_catalog_item_tasks_item_id_fkey"
             columns: ["item_id"]

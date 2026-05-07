@@ -481,7 +481,21 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     enabled: !!effectiveOrg,
   });
 
-  const [form, setForm] = useState<any>({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+  const { data: queues = [] } = useQuery({
+    queryKey: ["helpdesk-queues-picker", effectiveOrg],
+    queryFn: async () => {
+      if (!effectiveOrg) return [];
+      const { data } = await supabase
+        .from("helpdesk_queues")
+        .select("id, name")
+        .eq("organization_id", effectiveOrg)
+        .order("name");
+      return data ?? [];
+    },
+    enabled: !!effectiveOrg,
+  });
+
+  const [form, setForm] = useState<any>({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
 
   const refetch = () => qc.invalidateQueries({ queryKey: ["svc-item-tasks", itemId] });
 
@@ -489,21 +503,21 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
 
   const addTask = async () => {
     if (!form.title.trim() || !effectiveOrg) { toast.error("Task title required"); return; }
-    // run_mode "concurrent" => share the current max step (run alongside last stage)
-    // run_mode "sequential" => new step after current max
     const nextOrder = form.run_mode === "concurrent" && maxStep > 0 ? maxStep : maxStep + 1;
+    const isQueue = form.assignee_kind === "queue";
     const { error } = await supabase.from("service_catalog_item_tasks").insert({
       organization_id: effectiveOrg,
       item_id: itemId,
       step_order: nextOrder,
       title: form.title.trim(),
       description: form.description.trim() || null,
-      default_assignee_id: form.default_assignee_id || null,
+      default_assignee_id: !isQueue && form.default_assignee_id ? form.default_assignee_id : null,
+      default_queue_id: isQueue && form.default_queue_id ? form.default_queue_id : null,
       default_priority: form.default_priority,
       estimated_hours: form.estimated_hours ? Number(form.estimated_hours) : null,
     });
     if (error) { toast.error(error.message); return; }
-    setForm({ title: "", description: "", default_assignee_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
+    setForm({ title: "", description: "", assignee_kind: "user", default_assignee_id: "", default_queue_id: "", default_priority: "medium", estimated_hours: "", run_mode: "sequential" });
     refetch();
   };
 
@@ -545,6 +559,10 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
     const m: any = members.find((x: any) => x.user_id === uid);
     if (!m) return "Unknown";
     return [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
+  };
+  const queueLabel = (qid: string) => {
+    const q: any = queues.find((x: any) => x.id === qid);
+    return q?.name ?? "Queue";
   };
 
   // Group tasks into stages by step_order (preserving order)
@@ -588,7 +606,9 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
                         <div className="font-medium truncate">{t.title}</div>
                         <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
                           <span className="capitalize">{t.default_priority}</span>
+                          {t.default_queue_id && <span>· Queue: {queueLabel(t.default_queue_id)}</span>}
                           {t.default_assignee_id && <span>· {memberLabel(t.default_assignee_id)}</span>}
+                          {!t.default_queue_id && !t.default_assignee_id && <span>· Unassigned</span>}
                           {t.estimated_hours != null && <span>· {t.estimated_hours}h</span>}
                         </div>
                       </div>
@@ -614,19 +634,43 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
             <h4 className="text-sm font-semibold">Add task</h4>
             <Input placeholder="Task title (e.g. Provision laptop)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             <Textarea rows={2} placeholder="Description / instructions for the assignee" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label className="text-xs">Assignee</Label>
-                <Select value={form.default_assignee_id || "_none"} onValueChange={(v) => setForm({ ...form, default_assignee_id: v === "_none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">Unassigned</SelectItem>
-                    {members.map((m: any) => {
-                      const label = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
-                      return <SelectItem key={m.user_id} value={m.user_id}>{label}</SelectItem>;
-                    })}
-                  </SelectContent>
-                </Select>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="col-span-2 grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Assign to</Label>
+                  <Select value={form.assignee_kind} onValueChange={(v) => setForm({ ...form, assignee_kind: v, default_assignee_id: "", default_queue_id: "" })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="queue">Queue</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">{form.assignee_kind === "queue" ? "Queue" : "User"}</Label>
+                  {form.assignee_kind === "queue" ? (
+                    <Select value={form.default_queue_id || "_none"} onValueChange={(v) => setForm({ ...form, default_queue_id: v === "_none" ? "" : v })}>
+                      <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Unassigned</SelectItem>
+                        {queues.map((q: any) => (
+                          <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Select value={form.default_assignee_id || "_none"} onValueChange={(v) => setForm({ ...form, default_assignee_id: v === "_none" ? "" : v })}>
+                      <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Unassigned</SelectItem>
+                        {members.map((m: any) => {
+                          const label = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
+                          return <SelectItem key={m.user_id} value={m.user_id}>{label}</SelectItem>;
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </div>
               <div>
                 <Label className="text-xs">Priority</Label>
