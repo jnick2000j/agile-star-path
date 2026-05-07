@@ -635,18 +635,42 @@ function TasksDialog({ itemId, orgId, open, onOpenChange }: { itemId: string; or
             <Input placeholder="Task title (e.g. Provision laptop)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             <Textarea rows={2} placeholder="Description / instructions for the assignee" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label className="text-xs">Assignee</Label>
-                <Select value={form.default_assignee_id || "_none"} onValueChange={(v) => setForm({ ...form, default_assignee_id: v === "_none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">Unassigned</SelectItem>
-                    {members.map((m: any) => {
-                      const label = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
-                      return <SelectItem key={m.user_id} value={m.user_id}>{label}</SelectItem>;
-                    })}
-                  </SelectContent>
-                </Select>
+              <div className="col-span-2 grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Assign to</Label>
+                  <Select value={form.assignee_kind} onValueChange={(v) => setForm({ ...form, assignee_kind: v, default_assignee_id: "", default_queue_id: "" })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="queue">Queue</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">{form.assignee_kind === "queue" ? "Queue" : "User"}</Label>
+                  {form.assignee_kind === "queue" ? (
+                    <Select value={form.default_queue_id || "_none"} onValueChange={(v) => setForm({ ...form, default_queue_id: v === "_none" ? "" : v })}>
+                      <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Unassigned</SelectItem>
+                        {queues.map((q: any) => (
+                          <SelectItem key={q.id} value={q.id}>{q.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Select value={form.default_assignee_id || "_none"} onValueChange={(v) => setForm({ ...form, default_assignee_id: v === "_none" ? "" : v })}>
+                      <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Unassigned</SelectItem>
+                        {members.map((m: any) => {
+                          const label = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.email;
+                          return <SelectItem key={m.user_id} value={m.user_id}>{label}</SelectItem>;
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </div>
               <div>
                 <Label className="text-xs">Priority</Label>
