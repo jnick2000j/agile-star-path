@@ -236,6 +236,14 @@ export default function Products() {
         </div>
 
         <TabsContent value="portfolio" className="space-y-4">
+          <SavedViewsBar
+            scope="products.portfolio"
+            state={{ filters: { stage: stageFilter } }}
+            onApply={(cfg) => {
+              const f = cfg.filters ?? {};
+              if (typeof f.stage === "string") setStageFilter(f.stage);
+            }}
+          />
           {/* Search and Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
