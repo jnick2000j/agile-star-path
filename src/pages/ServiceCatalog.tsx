@@ -43,7 +43,10 @@ export default function ServiceCatalog() {
       if (!currentOrganization?.id) return [];
       const { data } = await supabase
         .from("service_catalog_items")
-        .select("id, name, short_description, category_id, approval_policy, cost_estimate, estimated_fulfillment_hours, service_catalog_categories(name, color)")
+        .select("id, name, short_description, category_id, approval_policy, cost_estimate, estimated_fulfillment_hours, audience, service_catalog_categories(name, color)")
+        .eq("organization_id", currentOrganization.id)
+        .eq("is_active", true)
+        .eq("audience", "external")
         .eq("organization_id", currentOrganization.id)
         .eq("is_active", true)
         .order("sort_order");
