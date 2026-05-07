@@ -295,7 +295,7 @@ export function EntitySprintsTab({ entityType, entityId, organizationId }: Entit
                           </div>
                         </div>
                       </div>
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1">
                         <Select
                           value={sprint.status}
                           onValueChange={(v) => updateSprintStatus.mutate({ sprintId: sprint.id, status: v })}
@@ -309,6 +309,15 @@ export function EntitySprintsTab({ entityType, entityId, organizationId }: Entit
                             <SelectItem value="completed">Completed</SelectItem>
                           </SelectContent>
                         </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setSprintToDelete({ id: sprint.id, name: sprint.name })}
+                          title="Delete sprint"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
