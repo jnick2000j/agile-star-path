@@ -153,8 +153,8 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     myAssignedTaskIds.has(task.id);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [entityFilter, setEntityFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [assignmentChip, setAssignmentChip] = useState<string | null>(null);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<any>(null);
@@ -410,10 +410,6 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
 
   // Filter tasks
   const matchesFilters = (task: Task) => {
-    if (statusFilter !== "all" && task.status !== statusFilter) return false;
-    if (entityFilter === "project" && !task.project_id) return false;
-    if (entityFilter === "program" && !task.programme_id) return false;
-    if (entityFilter === "product" && !task.product_id) return false;
     if (assignmentChip === "me" && (task as any).assignee_id !== user?.id) return false;
     if (assignmentChip === "my_team" && (task as any).assignee_id !== user?.id) return false;
     if (assignmentChip === "unassigned" && (task as any).assignee_id) return false;
@@ -421,6 +417,9 @@ export default function TaskManagement({ embedded }: { embedded?: boolean }) {
     if (assignmentChip === "mentioned_me") {
       const m = (task as any).mentioned_user_ids;
       if (!Array.isArray(m) || !m.includes(user?.id)) return false;
+    }
+    for (const f of filters) {
+      if (!applyFilters([task as any], [f], { userId: user?.id }).length) return false;
     }
     return true;
   };
