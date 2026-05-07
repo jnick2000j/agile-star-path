@@ -78,6 +78,7 @@ import { UpdateFrequencySettings } from "@/components/UpdateFrequencySettings";
 import { EditTaskDialog } from "@/components/dialogs/EditTaskDialog";
 import { RecurringTaskDialog } from "@/components/dialogs/RecurringTaskDialog";
 import { format } from "date-fns";
+import { SavedViewsBar } from "@/components/views/SavedViewsBar";
 
 type TaskStatus = "not_started" | "in_progress" | "on_hold" | "completed" | "cancelled";
 
