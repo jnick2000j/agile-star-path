@@ -216,6 +216,7 @@ export default function ServiceCatalogAdmin({ embedded = false }: { embedded?: b
                         </Badge>
                       )}
                       <Badge variant="outline" className="capitalize">{item.approval_policy.replace("_"," ")}</Badge>
+                      <Badge variant={item.audience === "internal" ? "secondary" : "outline"} className="capitalize">{item.audience === "internal" ? "Internal" : "External"}</Badge>
                     </div>
                     {item.short_description && <p className="text-xs text-muted-foreground truncate">{item.short_description}</p>}
                   </div>
