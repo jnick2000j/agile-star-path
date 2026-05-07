@@ -193,6 +193,22 @@ export default function IssueRegister({ embedded = false }: { embedded?: boolean
         </div>
       </div>
 
+      {/* Saved views */}
+      <div className="mb-3">
+        <SavedViewsBar
+          scope="issues.list"
+          state={{
+            filters: { status: statusFilters, type: typeFilters, priority: priorityFilters },
+          }}
+          onApply={(cfg) => {
+            const f = cfg.filters ?? {};
+            setStatusFilters(Array.isArray(f.status) ? f.status : []);
+            setTypeFilters(Array.isArray(f.type) ? f.type : []);
+            setPriorityFilters(Array.isArray(f.priority) ? f.priority : []);
+          }}
+        />
+      </div>
+
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
