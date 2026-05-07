@@ -14,12 +14,14 @@ import {
   FileText,
   ChevronRight,
   ChevronDown,
-  Filter,
   Edit,
   Trash2,
   ListTodo,
   Target,
 } from "lucide-react";
+import { workPackagesSchema } from "@/lib/viewSchemas/registers";
+import { applyFilters, applySort } from "@/lib/viewSchemas/applyFilters";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import { WorkPackageDetails } from "@/components/workpackages/WorkPackageDetails";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { EntityStatusActions } from "@/components/EntityStatusActions";
@@ -125,8 +127,8 @@ export default function WorkPackages() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [workPackages, setWorkPackages] = useState<WorkPackage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [projectFilter, setProjectFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [filters, setFilters] = useState<ViewFilter[]>([]);
+  const [sort, setSort] = useState<{ field: string; dir: "asc" | "desc" } | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
@@ -295,11 +297,10 @@ export default function WorkPackages() {
     toast.success("Status updated");
   };
 
-  const filteredWorkPackages = workPackages.filter(wp => {
-    const matchesProject = projectFilter === "all" || wp.project_id === projectFilter;
-    const matchesStatus = statusFilter === "all" || wp.status === statusFilter;
-    return matchesProject && matchesStatus;
-  });
+  const filteredWorkPackages = (() => {
+    const byFilters = applyFilters(workPackages, filters);
+    return applySort(byFilters, sort);
+  })();
 
   const getProjectName = (projectId: string | null) => {
     return projects.find(p => p.id === projectId)?.name || "Unassigned";
