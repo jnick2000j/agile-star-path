@@ -12488,6 +12488,131 @@ export type Database = {
           },
         ]
       }
+      saved_view_org_defaults: {
+        Row: {
+          organization_id: string
+          scope: string
+          set_by: string | null
+          updated_at: string
+          view_id: string
+        }
+        Insert: {
+          organization_id: string
+          scope: string
+          set_by?: string | null
+          updated_at?: string
+          view_id: string
+        }
+        Update: {
+          organization_id?: string
+          scope?: string
+          set_by?: string | null
+          updated_at?: string
+          view_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_view_org_defaults_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_view_org_defaults_view_id_fkey"
+            columns: ["view_id"]
+            isOneToOne: false
+            referencedRelation: "saved_views"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_view_user_defaults: {
+        Row: {
+          organization_id: string
+          scope: string
+          updated_at: string
+          user_id: string
+          view_id: string
+        }
+        Insert: {
+          organization_id: string
+          scope: string
+          updated_at?: string
+          user_id: string
+          view_id: string
+        }
+        Update: {
+          organization_id?: string
+          scope?: string
+          updated_at?: string
+          user_id?: string
+          view_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_view_user_defaults_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_view_user_defaults_view_id_fkey"
+            columns: ["view_id"]
+            isOneToOne: false
+            referencedRelation: "saved_views"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_views: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_shared: boolean
+          name: string
+          organization_id: string
+          owner_user_id: string
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_shared?: boolean
+          name: string
+          organization_id: string
+          owner_user_id: string
+          scope: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_shared?: boolean
+          name?: string
+          organization_id?: string
+          owner_user_id?: string
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_views_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_reports: {
         Row: {
           active: boolean
