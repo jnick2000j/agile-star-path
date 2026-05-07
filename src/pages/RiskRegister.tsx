@@ -185,111 +185,38 @@ export default function RiskRegister({ embedded = false }: { embedded?: boolean 
       {/* AI Risk Insights */}
       <RiskInsightsPanel risks={risks} />
 
-      {/* Saved views */}
-      <div className="mb-3">
+      {/* Saved views toolbar with search + new */}
+      <div className="mb-4">
         <SavedViewsBar
           scope="risks.list"
-          state={{
-            filters: { status: statusFilters, category: categoryFilters, probability: probabilityFilters },
-            sort: null,
-          }}
+          schema={risksSchema}
+          state={{ filters: filters as any, sort }}
           onApply={(cfg) => {
-            const f = cfg.filters ?? {};
-            setStatusFilters(Array.isArray(f.status) ? f.status : []);
-            setCategoryFilters(Array.isArray(f.category) ? f.category : []);
-            setProbabilityFilters(Array.isArray(f.probability) ? f.probability : []);
+            const f = cfg.filters as any;
+            setFilters(Array.isArray(f) ? (f as ViewFilter[]) : []);
+            setSort(cfg.sort ?? null);
           }}
-        />
-      </div>
-
-      {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search risks..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-                {activeFilterCount > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                    {activeFilterCount}
-                  </Badge>
-                )}
+          leading={
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search risks…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 text-sm bg-background"
+              />
+            </div>
+          }
+          trailing={
+            <>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                <Download className="h-3.5 w-3.5" />
+                Export
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-sm">Filters</h4>
-                  {activeFilterCount > 0 && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-0 text-xs text-muted-foreground">
-                      Clear all
-                    </Button>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Status</Label>
-                  {Object.entries(statusConfig).map(([key, config]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`status-${key}`} 
-                        checked={statusFilters.includes(key)}
-                        onCheckedChange={() => toggleFilter(key, statusFilters, setStatusFilters)}
-                      />
-                      <label htmlFor={`status-${key}`} className="text-sm cursor-pointer flex-1">
-                        {config.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Category</Label>
-                  {categoryOptions.map((cat) => (
-                    <div key={cat} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`cat-${cat}`} 
-                        checked={categoryFilters.includes(cat)}
-                        onCheckedChange={() => toggleFilter(cat, categoryFilters, setCategoryFilters)}
-                      />
-                      <label htmlFor={`cat-${cat}`} className="text-sm cursor-pointer flex-1">
-                        {cat}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Probability</Label>
-                  {Object.entries(probabilityConfig).map(([key, config]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`prob-${key}`} 
-                        checked={probabilityFilters.includes(key)}
-                        onCheckedChange={() => toggleFilter(key, probabilityFilters, setProbabilityFilters)}
-                      />
-                      <label htmlFor={`prob-${key}`} className="text-sm cursor-pointer flex-1">
-                        {config.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-          {canManage("risks") && <CreateRiskDialog onSuccess={fetchRisks} />}
-        </div>
+              {canManage("risks") && <CreateRiskDialog onSuccess={fetchRisks} />}
+            </>
+          }
+        />
       </div>
 
       {/* Risks Table */}
