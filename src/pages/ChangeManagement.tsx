@@ -18,6 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateChangeDialog } from "@/components/changeMgmt/CreateChangeDialog";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
+import { changesSchema } from "@/lib/viewSchemas/registers";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +52,7 @@ export default function ChangeManagement() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [advancedFilters, setAdvancedFilters] = useState<ViewFilter[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
 
   const { data: changes = [], refetch, isLoading } = useQuery({
@@ -109,50 +112,30 @@ export default function ChangeManagement() {
 
           <SavedViewsBar
             scope="change-management.list"
-            state={{ filters: { status: statusFilter, type: typeFilter } }}
+            schema={changesSchema}
+            state={{ filters: advancedFilters as any }}
             onApply={(cfg) => {
-              const f = cfg.filters ?? {};
-              if (typeof f.status === "string") setStatusFilter(f.status);
-              if (typeof f.type === "string") setTypeFilter(f.type);
+              const f = cfg.filters as any;
+              setAdvancedFilters(Array.isArray(f) ? f : []);
             }}
-          />
-
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-            <div className="flex items-center gap-2 flex-1 max-w-xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            leading={
+              <div className="relative w-full">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
-                  placeholder="Search title or reference..."
+                  placeholder="Search title or reference…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
+                  className="pl-8 h-8 text-sm bg-background"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[170px]"><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  {Object.keys(STATUS_STYLES).map(s => (
-                    <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Type" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="emergency">Emergency</SelectItem>
-                  <SelectItem value="operational">Operational</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Change
-            </Button>
-          </div>
+            }
+            trailing={
+              <Button onClick={() => setCreateOpen(true)} size="sm" className="h-8">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Change
+              </Button>
+            }
+          />
 
           <div className="border rounded-lg bg-card">
             <Table>
