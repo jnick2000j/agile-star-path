@@ -18,6 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { FeatureGate } from "@/components/billing/FeatureGate";
 import { CreateChangeDialog } from "@/components/changeMgmt/CreateChangeDialog";
 import { SavedViewsBar } from "@/components/views/SavedViewsBar";
+import { changesSchema } from "@/lib/viewSchemas/registers";
+import type { ViewFilter } from "@/lib/viewSchemas/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +52,7 @@ export default function ChangeManagement() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [advancedFilters, setAdvancedFilters] = useState<ViewFilter[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
 
   const { data: changes = [], refetch, isLoading } = useQuery({
