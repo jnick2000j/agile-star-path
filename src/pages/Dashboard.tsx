@@ -17,13 +17,51 @@ import { AskTaskMasterCard } from "@/components/dashboard/AskTaskMasterCard";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3, Settings2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useDashboardPrefs } from "@/hooks/useDashboardPrefs";
+
+type WidgetId =
+  | "metrics"
+  | "status-indicators"
+  | "risk-summary"
+  | "upcoming-milestones"
+  | "helpdesk-summary"
+  | "change-management-summary"
+  | "jsm-sla"
+  | "helpdesk-usage"
+  | "jsm-contacts";
+
+const WIDGET_LABELS: Record<WidgetId, string> = {
+  "metrics": "Portfolio Metrics",
+  "status-indicators": "Status Indicators",
+  "risk-summary": "Risk Summary",
+  "upcoming-milestones": "Upcoming Milestones",
+  "helpdesk-summary": "Helpdesk Summary",
+  "change-management-summary": "Change Management Summary",
+  "jsm-sla": "Service Management SLA",
+  "helpdesk-usage": "Helpdesk Usage",
+  "jsm-contacts": "Service Management Contacts",
+};
+
+const ALL_WIDGETS: WidgetId[] = [
+  "metrics",
+  "status-indicators",
+  "risk-summary",
+  "upcoming-milestones",
+  "helpdesk-summary",
+  "change-management-summary",
+  "jsm-sla",
+  "helpdesk-usage",
+  "jsm-contacts",
+];
 
 export default function Dashboard() {
   const { user, userRole } = useAuth();
@@ -66,6 +104,15 @@ export default function Dashboard() {
     },
   });
 
+  const hidden = useMemo(() => new Set(prefs.hidden_widgets ?? []), [prefs.hidden_widgets]);
+  const isVisible = (id: WidgetId) => !hidden.has(id);
+
+  const toggleWidget = (id: WidgetId, show: boolean) => {
+    const next = new Set(hidden);
+    if (show) next.delete(id); else next.add(id);
+    update({ hidden_widgets: Array.from(next) });
+  };
+
   return (
     <AppLayout title="Dashboard" subtitle="Get a snapshot of your work and your portfolio">
       {hasStakeholderAccess && (
@@ -93,7 +140,7 @@ export default function Dashboard() {
             <User className="h-4 w-4" /> My Work
           </TabsTrigger>
           <TabsTrigger value="portfolio" className="gap-2">
-            <BarChart3 className="h-4 w-4" /> Portfolio
+            <BarChart3 className="h-4 w-4" /> My Portfolio
           </TabsTrigger>
         </TabsList>
 
@@ -105,64 +152,108 @@ export default function Dashboard() {
             <ActionInbox />
             <NotificationsCard />
           </div>
-          
         </TabsContent>
 
-        {/* PORTFOLIO (the original dashboard) */}
+        {/* MY PORTFOLIO */}
         <TabsContent value="portfolio" className="space-y-6 mt-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-            <MetricCard
-              title="Active Programs"
-              value={metrics?.activeProgrammes ?? 0}
-              icon={<Layers className="h-6 w-6" />}
-              iconColor="primary"
-            />
-            <MetricCard
-              title="Active Projects"
-              value={metrics?.activeProjects ?? 0}
-              icon={<FolderKanban className="h-6 w-6" />}
-              iconColor="info"
-            />
-            <MetricCard
-              title="Active Products"
-              value={metrics?.activeProducts ?? 0}
-              icon={<Package className="h-6 w-6" />}
-              iconColor="info"
-            />
-            <MetricCard
-              title="Open Risks"
-              value={metrics?.openRisks ?? 0}
-              icon={<AlertTriangle className="h-6 w-6" />}
-              iconColor="warning"
-            />
-            <MetricCard
-              title="Avg Benefit Realization"
-              value={`${metrics?.avgRealization ?? 0}%`}
-              icon={<Target className="h-6 w-6" />}
-              iconColor="success"
-            />
+          <div className="flex justify-end">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Settings2 className="h-4 w-4" />
+                  Customize widgets
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72">
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-sm">Show widgets</p>
+                    <p className="text-xs text-muted-foreground">
+                      Choose which cards appear on My Portfolio.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    {ALL_WIDGETS.map((id) => (
+                      <div key={id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`widget-${id}`}
+                          checked={isVisible(id)}
+                          onCheckedChange={(c) => toggleWidget(id, c === true)}
+                        />
+                        <Label htmlFor={`widget-${id}`} className="text-sm font-normal cursor-pointer">
+                          {WIDGET_LABELS[id]}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <StatusIndicators />
+          {isVisible("metrics") && (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+              <MetricCard
+                title="Active Programs"
+                value={metrics?.activeProgrammes ?? 0}
+                icon={<Layers className="h-6 w-6" />}
+                iconColor="primary"
+              />
+              <MetricCard
+                title="Active Projects"
+                value={metrics?.activeProjects ?? 0}
+                icon={<FolderKanban className="h-6 w-6" />}
+                iconColor="info"
+              />
+              <MetricCard
+                title="Active Products"
+                value={metrics?.activeProducts ?? 0}
+                icon={<Package className="h-6 w-6" />}
+                iconColor="info"
+              />
+              <MetricCard
+                title="Open Risks"
+                value={metrics?.openRisks ?? 0}
+                icon={<AlertTriangle className="h-6 w-6" />}
+                iconColor="warning"
+              />
+              <MetricCard
+                title="Avg Benefit Realization"
+                value={`${metrics?.avgRealization ?? 0}%`}
+                icon={<Target className="h-6 w-6" />}
+                iconColor="success"
+              />
+            </div>
+          )}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <RiskSummary />
-            <UpcomingMilestones />
-          </div>
+          {isVisible("status-indicators") && <StatusIndicators />}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <HelpdeskSummary />
-            <ChangeManagementSummary />
-          </div>
+          {(isVisible("risk-summary") || isVisible("upcoming-milestones")) && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {isVisible("risk-summary") && <RiskSummary />}
+              {isVisible("upcoming-milestones") && <UpcomingMilestones />}
+            </div>
+          )}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <JsmSlaSummary />
-            <HelpdeskUsageCard />
-          </div>
+          {(isVisible("helpdesk-summary") || isVisible("change-management-summary")) && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {isVisible("helpdesk-summary") && <HelpdeskSummary />}
+              {isVisible("change-management-summary") && <ChangeManagementSummary />}
+            </div>
+          )}
 
-          <div className="grid gap-6 lg:grid-cols-1">
-            <JsmContactsSummary />
-          </div>
+          {(isVisible("jsm-sla") || isVisible("helpdesk-usage")) && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {isVisible("jsm-sla") && <JsmSlaSummary />}
+              {isVisible("helpdesk-usage") && <HelpdeskUsageCard />}
+            </div>
+          )}
+
+          {isVisible("jsm-contacts") && (
+            <div className="grid gap-6 lg:grid-cols-1">
+              <JsmContactsSummary />
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </AppLayout>
