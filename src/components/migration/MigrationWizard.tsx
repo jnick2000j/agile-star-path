@@ -400,7 +400,45 @@ export function MigrationWizard({
               <Button variant="ghost" onClick={() => setStep("scope")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
-              <Button onClick={() => setStep("contacts")} disabled={!mappingValid.ok}>
+              <Button
+                disabled={!mappingValid.ok}
+                onClick={async () => {
+                  setStep("users");
+                  if (adapter?.discoverUsers) {
+                    setDiscoveringUsers(true);
+                    try {
+                      const users = await adapter.discoverUsers(creds, scope, files);
+                      setDiscoveredUsers(users);
+                    } catch (e) {
+                      setDiscoveredUsers([]);
+                    } finally {
+                      setDiscoveringUsers(false);
+                    }
+                  } else {
+                    setDiscoveredUsers([]);
+                  }
+                }}
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+
+        {step === "users" && adapter && (
+          <div className="space-y-3 overflow-y-auto pr-1">
+            <UserMappingStep
+              discoveredUsers={discoveredUsers}
+              loading={discoveringUsers}
+              mapping={mapping}
+              onChange={setMapping}
+              organizationIdOverride={organizationIdOverride}
+            />
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setStep("mapping")}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Back
+              </Button>
+              <Button onClick={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "preview")}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </DialogFooter>
@@ -420,7 +458,7 @@ export function MigrationWizard({
               enabled={adapter.id === "jira_service_management"}
             />
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setStep("mapping")}>
+              <Button variant="ghost" onClick={() => setStep("users")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
               <Button onClick={() => setStep("preview")}>
@@ -432,7 +470,7 @@ export function MigrationWizard({
 
         {step === "preview" && adapter && (
           <PreviewStep
-            onBack={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "mapping")}
+            onBack={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "users")}
             onStart={start}
             adapter={adapter}
             creds={creds}
