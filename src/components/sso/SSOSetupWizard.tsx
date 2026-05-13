@@ -78,6 +78,17 @@ export function SSOSetupWizard({
   const [notes, setNotes] = useState("");
   const [ssoConfigId, setSsoConfigId] = useState<string | null>(null);
   const [domainStatuses, setDomainStatuses] = useState<DomainStatus[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<{ id: string; name: string; color: string | null }[]>([]);
+  const [defaultRoleIds, setDefaultRoleIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from("custom_roles")
+      .select("id, name, color")
+      .order("name")
+      .then(({ data }) => setAvailableRoles(data ?? []));
+  }, [open]);
 
   const reset = () => {
     setStep(1);
@@ -90,6 +101,7 @@ export function SSOSetupWizard({
     setNotes("");
     setSsoConfigId(null);
     setDomainStatuses([]);
+    setDefaultRoleIds([]);
   };
 
   const handleClose = (next: boolean) => {
@@ -156,6 +168,7 @@ export function SSOSetupWizard({
         provider_type: providerType,
         allowed_domains: parsedDomains,
         default_access_level: defaultAccessLevel,
+        default_custom_role_ids: defaultRoleIds,
         notes: notes.trim() || null,
         status: "pending",
         requested_by: user.id,
@@ -475,6 +488,36 @@ export function SSOSetupWizard({
                   <SelectItem value="manager">Manager (manage team)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Default Custom Roles (optional)</Label>
+              <p className="text-xs text-muted-foreground">
+                Auto-assigned to every user who signs in via SSO from a verified domain.
+              </p>
+              {availableRoles.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">No custom roles defined yet.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto rounded-md border p-2">
+                  {availableRoles.map((r) => {
+                    const checked = defaultRoleIds.includes(r.id);
+                    return (
+                      <Badge
+                        key={r.id}
+                        variant={checked ? "default" : "outline"}
+                        className="cursor-pointer select-none"
+                        onClick={() =>
+                          setDefaultRoleIds((prev) =>
+                            checked ? prev.filter((x) => x !== r.id) : [...prev, r.id]
+                          )
+                        }
+                      >
+                        {r.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

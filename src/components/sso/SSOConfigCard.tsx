@@ -16,9 +16,18 @@ interface SSOConfig {
   metadata_url: string | null;
   allowed_domains: string[];
   default_access_level: string;
+  default_custom_role_ids: string[] | null;
   created_at: string;
   activated_at: string | null;
   provisioning_notes: string | null;
+}
+
+interface JitLogEntry {
+  id: string;
+  email: string;
+  status: string;
+  access_level_granted: string | null;
+  created_at: string;
 }
 
 export function SSOConfigCard() {
@@ -27,6 +36,8 @@ export function SSOConfigCard() {
   const [loading, setLoading] = useState(true);
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [defaultRoles, setDefaultRoles] = useState<{ id: string; name: string }[]>([]);
+  const [jitLog, setJitLog] = useState<JitLogEntry[]>([]);
 
   useEffect(() => {
     if (currentOrganization?.id) {
@@ -39,7 +50,7 @@ export function SSOConfigCard() {
     setLoading(true);
 
     try {
-      const [configRes, planRes] = await Promise.all([
+      const [configRes, planRes, jitRes] = await Promise.all([
         supabase
           .from("sso_configurations")
           .select("*")
@@ -48,10 +59,28 @@ export function SSOConfigCard() {
           .limit(1)
           .maybeSingle(),
         supabase.rpc("has_paid_plan", { _org_id: currentOrganization.id }),
+        supabase
+          .from("sso_jit_provisioning_log")
+          .select("id, email, status, access_level_granted, created_at")
+          .eq("organization_id", currentOrganization.id)
+          .order("created_at", { ascending: false })
+          .limit(10),
       ]);
 
-      setConfig(configRes.data);
+      setConfig(configRes.data as any);
       setHasPaidPlan(planRes.data === true);
+      setJitLog((jitRes.data ?? []) as JitLogEntry[]);
+
+      const roleIds = (configRes.data as any)?.default_custom_role_ids ?? [];
+      if (roleIds.length > 0) {
+        const { data: roles } = await supabase
+          .from("custom_roles")
+          .select("id, name")
+          .in("id", roleIds);
+        setDefaultRoles(roles ?? []);
+      } else {
+        setDefaultRoles([]);
+      }
     } catch (e) {
       console.error("SSO config load error:", e);
     } finally {
@@ -202,6 +231,52 @@ export function SSOConfigCard() {
                 </div>
               )}
             </div>
+
+            {defaultRoles.length > 0 && (
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Default Custom Roles (auto-granted on SSO sign-in)</div>
+                <div className="flex flex-wrap gap-1">
+                  {defaultRoles.map((r) => (
+                    <Badge key={r.id} variant="secondary" className="text-xs">
+                      {r.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {config.status === "active" && (
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Recent JIT provisioning ({jitLog.length})</div>
+                {jitLog.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">No SSO sign-ins yet.</p>
+                ) : (
+                  <div className="rounded-md border divide-y text-xs max-h-48 overflow-y-auto">
+                    {jitLog.map((e) => (
+                      <div key={e.id} className="flex items-center justify-between gap-2 px-2 py-1.5">
+                        <span className="truncate">{e.email}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {e.access_level_granted && (
+                            <Badge variant="outline" className="capitalize text-[10px] px-1 py-0">
+                              {e.access_level_granted}
+                            </Badge>
+                          )}
+                          <Badge
+                            variant={e.status === "success" ? "secondary" : "destructive"}
+                            className="text-[10px] px-1 py-0"
+                          >
+                            {e.status}
+                          </Badge>
+                          <span className="text-muted-foreground tabular-nums">
+                            {format(new Date(e.created_at), "MMM d, HH:mm")}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {config.status === "pending" && (
               <Alert>
