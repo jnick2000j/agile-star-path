@@ -53,6 +53,7 @@ import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDia
 import { UserAccessList } from "@/components/admin/UserAccessList";
 import { RoleTypesManager } from "@/components/admin/RoleTypesManager";
 import { RequestMigrationCard } from "@/components/migration/RequestMigrationCard";
+import { ReconcileMigratedUsersCard } from "@/components/admin/ReconcileMigratedUsersCard";
 import { RoleBuilderMatrix } from "@/components/admin/RoleBuilderMatrix";
 import { ResidencyComplianceManager } from "@/components/admin/ResidencyComplianceManager";
 import { AIProviderSettings } from "@/components/admin/AIProviderSettings";
@@ -415,8 +416,9 @@ export default function AdminPanel() {
           <EmailTriggerSettings />
         </TabsContent>
 
-        <TabsContent value="migration">
+        <TabsContent value="migration" className="space-y-6">
           <RequestMigrationCard />
+          <ReconcileMigratedUsersCard />
         </TabsContent>
       </Tabs>
     </AppLayout>
