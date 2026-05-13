@@ -331,7 +331,7 @@ function WidgetEditor({
     let config: any = {};
     if (type === "note") config = { text: noteText };
     if (type === "links") config = { links: links.filter(l => l.url.trim()) };
-    if (type === "metric") config = { entity, status: statusFilter || undefined };
+    if (type === "metric") config = { entity, status: statusFilter || undefined, mine: mineOnly || undefined };
     onSave({
       id: editing?.id,
       position: editing?.position,
