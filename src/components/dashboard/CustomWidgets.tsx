@@ -25,19 +25,38 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-export function CustomWidgets() {
+type Scope = "portfolio" | "my-work";
+
+interface CustomWidgetsProps {
+  scope?: Scope;
+  /** Heading shown above the widget grid. Defaults vary per scope. */
+  heading?: string;
+  /** Hint text shown when the widget list is empty. */
+  emptyHint?: string;
+  /** When true, new widgets default to "Only mine" filter. */
+  defaultMine?: boolean;
+}
+
+export function CustomWidgets({
+  scope = "portfolio",
+  heading,
+  emptyHint,
+  defaultMine = false,
+}: CustomWidgetsProps = {}) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CustomWidget | null>(null);
+  const queryKey = ["custom-widgets", scope, user?.id];
 
   const { data: widgets = [] } = useQuery({
-    queryKey: ["custom-widgets", user?.id],
+    queryKey,
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_dashboard_widgets")
         .select("*")
+        .eq("dashboard_scope", scope)
         .order("position", { ascending: true })
         .order("created_at", { ascending: true });
       if (error) throw error;
@@ -54,13 +73,14 @@ export function CustomWidgets() {
         widget_type: w.widget_type,
         config: w.config,
         position: w.position ?? widgets.length,
+        dashboard_scope: scope,
       };
       if (w.id) payload.id = w.id;
       const { error } = await supabase.from("user_dashboard_widgets").upsert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] });
+      qc.invalidateQueries({ queryKey });
       setOpen(false);
       setEditing(null);
       toast({ title: "Widget saved" });
@@ -73,7 +93,7 @@ export function CustomWidgets() {
       const { error } = await supabase.from("user_dashboard_widgets").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey }),
   });
 
   const reorder = useMutation({
@@ -86,6 +106,7 @@ export function CustomWidgets() {
         widget_type: w.widget_type,
         config: w.config,
         position: i,
+        dashboard_scope: scope,
       }));
       const { error } = await supabase.from("user_dashboard_widgets").upsert(rows);
       if (error) throw error;
