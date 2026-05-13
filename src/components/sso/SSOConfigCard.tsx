@@ -36,6 +36,8 @@ export function SSOConfigCard() {
   const [loading, setLoading] = useState(true);
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [defaultRoles, setDefaultRoles] = useState<{ id: string; name: string }[]>([]);
+  const [jitLog, setJitLog] = useState<JitLogEntry[]>([]);
 
   useEffect(() => {
     if (currentOrganization?.id) {
@@ -48,7 +50,7 @@ export function SSOConfigCard() {
     setLoading(true);
 
     try {
-      const [configRes, planRes] = await Promise.all([
+      const [configRes, planRes, jitRes] = await Promise.all([
         supabase
           .from("sso_configurations")
           .select("*")
@@ -57,10 +59,28 @@ export function SSOConfigCard() {
           .limit(1)
           .maybeSingle(),
         supabase.rpc("has_paid_plan", { _org_id: currentOrganization.id }),
+        supabase
+          .from("sso_jit_provisioning_log")
+          .select("id, email, status, access_level_granted, created_at")
+          .eq("organization_id", currentOrganization.id)
+          .order("created_at", { ascending: false })
+          .limit(10),
       ]);
 
-      setConfig(configRes.data);
+      setConfig(configRes.data as any);
       setHasPaidPlan(planRes.data === true);
+      setJitLog((jitRes.data ?? []) as JitLogEntry[]);
+
+      const roleIds = (configRes.data as any)?.default_custom_role_ids ?? [];
+      if (roleIds.length > 0) {
+        const { data: roles } = await supabase
+          .from("custom_roles")
+          .select("id, name")
+          .in("id", roleIds);
+        setDefaultRoles(roles ?? []);
+      } else {
+        setDefaultRoles([]);
+      }
     } catch (e) {
       console.error("SSO config load error:", e);
     } finally {
