@@ -37,7 +37,12 @@ type WidgetId =
   | "risk-summary"
   | "upcoming-milestones"
   | "helpdesk-summary"
-  | "change-management-summary";
+  | "change-management-summary"
+  | "benefits-tracker"
+  | "organization-stats"
+  | "programme-progress"
+  | "recent-activity"
+  | "pinned-recents";
 
 const WIDGET_LABELS: Record<WidgetId, string> = {
   "metrics": "Portfolio Metrics",
@@ -46,6 +51,11 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   "upcoming-milestones": "Upcoming Milestones",
   "helpdesk-summary": "Helpdesk Summary",
   "change-management-summary": "Change Management Summary",
+  "benefits-tracker": "Benefits Realization",
+  "organization-stats": "Organization Stats",
+  "programme-progress": "Programme Progress",
+  "recent-activity": "Recent Activity",
+  "pinned-recents": "Pinned & Recently Viewed",
 };
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -55,6 +65,11 @@ const ALL_WIDGETS: WidgetId[] = [
   "upcoming-milestones",
   "helpdesk-summary",
   "change-management-summary",
+  "benefits-tracker",
+  "organization-stats",
+  "programme-progress",
+  "recent-activity",
+  "pinned-recents",
 ];
 
 export default function Dashboard() {
