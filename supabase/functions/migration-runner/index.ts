@@ -318,6 +318,8 @@ async function runCsv(
       continue;
     }
     try {
+      const assigneeEmail = (row.assignee_email || row.assigned_to_email || row.assignee || row.assigned_to || "").toLowerCase().trim();
+      const assignedUserId = resolveUserId(req.mapping, assigneeEmail);
       const { data, error } = await supa
         .from("tasks")
         .insert({
@@ -329,6 +331,7 @@ async function runCsv(
           priority: mapPriority(row.priority, req.mapping),
           planned_start: row.planned_start || null,
           planned_end: row.planned_end || row.due_date || null,
+          assigned_to: assignedUserId ?? null,
           created_by: ctx.userId,
         })
         .select("id")
@@ -340,6 +343,9 @@ async function runCsv(
         external_id: ext,
         internal_id: data.id,
         status: "created",
+        payload: assigneeEmail && !assignedUserId
+          ? { external: { assignee_email: assigneeEmail, assignee_name: row.assignee || null } }
+          : undefined,
       });
       await ctx.tick(`Task: ${row.name || ext}`);
     } catch (e) {
