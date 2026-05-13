@@ -13448,6 +13448,7 @@ export type Database = {
           attribute_mapping: Json
           created_at: string
           default_access_level: string
+          default_custom_role_ids: string[]
           domains_verified_at: string | null
           entity_id: string | null
           id: string
@@ -13474,6 +13475,7 @@ export type Database = {
           attribute_mapping?: Json
           created_at?: string
           default_access_level?: string
+          default_custom_role_ids?: string[]
           domains_verified_at?: string | null
           entity_id?: string | null
           id?: string
@@ -13500,6 +13502,7 @@ export type Database = {
           attribute_mapping?: Json
           created_at?: string
           default_access_level?: string
+          default_custom_role_ids?: string[]
           domains_verified_at?: string | null
           entity_id?: string | null
           id?: string
