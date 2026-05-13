@@ -76,13 +76,49 @@ export function CustomWidgets() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] }),
   });
 
+  const reorder = useMutation({
+    mutationFn: async (ordered: CustomWidget[]) => {
+      if (!user) throw new Error("Not signed in");
+      const rows = ordered.map((w, i) => ({
+        id: w.id,
+        user_id: user.id,
+        title: w.title,
+        widget_type: w.widget_type,
+        config: w.config,
+        position: i,
+      }));
+      const { error } = await supabase.from("user_dashboard_widgets").upsert(rows);
+      if (error) throw error;
+    },
+    onError: (e: any) => toast({ title: "Reorder failed", description: e.message, variant: "destructive" }),
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = widgets.findIndex(w => w.id === active.id);
+    const newIndex = widgets.findIndex(w => w.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(widgets, oldIndex, newIndex);
+    qc.setQueryData(["custom-widgets", user?.id], next);
+    reorder.mutate(next);
+  };
+
   const startCreate = () => { setEditing(null); setOpen(true); };
   const startEdit = (w: CustomWidget) => { setEditing(w); setOpen(true); };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">My Dashboard</h3>
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">My Dashboard</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Drag the handle on a card to reorder.</p>
+        </div>
         <Button size="sm" variant="outline" onClick={startCreate} className="gap-2">
           <Plus className="h-4 w-4" /> Add widget
         </Button>
@@ -93,16 +129,20 @@ export function CustomWidgets() {
           No widgets yet. Click <strong>Add widget</strong> to pin a note, link list, or live metric.
         </p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {widgets.map((w) => (
-            <CustomWidgetCard
-              key={w.id}
-              widget={w}
-              onEdit={startEdit}
-              onDelete={(x) => remove.mutate(x.id)}
-            />
-          ))}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={widgets.map(w => w.id)} strategy={rectSortingStrategy}>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {widgets.map((w) => (
+                <SortableWidget
+                  key={w.id}
+                  widget={w}
+                  onEdit={startEdit}
+                  onDelete={(x) => remove.mutate(x.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <WidgetEditor
@@ -112,6 +152,36 @@ export function CustomWidgets() {
         onSave={(w) => upsert.mutate(w)}
         saving={upsert.isPending}
       />
+    </div>
+  );
+}
+
+function SortableWidget({
+  widget, onEdit, onDelete,
+}: {
+  widget: CustomWidget;
+  onEdit: (w: CustomWidget) => void;
+  onDelete: (w: CustomWidget) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: widget.id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 10 : "auto",
+  };
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <button
+        type="button"
+        aria-label="Drag to reorder"
+        {...attributes}
+        {...listeners}
+        className="absolute left-1 top-2 z-10 p-1 rounded hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </button>
+      <CustomWidgetCard widget={widget} onEdit={onEdit} onDelete={onDelete} />
     </div>
   );
 }
