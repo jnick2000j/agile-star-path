@@ -3,10 +3,8 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { RiskSummary } from "@/components/dashboard/RiskSummary";
 import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
-import { HelpdeskUsageCard } from "@/components/dashboard/HelpdeskUsageCard";
 import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
-import { JsmSlaSummary } from "@/components/dashboard/JsmSlaSummary";
 import { CustomWidgets } from "@/components/dashboard/CustomWidgets";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
@@ -34,9 +32,7 @@ type WidgetId =
   | "risk-summary"
   | "upcoming-milestones"
   | "helpdesk-summary"
-  | "change-management-summary"
-  | "jsm-sla"
-  | "helpdesk-usage";
+  | "change-management-summary";
 
 const WIDGET_LABELS: Record<WidgetId, string> = {
   "metrics": "Portfolio Metrics",
@@ -45,8 +41,6 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   "upcoming-milestones": "Upcoming Milestones",
   "helpdesk-summary": "Helpdesk Summary",
   "change-management-summary": "Change Management Summary",
-  "jsm-sla": "Service Management SLA",
-  "helpdesk-usage": "Helpdesk Usage",
 };
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -56,8 +50,6 @@ const ALL_WIDGETS: WidgetId[] = [
   "upcoming-milestones",
   "helpdesk-summary",
   "change-management-summary",
-  "jsm-sla",
-  "helpdesk-usage",
 ];
 
 export default function Dashboard() {
@@ -239,12 +231,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {(isVisible("jsm-sla") || isVisible("helpdesk-usage")) && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              {isVisible("jsm-sla") && <JsmSlaSummary />}
-              {isVisible("helpdesk-usage") && <HelpdeskUsageCard />}
-            </div>
-          )}
 
           <CustomWidgets />
         </TabsContent>
