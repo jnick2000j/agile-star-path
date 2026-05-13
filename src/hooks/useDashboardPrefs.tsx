@@ -6,12 +6,14 @@ export interface DashboardPrefs {
   default_tab: string;
   quick_actions: string[];
   sidebar_favorites: string[]; // array of nav hrefs
+  hidden_widgets: string[]; // widget ids hidden on the My Portfolio tab
 }
 
 const DEFAULTS: DashboardPrefs = {
-  default_tab: "my-work",
+  default_tab: "portfolio",
   quick_actions: ["new-task", "log-time", "new-project", "log-update", "raise-risk", "open-ticket"],
   sidebar_favorites: [],
+  hidden_widgets: ["jsm-contacts"],
 };
 
 export function useDashboardPrefs() {
@@ -24,7 +26,7 @@ export function useDashboardPrefs() {
       if (!user) return DEFAULTS;
       const { data } = await supabase
         .from("user_dashboard_prefs")
-        .select("default_tab, quick_actions, sidebar_favorites")
+        .select("default_tab, quick_actions, sidebar_favorites, hidden_widgets")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!data) return DEFAULTS;
@@ -32,6 +34,7 @@ export function useDashboardPrefs() {
         default_tab: data.default_tab || DEFAULTS.default_tab,
         quick_actions: (data.quick_actions as string[]) || DEFAULTS.quick_actions,
         sidebar_favorites: (data.sidebar_favorites as string[]) || [],
+        hidden_widgets: (data.hidden_widgets as string[]) || DEFAULTS.hidden_widgets,
       };
     },
     enabled: !!user,
