@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { MappingEditor, type MappingValidationResult } from "./MappingEditor";
 import { ContactMappingStep } from "./ContactMappingStep";
+import { UserMappingStep } from "./UserMappingStep";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { listMigrationSources, getMigrationSource } from "@/lib/migration/registry";
 import type {
+  DiscoveredUser,
   FieldMapping,
   ImportSummary,
   MigrationCredentials,
@@ -25,7 +27,7 @@ import type {
 import { createMigrationJob, runMigrationJob } from "@/lib/migration/runner";
 import { toast } from "sonner";
 
-type Step = "source" | "connect" | "scope" | "mapping" | "contacts" | "preview" | "running" | "done";
+type Step = "source" | "connect" | "scope" | "mapping" | "users" | "contacts" | "preview" | "running" | "done";
 
 export function MigrationWizard({
   open,
@@ -57,6 +59,8 @@ export function MigrationWizard({
   const [progress, setProgress] = useState({ done: 0, total: 0, message: "" });
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  const [discoveredUsers, setDiscoveredUsers] = useState<DiscoveredUser[]>([]);
+  const [discoveringUsers, setDiscoveringUsers] = useState(false);
 
   const reset = () => {
     setStep("source");
@@ -71,6 +75,8 @@ export function MigrationWizard({
     setSummary(null);
     setRunError(null);
     setTesting(false);
+    setDiscoveredUsers([]);
+    setDiscoveringUsers(false);
   };
 
   const close = (v: boolean) => {
