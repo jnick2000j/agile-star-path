@@ -1,0 +1,4 @@
+email,first_name,last_name,job_title,department,phone_number,location,organization_slug,access_level,custom_roles,send_invite
+alex.smith@example.com,Alex,Smith,Project Manager,Delivery,+1-555-0100,New York,,editor,Project Manager,true
+sam.lee@example.com,Sam,Lee,Business Analyst,Strategy,,London,,viewer,,true
+admin.user@example.com,Admin,User,Org Admin,IT,,,acme-corp,admin,,true
