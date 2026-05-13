@@ -224,6 +224,36 @@ export const jiraAdapter: MigrationSourceAdapter = {
     };
   },
 
+  async discoverUsers(creds, scope) {
+    const c = creds as JiraCreds;
+    const projectIds = scope.selectedProjectIds ?? [];
+    const seen = new Map<string, { externalId: string; email?: string; displayName?: string; refCount: number }>();
+    for (const pid of projectIds) {
+      const jql = encodeURIComponent(`project = ${pid}${scope.includeClosed ? "" : " AND statusCategory != Done"}`);
+      try {
+        const page = await jiraFetch<{
+          issues: { fields: { assignee?: { accountId?: string; emailAddress?: string; displayName?: string }; reporter?: { accountId?: string; emailAddress?: string; displayName?: string } } }[];
+        }>(c, `/rest/api/3/search?jql=${jql}&fields=assignee,reporter&startAt=0&maxResults=100`);
+        for (const issue of page.issues ?? []) {
+          for (const u of [issue.fields.assignee, issue.fields.reporter]) {
+            if (!u) continue;
+            const key = (u.emailAddress || u.accountId || u.displayName || "").trim().toLowerCase();
+            if (!key) continue;
+            const existing = seen.get(key);
+            if (existing) existing.refCount += 1;
+            else seen.set(key, {
+              externalId: key,
+              email: u.emailAddress?.toLowerCase(),
+              displayName: u.displayName,
+              refCount: 1,
+            });
+          }
+        }
+      } catch { /* ignore per-project errors */ }
+    }
+    return Array.from(seen.values());
+  },
+
   async run(creds, scope, mapping, ctx: MigrationContext): Promise<ImportSummary> {
     const c = creds as JiraCreds;
     const summary: ImportSummary = {

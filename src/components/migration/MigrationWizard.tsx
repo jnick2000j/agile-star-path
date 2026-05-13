@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { MappingEditor, type MappingValidationResult } from "./MappingEditor";
 import { ContactMappingStep } from "./ContactMappingStep";
+import { UserMappingStep } from "./UserMappingStep";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/hooks/useAuth";
 import { listMigrationSources, getMigrationSource } from "@/lib/migration/registry";
 import type {
+  DiscoveredUser,
   FieldMapping,
   ImportSummary,
   MigrationCredentials,
@@ -25,7 +27,7 @@ import type {
 import { createMigrationJob, runMigrationJob } from "@/lib/migration/runner";
 import { toast } from "sonner";
 
-type Step = "source" | "connect" | "scope" | "mapping" | "contacts" | "preview" | "running" | "done";
+type Step = "source" | "connect" | "scope" | "mapping" | "users" | "contacts" | "preview" | "running" | "done";
 
 export function MigrationWizard({
   open,
@@ -57,6 +59,8 @@ export function MigrationWizard({
   const [progress, setProgress] = useState({ done: 0, total: 0, message: "" });
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  const [discoveredUsers, setDiscoveredUsers] = useState<DiscoveredUser[]>([]);
+  const [discoveringUsers, setDiscoveringUsers] = useState(false);
 
   const reset = () => {
     setStep("source");
@@ -71,6 +75,8 @@ export function MigrationWizard({
     setSummary(null);
     setRunError(null);
     setTesting(false);
+    setDiscoveredUsers([]);
+    setDiscoveringUsers(false);
   };
 
   const close = (v: boolean) => {
@@ -394,7 +400,45 @@ export function MigrationWizard({
               <Button variant="ghost" onClick={() => setStep("scope")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
-              <Button onClick={() => setStep("contacts")} disabled={!mappingValid.ok}>
+              <Button
+                disabled={!mappingValid.ok}
+                onClick={async () => {
+                  setStep("users");
+                  if (adapter?.discoverUsers) {
+                    setDiscoveringUsers(true);
+                    try {
+                      const users = await adapter.discoverUsers(creds, scope, files);
+                      setDiscoveredUsers(users);
+                    } catch (e) {
+                      setDiscoveredUsers([]);
+                    } finally {
+                      setDiscoveringUsers(false);
+                    }
+                  } else {
+                    setDiscoveredUsers([]);
+                  }
+                }}
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+
+        {step === "users" && adapter && (
+          <div className="space-y-3 overflow-y-auto pr-1">
+            <UserMappingStep
+              discoveredUsers={discoveredUsers}
+              loading={discoveringUsers}
+              mapping={mapping}
+              onChange={setMapping}
+              organizationIdOverride={organizationIdOverride}
+            />
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setStep("mapping")}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Back
+              </Button>
+              <Button onClick={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "preview")}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </DialogFooter>
@@ -414,7 +458,7 @@ export function MigrationWizard({
               enabled={adapter.id === "jira_service_management"}
             />
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setStep("mapping")}>
+              <Button variant="ghost" onClick={() => setStep("users")}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
               <Button onClick={() => setStep("preview")}>
@@ -426,7 +470,7 @@ export function MigrationWizard({
 
         {step === "preview" && adapter && (
           <PreviewStep
-            onBack={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "mapping")}
+            onBack={() => setStep(adapter.id === "jira_service_management" ? "contacts" : "users")}
             onStart={start}
             adapter={adapter}
             creds={creds}
