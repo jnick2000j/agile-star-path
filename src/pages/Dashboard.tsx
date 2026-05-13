@@ -239,12 +239,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {(isVisible("jsm-sla") || isVisible("helpdesk-usage")) && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              {isVisible("jsm-sla") && <JsmSlaSummary />}
-              {isVisible("helpdesk-usage") && <HelpdeskUsageCard />}
-            </div>
-          )}
 
           <CustomWidgets />
         </TabsContent>
