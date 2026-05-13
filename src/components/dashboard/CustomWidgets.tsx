@@ -218,9 +218,25 @@ function WidgetEditor({
                 { id: "my-notes", label: "My Notes" },
                 { id: "useful-links", label: "Useful Links" },
                 { id: "open-risks", label: "Open Risks" },
+                { id: "open-issues", label: "Open Issues" },
                 { id: "active-projects", label: "Active Projects" },
+                { id: "active-programmes", label: "Active Programmes" },
                 { id: "my-tasks", label: "Open Tasks" },
+                { id: "milestones-due", label: "Upcoming Milestones" },
+                { id: "open-tickets", label: "Open Tickets" },
+                { id: "pending-changes", label: "Pending Changes" },
+                { id: "open-problems", label: "Open Problems" },
+                { id: "open-rfis", label: "Open RFIs" },
+                { id: "course-enrollments", label: "Active Enrollments" },
+                { id: "kb-articles", label: "Published KB" },
               ].map(p => (
+                <Button key={p.id} type="button" variant="secondary" size="sm" onClick={() => presetTemplate(p.id)}>
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
                 <Button key={p.id} type="button" variant="secondary" size="sm" onClick={() => presetTemplate(p.id)}>
                   {p.label}
                 </Button>
