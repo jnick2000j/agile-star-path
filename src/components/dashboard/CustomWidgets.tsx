@@ -149,12 +149,39 @@ function WidgetEditor({
       case "open-risks":
         setTitle("Open Risks"); setType("metric");
         setEntity("risks"); setStatusFilter("open"); break;
+      case "open-issues":
+        setTitle("Open Issues"); setType("metric");
+        setEntity("issues"); setStatusFilter("open"); break;
       case "active-projects":
         setTitle("Active Projects"); setType("metric");
         setEntity("projects"); setStatusFilter("active"); break;
+      case "active-programmes":
+        setTitle("Active Programmes"); setType("metric");
+        setEntity("programmes"); setStatusFilter("active"); break;
       case "my-tasks":
         setTitle("Open Tasks"); setType("metric");
         setEntity("tasks"); setStatusFilter("open"); break;
+      case "open-tickets":
+        setTitle("Open Helpdesk Tickets"); setType("metric");
+        setEntity("helpdesk_tickets"); setStatusFilter("open"); break;
+      case "pending-changes":
+        setTitle("Pending Changes"); setType("metric");
+        setEntity("change_requests"); setStatusFilter("pending"); break;
+      case "open-problems":
+        setTitle("Open Problems"); setType("metric");
+        setEntity("problems"); setStatusFilter("open"); break;
+      case "milestones-due":
+        setTitle("Upcoming Milestones"); setType("metric");
+        setEntity("milestones"); setStatusFilter("upcoming"); break;
+      case "open-rfis":
+        setTitle("Open RFIs"); setType("metric");
+        setEntity("rfis"); setStatusFilter("open"); break;
+      case "course-enrollments":
+        setTitle("Active Enrollments"); setType("metric");
+        setEntity("lms_enrollments"); setStatusFilter("active"); break;
+      case "kb-articles":
+        setTitle("Published KB Articles"); setType("metric");
+        setEntity("kb_articles"); setStatusFilter("published"); break;
     }
   };
 
