@@ -168,6 +168,7 @@ export function SSOSetupWizard({
         provider_type: providerType,
         allowed_domains: parsedDomains,
         default_access_level: defaultAccessLevel,
+        default_custom_role_ids: defaultRoleIds,
         notes: notes.trim() || null,
         status: "pending",
         requested_by: user.id,
