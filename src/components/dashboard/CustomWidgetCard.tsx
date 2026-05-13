@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, ExternalLink, User } from "lucide-react";
 
 export type CustomWidgetType = "note" | "links" | "metric";
 
@@ -15,40 +16,43 @@ export interface CustomWidget {
 }
 
 // Allow-list of entities a user can build a metric for.
-// Grouped by platform area so users can pin a counter for almost anything they have access to.
-export const METRIC_ENTITIES: Record<string, { label: string; group: string; statusField?: string }> = {
+// `ownerField` is the column used when the widget is filtered to "only mine".
+export const METRIC_ENTITIES: Record<
+  string,
+  { label: string; group: string; statusField?: string; ownerField?: string }
+> = {
   // Delivery
-  programmes:               { label: "Programmes",              group: "Delivery", statusField: "status" },
-  projects:                 { label: "Projects",                group: "Delivery", statusField: "status" },
-  products:                 { label: "Products",                group: "Delivery", statusField: "status" },
-  work_packages:            { label: "Work Packages",           group: "Delivery", statusField: "status" },
-  milestones:               { label: "Milestones",              group: "Delivery", statusField: "status" },
+  programmes:               { label: "Programmes",              group: "Delivery", statusField: "status", ownerField: "manager_id" },
+  projects:                 { label: "Projects",                group: "Delivery", statusField: "status", ownerField: "manager_id" },
+  products:                 { label: "Products",                group: "Delivery", statusField: "status", ownerField: "created_by" },
+  work_packages:            { label: "Work Packages",           group: "Delivery", statusField: "status", ownerField: "assigned_to" },
+  milestones:               { label: "Milestones",              group: "Delivery", statusField: "status", ownerField: "owner_id" },
   stage_gates:              { label: "Stage Gates",             group: "Delivery", statusField: "status" },
   sprints:                  { label: "Sprints",                 group: "Delivery", statusField: "status" },
   tranches:                 { label: "Programme Tranches",      group: "Delivery", statusField: "status" },
 
   // Registers
-  risks:                    { label: "Risks",                   group: "Registers", statusField: "status" },
-  issues:                   { label: "Issues",                  group: "Registers", statusField: "status" },
-  exceptions:               { label: "Exceptions",              group: "Registers", statusField: "status" },
-  lessons_learned:          { label: "Lessons Learned",         group: "Registers" },
-  stakeholders:             { label: "Stakeholders",            group: "Registers" },
+  risks:                    { label: "Risks",                   group: "Registers", statusField: "status", ownerField: "owner_id" },
+  issues:                   { label: "Issues",                  group: "Registers", statusField: "status", ownerField: "owner_id" },
+  exceptions:               { label: "Exceptions",              group: "Registers", statusField: "status", ownerField: "owner_id" },
+  lessons_learned:          { label: "Lessons Learned",         group: "Registers", ownerField: "owner_id" },
+  stakeholders:             { label: "Stakeholders",            group: "Registers", ownerField: "created_by" },
   benefits:                 { label: "Benefits",                group: "Registers" },
-  business_requirements:    { label: "Business Requirements",   group: "Registers", statusField: "status" },
-  technical_requirements:   { label: "Technical Requirements",  group: "Registers", statusField: "status" },
+  business_requirements:    { label: "Business Requirements",   group: "Registers", statusField: "status", ownerField: "owner_id" },
+  technical_requirements:   { label: "Technical Requirements",  group: "Registers", statusField: "status", ownerField: "owner_id" },
 
   // Tasks & planning
-  tasks:                    { label: "Tasks",                   group: "Tasks", statusField: "status" },
-  daily_logs:               { label: "Daily Logs",              group: "Tasks" },
-  punch_list_items:         { label: "Punch List Items",        group: "Tasks", statusField: "status" },
-  rfis:                     { label: "RFIs",                    group: "Tasks", statusField: "status" },
+  tasks:                    { label: "Tasks",                   group: "Tasks", statusField: "status", ownerField: "assigned_to" },
+  daily_logs:               { label: "Daily Logs",              group: "Tasks", ownerField: "created_by" },
+  punch_list_items:         { label: "Punch List Items",        group: "Tasks", statusField: "status", ownerField: "assigned_to" },
+  rfis:                     { label: "RFIs",                    group: "Tasks", statusField: "status", ownerField: "assigned_to" },
   submittals:               { label: "Submittals",              group: "Tasks", statusField: "status" },
 
   // Service Management
-  helpdesk_tickets:         { label: "Helpdesk Tickets",        group: "Service Management", statusField: "status" },
-  change_requests:          { label: "Change Requests",         group: "Service Management", statusField: "status" },
-  problems:                 { label: "Problems",                group: "Service Management", statusField: "status" },
-  major_incidents:          { label: "Major Incidents",         group: "Service Management", statusField: "status" },
+  helpdesk_tickets:         { label: "Helpdesk Tickets",        group: "Service Management", statusField: "status", ownerField: "assignee_id" },
+  change_requests:          { label: "Change Requests",         group: "Service Management", statusField: "status", ownerField: "owner_id" },
+  problems:                 { label: "Problems",                group: "Service Management", statusField: "status", ownerField: "assignee_id" },
+  major_incidents:          { label: "Major Incidents",         group: "Service Management", statusField: "status", ownerField: "created_by" },
   configuration_items:      { label: "Configuration Items",     group: "Service Management", statusField: "status" },
   assets:                   { label: "Assets",                  group: "Service Management", statusField: "status" },
   asset_contracts:          { label: "Asset Contracts",         group: "Service Management", statusField: "status" },
@@ -60,8 +64,8 @@ export const METRIC_ENTITIES: Record<string, { label: string; group: string; sta
   // Knowledge & Learning
   kb_articles:              { label: "KB Articles",             group: "Knowledge", statusField: "status" },
   lms_courses:              { label: "Courses",                 group: "Knowledge", statusField: "status" },
-  lms_enrollments:          { label: "Course Enrollments",      group: "Knowledge", statusField: "status" },
-  lms_certificates:         { label: "Certificates Issued",     group: "Knowledge" },
+  lms_enrollments:          { label: "Course Enrollments",      group: "Knowledge", statusField: "status", ownerField: "user_id" },
+  lms_certificates:         { label: "Certificates Issued",     group: "Knowledge", ownerField: "user_id" },
 
   // Automation & AI
   automation_workflows:     { label: "Automation Workflows",    group: "Automation", statusField: "status" },
@@ -79,28 +83,43 @@ export const METRIC_ENTITIES: Record<string, { label: string; group: string; sta
 };
 
 function MetricBody({ config }: { config: any }) {
+  const { user } = useAuth();
   const entity = config?.entity as string | undefined;
   const statusFilter = config?.status as string | undefined;
+  const mineOnly = !!config?.mine;
+  const meta = entity ? METRIC_ENTITIES[entity] : undefined;
+  const ownerField = meta?.ownerField;
+  const canFilterMine = mineOnly && !!ownerField && !!user;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["custom-widget-metric", entity, statusFilter],
-    enabled: !!entity && entity in METRIC_ENTITIES,
+    queryKey: ["custom-widget-metric", entity, statusFilter, mineOnly, user?.id],
+    enabled: !!entity && entity in METRIC_ENTITIES && (!mineOnly || !!user),
     queryFn: async () => {
       let q = (supabase as any).from(entity).select("id", { count: "exact", head: true });
-      if (statusFilter) q = q.eq(METRIC_ENTITIES[entity!].statusField || "status", statusFilter);
+      if (statusFilter) q = q.eq(meta?.statusField || "status", statusFilter);
+      if (canFilterMine) q = q.eq(ownerField!, user!.id);
       const { count, error } = await q;
       if (error) throw error;
       return count ?? 0;
     },
   });
-  if (!entity || !(entity in METRIC_ENTITIES)) {
+  if (!entity || !meta) {
     return <p className="text-sm text-muted-foreground">No entity selected.</p>;
   }
   return (
     <div>
       <p className="text-3xl font-bold">{isLoading ? "…" : data}</p>
-      <p className="text-xs text-muted-foreground mt-1">
-        {METRIC_ENTITIES[entity].label}
-        {statusFilter ? ` · ${statusFilter}` : ""}
+      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5 flex-wrap">
+        <span>{meta.label}</span>
+        {statusFilter ? <span>· {statusFilter}</span> : null}
+        {mineOnly ? (
+          <span className="inline-flex items-center gap-1 text-primary">
+            <User className="h-3 w-3" /> mine
+          </span>
+        ) : null}
+        {mineOnly && !ownerField ? (
+          <span className="text-warning">(no owner field)</span>
+        ) : null}
       </p>
     </div>
   );

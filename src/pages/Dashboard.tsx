@@ -164,6 +164,7 @@ export default function Dashboard() {
             <ActionInbox />
             <NotificationsCard />
           </div>
+          <CustomWidgets scope="my-work" defaultMine />
         </TabsContent>
 
         {/* MY PORTFOLIO */}
@@ -271,7 +272,7 @@ export default function Dashboard() {
 
         {/* MY DASHBOARD — user-built widgets */}
         <TabsContent value="my-dashboard" className="space-y-6 mt-6">
-          <CustomWidgets />
+          <CustomWidgets scope="portfolio" />
         </TabsContent>
       </Tabs>
     </AppLayout>

@@ -13,6 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { CustomWidgetCard, CustomWidget, CustomWidgetType, METRIC_ENTITIES } from "./CustomWidgetCard";
 import {
@@ -25,19 +26,38 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-export function CustomWidgets() {
+type Scope = "portfolio" | "my-work";
+
+interface CustomWidgetsProps {
+  scope?: Scope;
+  /** Heading shown above the widget grid. Defaults vary per scope. */
+  heading?: string;
+  /** Hint text shown when the widget list is empty. */
+  emptyHint?: string;
+  /** When true, new widgets default to "Only mine" filter. */
+  defaultMine?: boolean;
+}
+
+export function CustomWidgets({
+  scope = "portfolio",
+  heading,
+  emptyHint,
+  defaultMine = false,
+}: CustomWidgetsProps = {}) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CustomWidget | null>(null);
+  const queryKey = ["custom-widgets", scope, user?.id];
 
   const { data: widgets = [] } = useQuery({
-    queryKey: ["custom-widgets", user?.id],
+    queryKey,
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_dashboard_widgets")
         .select("*")
+        .eq("dashboard_scope", scope)
         .order("position", { ascending: true })
         .order("created_at", { ascending: true });
       if (error) throw error;
@@ -54,13 +74,14 @@ export function CustomWidgets() {
         widget_type: w.widget_type,
         config: w.config,
         position: w.position ?? widgets.length,
+        dashboard_scope: scope,
       };
       if (w.id) payload.id = w.id;
       const { error } = await supabase.from("user_dashboard_widgets").upsert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] });
+      qc.invalidateQueries({ queryKey });
       setOpen(false);
       setEditing(null);
       toast({ title: "Widget saved" });
@@ -73,7 +94,7 @@ export function CustomWidgets() {
       const { error } = await supabase.from("user_dashboard_widgets").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey }),
   });
 
   const reorder = useMutation({
@@ -86,6 +107,7 @@ export function CustomWidgets() {
         widget_type: w.widget_type,
         config: w.config,
         position: i,
+        dashboard_scope: scope,
       }));
       const { error } = await supabase.from("user_dashboard_widgets").upsert(rows);
       if (error) throw error;
@@ -105,18 +127,23 @@ export function CustomWidgets() {
     const newIndex = widgets.findIndex(w => w.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
     const next = arrayMove(widgets, oldIndex, newIndex);
-    qc.setQueryData(["custom-widgets", user?.id], next);
+    qc.setQueryData(queryKey, next);
     reorder.mutate(next);
   };
 
   const startCreate = () => { setEditing(null); setOpen(true); };
   const startEdit = (w: CustomWidget) => { setEditing(w); setOpen(true); };
 
+  const resolvedHeading = heading ?? (scope === "my-work" ? "My Work Widgets" : "My Dashboard");
+  const resolvedEmpty = emptyHint ?? (scope === "my-work"
+    ? "No personal work widgets yet. Click Add widget to pin counters scoped to you (e.g. tasks assigned to me, my open risks)."
+    : "No widgets yet. Click Add widget to pin a note, link list, or live metric.");
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">My Dashboard</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{resolvedHeading}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Drag the handle on a card to reorder.</p>
         </div>
         <Button size="sm" variant="outline" onClick={startCreate} className="gap-2">
@@ -125,9 +152,7 @@ export function CustomWidgets() {
       </div>
 
       {widgets.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No widgets yet. Click <strong>Add widget</strong> to pin a note, link list, or live metric.
-        </p>
+        <p className="text-sm text-muted-foreground">{resolvedEmpty}</p>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map(w => w.id)} strategy={rectSortingStrategy}>
@@ -151,6 +176,7 @@ export function CustomWidgets() {
         editing={editing}
         onSave={(w) => upsert.mutate(w)}
         saving={upsert.isPending}
+        defaultMine={defaultMine}
       />
     </div>
   );
@@ -187,13 +213,14 @@ function SortableWidget({
 }
 
 function WidgetEditor({
-  open, onOpenChange, editing, onSave, saving,
+  open, onOpenChange, editing, onSave, saving, defaultMine = false,
 }: {
   open: boolean;
   onOpenChange: (b: boolean) => void;
   editing: CustomWidget | null;
   onSave: (w: Partial<CustomWidget> & { title: string; widget_type: CustomWidgetType; config: any }) => void;
   saving: boolean;
+  defaultMine?: boolean;
 }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<CustomWidgetType>("note");
@@ -201,6 +228,7 @@ function WidgetEditor({
   const [links, setLinks] = useState<{ label: string; url: string }[]>([{ label: "", url: "" }]);
   const [entity, setEntity] = useState<string>("projects");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [mineOnly, setMineOnly] = useState<boolean>(defaultMine);
 
   useEffect(() => {
     if (!open) return;
@@ -211,12 +239,14 @@ function WidgetEditor({
       setLinks(editing.config?.links?.length ? editing.config.links : [{ label: "", url: "" }]);
       setEntity(editing.config?.entity || "projects");
       setStatusFilter(editing.config?.status || "");
+      setMineOnly(!!editing.config?.mine);
     } else {
       setTitle(""); setType("note"); setNoteText("");
       setLinks([{ label: "", url: "" }]);
       setEntity("projects"); setStatusFilter("");
+      setMineOnly(defaultMine);
     }
-  }, [open, editing]);
+  }, [open, editing, defaultMine]);
 
   // Curated quick-start presets covering all platform areas. Each entry maps to
   // an entity already declared in METRIC_ENTITIES so the picker stays in sync.
@@ -302,7 +332,7 @@ function WidgetEditor({
     let config: any = {};
     if (type === "note") config = { text: noteText };
     if (type === "links") config = { links: links.filter(l => l.url.trim()) };
-    if (type === "metric") config = { entity, status: statusFilter || undefined };
+    if (type === "metric") config = { entity, status: statusFilter || undefined, mine: mineOnly || undefined };
     onSave({
       id: editing?.id,
       position: editing?.position,
@@ -426,6 +456,22 @@ function WidgetEditor({
                 <p className="text-xs text-muted-foreground mt-1">
                   Leave blank to count all rows you can see.
                 </p>
+              </div>
+              <div className="flex items-start gap-2 rounded-md border p-3 bg-muted/30">
+                <Checkbox
+                  id="w-mine"
+                  checked={mineOnly}
+                  onCheckedChange={(c) => setMineOnly(c === true)}
+                  disabled={!METRIC_ENTITIES[entity]?.ownerField}
+                />
+                <div className="space-y-0.5">
+                  <Label htmlFor="w-mine" className="cursor-pointer">Only show items assigned to / owned by me</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {METRIC_ENTITIES[entity]?.ownerField
+                      ? `Filters on the "${METRIC_ENTITIES[entity]!.ownerField}" field.`
+                      : "Not available for this entity (no owner/assignee field)."}
+                  </p>
+                </div>
               </div>
             </>
           )}
