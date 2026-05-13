@@ -83,28 +83,43 @@ export const METRIC_ENTITIES: Record<
 };
 
 function MetricBody({ config }: { config: any }) {
+  const { user } = useAuth();
   const entity = config?.entity as string | undefined;
   const statusFilter = config?.status as string | undefined;
+  const mineOnly = !!config?.mine;
+  const meta = entity ? METRIC_ENTITIES[entity] : undefined;
+  const ownerField = meta?.ownerField;
+  const canFilterMine = mineOnly && !!ownerField && !!user;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["custom-widget-metric", entity, statusFilter],
-    enabled: !!entity && entity in METRIC_ENTITIES,
+    queryKey: ["custom-widget-metric", entity, statusFilter, mineOnly, user?.id],
+    enabled: !!entity && entity in METRIC_ENTITIES && (!mineOnly || !!user),
     queryFn: async () => {
       let q = (supabase as any).from(entity).select("id", { count: "exact", head: true });
-      if (statusFilter) q = q.eq(METRIC_ENTITIES[entity!].statusField || "status", statusFilter);
+      if (statusFilter) q = q.eq(meta?.statusField || "status", statusFilter);
+      if (canFilterMine) q = q.eq(ownerField!, user!.id);
       const { count, error } = await q;
       if (error) throw error;
       return count ?? 0;
     },
   });
-  if (!entity || !(entity in METRIC_ENTITIES)) {
+  if (!entity || !meta) {
     return <p className="text-sm text-muted-foreground">No entity selected.</p>;
   }
   return (
     <div>
       <p className="text-3xl font-bold">{isLoading ? "…" : data}</p>
-      <p className="text-xs text-muted-foreground mt-1">
-        {METRIC_ENTITIES[entity].label}
-        {statusFilter ? ` · ${statusFilter}` : ""}
+      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5 flex-wrap">
+        <span>{meta.label}</span>
+        {statusFilter ? <span>· {statusFilter}</span> : null}
+        {mineOnly ? (
+          <span className="inline-flex items-center gap-1 text-primary">
+            <User className="h-3 w-3" /> mine
+          </span>
+        ) : null}
+        {mineOnly && !ownerField ? (
+          <span className="text-warning">(no owner field)</span>
+        ) : null}
       </p>
     </div>
   );
