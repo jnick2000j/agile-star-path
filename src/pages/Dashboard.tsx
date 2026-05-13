@@ -124,12 +124,15 @@ export default function Dashboard() {
         onValueChange={(v) => update({ default_tab: v })}
         className="space-y-6"
       >
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="my-work" className="gap-2">
             <User className="h-4 w-4" /> My Work
           </TabsTrigger>
           <TabsTrigger value="portfolio" className="gap-2">
             <BarChart3 className="h-4 w-4" /> My Portfolio
+          </TabsTrigger>
+          <TabsTrigger value="my-dashboard" className="gap-2">
+            <LayoutDashboard className="h-4 w-4" /> My Dashboard
           </TabsTrigger>
         </TabsList>
 
