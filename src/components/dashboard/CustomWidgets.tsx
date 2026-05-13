@@ -67,55 +67,6 @@ export function CustomWidgets() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] }),
   });
 
-  // Platform-spanning default widget set — covers Delivery, Registers, Tasks,
-  // Service Management, Knowledge/LMS and Governance in one click.
-  const PLATFORM_DEFAULTS: Array<{ title: string; widget_type: CustomWidgetType; config: any }> = [
-    { title: "Active Programmes",      widget_type: "metric", config: { entity: "programmes",          status: "active" } },
-    { title: "Active Projects",        widget_type: "metric", config: { entity: "projects",            status: "active" } },
-    { title: "Active Products",        widget_type: "metric", config: { entity: "products",            status: "active" } },
-    { title: "Open Risks",             widget_type: "metric", config: { entity: "risks",               status: "open" } },
-    { title: "Open Issues",            widget_type: "metric", config: { entity: "issues",              status: "open" } },
-    { title: "Open Exceptions",        widget_type: "metric", config: { entity: "exceptions",          status: "open" } },
-    { title: "Open Tasks",             widget_type: "metric", config: { entity: "tasks",               status: "open" } },
-    { title: "Upcoming Milestones",    widget_type: "metric", config: { entity: "milestones",          status: "upcoming" } },
-    { title: "Active Sprints",         widget_type: "metric", config: { entity: "sprints",             status: "active" } },
-    { title: "Open Stage Gates",       widget_type: "metric", config: { entity: "stage_gates",         status: "open" } },
-    { title: "Open Helpdesk Tickets",  widget_type: "metric", config: { entity: "helpdesk_tickets",    status: "open" } },
-    { title: "Pending Changes",        widget_type: "metric", config: { entity: "change_requests",     status: "pending" } },
-    { title: "Open Problems",          widget_type: "metric", config: { entity: "problems",            status: "open" } },
-    { title: "Major Incidents",        widget_type: "metric", config: { entity: "major_incidents",     status: "open" } },
-    { title: "Open RFIs",              widget_type: "metric", config: { entity: "rfis",                status: "open" } },
-    { title: "Open Submittals",        widget_type: "metric", config: { entity: "submittals",          status: "open" } },
-    { title: "Active Engagements",     widget_type: "metric", config: { entity: "client_engagements",  status: "active" } },
-    { title: "Active Retainers",       widget_type: "metric", config: { entity: "retainers",           status: "active" } },
-    { title: "Published KB Articles",  widget_type: "metric", config: { entity: "kb_articles",         status: "published" } },
-    { title: "Active Enrollments",     widget_type: "metric", config: { entity: "lms_enrollments",     status: "active" } },
-    { title: "AI Insights",            widget_type: "metric", config: { entity: "ai_insights",         status: "open" } },
-    { title: "Automation Workflows",   widget_type: "metric", config: { entity: "automation_workflows", status: "active" } },
-    { title: "My Notes",               widget_type: "note",   config: { text: "" } },
-    { title: "Useful Links",           widget_type: "links",  config: { links: [] } },
-  ];
-
-  const seedDefaults = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error("Not signed in");
-      const rows = PLATFORM_DEFAULTS.map((w, i) => ({
-        user_id: user.id,
-        title: w.title,
-        widget_type: w.widget_type,
-        config: w.config,
-        position: widgets.length + i,
-      }));
-      const { error } = await supabase.from("user_dashboard_widgets").insert(rows);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["custom-widgets", user?.id] });
-      toast({ title: "Default widgets added", description: "Platform-wide widget set loaded." });
-    },
-    onError: (e: any) => toast({ title: "Could not load defaults", description: e.message, variant: "destructive" }),
-  });
-
   const startCreate = () => { setEditing(null); setOpen(true); };
   const startEdit = (w: CustomWidget) => { setEditing(w); setOpen(true); };
 
