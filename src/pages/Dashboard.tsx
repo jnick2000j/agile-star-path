@@ -254,6 +254,18 @@ export default function Dashboard() {
             </div>
           )}
 
+          {isVisible("organization-stats") && <OrganizationStats />}
+
+          {isVisible("programme-progress") && <ProgrammeProgress />}
+
+          {isVisible("benefits-tracker") && <BenefitsTracker />}
+
+          {(isVisible("recent-activity") || isVisible("pinned-recents")) && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {isVisible("pinned-recents") && <PinnedAndRecents />}
+              {isVisible("recent-activity") && <RecentActivity />}
+            </div>
+          )}
 
         </TabsContent>
 
