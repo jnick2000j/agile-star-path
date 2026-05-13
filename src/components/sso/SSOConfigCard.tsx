@@ -16,9 +16,18 @@ interface SSOConfig {
   metadata_url: string | null;
   allowed_domains: string[];
   default_access_level: string;
+  default_custom_role_ids: string[] | null;
   created_at: string;
   activated_at: string | null;
   provisioning_notes: string | null;
+}
+
+interface JitLogEntry {
+  id: string;
+  email: string;
+  status: string;
+  access_level_granted: string | null;
+  created_at: string;
 }
 
 export function SSOConfigCard() {
