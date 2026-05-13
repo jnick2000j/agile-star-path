@@ -25,7 +25,6 @@ export const METRIC_ENTITIES: Record<string, { label: string; group: string; sta
   milestones:               { label: "Milestones",              group: "Delivery", statusField: "status" },
   stage_gates:              { label: "Stage Gates",             group: "Delivery", statusField: "status" },
   sprints:                  { label: "Sprints",                 group: "Delivery", statusField: "status" },
-  features:                 { label: "Features",                group: "Delivery", statusField: "status" },
   tranches:                 { label: "Programme Tranches",      group: "Delivery", statusField: "status" },
 
   // Registers
