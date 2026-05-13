@@ -68,7 +68,14 @@ After login:
 2. Open **Platform Admin → AI & Credits** and confirm your AI provider is
    reachable (or switch from Ollama to your provider of choice).
 3. Open **Settings → Branding** to upload your org logo.
-4. Invite your team via **Admin Panel → Users**.
+4. Invite your team via **Admin Panel → Users**. For more than ~20 users,
+   use **Bulk Import** with `/migration-templates/users.csv`. If you have
+   an IdP, configure it under **Org Admin → SSO** so subsequent users are
+   provisioned automatically on first login.
+
+See [user-provisioning.md](./user-provisioning.md) for the full provisioning
+matrix (manual invite, bulk import, migration mapping, reconciliation, SSO
+JIT) and the billable-user model.
 
 ## Troubleshooting
 

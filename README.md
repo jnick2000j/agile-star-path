@@ -1,73 +1,46 @@
-# Welcome to your Lovable project
+# TaskMaster
 
-## Project info
+PRINCE2 + MSP + Agile Program Information Management Platform (PIMP) with
+integrated Helpdesk/ITSM, Service Catalog, Knowledge Base and LMS.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Editions
 
-## How can I edit this code?
+- **Cloud** — runs on Lovable Cloud. Edit at the project's Lovable URL;
+  changes commit to this repo automatically.
+- **On-premises** — single-host or HA, air-gappable. See
+  [`onprem/README.md`](./onprem/README.md) and [`onprem/docs/`](./onprem/docs/).
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Requires Node.js 20+ (via [nvm](https://github.com/nvm-sh/nvm)).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Stack
 
-**Use GitHub Codespaces**
+Vite · React 18 · TypeScript · Tailwind · shadcn/ui · Supabase
+(Postgres + Edge Functions + Auth + Storage).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Key docs
 
-## What technologies are used for this project?
+- **In-app**: `Documentation` in the sidebar — methodology guides,
+  templates, feature reference.
+- **Operators (on-prem)**: [`onprem/docs/`](./onprem/docs/) —
+  install, upgrade, scaling, AI provider, SMTP, object storage,
+  [user provisioning & SSO](./onprem/docs/user-provisioning.md).
+- **Lovable platform**: <https://docs.lovable.dev/>
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Cloud** — Share → Publish in Lovable.
+- **On-prem** — `cd onprem && cp .env.example .env && ./scripts/install.sh`.
+  Upgrades use signed versioned bundles — see
+  [`onprem/docs/upgrade.md`](./onprem/docs/upgrade.md).
 
-## How can I deploy this project?
+## Custom domains
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Cloud projects: Project → Settings → Domains → Connect Domain.
+On-prem: set `DOMAIN` in `.env` and provide TLS in `tls/`.
