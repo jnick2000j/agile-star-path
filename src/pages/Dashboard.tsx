@@ -235,6 +235,10 @@ export default function Dashboard() {
           )}
 
 
+        </TabsContent>
+
+        {/* MY DASHBOARD — user-built widgets */}
+        <TabsContent value="my-dashboard" className="space-y-6 mt-6">
           <CustomWidgets />
         </TabsContent>
       </Tabs>
