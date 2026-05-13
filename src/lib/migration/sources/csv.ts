@@ -221,6 +221,37 @@ export const csvAdapter: MigrationSourceAdapter = {
     return { status: { ...DEFAULT_STATUS_MAP }, priority: { ...DEFAULT_PRIORITY_MAP } };
   },
 
+  async discoverUsers(_creds, _scope, files) {
+    const seen = new Map<string, { externalId: string; email?: string; displayName?: string; refCount: number }>();
+    const collect = (rows: Record<string, string>[]) => {
+      for (const r of rows) {
+        for (const col of [
+          "assignee_email", "assigned_to_email", "assignee", "assigned_to",
+          "reporter_email", "reporter", "owner_email", "owner", "created_by_email", "created_by",
+        ]) {
+          const v = r[col];
+          if (!v) continue;
+          const key = v.trim().toLowerCase();
+          if (!key) continue;
+          const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key);
+          const existing = seen.get(key);
+          if (existing) existing.refCount += 1;
+          else seen.set(key, {
+            externalId: key,
+            email: isEmail ? key : undefined,
+            displayName: isEmail ? undefined : v.trim(),
+            refCount: 1,
+          });
+        }
+      }
+    };
+    collect(getFile(files, "tasks"));
+    collect(getFile(files, "issues"));
+    collect(getFile(files, "risks"));
+    collect(getFile(files, "projects"));
+    return Array.from(seen.values());
+  },
+
   async run(_creds, scope, mapping, ctx: MigrationContext, files): Promise<ImportSummary> {
     const summary: ImportSummary = {
       createdProjects: 0,
