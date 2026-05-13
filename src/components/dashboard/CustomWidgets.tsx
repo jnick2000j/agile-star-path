@@ -322,28 +322,16 @@ function WidgetEditor({
         {!editing && (
           <div>
             <Label className="text-xs text-muted-foreground">Start from a default</Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {[
-                { id: "my-notes", label: "My Notes" },
-                { id: "useful-links", label: "Useful Links" },
-                { id: "open-risks", label: "Open Risks" },
-                { id: "open-issues", label: "Open Issues" },
-                { id: "active-projects", label: "Active Projects" },
-                { id: "active-programmes", label: "Active Programmes" },
-                { id: "my-tasks", label: "Open Tasks" },
-                { id: "milestones-due", label: "Upcoming Milestones" },
-                { id: "open-tickets", label: "Open Tickets" },
-                { id: "pending-changes", label: "Pending Changes" },
-                { id: "open-problems", label: "Open Problems" },
-                { id: "open-rfis", label: "Open RFIs" },
-                { id: "course-enrollments", label: "Active Enrollments" },
-                { id: "kb-articles", label: "Published KB" },
-              ].map(p => (
+            <div className="flex flex-wrap gap-2 mt-2 max-h-48 overflow-y-auto pr-1">
+              {PRESETS.map(p => (
                 <Button key={p.id} type="button" variant="secondary" size="sm" onClick={() => presetTemplate(p.id)}>
                   {p.label}
                 </Button>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Or build your own below — every platform area is in the Entity picker.
+            </p>
           </div>
         )}
 
