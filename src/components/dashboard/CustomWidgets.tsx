@@ -126,18 +126,23 @@ export function CustomWidgets({
     const newIndex = widgets.findIndex(w => w.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
     const next = arrayMove(widgets, oldIndex, newIndex);
-    qc.setQueryData(["custom-widgets", user?.id], next);
+    qc.setQueryData(queryKey, next);
     reorder.mutate(next);
   };
 
   const startCreate = () => { setEditing(null); setOpen(true); };
   const startEdit = (w: CustomWidget) => { setEditing(w); setOpen(true); };
 
+  const resolvedHeading = heading ?? (scope === "my-work" ? "My Work Widgets" : "My Dashboard");
+  const resolvedEmpty = emptyHint ?? (scope === "my-work"
+    ? "No personal work widgets yet. Click Add widget to pin counters scoped to you (e.g. tasks assigned to me, my open risks)."
+    : "No widgets yet. Click Add widget to pin a note, link list, or live metric.");
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">My Dashboard</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{resolvedHeading}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Drag the handle on a card to reorder.</p>
         </div>
         <Button size="sm" variant="outline" onClick={startCreate} className="gap-2">
@@ -146,9 +151,7 @@ export function CustomWidgets({
       </div>
 
       {widgets.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No widgets yet. Click <strong>Add widget</strong> to pin a note, link list, or live metric.
-        </p>
+        <p className="text-sm text-muted-foreground">{resolvedEmpty}</p>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgets.map(w => w.id)} strategy={rectSortingStrategy}>
@@ -172,6 +175,7 @@ export function CustomWidgets({
         editing={editing}
         onSave={(w) => upsert.mutate(w)}
         saving={upsert.isPending}
+        defaultMine={defaultMine}
       />
     </div>
   );
