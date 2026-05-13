@@ -253,6 +253,8 @@ export const jiraAdapter: MigrationSourceAdapter = {
     }
     return Array.from(seen.values());
   },
+
+  async run(creds, scope, mapping, ctx: MigrationContext): Promise<ImportSummary> {
     const c = creds as JiraCreds;
     const summary: ImportSummary = {
       createdProjects: 0,
