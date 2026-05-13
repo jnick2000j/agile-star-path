@@ -457,6 +457,22 @@ function WidgetEditor({
                   Leave blank to count all rows you can see.
                 </p>
               </div>
+              <div className="flex items-start gap-2 rounded-md border p-3 bg-muted/30">
+                <Checkbox
+                  id="w-mine"
+                  checked={mineOnly}
+                  onCheckedChange={(c) => setMineOnly(c === true)}
+                  disabled={!METRIC_ENTITIES[entity]?.ownerField}
+                />
+                <div className="space-y-0.5">
+                  <Label htmlFor="w-mine" className="cursor-pointer">Only show items assigned to / owned by me</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {METRIC_ENTITIES[entity]?.ownerField
+                      ? `Filters on the "${METRIC_ENTITIES[entity]!.ownerField}" field.`
+                      : "Not available for this entity (no owner/assignee field)."}
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </div>
