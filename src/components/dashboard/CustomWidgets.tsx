@@ -149,12 +149,39 @@ function WidgetEditor({
       case "open-risks":
         setTitle("Open Risks"); setType("metric");
         setEntity("risks"); setStatusFilter("open"); break;
+      case "open-issues":
+        setTitle("Open Issues"); setType("metric");
+        setEntity("issues"); setStatusFilter("open"); break;
       case "active-projects":
         setTitle("Active Projects"); setType("metric");
         setEntity("projects"); setStatusFilter("active"); break;
+      case "active-programmes":
+        setTitle("Active Programmes"); setType("metric");
+        setEntity("programmes"); setStatusFilter("active"); break;
       case "my-tasks":
         setTitle("Open Tasks"); setType("metric");
         setEntity("tasks"); setStatusFilter("open"); break;
+      case "open-tickets":
+        setTitle("Open Helpdesk Tickets"); setType("metric");
+        setEntity("helpdesk_tickets"); setStatusFilter("open"); break;
+      case "pending-changes":
+        setTitle("Pending Changes"); setType("metric");
+        setEntity("change_requests"); setStatusFilter("pending"); break;
+      case "open-problems":
+        setTitle("Open Problems"); setType("metric");
+        setEntity("problems"); setStatusFilter("open"); break;
+      case "milestones-due":
+        setTitle("Upcoming Milestones"); setType("metric");
+        setEntity("milestones"); setStatusFilter("upcoming"); break;
+      case "open-rfis":
+        setTitle("Open RFIs"); setType("metric");
+        setEntity("rfis"); setStatusFilter("open"); break;
+      case "course-enrollments":
+        setTitle("Active Enrollments"); setType("metric");
+        setEntity("lms_enrollments"); setStatusFilter("active"); break;
+      case "kb-articles":
+        setTitle("Published KB Articles"); setType("metric");
+        setEntity("kb_articles"); setStatusFilter("published"); break;
     }
   };
 
@@ -191,8 +218,17 @@ function WidgetEditor({
                 { id: "my-notes", label: "My Notes" },
                 { id: "useful-links", label: "Useful Links" },
                 { id: "open-risks", label: "Open Risks" },
+                { id: "open-issues", label: "Open Issues" },
                 { id: "active-projects", label: "Active Projects" },
+                { id: "active-programmes", label: "Active Programmes" },
                 { id: "my-tasks", label: "Open Tasks" },
+                { id: "milestones-due", label: "Upcoming Milestones" },
+                { id: "open-tickets", label: "Open Tickets" },
+                { id: "pending-changes", label: "Pending Changes" },
+                { id: "open-problems", label: "Open Problems" },
+                { id: "open-rfis", label: "Open RFIs" },
+                { id: "course-enrollments", label: "Active Enrollments" },
+                { id: "kb-articles", label: "Published KB" },
               ].map(p => (
                 <Button key={p.id} type="button" variant="secondary" size="sm" onClick={() => presetTemplate(p.id)}>
                   {p.label}
@@ -266,9 +302,18 @@ function WidgetEditor({
                 <Label>Entity</Label>
                 <Select value={entity} onValueChange={setEntity}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(METRIC_ENTITIES).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  <SelectContent className="max-h-80">
+                    {Array.from(new Set(Object.values(METRIC_ENTITIES).map(v => v.group))).map((group) => (
+                      <div key={group}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          {group}
+                        </div>
+                        {Object.entries(METRIC_ENTITIES)
+                          .filter(([, v]) => v.group === group)
+                          .map(([k, v]) => (
+                            <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                          ))}
+                      </div>
                     ))}
                   </SelectContent>
                 </Select>
