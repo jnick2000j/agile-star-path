@@ -123,27 +123,14 @@ export function CustomWidgets() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">My Dashboard</h3>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => seedDefaults.mutate()}
-            disabled={seedDefaults.isPending}
-            className="gap-2"
-          >
-            Load platform defaults
-          </Button>
-          <Button size="sm" variant="outline" onClick={startCreate} className="gap-2">
-            <Plus className="h-4 w-4" /> Add widget
-          </Button>
-        </div>
+        <Button size="sm" variant="outline" onClick={startCreate} className="gap-2">
+          <Plus className="h-4 w-4" /> Add widget
+        </Button>
       </div>
 
       {widgets.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No widgets yet. Click <strong>Load platform defaults</strong> to seed a curated set covering
-          delivery, registers, tasks, service management, knowledge and governance — or <strong>Add widget</strong>
-          to build your own.
+          No widgets yet. Click <strong>Add widget</strong> to pin a note, link list, or live metric.
         </p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
