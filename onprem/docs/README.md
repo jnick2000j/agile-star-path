@@ -20,6 +20,7 @@ Operator guide for self-hosted TaskMaster installations.
 11. [Features overview](./features.md) — every shipped module + the edge functions / cron jobs that back it
 12. [User provisioning](./user-provisioning.md) — manual invites, bulk import, migration mapping, reconciliation, SSO JIT, billable users
 13. [Scaling & HA](./scaling-ha.md) — going beyond 2,000 users, multi-host topologies, Patroni, multi-AZ
+    - **Sizing shortcut**: `node onprem/scripts/scale-configurator.mjs --users <N> [--ha] [--multi-az] [--gpu]` emits ready-to-use `.env.scaling`, compose overlay list, `bring-up.sh`, and a per-tier `topology.md` into `out/<tier>/`.
 14. [Troubleshooting](./troubleshooting.md) — common errors and fixes
 
 ### For release engineers (not operators)
