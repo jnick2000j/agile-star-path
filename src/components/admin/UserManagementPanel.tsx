@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { AssignUserAccessDialog } from "@/components/dialogs/AssignUserAccessDialog";
 import { EditUserDialog } from "@/components/dialogs/EditUserDialog";
 import { CreateUserDialog } from "@/components/dialogs/CreateUserDialog";
+import { BulkImportUsersDialog } from "@/components/admin/BulkImportUsersDialog";
 
 type AccessLevel = "admin" | "editor" | "viewer";
 
@@ -308,6 +309,7 @@ export function UserManagementPanel({ heading, subtitle }: Props) {
             {showArchived ? <UserCheck className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
             {showArchived ? "Show Active" : "Show Archived"}
           </Button>
+          <BulkImportUsersDialog onSuccess={fetchUsers} />
           <CreateUserDialog onSuccess={fetchUsers} />
         </div>
       </div>
