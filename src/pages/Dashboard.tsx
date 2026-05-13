@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3, Settings2 } from "lucide-react";
+import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3, Settings2, LayoutDashboard } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
@@ -124,12 +124,15 @@ export default function Dashboard() {
         onValueChange={(v) => update({ default_tab: v })}
         className="space-y-6"
       >
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="my-work" className="gap-2">
             <User className="h-4 w-4" /> My Work
           </TabsTrigger>
           <TabsTrigger value="portfolio" className="gap-2">
             <BarChart3 className="h-4 w-4" /> My Portfolio
+          </TabsTrigger>
+          <TabsTrigger value="my-dashboard" className="gap-2">
+            <LayoutDashboard className="h-4 w-4" /> My Dashboard
           </TabsTrigger>
         </TabsList>
 
@@ -232,6 +235,10 @@ export default function Dashboard() {
           )}
 
 
+        </TabsContent>
+
+        {/* MY DASHBOARD — user-built widgets */}
+        <TabsContent value="my-dashboard" className="space-y-6 mt-6">
           <CustomWidgets />
         </TabsContent>
       </Tabs>
