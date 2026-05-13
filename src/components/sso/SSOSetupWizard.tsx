@@ -78,6 +78,17 @@ export function SSOSetupWizard({
   const [notes, setNotes] = useState("");
   const [ssoConfigId, setSsoConfigId] = useState<string | null>(null);
   const [domainStatuses, setDomainStatuses] = useState<DomainStatus[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<{ id: string; name: string; color: string | null }[]>([]);
+  const [defaultRoleIds, setDefaultRoleIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from("custom_roles")
+      .select("id, name, color")
+      .order("name")
+      .then(({ data }) => setAvailableRoles(data ?? []));
+  }, [open]);
 
   const reset = () => {
     setStep(1);
