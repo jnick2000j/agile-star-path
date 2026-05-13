@@ -266,9 +266,18 @@ function WidgetEditor({
                 <Label>Entity</Label>
                 <Select value={entity} onValueChange={setEntity}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(METRIC_ENTITIES).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  <SelectContent className="max-h-80">
+                    {Array.from(new Set(Object.values(METRIC_ENTITIES).map(v => v.group))).map((group) => (
+                      <div key={group}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          {group}
+                        </div>
+                        {Object.entries(METRIC_ENTITIES)
+                          .filter(([, v]) => v.group === group)
+                          .map(([k, v]) => (
+                            <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                          ))}
+                      </div>
                     ))}
                   </SelectContent>
                 </Select>
