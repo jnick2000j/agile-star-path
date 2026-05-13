@@ -7,7 +7,7 @@ import { HelpdeskUsageCard } from "@/components/dashboard/HelpdeskUsageCard";
 import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
 import { JsmSlaSummary } from "@/components/dashboard/JsmSlaSummary";
-import { JsmContactsSummary } from "@/components/dashboard/JsmContactsSummary";
+import { CustomWidgets } from "@/components/dashboard/CustomWidgets";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
 
@@ -36,8 +36,7 @@ type WidgetId =
   | "helpdesk-summary"
   | "change-management-summary"
   | "jsm-sla"
-  | "helpdesk-usage"
-  | "jsm-contacts";
+  | "helpdesk-usage";
 
 const WIDGET_LABELS: Record<WidgetId, string> = {
   "metrics": "Portfolio Metrics",
@@ -48,7 +47,6 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   "change-management-summary": "Change Management Summary",
   "jsm-sla": "Service Management SLA",
   "helpdesk-usage": "Helpdesk Usage",
-  "jsm-contacts": "Service Management Contacts",
 };
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -60,7 +58,6 @@ const ALL_WIDGETS: WidgetId[] = [
   "change-management-summary",
   "jsm-sla",
   "helpdesk-usage",
-  "jsm-contacts",
 ];
 
 export default function Dashboard() {
@@ -249,11 +246,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {isVisible("jsm-contacts") && (
-            <div className="grid gap-6 lg:grid-cols-1">
-              <JsmContactsSummary />
-            </div>
-          )}
+          <CustomWidgets />
         </TabsContent>
       </Tabs>
     </AppLayout>
