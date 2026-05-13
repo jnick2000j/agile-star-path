@@ -76,6 +76,14 @@ export interface ImportSummary {
  * A migration source adapter. Each external system (Jira, Asana, etc.)
  * implements this interface; the wizard + runner are source-agnostic.
  */
+export interface DiscoveredUser {
+  /** Stable identifier for this source user (email, accountId, or display name). */
+  externalId: string;
+  email?: string;
+  displayName?: string;
+  refCount?: number;
+}
+
 export interface MigrationSourceAdapter {
   id: MigrationSourceId;
   label: string;
@@ -97,6 +105,12 @@ export interface MigrationSourceAdapter {
   preview(creds: MigrationCredentials, scope: MigrationScope, files?: MigrationFiles): Promise<PreviewResult>;
   /** Suggest a default field mapping (status / priority / etc.) given a sample. */
   suggestMapping(creds: MigrationCredentials, scope: MigrationScope, files?: MigrationFiles): Promise<FieldMapping>;
+  /** Optional: discover distinct source users (assignees/reporters) for mapping. */
+  discoverUsers?(
+    creds: MigrationCredentials,
+    scope: MigrationScope,
+    files?: MigrationFiles,
+  ): Promise<DiscoveredUser[]>;
   /** Run the actual import, writing to the database via Supabase. */
   run(
     creds: MigrationCredentials,
