@@ -364,6 +364,45 @@ region a tenant may use. `residency_enforcement` is `warn` or `block`. See
 
 ---
 
+## User provisioning, SSO & billable users
+
+Five paths converge on the same data model (`auth.users` + `profiles` +
+`user_organization_access` + `user_organization_custom_roles`):
+
+| Path                       | Surface                                  | Edge function |
+|----------------------------|------------------------------------------|---------------|
+| Manual invite (email)      | Admin Panel → Users → Invite             | `manage-user` |
+| Bulk CSV import            | Admin Panel → Users → Bulk Import        | `bulk-create-users` |
+| Migration user mapping     | Migration Wizard → Step 3                | `migration-runner` |
+| Reconciliation (catch-up)  | Admin Panel → Users → Reconcile Migrated | `reconcile-migration-users` |
+| SSO Just-in-Time           | First IdP login                          | DB trigger `handle_new_user` |
+
+**SSO JIT** is wired through two database triggers:
+
+- `handle_new_user()` — on first SAML/OIDC sign-in, looks up
+  `sso_configurations` by the email's domain, attaches the user to the org
+  at `default_access_level`, applies `default_custom_role_ids`, maps
+  `first_name`/`last_name` from the IdP claims, and logs the result to
+  `sso_jit_provisioning_log`.
+- `trg_apply_sso_default_roles` (on `user_organization_access`) — applies
+  the org's SSO default roles to **any** user whose email domain matches an
+  active SSO config, regardless of which path added them. Idempotent; never
+  overrides explicit access-level choices made by the inviter.
+
+**Billable users**: a user is billable when their effective tier is
+`member`, `manager`, or `admin` (configurable via the `is_billable_tier()`
+SQL function). Counts are surfaced under **Platform Admin → Licenses**;
+in on-prem they enforce against the licensed seat count rather than
+charging — see [license.md](./license.md). Stripe metering is **cloud-only**.
+
+**Lifecycle** — archive (ban + hide), restore, and permanent delete all
+route through `manage-user` so the service-role key never reaches the
+client. Permanent delete is Platform-Admin-only.
+
+Full operator runbook in [user-provisioning.md](./user-provisioning.md).
+
+---
+
 ## What's intentionally NOT in on-prem
 
 - Stripe checkout / billing portal UI (use license entitlements instead).
