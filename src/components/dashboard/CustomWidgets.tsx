@@ -212,13 +212,14 @@ function SortableWidget({
 }
 
 function WidgetEditor({
-  open, onOpenChange, editing, onSave, saving,
+  open, onOpenChange, editing, onSave, saving, defaultMine = false,
 }: {
   open: boolean;
   onOpenChange: (b: boolean) => void;
   editing: CustomWidget | null;
   onSave: (w: Partial<CustomWidget> & { title: string; widget_type: CustomWidgetType; config: any }) => void;
   saving: boolean;
+  defaultMine?: boolean;
 }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<CustomWidgetType>("note");
@@ -226,6 +227,7 @@ function WidgetEditor({
   const [links, setLinks] = useState<{ label: string; url: string }[]>([{ label: "", url: "" }]);
   const [entity, setEntity] = useState<string>("projects");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [mineOnly, setMineOnly] = useState<boolean>(defaultMine);
 
   useEffect(() => {
     if (!open) return;
@@ -236,12 +238,14 @@ function WidgetEditor({
       setLinks(editing.config?.links?.length ? editing.config.links : [{ label: "", url: "" }]);
       setEntity(editing.config?.entity || "projects");
       setStatusFilter(editing.config?.status || "");
+      setMineOnly(!!editing.config?.mine);
     } else {
       setTitle(""); setType("note"); setNoteText("");
       setLinks([{ label: "", url: "" }]);
       setEntity("projects"); setStatusFilter("");
+      setMineOnly(defaultMine);
     }
-  }, [open, editing]);
+  }, [open, editing, defaultMine]);
 
   // Curated quick-start presets covering all platform areas. Each entry maps to
   // an entity already declared in METRIC_ENTITIES so the picker stays in sync.
