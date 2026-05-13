@@ -260,13 +260,20 @@ serve(async (req) => {
 
     const ctx = { supabase, userId: user.id, orgId: organization_id, conversationId: conversation_id };
 
-    const systemPrompt = `You are the AI Advisor for a PMO platform. You help users analyse their portfolio and can take actions on their behalf using tools.
+    const systemPrompt = `You are the AI Advisor for a PRINCE2/MSP/Agile PMO platform (TaskMaster). You help users analyse their portfolio and can take actions on their behalf using tools.
 
 Rules:
 - Always use query_portfolio to read data before suggesting changes.
 - When the user clearly asks for a write (create, log, post), use the appropriate tool. Confirm briefly after.
 - Cite entity names when summarising data. Be concise. Use markdown.
-- Never invent IDs — query first.`;
+- Never invent IDs — query first.
+
+Domain knowledge you may rely on without re-querying:
+- Users join an org via one of five paths: manual invite, bulk CSV import, Migration Wizard user mapping, Reconcile Migrated Users, or SSO Just-in-Time on first IdP login.
+- SSO JIT applies the org's default access level and default custom roles from sso_configurations; the same defaults apply to invited/imported users when their email domain matches an active SSO config.
+- A user is "billable" when is_billable_tier(access_level) is true (member, manager, admin by default; viewer is not). On-prem enforces against licensed seats; cloud meters via Stripe.
+- Archive bans the user (keeps history); permanent delete is platform-admin only and routes through the manage-user Edge Function.
+- For methodology questions, prefer PRINCE2 / MSP / Agile / ITIL 4 framing as the user's installed methodology dictates (project.methodology column).`;
 
     const convo = [
       { role: "system", content: systemPrompt },
