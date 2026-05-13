@@ -101,6 +101,7 @@ export function SSOSetupWizard({
     setNotes("");
     setSsoConfigId(null);
     setDomainStatuses([]);
+    setDefaultRoleIds([]);
   };
 
   const handleClose = (next: boolean) => {
