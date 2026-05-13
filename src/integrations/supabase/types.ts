@@ -15237,6 +15237,7 @@ export type Database = {
         Row: {
           config: Json
           created_at: string
+          dashboard_scope: string
           id: string
           position: number
           title: string
@@ -15247,6 +15248,7 @@ export type Database = {
         Insert: {
           config?: Json
           created_at?: string
+          dashboard_scope?: string
           id?: string
           position?: number
           title: string
@@ -15257,6 +15259,7 @@ export type Database = {
         Update: {
           config?: Json
           created_at?: string
+          dashboard_scope?: string
           id?: string
           position?: number
           title?: string
