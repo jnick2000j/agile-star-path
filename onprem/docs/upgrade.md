@@ -104,6 +104,27 @@ Set `UPDATE_CHANNEL` in `.env` to:
 Channel only affects `pimp-cli download` defaults. `pimp-cli download v1.4.0`
 always works regardless of channel.
 
+## Upgrading to 1.1.0 — User provisioning & SSO JIT
+
+Release 1.1.0 ships the unified user-provisioning stack (bulk import,
+migration mapping, reconciliation, SSO Just-in-Time) and the billable-user
+helper. The bundled migrations are additive and safe to apply on a live
+system; no manual steps are required.
+
+After upgrade, verify on each org:
+
+1. **Platform Admin → Licenses** — the **Billable seats** counter now
+   reflects users whose effective tier passes `is_billable_tier()`. If the
+   number looks high, audit `user_organization_access.access_level` and
+   demote viewer-class users.
+2. **Org Admin → SSO** — open each active SSO configuration and pick the
+   `default_custom_role_ids` you want JIT to apply. Pre-1.1.0 configs
+   default to no custom roles; the access-level default is preserved.
+3. **Admin Panel → Users → Reconcile Migrated** — run once if you have any
+   incomplete migrations to attribute newly-accepted invites.
+
+Tables/triggers introduced by 1.1.0 are listed in the next section.
+
 ## Notable schema additions in recent releases
 
 These tables/triggers are added by ordered migrations in the bundle and need
