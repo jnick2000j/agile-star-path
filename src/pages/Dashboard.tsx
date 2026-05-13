@@ -164,6 +164,7 @@ export default function Dashboard() {
             <ActionInbox />
             <NotificationsCard />
           </div>
+          <CustomWidgets scope="my-work" defaultMine />
         </TabsContent>
 
         {/* MY PORTFOLIO */}
