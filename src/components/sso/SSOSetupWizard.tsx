@@ -491,6 +491,36 @@ export function SSOSetupWizard({
             </div>
 
             <div className="space-y-2">
+              <Label>Default Custom Roles (optional)</Label>
+              <p className="text-xs text-muted-foreground">
+                Auto-assigned to every user who signs in via SSO from a verified domain.
+              </p>
+              {availableRoles.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">No custom roles defined yet.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto rounded-md border p-2">
+                  {availableRoles.map((r) => {
+                    const checked = defaultRoleIds.includes(r.id);
+                    return (
+                      <Badge
+                        key={r.id}
+                        variant={checked ? "default" : "outline"}
+                        className="cursor-pointer select-none"
+                        onClick={() =>
+                          setDefaultRoleIds((prev) =>
+                            checked ? prev.filter((x) => x !== r.id) : [...prev, r.id]
+                          )
+                        }
+                      >
+                        {r.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="notes">Notes (optional)</Label>
               <Textarea
                 id="notes"
