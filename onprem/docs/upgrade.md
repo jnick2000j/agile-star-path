@@ -139,6 +139,12 @@ no manual action — they are listed here for operators auditing the diff:
 | `trg_helpdesk_catalog_task_close` trigger  | Fires next task when prior is resolved/closed |
 | `lms_*` tables + `lms_recompute_enrollment` fn | Optional LMS add-on — courses, lessons, quizzes, enrollments, certificates, vector chunks. See [features.md → LMS](./features.md#learning-management-lms--optional-add-on). |
 | `lms-content` and `lms-certificates` storage buckets | Auto-created by the MinIO bootstrap. **External-S3 operators**: create both buckets and re-attach the IAM policy before enabling the LMS module — see [object-storage.md](./object-storage.md). |
+| `sso_configurations.default_custom_role_ids` (uuid[]) | SSO JIT default custom roles, applied on first IdP login |
+| `sso_jit_provisioning_log`                 | Audit row per SSO first-login attempt (success / error, granted access level) |
+| `apply_sso_default_roles_on_access` fn + `trg_apply_sso_default_roles` trigger | Applies SSO default roles to any user whose email domain matches an active SSO config — covers manual invites, bulk imports and reconciliation, not just JIT |
+| `bulk_user_import_runs`                    | One row per `bulk-create-users` invocation, with row-level outcomes |
+| `migration_user_map`                       | Source-system user → TaskMaster user mapping (Migration Wizard Step 3) |
+| `is_billable_tier(access_level)` fn        | Single source of truth for what counts as a paid seat — used by license checks and the seat counter |
 
 If you maintain custom RLS or BI views over `service_catalog_*` or
 `helpdesk_tickets`, re-validate after upgrading — the catalog-task workflow
