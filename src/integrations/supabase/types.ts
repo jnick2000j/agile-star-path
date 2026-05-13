@@ -15204,6 +15204,7 @@ export type Database = {
         Row: {
           created_at: string
           default_tab: string
+          hidden_widgets: Json
           id: string
           quick_actions: Json
           sidebar_favorites: Json
@@ -15213,6 +15214,7 @@ export type Database = {
         Insert: {
           created_at?: string
           default_tab?: string
+          hidden_widgets?: Json
           id?: string
           quick_actions?: Json
           sidebar_favorites?: Json
@@ -15222,6 +15224,7 @@ export type Database = {
         Update: {
           created_at?: string
           default_tab?: string
+          hidden_widgets?: Json
           id?: string
           quick_actions?: Json
           sidebar_favorites?: Json
