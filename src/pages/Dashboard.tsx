@@ -5,6 +5,11 @@ import { UpcomingMilestones } from "@/components/dashboard/UpcomingMilestones";
 import { StatusIndicators } from "@/components/dashboard/StatusIndicators";
 import { HelpdeskSummary } from "@/components/dashboard/HelpdeskSummary";
 import { ChangeManagementSummary } from "@/components/dashboard/ChangeManagementSummary";
+import { BenefitsTracker } from "@/components/dashboard/BenefitsTracker";
+import { OrganizationStats } from "@/components/dashboard/OrganizationStats";
+import { ProgrammeProgress } from "@/components/dashboard/ProgrammeProgress";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { PinnedAndRecents } from "@/components/dashboard/PinnedAndRecents";
 import { CustomWidgets } from "@/components/dashboard/CustomWidgets";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { MyWork } from "@/components/dashboard/MyWork";
@@ -32,7 +37,12 @@ type WidgetId =
   | "risk-summary"
   | "upcoming-milestones"
   | "helpdesk-summary"
-  | "change-management-summary";
+  | "change-management-summary"
+  | "benefits-tracker"
+  | "organization-stats"
+  | "programme-progress"
+  | "recent-activity"
+  | "pinned-recents";
 
 const WIDGET_LABELS: Record<WidgetId, string> = {
   "metrics": "Portfolio Metrics",
@@ -41,6 +51,11 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   "upcoming-milestones": "Upcoming Milestones",
   "helpdesk-summary": "Helpdesk Summary",
   "change-management-summary": "Change Management Summary",
+  "benefits-tracker": "Benefits Realization",
+  "organization-stats": "Organization Stats",
+  "programme-progress": "Programme Progress",
+  "recent-activity": "Recent Activity",
+  "pinned-recents": "Pinned & Recently Viewed",
 };
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -50,6 +65,11 @@ const ALL_WIDGETS: WidgetId[] = [
   "upcoming-milestones",
   "helpdesk-summary",
   "change-management-summary",
+  "benefits-tracker",
+  "organization-stats",
+  "programme-progress",
+  "recent-activity",
+  "pinned-recents",
 ];
 
 export default function Dashboard() {
@@ -234,6 +254,18 @@ export default function Dashboard() {
             </div>
           )}
 
+          {isVisible("organization-stats") && <OrganizationStats />}
+
+          {isVisible("programme-progress") && <ProgrammeProgress />}
+
+          {isVisible("benefits-tracker") && <BenefitsTracker />}
+
+          {(isVisible("recent-activity") || isVisible("pinned-recents")) && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {isVisible("pinned-recents") && <PinnedAndRecents />}
+              {isVisible("recent-activity") && <RecentActivity />}
+            </div>
+          )}
 
         </TabsContent>
 
