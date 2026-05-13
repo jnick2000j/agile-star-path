@@ -232,6 +232,52 @@ export function SSOConfigCard() {
               )}
             </div>
 
+            {defaultRoles.length > 0 && (
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Default Custom Roles (auto-granted on SSO sign-in)</div>
+                <div className="flex flex-wrap gap-1">
+                  {defaultRoles.map((r) => (
+                    <Badge key={r.id} variant="secondary" className="text-xs">
+                      {r.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {config.status === "active" && (
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Recent JIT provisioning ({jitLog.length})</div>
+                {jitLog.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">No SSO sign-ins yet.</p>
+                ) : (
+                  <div className="rounded-md border divide-y text-xs max-h-48 overflow-y-auto">
+                    {jitLog.map((e) => (
+                      <div key={e.id} className="flex items-center justify-between gap-2 px-2 py-1.5">
+                        <span className="truncate">{e.email}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {e.access_level_granted && (
+                            <Badge variant="outline" className="capitalize text-[10px] px-1 py-0">
+                              {e.access_level_granted}
+                            </Badge>
+                          )}
+                          <Badge
+                            variant={e.status === "success" ? "secondary" : "destructive"}
+                            className="text-[10px] px-1 py-0"
+                          >
+                            {e.status}
+                          </Badge>
+                          <span className="text-muted-foreground tabular-nums">
+                            {format(new Date(e.created_at), "MMM d, HH:mm")}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {config.status === "pending" && (
               <Alert>
                 <AlertDescription className="text-xs">
