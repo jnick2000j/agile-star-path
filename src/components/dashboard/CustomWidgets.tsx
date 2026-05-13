@@ -237,13 +237,6 @@ function WidgetEditor({
             </div>
           </div>
         )}
-                <Button key={p.id} type="button" variant="secondary" size="sm" onClick={() => presetTemplate(p.id)}>
-                  {p.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div className="space-y-3">
           <div>
