@@ -424,17 +424,43 @@ export default function Timesheets() {
 
   const addEntry = async () => {
     if (!selectedSheet) return;
+    // Constraint requires at least one link (programme/project/product/task/ticket).
+    const defaultProject = projects[0]?.id ?? null;
+    const defaultProgramme = !defaultProject ? programmes[0]?.id ?? null : null;
+    const defaultProduct =
+      !defaultProject && !defaultProgramme ? products[0]?.id ?? null : null;
+    const defaultTask =
+      !defaultProject && !defaultProgramme && !defaultProduct
+        ? selectableTasks[0]?.id ?? null
+        : null;
+    const defaultTicket =
+      !defaultProject && !defaultProgramme && !defaultProduct && !defaultTask
+        ? tickets[0]?.id ?? null
+        : null;
+
+    if (
+      !defaultProject &&
+      !defaultProgramme &&
+      !defaultProduct &&
+      !defaultTask &&
+      !defaultTicket
+    ) {
+      toast.error(
+        "You need at least one program, project, product, task, or ticket to log time against.",
+      );
+      return;
+    }
+
     const { data, error } = await supabase
       .from("timesheet_entries")
       .insert({
         timesheet_id: selectedSheet.id,
         sort_order: entries.length,
-        // default link must satisfy CHECK — use first available project else programme/product/task
-        project_id: projects[0]?.id ?? null,
-        programme_id: !projects[0] ? programmes[0]?.id ?? null : null,
-        product_id: !projects[0] && !programmes[0] ? products[0]?.id ?? null : null,
-        task_id:
-          !projects[0] && !programmes[0] && !products[0] ? selectableTasks[0]?.id ?? null : null,
+        project_id: defaultProject,
+        programme_id: defaultProgramme,
+        product_id: defaultProduct,
+        task_id: defaultTask,
+        ticket_id: defaultTicket,
       })
       .select()
       .single();
