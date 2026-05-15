@@ -27,6 +27,7 @@ import {
   Archive,
   ArchiveRestore,
   Trash2,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
@@ -43,6 +44,7 @@ import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
 import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
+import { CreateOrgDialog } from "@/components/admin/CreateOrgDialog";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { PlatformAdminsPanel } from "@/components/platform-admin/PlatformAdminsPanel";
@@ -107,6 +109,7 @@ export default function PlatformAdmin() {
   const [archiveTarget, setArchiveTarget] = useState<OrgOverview | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OrgOverview | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [createOrgOpen, setCreateOrgOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = [
     "overview","tenants","users","platform-admins","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
@@ -332,6 +335,12 @@ export default function PlatformAdmin() {
         </TabsContent>
 
         <TabsContent value="tenants" className="space-y-6">
+          <div className="flex justify-end">
+            <Button onClick={() => setCreateOrgOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create organization
+            </Button>
+          </div>
           <Card className="overflow-hidden">
             <Table>
               <TableHeader>
@@ -551,6 +560,12 @@ export default function PlatformAdmin() {
           onSuccess={() => { setSuspensionTarget(null); fetchData(); }}
         />
       )}
+
+      <CreateOrgDialog
+        open={createOrgOpen}
+        onOpenChange={setCreateOrgOpen}
+        onCreated={() => fetchData()}
+      />
 
       <OrgVerticalDialog
         open={!!verticalTarget}

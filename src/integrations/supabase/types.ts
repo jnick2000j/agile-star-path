@@ -16951,6 +16951,14 @@ export type Database = {
         }
         Returns: number
       }
+      platform_admin_create_organization: {
+        Args: {
+          _industry_vertical?: string
+          _join_as_admin?: boolean
+          _org_name: string
+        }
+        Returns: string
+      }
       purge_expired_audit_logs: { Args: never; Returns: Json }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
