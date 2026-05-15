@@ -430,7 +430,7 @@ function WidgetEditor({
             </div>
           )}
 
-          {type === "metric" && (
+          {(type === "metric" || type === "list" || type === "chart") && (
             <>
               <div>
                 <Label>Entity</Label>
@@ -452,18 +452,45 @@ function WidgetEditor({
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="w-status">Status filter (optional)</Label>
-                <Input
-                  id="w-status"
-                  placeholder="e.g. open, active, mitigating"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Leave blank to count all rows you can see.
+
+              {(type === "metric" || type === "list") && (
+                <div>
+                  <Label htmlFor="w-status">Status filter (optional)</Label>
+                  <Input
+                    id="w-status"
+                    placeholder="e.g. open, active, mitigating"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Leave blank to include all rows you can see.
+                  </p>
+                </div>
+              )}
+
+              {type === "list" && (
+                <div>
+                  <Label htmlFor="w-limit">Rows shown</Label>
+                  <Input
+                    id="w-limit"
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={listLimit}
+                    onChange={(e) => setListLimit(Math.max(1, Math.min(20, Number(e.target.value) || 5)))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Click "View all" on the widget to drill down to the full list.
+                  </p>
+                </div>
+              )}
+
+              {type === "chart" && (
+                <p className="text-xs text-muted-foreground">
+                  Chart groups records by their status field. Click any bar to drill down to the matching records.
                 </p>
-              </div>
+              )}
+
               <div className="flex items-start gap-2 rounded-md border p-3 bg-muted/30">
                 <Checkbox
                   id="w-mine"
