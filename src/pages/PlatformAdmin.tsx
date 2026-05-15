@@ -109,6 +109,7 @@ export default function PlatformAdmin() {
   const [archiveTarget, setArchiveTarget] = useState<OrgOverview | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OrgOverview | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [createOrgOpen, setCreateOrgOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = [
     "overview","tenants","users","platform-admins","licenses","plans","ai","support","sso","verticals","modules","migration-requests","migrations","audit",
