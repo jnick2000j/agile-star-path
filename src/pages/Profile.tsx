@@ -11,6 +11,7 @@ import { User, Lock, MapPin, Save } from "lucide-react";
 import { LanguagePreferenceCard } from "@/components/settings/LanguagePreferenceCard";
 import { MFASettingsCard } from "@/components/security/MFASettingsCard";
 import { ActiveSessionsCard } from "@/components/security/ActiveSessionsCard";
+import { CalendarSyncSection } from "@/components/profile/CalendarSyncSection";
 
 interface ProfileData {
   first_name: string;
@@ -306,6 +307,9 @@ export default function Profile() {
 
         {/* Language preference */}
         <LanguagePreferenceCard />
+
+        {/* Calendar sync (ICS subscription) */}
+        <CalendarSyncSection />
 
         {/* Change Password */}
         <Card>
