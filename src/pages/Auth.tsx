@@ -241,7 +241,6 @@ export default function Auth() {
           firstName,
           lastName,
           fullName: `${firstName} ${lastName}`.trim(),
-          orgName: orgName.trim(),
         });
         if (!error) {
           sessionStorage.setItem(SIGNUP_ONBOARDING_EMAIL_KEY, email.toLowerCase());
