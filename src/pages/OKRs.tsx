@@ -67,7 +67,7 @@ export default function OKRs() {
   const activeCycle = cycles.find((c) => c.id === activeCycleId);
 
   return (
-    <AppLayout>
+    <AppLayout title="OKRs">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>

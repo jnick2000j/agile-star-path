@@ -28,7 +28,7 @@ export default function OKRCheckins() {
   }, [user, currentOrganization?.id]);
 
   return (
-    <AppLayout>
+    <AppLayout title="OKRs">
       <div className="p-6 space-y-4">
         <Button variant="ghost" asChild><Link to="/okrs"><ArrowLeft className="h-4 w-4 mr-2" />Back</Link></Button>
         <h1 className="text-3xl font-bold flex items-center gap-2"><ClipboardCheck className="h-7 w-7" /> My Check-ins</h1>

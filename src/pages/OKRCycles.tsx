@@ -28,7 +28,7 @@ export default function OKRCycles() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout title="OKRs">
       <div className="p-6 space-y-4">
         <Button variant="ghost" asChild className="mb-2"><Link to="/okrs"><ArrowLeft className="h-4 w-4 mr-2" />Back to OKRs</Link></Button>
         <h1 className="text-3xl font-bold flex items-center gap-2"><Calendar className="h-7 w-7" /> OKR Cycles</h1>

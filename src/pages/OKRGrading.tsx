@@ -46,7 +46,7 @@ export default function OKRGrading() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout title="OKRs">
       <div className="p-6 space-y-4">
         <Button variant="ghost" asChild><Link to="/okrs"><ArrowLeft className="h-4 w-4 mr-2" />Back</Link></Button>
         <div className="flex items-center justify-between flex-wrap gap-3">

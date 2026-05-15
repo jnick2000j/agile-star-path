@@ -39,12 +39,12 @@ export default function OKRObjectiveDetail() {
   };
   useEffect(() => { load(); }, [id]);
 
-  if (!obj) return <AppLayout><div className="p-6">Loading…</div></AppLayout>;
+  if (!obj) return <AppLayout title="OKRs"><div className="p-6">Loading…</div></AppLayout>;
   const sm = statusMeta(obj.status);
   const cm = confidenceMeta(Number(obj.confidence));
 
   return (
-    <AppLayout>
+    <AppLayout title="OKRs">
       <div className="p-6 space-y-6">
         <Button variant="ghost" asChild><Link to="/okrs"><ArrowLeft className="h-4 w-4 mr-2" />Back</Link></Button>
         <div>
