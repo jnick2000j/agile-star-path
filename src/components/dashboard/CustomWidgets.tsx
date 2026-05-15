@@ -233,6 +233,8 @@ function WidgetEditor({
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [mineOnly, setMineOnly] = useState<boolean>(defaultMine);
   const [listLimit, setListLimit] = useState<number>(5);
+  const [compositeColumns, setCompositeColumns] = useState<number>(2);
+  const [compositeItems, setCompositeItems] = useState<CompositeItem[]>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -245,12 +247,16 @@ function WidgetEditor({
       setStatusFilter(editing.config?.status || "");
       setMineOnly(!!editing.config?.mine);
       setListLimit(Number(editing.config?.limit) || 5);
+      setCompositeColumns(Number(editing.config?.columns) || 2);
+      setCompositeItems(Array.isArray(editing.config?.items) ? editing.config.items : []);
     } else {
       setTitle(""); setType("note"); setNoteText("");
       setLinks([{ label: "", url: "" }]);
       setEntity("projects"); setStatusFilter("");
       setMineOnly(defaultMine);
       setListLimit(5);
+      setCompositeColumns(2);
+      setCompositeItems([]);
     }
   }, [open, editing, defaultMine]);
 
