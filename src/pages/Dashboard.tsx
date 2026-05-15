@@ -140,7 +140,7 @@ export default function Dashboard() {
       </div>
 
       <Tabs
-        value={prefs.default_tab}
+        value={prefs.default_tab === "my-dashboard" ? "portfolio" : prefs.default_tab}
         onValueChange={(v) => update({ default_tab: v })}
         className="space-y-6"
       >
