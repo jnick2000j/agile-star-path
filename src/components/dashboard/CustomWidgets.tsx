@@ -347,6 +347,7 @@ function WidgetEditor({
     if (type === "metric") config = { entity, status: statusFilter || undefined, mine: mineOnly || undefined };
     if (type === "list") config = { entity, status: statusFilter || undefined, mine: mineOnly || undefined, limit: listLimit };
     if (type === "chart") config = { entity, mine: mineOnly || undefined };
+    if (type === "composite") config = { columns: compositeColumns, items: compositeItems };
     onSave({
       id: editing?.id,
       position: editing?.position,
