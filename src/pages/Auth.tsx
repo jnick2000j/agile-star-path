@@ -178,11 +178,10 @@ export default function Auth() {
   const validateRequest = () => {
     const newErrors: typeof errors = {};
     try { emailSchema.parse(email); } catch (e) { if (e instanceof z.ZodError) newErrors.email = e.errors[0].message; }
-    if (mode === "signup") {
-      try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
-      try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
-      if (!orgName.trim()) newErrors.orgName = "Organization name is required";
-    }
+      if (mode === "signup") {
+        try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
+        try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
+      }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -242,7 +241,6 @@ export default function Auth() {
           firstName,
           lastName,
           fullName: `${firstName} ${lastName}`.trim(),
-          orgName: orgName.trim(),
         });
         if (!error) {
           sessionStorage.setItem(SIGNUP_ONBOARDING_EMAIL_KEY, email.toLowerCase());
@@ -435,14 +433,6 @@ export default function Auth() {
                 <Input id="lastName" placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors" />
                 {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="orgName" className="text-xs font-medium">Organization Name</Label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
-                <Input id="orgName" placeholder="Acme Corporation" value={orgName} onChange={(e) => setOrgName(e.target.value)} className="pl-9 h-10 text-sm bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-              </div>
-              {errors.orgName && <p className="text-xs text-destructive">{errors.orgName}</p>}
             </div>
           </>
         )}
