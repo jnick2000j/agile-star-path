@@ -424,43 +424,16 @@ export default function Timesheets() {
 
   const addEntry = async () => {
     if (!selectedSheet) return;
-    // Constraint requires at least one link (programme/project/product/task/ticket).
-    const defaultProject = projects[0]?.id ?? null;
-    const defaultProgramme = !defaultProject ? programmes[0]?.id ?? null : null;
-    const defaultProduct =
-      !defaultProject && !defaultProgramme ? products[0]?.id ?? null : null;
-    const defaultTask =
-      !defaultProject && !defaultProgramme && !defaultProduct
-        ? selectableTasks[0]?.id ?? null
-        : null;
-    const defaultTicket =
-      !defaultProject && !defaultProgramme && !defaultProduct && !defaultTask
-        ? tickets[0]?.id ?? null
-        : null;
-
-    if (
-      !defaultProject &&
-      !defaultProgramme &&
-      !defaultProduct &&
-      !defaultTask &&
-      !defaultTicket
-    ) {
-      toast.error(
-        "You need at least one program, project, product, task, or ticket to log time against.",
-      );
-      return;
-    }
-
     const { data, error } = await supabase
       .from("timesheet_entries")
       .insert({
         timesheet_id: selectedSheet.id,
         sort_order: entries.length,
-        project_id: defaultProject,
-        programme_id: defaultProgramme,
-        product_id: defaultProduct,
-        task_id: defaultTask,
-        ticket_id: defaultTicket,
+        programme_id: null,
+        project_id: null,
+        product_id: null,
+        task_id: null,
+        ticket_id: null,
       })
       .select()
       .single();
@@ -1039,7 +1012,9 @@ export default function Timesheets() {
                             ? "product"
                             : e.ticket_id
                               ? "ticket"
-                              : "task";
+                              : e.task_id
+                                ? "task"
+                                : "general";
                       const linkValue =
                         e.programme_id || e.project_id || e.product_id || e.task_id || e.ticket_id || "";
                       return (
@@ -1067,12 +1042,13 @@ export default function Timesheets() {
                                           : v === "ticket"
                                             ? tickets[0]?.id
                                             : selectableTasks[0]?.id;
+                                  if (v === "general") updateEntry(e.id, patch);
                                   if (v === "programme") patch.programme_id = first ?? null;
                                   if (v === "project") patch.project_id = first ?? null;
                                   if (v === "product") patch.product_id = first ?? null;
                                   if (v === "task") patch.task_id = first ?? null;
                                   if (v === "ticket") patch.ticket_id = first ?? null;
-                                  updateEntry(e.id, patch);
+                                  if (v !== "general") updateEntry(e.id, patch);
                                 }}
                                 disabled={!canEdit}
                               >
@@ -1080,6 +1056,7 @@ export default function Timesheets() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="general">General</SelectItem>
                                   <SelectItem value="programme">Program</SelectItem>
                                   <SelectItem value="project">Project</SelectItem>
                                   <SelectItem value="product">Product</SelectItem>
@@ -1104,10 +1081,10 @@ export default function Timesheets() {
                                   if (linkType === "ticket") patch.ticket_id = v;
                                   updateEntry(e.id, patch);
                                 }}
-                                disabled={!canEdit}
+                                disabled={!canEdit || linkType === "general"}
                               >
                                 <SelectTrigger className="flex-1 min-w-[140px]">
-                                  <SelectValue placeholder="Select…" />
+                                  <SelectValue placeholder={linkType === "general" ? "No linked item" : "Select…"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {(linkType === "programme"
