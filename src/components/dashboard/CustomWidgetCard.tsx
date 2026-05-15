@@ -15,7 +15,15 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
 
-export type CustomWidgetType = "note" | "links" | "metric" | "list" | "chart";
+export type CustomWidgetType = "note" | "links" | "metric" | "list" | "chart" | "composite";
+
+/** Sub-item kinds usable inside a composite widget. */
+export type CompositeItemKind = "metric" | "chart" | "list" | "note" | "links";
+export interface CompositeItem {
+  label?: string;
+  kind: CompositeItemKind;
+  config: any;
+}
 
 export interface CustomWidget {
   id: string;
