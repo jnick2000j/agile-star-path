@@ -561,6 +561,12 @@ export default function PlatformAdmin() {
         />
       )}
 
+      <CreateOrgDialog
+        open={createOrgOpen}
+        onOpenChange={setCreateOrgOpen}
+        onCreated={() => fetchData()}
+      />
+
       <OrgVerticalDialog
         open={!!verticalTarget}
         onOpenChange={(o) => !o && setVerticalTarget(null)}
