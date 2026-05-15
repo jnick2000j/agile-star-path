@@ -335,6 +335,12 @@ export default function PlatformAdmin() {
         </TabsContent>
 
         <TabsContent value="tenants" className="space-y-6">
+          <div className="flex justify-end">
+            <Button onClick={() => setCreateOrgOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create organization
+            </Button>
+          </div>
           <Card className="overflow-hidden">
             <Table>
               <TableHeader>
