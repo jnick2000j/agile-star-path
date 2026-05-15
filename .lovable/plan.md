@@ -1,48 +1,98 @@
-## OKR Module — Lightweight, Cycles → Objectives → Key Results → Check-ins
+## Task Calendar Integration
 
-Add an org-scoped OKR module that fits alongside the Benefits Register, reusing existing patterns (RLS via `has_org_access`, notifications dispatcher, weekly report cron, AI summary panels).
+Three layers, shipped together. All scoped to the existing `tasks` table (uses `planned_start`, `planned_end`, `assigned_to`, `organization_id`).
 
-### 1. Database (migration)
+### 1. In-app Calendar View
 
-New tables, all `organization_id`-scoped with RLS:
+New tab inside `Tasks.tsx` ("Calendar") next to Task Management / Sprint Planning / Backlog.
 
-- **`okr_cycles`** — name, period_type (`quarterly`/`annual`/`custom`), start_date, end_date, status (`planned`/`active`/`closed`), grading_scale (default 0.0–1.0).
-- **`okr_objectives`** — cycle_id, parent_objective_id (cascading), owner_user_id, scope (`org`/`programme`/`project`/`team`/`individual`), programme_id/project_id/product_id (nullable links), title, description, category, status, final_grade, final_commentary.
-- **`okr_key_results`** — objective_id, owner_user_id, title, metric_type (`number`/`percent`/`currency`/`boolean`/`milestone`), start_value, target_value, current_value, unit, progress_pct (computed/stored), confidence (0.0–1.0), status, weight.
-- **`okr_checkins`** — key_result_id, user_id, checkin_date, previous_value, new_value, progress_pct, confidence, commentary, blockers.
-- **`okr_objective_alignments`** — optional many-to-many for cross-team alignment beyond parent.
-- **`okr_settings`** — per-org: checkin_cadence (`weekly`/`biweekly`), checkin_day_of_week, reminder_enabled, cycle_reminder_days_before_end.
+- New page `src/pages/TaskCalendar.tsx` using `react-big-calendar` (or `@fullcalendar/react` — leaning `react-big-calendar` for lighter weight, already pairs with date-fns).
+- Month / Week / Day / Agenda views.
+- Filters: My tasks / All org tasks / by project / programme / product / status / priority (reuse existing filter patterns).
+- Drag-to-move and resize → updates `planned_start` / `planned_end`.
+- Click event → opens existing task edit dialog.
+- Color-codes by priority; strike-through for completed.
+- Respects `has_org_access` RLS (no schema change needed).
 
-RLS: standard `has_org_access(organization_id)` SELECT; INSERT/UPDATE/DELETE gated to org members; Org Admin full rights. Triggers: auto-recompute `key_result.progress_pct` and `current_value` from latest check-in; recompute `objective.progress` (weighted avg of KRs); `updated_at` triggers; `status_history` audit on objective/cycle status changes.
+### 2. ICS Subscription Feed
 
-### 2. Frontend pages & components
+Per-user secure read-only calendar feed any client can subscribe to (Google / Outlook / Apple).
 
-- **`/okrs`** — Cycle picker + dashboard: active objectives grid, overall org progress, confidence heatmap, alignment tree view, filter by owner/scope/programme/project.
-- **`/okrs/cycles`** — Cycle list + create/edit dialog, close-cycle flow (triggers grading).
-- **`/okrs/objectives/:id`** — Objective detail: KR list with sparkline progress, check-in history, child objectives (cascading view), alignment links.
-- **`/okrs/checkins`** — "My check-ins this week" — quick entry form per KR (new value + confidence slider + commentary).
-- **`/okrs/grading`** — End-of-cycle grading workspace for closed cycles: per-objective final grade (auto-suggested from KR avg), commentary, lessons learned link.
-- **Sidebar entry** under Strategy/Programmes section, gated by `useModuleToggles` (`okrs` flag).
-- Reuse: `Badge` for confidence/status, `Progress` bars, `Recharts` for trend lines, AI Summary panel, status filter popovers.
+**DB (migration):**
+- `task_calendar_tokens` — `user_id`, `organization_id`, `token` (random 48-char), `scope` (`my_tasks` | `org_tasks`), `revoked_at`, `last_accessed_at`. RLS: user can manage their own rows.
 
-### 3. Notifications & emails
+**Edge function `task-calendar-ics` (public, `verify_jwt = false`):**
+- `GET /task-calendar-ics?token=...`
+- Looks up token via service role, fetches matching tasks with `planned_start` set, returns `text/calendar` body (RFC 5545) with VEVENTs (UID = `task-{id}@pimp`, SUMMARY = task name, DTSTART/DTEND from planned dates, DESCRIPTION + URL back to task, STATUS mapped, LAST-MODIFIED for refresh).
+- Updates `last_accessed_at`.
 
-- Reuse `notification-dispatcher` with new event types: `okr_checkin_due`, `okr_checkin_missed`, `okr_confidence_dropped`, `okr_cycle_starting`, `okr_cycle_ending`, `okr_objective_assigned`, `okr_grading_due`.
-- New cron-driven edge function **`okr-reminder-scanner`** (hourly): finds KR owners due for check-in based on `okr_settings.checkin_cadence`, queues bell + email notifications. Also fires cycle start/end reminders.
-- Email templates (transactional, per-recipient): "Your weekly OKR check-in is due", "Cycle ending in 7 days — time to grade", "Confidence dropped on [KR]". Wired through existing transactional email infrastructure.
-- Weekly report (`summarize-weekly-report`): include OKR progress section per recipient — objectives at risk (confidence < 0.4), KRs without check-ins this week, trending grades.
+**UI (Profile → "Calendar Sync" section):**
+- Generate / revoke / regenerate token.
+- Show `webcal://…/functions/v1/task-calendar-ics?token=…` URL with copy button.
+- Buttons: "Add to Google Calendar" (opens `https://calendar.google.com/calendar/r?cid=...`), "Add to Outlook", download `.ics` snapshot.
 
-### 4. Module toggle
+### 3. Google Calendar Two-Way Sync (per-user OAuth)
 
-Add `okrs` to `organization_module_toggles` so org admins can enable/disable from Helpdesk → Admin → Modules pattern (or new Strategy admin tab). Off by default.
+**Why per-user OAuth (not the connector):** the platform connector authenticates the workspace owner only. Each end-user must grant access to their own calendar.
 
-### 5. Memory
+**Setup the user must do once (documented in UI):**
+- Create OAuth client in Google Cloud Console (scope: `https://www.googleapis.com/auth/calendar.events`).
+- Paste Client ID + Secret into Cloud secrets (`GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`).
 
-Add `mem://features/okr-module` describing the module and update index Core line: "OKR module: org-scoped cycles → objectives → KRs → check-ins, weighted progress, confidence 0.0–1.0, gated by `okrs` module toggle."
+**DB (migration):**
+- `user_google_calendar_connections` — `user_id` (unique), `google_account_email`, `target_calendar_id` (default `primary`), `access_token` (encrypted via pgsodium or stored as text — using text + RLS owner-only), `refresh_token`, `token_expires_at`, `sync_token` (incremental sync), `last_synced_at`, `sync_enabled`.
+- `task_calendar_event_links` — `task_id`, `user_id`, `google_event_id`, `etag`, `last_pushed_at`, unique `(task_id, user_id)`.
+- RLS: each user manages only their own rows.
+
+**Edge functions:**
+- `gcal-oauth-start` — builds Google consent URL, returns to client.
+- `gcal-oauth-callback` — exchanges code → tokens, stores connection, redirects back to Profile.
+- `gcal-sync-push` — for a given user, upserts/deletes Google events for their assigned tasks with planned dates (called on task save via DB trigger → pg_net, and on demand).
+- `gcal-sync-pull` — incremental `events.list` with `syncToken`; if a linked event was moved/resized in Google, updates the task's `planned_start`/`planned_end`.
+- `gcal-sync-scanner` — hourly cron, iterates `sync_enabled` users, runs pull then push, refreshes tokens.
+
+**Triggers:**
+- After insert/update/delete on `tasks` where `assigned_to` is set and `planned_start` is not null → `pg_net.http_post` to `gcal-sync-push` (best-effort; failure logged, not blocking).
+
+**UI (Profile → "Calendar Sync" section, alongside ICS):**
+- "Connect Google Calendar" button → starts OAuth.
+- Connected state shows account email, target calendar dropdown (fetched once), Disconnect, "Sync now".
+- Per-task badge "Synced to Google" when link row exists.
+
+### 4. Module toggle & navigation
+
+- Add `task_calendar` to `organization_module_toggles` (default on).
+- Calendar tab inside Tasks page is gated by toggle.
+- Sidebar gets no new top-level item — lives under existing Tasks.
 
 ### Technical notes
 
-- Progress aggregation: trigger on `okr_checkins` insert → updates parent KR `current_value`, `progress_pct`, `confidence`; second trigger on KR update → recomputes objective progress as weighted avg; cascading objective progress rolls up to parent objectives.
-- Final grade suggestion: average of KR `progress_pct` weighted by `weight`, surfaced as default in grading UI but editable.
-- Alignment view: recursive CTE on `parent_objective_id` rendered as a tree.
-- All currency in USD per project rules.
+- `react-big-calendar` + `date-fns` localizer.
+- Token format for ICS: `encode(random_bytes(36), 'base64url')`.
+- All times stored UTC; ICS uses `DTSTART:YYYYMMDDTHHMMSSZ`.
+- Google sync: handle 410 Gone on `syncToken` → fall back to full sync.
+- Rate limiting on push: debounce per-user 10s in scanner; trigger uses NOTIFY queue table `gcal_sync_queue` instead of direct HTTP to avoid bursts.
+- Currency rule (USD) untouched — no financial fields here.
+- All emails in connection status shown as `first_name last_name` per identity rule (Google email kept as system identifier only).
+
+### Files to create
+- `src/pages/TaskCalendar.tsx`
+- `src/components/profile/CalendarSyncSection.tsx`
+- `supabase/functions/task-calendar-ics/index.ts`
+- `supabase/functions/gcal-oauth-start/index.ts`
+- `supabase/functions/gcal-oauth-callback/index.ts`
+- `supabase/functions/gcal-sync-push/index.ts`
+- `supabase/functions/gcal-sync-pull/index.ts`
+- `supabase/functions/gcal-sync-scanner/index.ts`
+- Migration: tables, RLS, trigger, hourly cron.
+
+### Files to edit
+- `src/pages/Tasks.tsx` — add Calendar tab.
+- `src/pages/Profile.tsx` — mount `CalendarSyncSection`.
+- `package.json` — add `react-big-calendar`.
+
+### Secrets needed before Google sync works
+- `GOOGLE_CALENDAR_CLIENT_ID`
+- `GOOGLE_CALENDAR_CLIENT_SECRET`
+
+I'll request these via the secrets tool when we get to step 3. Steps 1 (in-app calendar) and 2 (ICS feed) work without any secrets and can ship first.
