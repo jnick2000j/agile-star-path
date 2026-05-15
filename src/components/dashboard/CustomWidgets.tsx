@@ -15,7 +15,10 @@ import {
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { CustomWidgetCard, CustomWidget, CustomWidgetType, METRIC_ENTITIES } from "./CustomWidgetCard";
+import {
+  CustomWidgetCard, CustomWidget, CustomWidgetType, METRIC_ENTITIES,
+  type CompositeItem, type CompositeItemKind,
+} from "./CustomWidgetCard";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent,
