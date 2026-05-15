@@ -1,0 +1,2 @@
+ALTER TABLE public.user_dashboard_widgets DROP CONSTRAINT user_dashboard_widgets_widget_type_check;
+ALTER TABLE public.user_dashboard_widgets ADD CONSTRAINT user_dashboard_widgets_widget_type_check CHECK (widget_type = ANY (ARRAY['note'::text, 'links'::text, 'metric'::text, 'list'::text, 'chart'::text, 'composite'::text]));
