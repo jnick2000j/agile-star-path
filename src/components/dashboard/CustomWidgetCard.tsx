@@ -445,6 +445,44 @@ function LinksBody({ config }: { config: any }) {
   );
 }
 
+// ----- Composite widget ---------------------------------------------------
+
+function CompositeItemRenderer({ item, parentTitle }: { item: CompositeItem; parentTitle: string }) {
+  const childTitle = item.label?.trim() || parentTitle;
+  switch (item.kind) {
+    case "metric": return <MetricBody widgetTitle={childTitle} config={item.config} />;
+    case "list":   return <ListBody widgetTitle={childTitle} config={item.config} />;
+    case "chart":  return <ChartBody widgetTitle={childTitle} config={item.config} />;
+    case "note":   return <NoteBody config={item.config} />;
+    case "links":  return <LinksBody config={item.config} />;
+    default:       return null;
+  }
+}
+
+function CompositeBody({ widgetTitle, config }: { widgetTitle: string; config: any }) {
+  const items: CompositeItem[] = Array.isArray(config?.items) ? config.items : [];
+  const columns = Math.max(1, Math.min(3, Number(config?.columns) || 2));
+  if (items.length === 0) {
+    return <p className="text-sm text-muted-foreground italic">No items in this composite widget yet.</p>;
+  }
+  const gridCls =
+    columns === 1 ? "grid grid-cols-1 gap-4"
+    : columns === 3 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    : "grid grid-cols-1 sm:grid-cols-2 gap-4";
+  return (
+    <div className={gridCls}>
+      {items.map((item, i) => (
+        <div key={i} className="rounded-md border bg-card p-3 space-y-1">
+          {item.label ? (
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{item.label}</p>
+          ) : null}
+          <CompositeItemRenderer item={item} parentTitle={widgetTitle} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CustomWidgetCard({
   widget,
   onEdit,
@@ -455,7 +493,7 @@ export function CustomWidgetCard({
   onDelete: (w: CustomWidget) => void;
 }) {
   return (
-    <Card>
+    <Card className={widget.widget_type === "composite" ? "md:col-span-2" : undefined}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-semibold">{widget.title}</CardTitle>
         <div className="flex gap-1">
@@ -473,7 +511,9 @@ export function CustomWidgetCard({
         {widget.widget_type === "metric" && <MetricBody widgetTitle={widget.title} config={widget.config} />}
         {widget.widget_type === "list" && <ListBody widgetTitle={widget.title} config={widget.config} />}
         {widget.widget_type === "chart" && <ChartBody widgetTitle={widget.title} config={widget.config} />}
+        {widget.widget_type === "composite" && <CompositeBody widgetTitle={widget.title} config={widget.config} />}
       </CardContent>
     </Card>
   );
+}
 }
