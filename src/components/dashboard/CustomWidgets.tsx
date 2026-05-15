@@ -229,6 +229,7 @@ function WidgetEditor({
   const [entity, setEntity] = useState<string>("projects");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [mineOnly, setMineOnly] = useState<boolean>(defaultMine);
+  const [listLimit, setListLimit] = useState<number>(5);
 
   useEffect(() => {
     if (!open) return;
@@ -240,11 +241,13 @@ function WidgetEditor({
       setEntity(editing.config?.entity || "projects");
       setStatusFilter(editing.config?.status || "");
       setMineOnly(!!editing.config?.mine);
+      setListLimit(Number(editing.config?.limit) || 5);
     } else {
       setTitle(""); setType("note"); setNoteText("");
       setLinks([{ label: "", url: "" }]);
       setEntity("projects"); setStatusFilter("");
       setMineOnly(defaultMine);
+      setListLimit(5);
     }
   }, [open, editing, defaultMine]);
 
