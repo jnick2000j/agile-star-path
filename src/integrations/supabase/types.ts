@@ -9853,7 +9853,7 @@ export type Database = {
           environment: string
           id: string
           organization_id: string
-          plan_id: string
+          plan_id: string | null
           status: string
           stripe_customer_id: string | null
           stripe_price_id: string | null
@@ -9871,7 +9871,7 @@ export type Database = {
           environment?: string
           id?: string
           organization_id: string
-          plan_id: string
+          plan_id?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
@@ -9889,7 +9889,7 @@ export type Database = {
           environment?: string
           id?: string
           organization_id?: string
-          plan_id?: string
+          plan_id?: string | null
           status?: string
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
