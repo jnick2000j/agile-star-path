@@ -27,6 +27,7 @@ import {
   Archive,
   ArchiveRestore,
   Trash2,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformSSOQueue } from "@/components/sso/PlatformSSOQueue";
