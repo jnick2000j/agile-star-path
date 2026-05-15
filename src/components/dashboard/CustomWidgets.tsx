@@ -520,6 +520,15 @@ function WidgetEditor({
               </div>
             </>
           )}
+
+          {type === "composite" && (
+            <CompositeItemsEditor
+              columns={compositeColumns}
+              onColumnsChange={setCompositeColumns}
+              items={compositeItems}
+              onItemsChange={setCompositeItems}
+            />
+          )}
         </div>
 
         <DialogFooter>
