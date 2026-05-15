@@ -229,6 +229,7 @@ function WidgetEditor({
   const [entity, setEntity] = useState<string>("projects");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [mineOnly, setMineOnly] = useState<boolean>(defaultMine);
+  const [listLimit, setListLimit] = useState<number>(5);
 
   useEffect(() => {
     if (!open) return;
@@ -240,11 +241,13 @@ function WidgetEditor({
       setEntity(editing.config?.entity || "projects");
       setStatusFilter(editing.config?.status || "");
       setMineOnly(!!editing.config?.mine);
+      setListLimit(Number(editing.config?.limit) || 5);
     } else {
       setTitle(""); setType("note"); setNoteText("");
       setLinks([{ label: "", url: "" }]);
       setEntity("projects"); setStatusFilter("");
       setMineOnly(defaultMine);
+      setListLimit(5);
     }
   }, [open, editing, defaultMine]);
 
@@ -333,6 +336,8 @@ function WidgetEditor({
     if (type === "note") config = { text: noteText };
     if (type === "links") config = { links: links.filter(l => l.url.trim()) };
     if (type === "metric") config = { entity, status: statusFilter || undefined, mine: mineOnly || undefined };
+    if (type === "list") config = { entity, status: statusFilter || undefined, mine: mineOnly || undefined, limit: listLimit };
+    if (type === "chart") config = { entity, mine: mineOnly || undefined };
     onSave({
       id: editing?.id,
       position: editing?.position,
@@ -377,7 +382,9 @@ function WidgetEditor({
               <SelectContent>
                 <SelectItem value="note">Note</SelectItem>
                 <SelectItem value="links">Link list</SelectItem>
-                <SelectItem value="metric">Metric counter</SelectItem>
+                <SelectItem value="metric">Metric counter (drill-down)</SelectItem>
+                <SelectItem value="list">List of items (drill-down)</SelectItem>
+                <SelectItem value="chart">Chart by status (drill-down)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -423,7 +430,7 @@ function WidgetEditor({
             </div>
           )}
 
-          {type === "metric" && (
+          {(type === "metric" || type === "list" || type === "chart") && (
             <>
               <div>
                 <Label>Entity</Label>
@@ -445,18 +452,45 @@ function WidgetEditor({
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="w-status">Status filter (optional)</Label>
-                <Input
-                  id="w-status"
-                  placeholder="e.g. open, active, mitigating"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Leave blank to count all rows you can see.
+
+              {(type === "metric" || type === "list") && (
+                <div>
+                  <Label htmlFor="w-status">Status filter (optional)</Label>
+                  <Input
+                    id="w-status"
+                    placeholder="e.g. open, active, mitigating"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Leave blank to include all rows you can see.
+                  </p>
+                </div>
+              )}
+
+              {type === "list" && (
+                <div>
+                  <Label htmlFor="w-limit">Rows shown</Label>
+                  <Input
+                    id="w-limit"
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={listLimit}
+                    onChange={(e) => setListLimit(Math.max(1, Math.min(20, Number(e.target.value) || 5)))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Click "View all" on the widget to drill down to the full list.
+                  </p>
+                </div>
+              )}
+
+              {type === "chart" && (
+                <p className="text-xs text-muted-foreground">
+                  Chart groups records by their status field. Click any bar to drill down to the matching records.
                 </p>
-              </div>
+              )}
+
               <div className="flex items-start gap-2 rounded-md border p-3 bg-muted/30">
                 <Checkbox
                   id="w-mine"
