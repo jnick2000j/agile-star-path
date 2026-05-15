@@ -265,11 +265,8 @@ export default function Dashboard() {
             </div>
           )}
 
-        </TabsContent>
-
-        {/* MY DASHBOARD — user-built widgets */}
-        <TabsContent value="my-dashboard" className="space-y-6 mt-6">
-          <CustomWidgets scope="portfolio" />
+          {/* User-built widgets, formerly the "My Dashboard" tab */}
+          <CustomWidgets scope="portfolio" heading="My Custom Widgets" />
         </TabsContent>
       </Tabs>
     </AppLayout>
