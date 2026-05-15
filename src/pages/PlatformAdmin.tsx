@@ -44,6 +44,7 @@ import { VerticalPacksManager } from "@/components/admin/VerticalPacksManager";
 import { OrgVerticalDialog } from "@/components/admin/OrgVerticalDialog";
 import { PlatformModuleToggles } from "@/components/admin/PlatformModuleToggles";
 import { OrgOnboardingWizard } from "@/components/admin/OrgOnboardingWizard";
+import { CreateOrgDialog } from "@/components/admin/CreateOrgDialog";
 import { PlatformMigrationsManager } from "@/components/admin/PlatformMigrationsManager";
 import { PlatformMigrationRequestsQueue } from "@/components/admin/PlatformMigrationRequestsQueue";
 import { PlatformAdminsPanel } from "@/components/platform-admin/PlatformAdminsPanel";
