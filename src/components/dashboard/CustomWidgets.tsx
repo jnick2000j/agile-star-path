@@ -395,6 +395,7 @@ function WidgetEditor({
                 <SelectItem value="metric">Metric counter (drill-down)</SelectItem>
                 <SelectItem value="list">List of items (drill-down)</SelectItem>
                 <SelectItem value="chart">Chart by status (drill-down)</SelectItem>
+                <SelectItem value="composite">Composite (multiple items in one card)</SelectItem>
               </SelectContent>
             </Select>
           </div>
