@@ -163,6 +163,12 @@ export function Sidebar() {
       ],
     },
     { label: "Registers", icon: ClipboardList, href: "/registers" },
+    { label: "OKRs", icon: Target, href: "/okrs", children: [
+      { label: "Dashboard", href: "/okrs" },
+      { label: "Cycles", href: "/okrs/cycles" },
+      { label: "My Check-ins", href: "/okrs/checkins" },
+      { label: "Grading", href: "/okrs/grading" },
+    ] },
     {
       label: "Reporting",
       icon: BarChart3,
