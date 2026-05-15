@@ -9374,6 +9374,350 @@ export type Database = {
         }
         Relationships: []
       }
+      okr_checkins: {
+        Row: {
+          blockers: string | null
+          checkin_date: string
+          commentary: string | null
+          confidence: number
+          created_at: string
+          id: string
+          key_result_id: string
+          new_value: number
+          organization_id: string
+          previous_value: number | null
+          progress_pct: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          blockers?: string | null
+          checkin_date?: string
+          commentary?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          key_result_id: string
+          new_value: number
+          organization_id: string
+          previous_value?: number | null
+          progress_pct?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          blockers?: string | null
+          checkin_date?: string
+          commentary?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          key_result_id?: string
+          new_value?: number
+          organization_id?: string
+          previous_value?: number | null
+          progress_pct?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "okr_checkins_key_result_id_fkey"
+            columns: ["key_result_id"]
+            isOneToOne: false
+            referencedRelation: "okr_key_results"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "okr_checkins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      okr_cycles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string
+          grading_scale_max: number
+          grading_scale_min: number
+          id: string
+          name: string
+          organization_id: string
+          period_type: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          grading_scale_max?: number
+          grading_scale_min?: number
+          id?: string
+          name: string
+          organization_id: string
+          period_type?: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          grading_scale_max?: number
+          grading_scale_min?: number
+          id?: string
+          name?: string
+          organization_id?: string
+          period_type?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "okr_cycles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      okr_key_results: {
+        Row: {
+          confidence: number
+          created_at: string
+          created_by: string | null
+          current_value: number
+          description: string | null
+          due_date: string | null
+          id: string
+          last_checkin_at: string | null
+          metric_type: string
+          objective_id: string
+          organization_id: string
+          owner_user_id: string | null
+          progress_pct: number
+          start_value: number
+          status: string
+          target_value: number
+          title: string
+          unit: string | null
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          current_value?: number
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          last_checkin_at?: string | null
+          metric_type?: string
+          objective_id: string
+          organization_id: string
+          owner_user_id?: string | null
+          progress_pct?: number
+          start_value?: number
+          status?: string
+          target_value?: number
+          title: string
+          unit?: string | null
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          current_value?: number
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          last_checkin_at?: string | null
+          metric_type?: string
+          objective_id?: string
+          organization_id?: string
+          owner_user_id?: string | null
+          progress_pct?: number
+          start_value?: number
+          status?: string
+          target_value?: number
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "okr_key_results_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "okr_objectives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "okr_key_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      okr_objectives: {
+        Row: {
+          category: string | null
+          confidence: number
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          description: string | null
+          final_commentary: string | null
+          final_grade: number | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          organization_id: string
+          owner_user_id: string | null
+          parent_objective_id: string | null
+          product_id: string | null
+          programme_id: string | null
+          progress_pct: number
+          project_id: string | null
+          scope: string
+          status: string
+          team_name: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          description?: string | null
+          final_commentary?: string | null
+          final_grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          organization_id: string
+          owner_user_id?: string | null
+          parent_objective_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          progress_pct?: number
+          project_id?: string | null
+          scope?: string
+          status?: string
+          team_name?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          description?: string | null
+          final_commentary?: string | null
+          final_grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          organization_id?: string
+          owner_user_id?: string | null
+          parent_objective_id?: string | null
+          product_id?: string | null
+          programme_id?: string | null
+          progress_pct?: number
+          project_id?: string | null
+          scope?: string
+          status?: string
+          team_name?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "okr_objectives_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "okr_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "okr_objectives_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "okr_objectives_parent_objective_id_fkey"
+            columns: ["parent_objective_id"]
+            isOneToOne: false
+            referencedRelation: "okr_objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      okr_settings: {
+        Row: {
+          checkin_cadence: string
+          checkin_day_of_week: number
+          created_at: string
+          cycle_reminder_days_before_end: number
+          low_confidence_threshold: number
+          organization_id: string
+          reminder_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          checkin_cadence?: string
+          checkin_day_of_week?: number
+          created_at?: string
+          cycle_reminder_days_before_end?: number
+          low_confidence_threshold?: number
+          organization_id: string
+          reminder_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          checkin_cadence?: string
+          checkin_day_of_week?: number
+          created_at?: string
+          cycle_reminder_days_before_end?: number
+          low_confidence_threshold?: number
+          organization_id?: string
+          reminder_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "okr_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_email_template_overrides: {
         Row: {
           created_at: string
@@ -9756,6 +10100,7 @@ export type Database = {
           enabled: boolean
           id: string
           module_key: string
+          okrs: boolean
           organization_id: string
           updated_at: string
           updated_by: string | null
@@ -9765,6 +10110,7 @@ export type Database = {
           enabled?: boolean
           id?: string
           module_key: string
+          okrs?: boolean
           organization_id: string
           updated_at?: string
           updated_by?: string | null
@@ -9774,6 +10120,7 @@ export type Database = {
           enabled?: boolean
           id?: string
           module_key?: string
+          okrs?: boolean
           organization_id?: string
           updated_at?: string
           updated_by?: string | null

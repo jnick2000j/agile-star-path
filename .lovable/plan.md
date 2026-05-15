@@ -1,84 +1,48 @@
-## Goal
-Two related capabilities, behind one cohesive UX:
-1. **Bulk-create users** from CSV in Admin → User Management.
-2. **Map source users → platform users** during migrations, with auto-invite of unmatched and a reconciliation tool that back-fills assignees later.
+## OKR Module — Lightweight, Cycles → Objectives → Key Results → Check-ins
 
-Activation = invite-only. Scope = both Org Admins (own org) and Platform Admins (any org via slug). Mapping step = optional, auto-invites unmatched valid emails. Reconciliation = built now.
+Add an org-scoped OKR module that fits alongside the Benefits Register, reusing existing patterns (RLS via `has_org_access`, notifications dispatcher, weekly report cron, AI summary panels).
 
----
+### 1. Database (migration)
 
-## What gets built
+New tables, all `organization_id`-scoped with RLS:
 
-### A. New edge function `bulk-create-users`
-Accepts an array of rows; returns a per-row result. Reuses `manage-user`'s invite logic per row.
+- **`okr_cycles`** — name, period_type (`quarterly`/`annual`/`custom`), start_date, end_date, status (`planned`/`active`/`closed`), grading_scale (default 0.0–1.0).
+- **`okr_objectives`** — cycle_id, parent_objective_id (cascading), owner_user_id, scope (`org`/`programme`/`project`/`team`/`individual`), programme_id/project_id/product_id (nullable links), title, description, category, status, final_grade, final_commentary.
+- **`okr_key_results`** — objective_id, owner_user_id, title, metric_type (`number`/`percent`/`currency`/`boolean`/`milestone`), start_value, target_value, current_value, unit, progress_pct (computed/stored), confidence (0.0–1.0), status, weight.
+- **`okr_checkins`** — key_result_id, user_id, checkin_date, previous_value, new_value, progress_pct, confidence, commentary, blockers.
+- **`okr_objective_alignments`** — optional many-to-many for cross-team alignment beyond parent.
+- **`okr_settings`** — per-org: checkin_cadence (`weekly`/`biweekly`), checkin_day_of_week, reminder_enabled, cycle_reminder_days_before_end.
 
-- **Authorization**: same checks as `manage-user`. Non-platform-admins can only target their own org; `organization_slug` column ignored unless caller is platform admin.
-- **Per-row flow**: validate (email+first/last name required) → resolve org (slug or default) → resolve role (custom_role name or `viewer`/`editor`/`admin`) → `auth.admin.createUser` → grant `user_organization_access` → optional `user_organization_custom_roles` → upsert profile fields (job_title, department, phone, location) → generate signup link → `sendTransactionalEmail` invite.
-- Idempotent on email: existing user → `linked` (grant access only), don't recreate.
-- Returns `{rows: [{email, status: 'created'|'linked'|'skipped'|'error', user_id?, error?, accept_url?}], summary: {created, linked, skipped, errored}}`.
-- Also accepts `mode: 'auto_invite'` from the migration wizard (same body, smaller default fields, suppresses email if `send_invite=false`).
+RLS: standard `has_org_access(organization_id)` SELECT; INSERT/UPDATE/DELETE gated to org members; Org Admin full rights. Triggers: auto-recompute `key_result.progress_pct` and `current_value` from latest check-in; recompute `objective.progress` (weighted avg of KRs); `updated_at` triggers; `status_history` audit on objective/cycle status changes.
 
-### B. New `BulkImportUsersDialog` (Admin → User Management)
-- "Bulk import" button next to existing Create User.
-- CSV input + downloadable template (`/migration-templates/users.csv`).
-- Headers: `email, first_name, last_name, job_title, department, phone_number, location, organization_slug, access_level, custom_roles, send_invite`.
-- Client-side parse → preview table with row-level validation badges (duplicate email in file, malformed email, unknown org slug for platform admin, unknown role name).
-- "Import N users" → calls `bulk-create-users` → shows results table → "Download report.csv" button.
-- Reuses `downloadBlob` helper from `src/lib/migration/runner.ts`.
+### 2. Frontend pages & components
 
-### C. Migration framework — user mapping
-- **Type**: `MigrationSourceAdapter.discoverUsers?(creds, scope, files)` returns `{ externalId, email?, displayName?, refCount }[]`. Optional; adapters implement when feasible.
-- **CSV adapter**: scans `assignee`/`reporter`/`owner`/`created_by` columns across all uploaded files; emits distinct entries.
-- **Jira adapter**: pulls a sample page of issues per selected project (already has `jiraFetch`) and collects `fields.assignee`/`fields.reporter` `emailAddress` + `displayName` + `accountId`.
-- **JSM adapter**: same shape, from request reporter/assignee.
-- **Wizard**: new `users` step inserted between `mapping` and `contacts`. Shows discovered users with auto-match results:
-  - Auto-match: case-insensitive email exact match against `profiles.email`.
-  - Per-row dropdown: **Linked to <user>** (auto), **Link to existing user…** (search picker), **Invite as viewer** (calls `bulk-create-users` with one row), **Skip**.
-  - "Auto-invite all unmatched (with valid emails)" bulk button.
-  - Saves `mapping.user[externalId] = user_id` for resolved rows; skipped rows stay absent.
-- **Adapter `run`**: when inserting a record, look up `mapping.user[externalId]` → set `assigned_to`/`owner_id` accordingly. If no match, write the original identity into `metadata.external = { assignee_email, assignee_name }` on the imported row's `payload` AND on the entity's `metadata` jsonb where the table has one (tasks/issues already do).
-  - Concretely modify: `jira.ts` task insert (`assigned_to`), issue insert (`owner_id`), risk insert (`owner_id`); same shape in `csv.ts` and `jiraServiceManagement.ts`.
+- **`/okrs`** — Cycle picker + dashboard: active objectives grid, overall org progress, confidence heatmap, alignment tree view, filter by owner/scope/programme/project.
+- **`/okrs/cycles`** — Cycle list + create/edit dialog, close-cycle flow (triggers grading).
+- **`/okrs/objectives/:id`** — Objective detail: KR list with sparkline progress, check-in history, child objectives (cascading view), alignment links.
+- **`/okrs/checkins`** — "My check-ins this week" — quick entry form per KR (new value + confidence slider + commentary).
+- **`/okrs/grading`** — End-of-cycle grading workspace for closed cycles: per-objective final grade (auto-suggested from KR avg), commentary, lessons learned link.
+- **Sidebar entry** under Strategy/Programmes section, gated by `useModuleToggles` (`okrs` flag).
+- Reuse: `Badge` for confidence/status, `Progress` bars, `Recharts` for trend lines, AI Summary panel, status filter popovers.
 
-### D. Reconciliation tool
-- New page section under Admin → Migration: **"Reconcile imported users"**.
-- Lists `migration_items` rows where `payload->'external'->>'assignee_email'` is not null AND `internal_id` is set AND the corresponding entity has no `assigned_to`/`owner_id`.
-- Joins against `profiles.email` to find now-known users; one-click "Reconcile all" runs an edge function `reconcile-migration-users` that:
-  - Iterates matches, updates the target table (tasks/issues/risks based on `entity_type`) setting `assigned_to`/`owner_id`.
-  - Returns counts per entity type.
+### 3. Notifications & emails
 
----
+- Reuse `notification-dispatcher` with new event types: `okr_checkin_due`, `okr_checkin_missed`, `okr_confidence_dropped`, `okr_cycle_starting`, `okr_cycle_ending`, `okr_objective_assigned`, `okr_grading_due`.
+- New cron-driven edge function **`okr-reminder-scanner`** (hourly): finds KR owners due for check-in based on `okr_settings.checkin_cadence`, queues bell + email notifications. Also fires cycle start/end reminders.
+- Email templates (transactional, per-recipient): "Your weekly OKR check-in is due", "Cycle ending in 7 days — time to grade", "Confidence dropped on [KR]". Wired through existing transactional email infrastructure.
+- Weekly report (`summarize-weekly-report`): include OKR progress section per recipient — objectives at risk (confidence < 0.4), KRs without check-ins this week, trending grades.
 
-## Database changes
-None. We reuse existing tables:
-- `migration_items.payload` (jsonb) stores skipped-assignee identity.
-- `migration_jobs.field_map` already stores `mapping.user`.
-- `tasks.assigned_to` / `issues.owner_id` / `risks.owner_id` are the targets.
+### 4. Module toggle
 
----
+Add `okrs` to `organization_module_toggles` so org admins can enable/disable from Helpdesk → Admin → Modules pattern (or new Strategy admin tab). Off by default.
 
-## Files
+### 5. Memory
 
-**New**
-- `supabase/functions/bulk-create-users/index.ts`
-- `supabase/functions/reconcile-migration-users/index.ts`
-- `src/components/admin/BulkImportUsersDialog.tsx`
-- `src/components/migration/UserMappingStep.tsx`
-- `src/components/admin/ReconcileMigratedUsersCard.tsx`
-- `public/migration-templates/users.csv`
+Add `mem://features/okr-module` describing the module and update index Core line: "OKR module: org-scoped cycles → objectives → KRs → check-ins, weighted progress, confidence 0.0–1.0, gated by `okrs` module toggle."
 
-**Edited**
-- `src/components/admin/UserManagementPanel.tsx` — add "Bulk import" button.
-- `src/lib/migration/types.ts` — add optional `discoverUsers` to adapter, add `DiscoveredUser` type.
-- `src/lib/migration/sources/csv.ts` — implement `discoverUsers` + write `assigned_to`/`owner_id` from `mapping.user` + record skipped identity in payload.
-- `src/lib/migration/sources/jira.ts` — same.
-- `src/lib/migration/sources/jiraServiceManagement.ts` — same.
-- `src/components/migration/MigrationWizard.tsx` — insert "users" step, render `UserMappingStep`.
-- `src/pages/AdminPanel.tsx` — add Reconciliation card under Migration tab.
+### Technical notes
 
----
-
-## Out of scope (deliberate)
-- SCIM enhancements — already covers ongoing sync.
-- Updating user data on re-imports (only links/creates; never overwrites profile fields after creation).
-- Bulk delete/archive via CSV.
-- Mapping users to roles per-record (only per-org access from CSV).
+- Progress aggregation: trigger on `okr_checkins` insert → updates parent KR `current_value`, `progress_pct`, `confidence`; second trigger on KR update → recomputes objective progress as weighted avg; cascading objective progress rolls up to parent objectives.
+- Final grade suggestion: average of KR `progress_pct` weighted by `weight`, surfaced as default in grading UI but editable.
+- Alignment view: recursive CTE on `parent_objective_id` rendered as a tree.
+- All currency in USD per project rules.

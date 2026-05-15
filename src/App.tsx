@@ -141,6 +141,11 @@ import LmsAdmin from "./pages/lms/LmsAdmin";
 import LmsCourseEditor from "./pages/lms/LmsCourseEditor";
 import LmsQuizEditor from "./pages/lms/LmsQuizEditor";
 import LmsManagerDashboard from "./pages/lms/LmsManagerDashboard";
+import OKRs from "./pages/OKRs";
+import OKRCycles from "./pages/OKRCycles";
+import OKRCheckins from "./pages/OKRCheckins";
+import OKRGrading from "./pages/OKRGrading";
+import OKRObjectiveDetail from "./pages/OKRObjectiveDetail";
 
 const queryClient = new QueryClient();
 
@@ -289,6 +294,11 @@ const App = () => (
             <Route path="/learning/admin/courses/:id" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to edit courses."><LmsCourseEditor /></ModuleGate></ProtectedRoute>} />
             <Route path="/learning/admin/lessons/:id/quiz" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to edit quizzes."><LmsQuizEditor /></ModuleGate></ProtectedRoute>} />
             <Route path="/learning/dashboard" element={<ProtectedRoute><ModuleGate feature="feature_lms" title="Learning (LMS)" description="Upgrade to a Helpdesk & Learning or ITSM & Learning plan to access the learning manager dashboard."><LmsManagerDashboard /></ModuleGate></ProtectedRoute>} />
+            <Route path="/okrs" element={<ProtectedRoute><OKRs /></ProtectedRoute>} />
+            <Route path="/okrs/cycles" element={<ProtectedRoute><OKRCycles /></ProtectedRoute>} />
+            <Route path="/okrs/checkins" element={<ProtectedRoute><OKRCheckins /></ProtectedRoute>} />
+            <Route path="/okrs/grading" element={<ProtectedRoute><OKRGrading /></ProtectedRoute>} />
+            <Route path="/okrs/objectives/:id" element={<ProtectedRoute><OKRObjectiveDetail /></ProtectedRoute>} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
