@@ -516,4 +516,3 @@ export function CustomWidgetCard({
     </Card>
   );
 }
-}
