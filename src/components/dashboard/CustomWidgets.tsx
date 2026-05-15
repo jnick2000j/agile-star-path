@@ -541,3 +541,232 @@ function WidgetEditor({
     </Dialog>
   );
 }
+
+// --------------------------------------------------------------------------
+// Composite item editor — used when widget type === "composite".
+// Lets the user assemble multiple sub-items (metric/chart/list/note/links)
+// inside a single widget card.
+// --------------------------------------------------------------------------
+
+const COMPOSITE_KIND_LABELS: Record<CompositeItemKind, string> = {
+  metric: "Metric counter",
+  chart: "Chart by status",
+  list: "List of items",
+  note: "Note",
+  links: "Link list",
+};
+
+function defaultConfigForKind(kind: CompositeItemKind): any {
+  if (kind === "note") return { text: "" };
+  if (kind === "links") return { links: [] };
+  if (kind === "chart") return { entity: "projects" };
+  if (kind === "list") return { entity: "projects", limit: 5 };
+  return { entity: "projects" }; // metric
+}
+
+function CompositeItemsEditor({
+  columns, onColumnsChange, items, onItemsChange,
+}: {
+  columns: number;
+  onColumnsChange: (n: number) => void;
+  items: CompositeItem[];
+  onItemsChange: (items: CompositeItem[]) => void;
+}) {
+  const updateItem = (i: number, patch: Partial<CompositeItem>) => {
+    const next = items.map((it, idx) => idx === i ? { ...it, ...patch } : it);
+    onItemsChange(next);
+  };
+  const updateConfig = (i: number, patch: any) => {
+    updateItem(i, { config: { ...(items[i].config || {}), ...patch } });
+  };
+  const addItem = () => {
+    onItemsChange([...items, { kind: "metric", label: "", config: defaultConfigForKind("metric") }]);
+  };
+  const removeItem = (i: number) => onItemsChange(items.filter((_, idx) => idx !== i));
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    onItemsChange(next);
+  };
+
+  return (
+    <div className="space-y-3 rounded-md border p-3 bg-muted/20">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1">
+          <Label>Layout columns</Label>
+          <Select value={String(columns)} onValueChange={(v) => onColumnsChange(Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1 column</SelectItem>
+              <SelectItem value="2">2 columns</SelectItem>
+              <SelectItem value="3">3 columns</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={addItem} className="gap-2 mt-5">
+          <Plus className="h-4 w-4" /> Add item
+        </Button>
+      </div>
+
+      {items.length === 0 ? (
+        <p className="text-xs text-muted-foreground italic">No items yet — click "Add item" to start composing your widget.</p>
+      ) : (
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+          {items.map((item, i) => {
+            const meta = METRIC_ENTITIES[item.config?.entity || ""];
+            return (
+              <div key={i} className="rounded-md border bg-background p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground w-6">#{i + 1}</span>
+                  <Input
+                    placeholder="Label (optional)"
+                    value={item.label || ""}
+                    onChange={(e) => updateItem(i, { label: e.target.value })}
+                    className="flex-1"
+                  />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => move(i, -1)} disabled={i === 0} title="Move up">↑</Button>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => move(i, 1)} disabled={i === items.length - 1} title="Move down">↓</Button>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)} title="Remove item">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Kind</Label>
+                    <Select
+                      value={item.kind}
+                      onValueChange={(v) => updateItem(i, {
+                        kind: v as CompositeItemKind,
+                        config: defaultConfigForKind(v as CompositeItemKind),
+                      })}
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(COMPOSITE_KIND_LABELS) as CompositeItemKind[]).map((k) => (
+                          <SelectItem key={k} value={k}>{COMPOSITE_KIND_LABELS[k]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {(item.kind === "metric" || item.kind === "list" || item.kind === "chart") && (
+                    <div>
+                      <Label className="text-xs">Entity</Label>
+                      <Select
+                        value={item.config?.entity || "projects"}
+                        onValueChange={(v) => updateConfig(i, { entity: v })}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          {Array.from(new Set(Object.values(METRIC_ENTITIES).map(v => v.group))).map((group) => (
+                            <div key={group}>
+                              <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{group}</div>
+                              {Object.entries(METRIC_ENTITIES)
+                                .filter(([, v]) => v.group === group)
+                                .map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                            </div>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {(item.kind === "metric" || item.kind === "list") && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">Status filter (optional)</Label>
+                      <Input
+                        placeholder="e.g. open, active"
+                        value={item.config?.status || ""}
+                        onChange={(e) => updateConfig(i, { status: e.target.value || undefined })}
+                      />
+                    </div>
+                    {item.kind === "list" && (
+                      <div>
+                        <Label className="text-xs">Rows shown</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={20}
+                          value={item.config?.limit || 5}
+                          onChange={(e) => updateConfig(i, { limit: Math.max(1, Math.min(20, Number(e.target.value) || 5)) })}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(item.kind === "metric" || item.kind === "list" || item.kind === "chart") && (
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`item-mine-${i}`}
+                      checked={!!item.config?.mine}
+                      onCheckedChange={(c) => updateConfig(i, { mine: c === true || undefined })}
+                      disabled={!meta?.ownerField}
+                    />
+                    <Label htmlFor={`item-mine-${i}`} className="text-xs font-normal cursor-pointer">
+                      Only items assigned to / owned by me
+                      {!meta?.ownerField ? <span className="text-muted-foreground"> (not available)</span> : null}
+                    </Label>
+                  </div>
+                )}
+
+                {item.kind === "note" && (
+                  <Textarea
+                    rows={3}
+                    placeholder="Note text"
+                    value={item.config?.text || ""}
+                    onChange={(e) => updateConfig(i, { text: e.target.value })}
+                  />
+                )}
+
+                {item.kind === "links" && (
+                  <CompositeLinksEditor
+                    links={Array.isArray(item.config?.links) ? item.config.links : []}
+                    onChange={(links) => updateConfig(i, { links })}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CompositeLinksEditor({
+  links, onChange,
+}: {
+  links: { label: string; url: string }[];
+  onChange: (links: { label: string; url: string }[]) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      {links.map((l, i) => (
+        <div key={i} className="flex gap-2">
+          <Input
+            placeholder="Label"
+            value={l.label}
+            onChange={(e) => onChange(links.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
+          />
+          <Input
+            placeholder="https://…"
+            value={l.url}
+            onChange={(e) => onChange(links.map((x, j) => j === i ? { ...x, url: e.target.value } : x))}
+          />
+          <Button type="button" variant="ghost" size="icon" onClick={() => onChange(links.filter((_, j) => j !== i))}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => onChange([...links, { label: "", url: "" }])}>
+        <Plus className="h-4 w-4 mr-1" /> Add link
+      </Button>
+    </div>
+  );
+}
