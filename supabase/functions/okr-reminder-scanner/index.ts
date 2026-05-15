@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     if (daysSince >= cadenceDays) {
       await supabase.from("notifications").insert({
         user_id: kr.owner_user_id,
-        organization_id: kr.organization_id,
+        
         type: "okr_checkin_due",
         title: "OKR check-in due",
         message: `Time for your weekly check-in on "${kr.title}".`,
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     if (Number(kr.confidence) < lowThresh) {
       await supabase.from("notifications").insert({
         user_id: kr.owner_user_id,
-        organization_id: kr.organization_id,
+        
         type: "okr_confidence_dropped",
         title: "Low confidence on key result",
         message: `Confidence on "${kr.title}" is ${Number(kr.confidence).toFixed(2)}.`,
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       for (const a of admins ?? []) {
         await supabase.from("notifications").insert({
           user_id: a.user_id,
-          organization_id: c.organization_id,
+          
           type: "okr_cycle_ending",
           title: "OKR cycle ending soon",
           message: `Cycle "${c.name}" ends in ${Math.ceil(daysToEnd)} day(s). Time to grade.`,
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       for (const a of admins ?? []) {
         await supabase.from("notifications").insert({
           user_id: a.user_id,
-          organization_id: c.organization_id,
+          
           type: "okr_cycle_starting",
           title: "OKR cycle starting",
           message: `Cycle "${c.name}" starts on ${c.start_date}.`,
