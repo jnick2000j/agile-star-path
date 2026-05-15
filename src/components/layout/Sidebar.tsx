@@ -29,6 +29,7 @@ import {
   StarOff,
   GraduationCap,
   Crown,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVertical } from "@/hooks/useVertical";
