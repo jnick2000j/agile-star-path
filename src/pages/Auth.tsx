@@ -178,11 +178,10 @@ export default function Auth() {
   const validateRequest = () => {
     const newErrors: typeof errors = {};
     try { emailSchema.parse(email); } catch (e) { if (e instanceof z.ZodError) newErrors.email = e.errors[0].message; }
-    if (mode === "signup") {
-      try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
-      try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
-      if (!orgName.trim()) newErrors.orgName = "Organization name is required";
-    }
+      if (mode === "signup") {
+        try { nameSchema.parse(firstName); } catch (e) { if (e instanceof z.ZodError) newErrors.firstName = e.errors[0].message; }
+        try { nameSchema.parse(lastName); } catch (e) { if (e instanceof z.ZodError) newErrors.lastName = e.errors[0].message; }
+      }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
