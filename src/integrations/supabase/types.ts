@@ -4360,6 +4360,33 @@ export type Database = {
           },
         ]
       }
+      gcal_sync_queue: {
+        Row: {
+          action: string
+          enqueued_at: string
+          id: string
+          processed_at: string | null
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          enqueued_at?: string
+          id?: string
+          processed_at?: string | null
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          enqueued_at?: string
+          id?: string
+          processed_at?: string | null
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       governance_reports: {
         Row: {
           ai_model: string | null
@@ -14901,6 +14928,80 @@ export type Database = {
           },
         ]
       }
+      task_calendar_event_links: {
+        Row: {
+          created_at: string
+          etag: string | null
+          google_event_id: string
+          id: string
+          last_pushed_at: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          etag?: string | null
+          google_event_id: string
+          id?: string
+          last_pushed_at?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          etag?: string | null
+          google_event_id?: string
+          id?: string
+          last_pushed_at?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_calendar_event_links_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_calendar_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_accessed_at: string | null
+          organization_id: string
+          revoked_at: string | null
+          scope: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          organization_id: string
+          revoked_at?: string | null
+          scope?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          organization_id?: string
+          revoked_at?: string | null
+          scope?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       task_comments: {
         Row: {
           author_id: string
@@ -15613,6 +15714,51 @@ export type Database = {
           updated_at?: string
           user_id?: string
           widget_type?: string
+        }
+        Relationships: []
+      }
+      user_google_calendar_connections: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          google_account_email: string
+          id: string
+          last_synced_at: string | null
+          refresh_token: string
+          sync_enabled: boolean
+          sync_token: string | null
+          target_calendar_id: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          google_account_email: string
+          id?: string
+          last_synced_at?: string | null
+          refresh_token: string
+          sync_enabled?: boolean
+          sync_token?: string | null
+          target_calendar_id?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          google_account_email?: string
+          id?: string
+          last_synced_at?: string | null
+          refresh_token?: string
+          sync_enabled?: boolean
+          sync_token?: string | null
+          target_calendar_id?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
