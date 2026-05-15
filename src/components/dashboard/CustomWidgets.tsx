@@ -382,7 +382,9 @@ function WidgetEditor({
               <SelectContent>
                 <SelectItem value="note">Note</SelectItem>
                 <SelectItem value="links">Link list</SelectItem>
-                <SelectItem value="metric">Metric counter</SelectItem>
+                <SelectItem value="metric">Metric counter (drill-down)</SelectItem>
+                <SelectItem value="list">List of items (drill-down)</SelectItem>
+                <SelectItem value="chart">Chart by status (drill-down)</SelectItem>
               </SelectContent>
             </Select>
           </div>
