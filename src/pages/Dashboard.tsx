@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3, Settings2, LayoutDashboard } from "lucide-react";
+import { Layers, FolderKanban, AlertTriangle, Target, Package, Eye, User, BarChart3, Settings2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
