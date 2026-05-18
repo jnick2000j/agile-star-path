@@ -2,3 +2,6 @@ project_id = "lpsbudbighowwdmgdfyc"
 
 [functions.task-calendar-ics]
 verify_jwt = false
+
+[functions.calendar-oauth-callback]
+verify_jwt = false

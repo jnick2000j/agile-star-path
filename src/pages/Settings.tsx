@@ -8,6 +8,7 @@ import StakeholderAccessSettings from "@/components/admin/StakeholderAccessSetti
 import { OrgAdminDangerZone } from "@/components/admin/OrgAdminDangerZone";
 import { TimesheetRestrictionSettings } from "@/components/admin/TimesheetRestrictionSettings";
 import { OrganizationModulesPanel } from "@/components/admin/OrganizationModulesPanel";
+import CalendarIntegrationsAdmin from "@/components/settings/CalendarIntegrationsAdmin";
 
 import { 
   Save, 
@@ -28,6 +29,7 @@ export default function Settings() {
           <TabsTrigger value="email">Email Reports</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="stakeholders">Stakeholder Access</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar Integrations</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -220,6 +222,10 @@ export default function Settings() {
 
         <TabsContent value="stakeholders">
           <StakeholderAccessSettings />
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <CalendarIntegrationsAdmin />
         </TabsContent>
       </Tabs>
     </AppLayout>

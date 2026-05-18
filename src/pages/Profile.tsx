@@ -12,6 +12,7 @@ import { LanguagePreferenceCard } from "@/components/settings/LanguagePreference
 import { MFASettingsCard } from "@/components/security/MFASettingsCard";
 import { ActiveSessionsCard } from "@/components/security/ActiveSessionsCard";
 import { CalendarSyncSection } from "@/components/profile/CalendarSyncSection";
+import { ConnectedCalendarsCard } from "@/components/profile/ConnectedCalendarsCard";
 
 interface ProfileData {
   first_name: string;
@@ -310,6 +311,7 @@ export default function Profile() {
 
         {/* Calendar sync (ICS subscription) */}
         <CalendarSyncSection />
+        <ConnectedCalendarsCard />
 
         {/* Change Password */}
         <Card>
