@@ -109,27 +109,9 @@ function ProviderCard({ value, onSave }: { value: Integration; onSave: (v: Integ
 
         {draft.enabled && (
           <>
-            <div className="space-y-2">
-              <Label className="text-sm">OAuth credentials</Label>
-              <RadioGroup
-                value={draft.use_custom_oauth ? "custom" : "managed"}
-                onValueChange={(v) => setDraft({ ...draft, use_custom_oauth: v === "custom" })}
-                className="space-y-2"
-              >
-                <div className="flex items-start gap-2 rounded border p-3">
-                  <RadioGroupItem value="custom" id={`${draft.provider}-custom`} className="mt-1" />
-                  <Label htmlFor={`${draft.provider}-custom`} className="font-normal cursor-pointer flex-1">
-                    <span className="font-medium">Use our own OAuth app</span>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Your users see your branding on the consent screen. You register an app in the {meta.consoleLabel}.
-                    </p>
-                  </Label>
-                </div>
-              </RadioGroup>
+            <div className="rounded border p-3 text-xs text-muted-foreground">
+              Register an OAuth application in the <a href={meta.consoleUrl} target="_blank" rel="noreferrer" className="text-primary underline">{meta.consoleLabel}</a>, then paste the Client ID and Secret below. Users will see your organisation's branding on the consent screen.
             </div>
-
-            {draft.use_custom_oauth && (
-              <div className="space-y-3 rounded border p-3 bg-muted/30">
                 <div className="space-y-1">
                   <Label className="text-xs">Redirect URI (paste this into your OAuth app)</Label>
                   <div className="flex gap-2">
