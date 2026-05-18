@@ -1,0 +1,1 @@
+ALTER VIEW public.org_calendar_integrations_public SET (security_invoker = true);
