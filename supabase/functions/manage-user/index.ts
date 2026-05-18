@@ -256,6 +256,22 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Org admins must share an organization with the target
+      if (!isPlatformAdmin) {
+        const { data: targetMembership } = await supabaseAdmin
+          .from("user_organization_access")
+          .select("organization_id")
+          .eq("user_id", user_id)
+          .eq("organization_id", organization_id)
+          .maybeSingle();
+        if (!targetMembership) {
+          return new Response(
+            JSON.stringify({ error: "Target user is not a member of this organization" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
       // Get the user's email
       const { data: { user: targetUser }, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(user_id);
 
@@ -324,6 +340,22 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "user_id is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // For destructive actions on a user_id, org admins must share an org with the target
+    if (!isPlatformAdmin && (action === "archive" || action === "unarchive" || action === "delete")) {
+      const { data: targetMembership } = await supabaseAdmin
+        .from("user_organization_access")
+        .select("organization_id")
+        .eq("user_id", user_id)
+        .eq("organization_id", organization_id)
+        .maybeSingle();
+      if (!targetMembership) {
+        return new Response(
+          JSON.stringify({ error: "Target user is not a member of this organization" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     if (action === "archive") {
