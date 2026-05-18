@@ -14,9 +14,11 @@ export function useMFAGate(): MFAGateState & { markSatisfied: () => void } {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [required, setRequired] = useState(false);
-  const [satisfied, setSatisfied] = useState(
-    () => sessionStorage.getItem("mfa_verified") === "true"
-  );
+  // Verification is intentionally NOT persisted across reloads or tabs.
+  // Persisting in sessionStorage/localStorage would let an attacker (or any user
+  // via devtools) bypass the MFA challenge by setting a flag. The challenge
+  // must be completed in-memory for every fresh page load.
+  const [satisfied, setSatisfied] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -73,10 +75,10 @@ export function useMFAGate(): MFAGateState & { markSatisfied: () => void } {
     };
   }, [user?.id]);
 
-  // Reset session-scoped verification flag on sign-out
+  // Reset verification on sign-out
   useEffect(() => {
     if (!user) {
-      sessionStorage.removeItem("mfa_verified");
+      sessionStorage.removeItem("mfa_verified"); // cleanup any legacy value
       setSatisfied(false);
     }
   }, [user]);
@@ -86,7 +88,6 @@ export function useMFAGate(): MFAGateState & { markSatisfied: () => void } {
     required,
     satisfied,
     markSatisfied: () => {
-      sessionStorage.setItem("mfa_verified", "true");
       setSatisfied(true);
     },
   };
