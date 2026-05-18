@@ -384,7 +384,7 @@ export default function ChangeManagementDetail() {
     if (!change || !user || pendingFiles.length === 0) return;
     for (const file of pendingFiles) {
       const fileExt = file.name.split(".").pop();
-      const filePath = `change_activity/${activityId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
+      const filePath = `${change.organization_id}/change_activity/${activityId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
       const { error: upErr } = await supabase.storage.from("documents").upload(filePath, file);
       if (upErr) {
         toast.error(`Failed to upload ${file.name}`);

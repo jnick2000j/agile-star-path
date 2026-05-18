@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Upload, File, Trash2, Download, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -45,6 +46,7 @@ export const DocumentUpload = forwardRef<HTMLDivElement, DocumentUploadProps>(
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
 
   const fetchDocuments = async () => {
     const { data, error } = await supabase
@@ -68,11 +70,15 @@ export const DocumentUpload = forwardRef<HTMLDivElement, DocumentUploadProps>(
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!currentOrganization?.id) {
+      toast.error("Select an organization before uploading");
+      return;
+    }
 
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const filePath = `${entityType}/${entityId}/${Date.now()}.${fileExt}`;
+      const filePath = `${currentOrganization.id}/${entityType}/${entityId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("documents")
