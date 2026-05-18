@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { useOrganization } from "@/hooks/useOrganization";
 import { maybeRunLmsCommand } from "@/lib/lmsChatCommands";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "assistant";
