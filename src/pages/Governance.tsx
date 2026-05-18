@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import DOMPurify from "dompurify";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -943,7 +944,7 @@ export default function Governance() {
                       <Card>
                         <CardContent
                           className="p-4 prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ __html: activePack.email_html || "" }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activePack.email_html || "") }}
                         />
                       </Card>
                     </div>
