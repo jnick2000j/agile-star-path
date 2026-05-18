@@ -70,11 +70,15 @@ export const DocumentUpload = forwardRef<HTMLDivElement, DocumentUploadProps>(
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!currentOrganization?.id) {
+      toast.error("Select an organization before uploading");
+      return;
+    }
 
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const filePath = `${entityType}/${entityId}/${Date.now()}.${fileExt}`;
+      const filePath = `${currentOrganization.id}/${entityType}/${entityId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("documents")
