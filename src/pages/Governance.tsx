@@ -944,7 +944,7 @@ export default function Governance() {
                       <Card>
                         <CardContent
                           className="p-4 prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ __html: activePack.email_html || "" }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activePack.email_html || "") }}
                         />
                       </Card>
                     </div>
