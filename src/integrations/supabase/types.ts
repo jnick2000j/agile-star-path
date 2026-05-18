@@ -1794,6 +1794,36 @@ export type Database = {
           },
         ]
       }
+      calendar_sync_queue: {
+        Row: {
+          action: string
+          enqueued_at: string
+          id: string
+          processed_at: string | null
+          provider: string | null
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          enqueued_at?: string
+          id?: string
+          processed_at?: string | null
+          provider?: string | null
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          enqueued_at?: string
+          id?: string
+          processed_at?: string | null
+          provider?: string | null
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       change_management_activity: {
         Row: {
           actor_user_id: string | null
@@ -4359,33 +4389,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      gcal_sync_queue: {
-        Row: {
-          action: string
-          enqueued_at: string
-          id: string
-          processed_at: string | null
-          task_id: string | null
-          user_id: string
-        }
-        Insert: {
-          action: string
-          enqueued_at?: string
-          id?: string
-          processed_at?: string | null
-          task_id?: string | null
-          user_id: string
-        }
-        Update: {
-          action?: string
-          enqueued_at?: string
-          id?: string
-          processed_at?: string | null
-          task_id?: string | null
-          user_id?: string
-        }
-        Relationships: []
       }
       governance_reports: {
         Row: {
@@ -9993,6 +9996,56 @@ export type Database = {
           },
         ]
       }
+      organization_calendar_integrations: {
+        Row: {
+          created_at: string
+          custom_client_id: string | null
+          custom_client_secret: string | null
+          enabled: boolean
+          id: string
+          organization_id: string
+          provider: string
+          tenant_id: string | null
+          updated_at: string
+          updated_by: string | null
+          use_custom_oauth: boolean
+        }
+        Insert: {
+          created_at?: string
+          custom_client_id?: string | null
+          custom_client_secret?: string | null
+          enabled?: boolean
+          id?: string
+          organization_id: string
+          provider: string
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          use_custom_oauth?: boolean
+        }
+        Update: {
+          created_at?: string
+          custom_client_id?: string | null
+          custom_client_secret?: string | null
+          enabled?: boolean
+          id?: string
+          organization_id?: string
+          provider?: string
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          use_custom_oauth?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_calendar_integrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invitations: {
         Row: {
           accepted_at: string | null
@@ -14935,6 +14988,7 @@ export type Database = {
           google_event_id: string
           id: string
           last_pushed_at: string
+          provider: string
           task_id: string
           user_id: string
         }
@@ -14944,6 +14998,7 @@ export type Database = {
           google_event_id: string
           id?: string
           last_pushed_at?: string
+          provider?: string
           task_id: string
           user_id: string
         }
@@ -14953,6 +15008,7 @@ export type Database = {
           google_event_id?: string
           id?: string
           last_pushed_at?: string
+          provider?: string
           task_id?: string
           user_id?: string
         }
@@ -15648,6 +15704,71 @@ export type Database = {
           },
         ]
       }
+      user_calendar_connections: {
+        Row: {
+          access_token: string | null
+          account_email: string | null
+          created_at: string
+          delta_link: string | null
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          organization_id: string
+          provider: string
+          refresh_token: string | null
+          sync_enabled: boolean
+          sync_token: string | null
+          target_calendar_id: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_email?: string | null
+          created_at?: string
+          delta_link?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          organization_id: string
+          provider: string
+          refresh_token?: string | null
+          sync_enabled?: boolean
+          sync_token?: string | null
+          target_calendar_id?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          account_email?: string | null
+          created_at?: string
+          delta_link?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          organization_id?: string
+          provider?: string
+          refresh_token?: string | null
+          sync_enabled?: boolean
+          sync_token?: string | null
+          target_calendar_id?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_calendar_connections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_dashboard_prefs: {
         Row: {
           created_at: string
@@ -15714,51 +15835,6 @@ export type Database = {
           updated_at?: string
           user_id?: string
           widget_type?: string
-        }
-        Relationships: []
-      }
-      user_google_calendar_connections: {
-        Row: {
-          access_token: string | null
-          created_at: string
-          google_account_email: string
-          id: string
-          last_synced_at: string | null
-          refresh_token: string
-          sync_enabled: boolean
-          sync_token: string | null
-          target_calendar_id: string
-          token_expires_at: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          access_token?: string | null
-          created_at?: string
-          google_account_email: string
-          id?: string
-          last_synced_at?: string | null
-          refresh_token: string
-          sync_enabled?: boolean
-          sync_token?: string | null
-          target_calendar_id?: string
-          token_expires_at?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          access_token?: string | null
-          created_at?: string
-          google_account_email?: string
-          id?: string
-          last_synced_at?: string | null
-          refresh_token?: string
-          sync_enabled?: boolean
-          sync_token?: string | null
-          target_calendar_id?: string
-          token_expires_at?: string | null
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -16843,6 +16919,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "configuration_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_calendar_integrations_public: {
+        Row: {
+          enabled: boolean | null
+          id: string | null
+          organization_id: string | null
+          provider: string | null
+          tenant_id: string | null
+          use_custom_oauth: boolean | null
+        }
+        Insert: {
+          enabled?: boolean | null
+          id?: string | null
+          organization_id?: string | null
+          provider?: string | null
+          tenant_id?: string | null
+          use_custom_oauth?: boolean | null
+        }
+        Update: {
+          enabled?: boolean | null
+          id?: string | null
+          organization_id?: string | null
+          provider?: string | null
+          tenant_id?: string | null
+          use_custom_oauth?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_calendar_integrations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
