@@ -46,6 +46,7 @@ export const DocumentUpload = forwardRef<HTMLDivElement, DocumentUploadProps>(
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const { currentOrganization } = useOrganization();
 
   const fetchDocuments = async () => {
     const { data, error } = await supabase
