@@ -30,7 +30,7 @@ export function MFAChallengeDialog({ open, onVerified, onCancel }: MFAChallengeD
           : { action: "verify_login", recovery_code: recovery.trim() };
       const { error } = await supabase.functions.invoke("mfa-manage", { body });
       if (error) throw error;
-      sessionStorage.setItem("mfa_verified", "true");
+      // In-memory only — useMFAGate.markSatisfied() is invoked via onVerified.
       toast.success("Verified");
       setCode("");
       setRecovery("");
